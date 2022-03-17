@@ -8,8 +8,8 @@ code generates the minimum energy configuration.
 
 The surface config shown below::
 
-![plot](./figs/surf_mc_random.png)
+![plot](./doc/figs/surf_mc_random.png)
 
 After 60000 monte-carlo steps become::
 
-![plot](./figs/surf_mc_final.png)
+![plot](./doc/figs/surf_mc_final.png)

@@ -30,9 +30,14 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Figures
-
+<!-- <img src="figs/surf_mc_random.png" alt="random" width="200"/> -->
+![Random points on the sphere. \label{fig:surf_mc_random}](figs/surf_mc_random.png){width=40%}
+![We perform monte carlo simulation on the surface of spher to get more regular lattice. Here we show points on sphere after 60000 iteration of surface monte carlo simulation. We use Spherical-Voronoi to triangulate the mesh. \label{fig:surf_mc_lattice}](figs/surf_mc_lattice.png){width=40%}
+![Here comes figure after we stick but with no afm \label{fig:noafm_stick}](figs/noafm_stick.png){width=40%}
+![We push the tip from top to study the mechanical properties of the membrane. We start with the tip position at $1.05R$, where $R$ is radius of the sphere. \label{fig:tip_1p05}](figs/tip_1p05.png){width=40%}
+![Shape of membrane at tip position = $0.9R$ \label{fig:tip_0p9}](figs/tip_0p9.png){width=40%}
+![Shape of membrane at tip position = $0.75R$ \label{fig:tip_0p75}](figs/tip_0p75.png){width=40%}
 <!-- # Summary
-
 
 # Statement of need
 

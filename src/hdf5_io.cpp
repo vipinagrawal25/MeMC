@@ -1,5 +1,5 @@
 #include <hdf5.h>
-#include "../include/global.h"
+#include "global.h"
 #include "misc.h"
   /* The input for the hdf5 configuration */ 
   /* supposedly will read all the position and */ 
@@ -9,7 +9,7 @@ void hdf5_io_read_pos(double *Pos, int *cmlist,
         int *node_nbr, int2 *bond_nbr, int *triangles,
         char input_file[]){
 
-    hid_t   file_id, group_id,dataset_id;  /* identifiers */
+    hid_t   file_id,dataset_id;  /* identifiers */
     herr_t  status;
 
   /* Open an existing file. */
@@ -20,6 +20,10 @@ void hdf5_io_read_pos(double *Pos, int *cmlist,
           H5S_ALL, H5S_ALL, H5P_DEFAULT,Pos);
   status = H5Dclose(dataset_id);
   status = H5Fclose(file_id);
+
+  if(status != 0){
+      fprintf(stderr, "file close failed");
+  }
 }
 
 
@@ -27,7 +31,7 @@ void hdf5_io_read_config(double *Pos, int *cmlist,
         int *node_nbr, int2 *bond_nbr, int *triangles,
         string input_file){
 
-    hid_t   file_id, group_id,dataset_id;  /* identifiers */
+    hid_t   file_id,dataset_id;  /* identifiers */
     herr_t  status;
   /* Open an existing file. */
   if (FileExists(input_file)){
@@ -63,28 +67,39 @@ void hdf5_io_read_config(double *Pos, int *cmlist,
   status = H5Dclose(dataset_id);
 
   status = H5Fclose(file_id);
+  if(status != 0){
+      fprintf(stderr, "file close failed");
+  }
 }
 
-int io_dump_config(POSITION *Pos, double len, 
-        int iter, int N){
-    char part_file[80];
-    int i;
-    double x_n, y_n;
+void io_read_config(double *Pos, 
+        int N, char *file ){
+    FILE *fid;
+
+    fid = fopen(file, "rb");
+    fread(Pos, N*sizeof(double), 1, fid);
+    fclose(fid);
+}
+
+void io_dump_config(double *Pos, 
+        int N, char *file ){
     FILE *fid;
 
 
-    sprintf(part_file,"output/part_%04d.dat",iter);
+    fid = fopen(file, "wb");
+    fwrite(Pos, N*sizeof(double), 1, fid);
+    fclose(fid);
+}
 
-    fid = fopen(part_file, "wb");
-
-    for(i=0; i < N; i++){
-        x_n = fmod((Pos[i].x + 30*len), len);
-        y_n = fmod((Pos[i].y + 30*len), len);
-        fprintf(fid, "%lf  %lf \n", x_n, y_n);
-        fflush(fid);
+void io_dump_config_ascii(double *Pos, 
+        int N, char *file ){
+    FILE *fid;
+    int i;
+    fid = fopen(file, "wb");
+    for(i=0;i<N;i=i+2){
+        fprintf(fid,"%g %g\n", Pos[i], Pos[i+1]);
     }
     fclose(fid);
-    return 1;
 }
 
 void hdf5_io_dump_restart_config(double *Pos, int *cmlist,
@@ -102,6 +117,7 @@ void hdf5_io_dump_restart_config(double *Pos, int *cmlist,
     syscmds="mv "+folder+"/restart.h5 "+folder+"/restart_old.h5";
     cout << syscmds << endl;
     err = system(syscmds.c_str());
+    if(err !=0 ) fprintf(stderr, "fail to execute system cmds");
     filename=folder+"/restart.h5";
     /*
      * Create a new file using the default properties.
@@ -159,5 +175,10 @@ void hdf5_io_dump_restart_config(double *Pos, int *cmlist,
 
 
     status = H5Fclose (file_id);
+
+    if(status != 0){
+        fprintf(stderr, "file close failed");
+    }
+
 
 }

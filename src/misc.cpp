@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include "math.h"
 #include <string>
-#include "../include/Position.h"
+#include "Vector.h"
 using namespace std;
 /*-----------------------------------------------*/
 double SqEr(double Arr1[], double Arr2[],int nn){
@@ -124,13 +124,15 @@ void zeros(double *yzero, int ndim){
   }
 }
 /*-----------------------------------------------*/
-inline double pos_coord(POSITION pos,char dirn='z'){
+
+inline double pos_coord(Vec3d pos, char dirn='z'){
   if (dirn=='x'){return pos.x;}
   else if(dirn=='y'){return pos.y;}
   else if(dirn=='z'){return pos.z;}
+  return 0e0;
 }
 /*-----------------------------------------------*/
-void max(int *amaxind, double *amaxval, POSITION *pos, int ndim,char dirn){
+void max(int *amaxind, double *amaxval, Vec3d *pos, int ndim,char dirn){
   // function returns the value and index of the maximum entry.
   int maxind=0;
   double maxval=-1e+16;
@@ -145,7 +147,7 @@ void max(int *amaxind, double *amaxval, POSITION *pos, int ndim,char dirn){
   *amaxval=maxval;
 }
 /*-----------------------------------------------*/
-void min(int *aminind, double *aminval, POSITION *pos, int ndim,char dirn){
+void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn){
   // function returns the value and index of the maximum entry.
   int minind=0;
   double minval=1e+16;

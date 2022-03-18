@@ -1,14 +1,15 @@
-#include "../include/global.h"
-#include "../include/subroutine.h"
+#include "global.h"
+#include "subroutine.h"
+
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
-double cotangent(POSITION si, POSITION sk, POSITION sj){
-    POSITION drik, drjk, cross;
-    double cot_theta, inp_1;  
+double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
+    Vec3d drik, drjk, cross;
+    double cot_theta;  
     double inner_prod;
     //
-    drik = Position_add(si , sk, -1e0);
-    drjk = Position_add(sj , sk, -1e0);
+    drik = Vec3d_add(si , sk, -1e0);
+    drjk = Vec3d_add(sj , sk, -1e0);
     cross = cross_product(drik, drjk);
     inner_prod = inner_product(drik, drjk);
     cot_theta = inner_prod/sqrt(inner_product(cross,cross));
@@ -23,12 +24,12 @@ double cotangent(double a, double b, double c){
     return cot_theta;
 }
 
-POSITION determine_xyz_parabola(POSITION pos, AFM_para afm) {
+Vec3d determine_xyz_parabola(Vec3d pos, AFM_para afm) {
     int nroot;
     double a, b, c, d;
     double a0, c0;
     double roots[6];
-    POSITION pt_pbola;
+    Vec3d pt_pbola;
     double x0, y0, z0;
     // a coef of x^3
     // b coef of x^2
@@ -67,18 +68,16 @@ POSITION determine_xyz_parabola(POSITION pos, AFM_para afm) {
     return pt_pbola;
 
 }
-double volume_ipart(POSITION *pos, 
+double volume_ipart(Vec3d *pos, 
         int *node_nbr, int2* bond_nbr,
         int num_nbr, int idx, MBRANE_para para){
 
-    int i, j, k, kp, it, itn;
+    int i, j, k, kp;
     double volume1, volume2;
-    POSITION area1, area2, rk, ri, rj, rkp;
-    POSITION rij, rijk, rik, rjkp;
-    POSITION rijkp;
-    POSITION rjk, pt; 
-    double dir_norm, ini_vol;
-    double inp_r1, inp_r2, inp_r3;
+    Vec3d area1, area2, rk, ri, rj, rkp;
+    Vec3d rij, rijk, rik, rjkp;
+    Vec3d rijkp;
+    Vec3d rjk, pt; 
 
     volume1 = 0e0;
     volume2 = 0e0;
@@ -89,17 +88,17 @@ double volume_ipart(POSITION *pos,
         ri = pos[idx]; rj = pos[j]; 
         rk = pos[k]; rkp = pos[kp];
 
-        rij = Position_add(ri, rj, 1e0);
-        rijk = Position_add(rij, rk, 1e0);
-        rijkp = Position_add(rij, rkp, 1e0);
+        rij = Vec3d_add(ri, rj, 1e0);
+        rijk = Vec3d_add(rij, rk, 1e0);
+        rijkp = Vec3d_add(rij, rkp, 1e0);
 
         rijk.x = rijk.x/3e0; rijk.y = rijk.y/3e0; rijk.z = rijk.z/3e0;
         rijkp.x = rijkp.x/3e0; 
         rijkp.y = rijkp.y/3e0; rijkp.z = rijkp.z/3e0;
 
-        rij  = Position_add(rj, ri, -1e0);
-        rjk  = Position_add(rj , rk, -1e0);
-        rjkp = Position_add(rj , rkp, -1e0);
+        rij  = Vec3d_add(rj, ri, -1e0);
+        rjk  = Vec3d_add(rj , rk, -1e0);
+        rjkp = Vec3d_add(rj , rkp, -1e0);
 
 
         area1 = cross_product(rij, rjk);
@@ -116,13 +115,13 @@ double volume_ipart(POSITION *pos,
     volume1 = volume1/3e0;
     return volume1;
 }
-double stretch_energy_ipart(POSITION *pos, 
+double stretch_energy_ipart(Vec3d *pos, 
         int *node_nbr, double *lij_t0,
         int num_nbr, int idx, MBRANE_para para){
     //
     double HH;
     double idx_ener;
-    POSITION rij;
+    Vec3d rij;
     double mod_rij;
     int i,j;
     //
@@ -130,7 +129,7 @@ double stretch_energy_ipart(POSITION *pos,
     HH = para.coef_str/(para.av_bond_len*para.av_bond_len);
     for (i =0; i < num_nbr; i++){
         j = node_nbr[i];
-        rij = Position_add(pos[idx], pos[j], -1e0);
+        rij = Vec3d_add(pos[idx], pos[j], -1e0);
         mod_rij = sqrt(inner_product(rij, rij));
         //
         idx_ener = idx_ener + (mod_rij - lij_t0[i])*(mod_rij - lij_t0[i]);
@@ -156,28 +155,25 @@ double voronoi_area(double cotJ, double cotK, double jsq, double ksq, double are
     return sigma;
 }
 //
-double bending_energy_ipart(POSITION *pos, int *node_nbr, int2 *bond_nbr, int num_nbr,
+double bending_energy_ipart(Vec3d *pos, int *node_nbr, int2 *bond_nbr, int num_nbr,
                             int idx, MBRANE_para para, string method){
     double bend_ener,curvature,sigma_i;
-    POSITION cot_times_rij;
+    Vec3d cot_times_rij;
     double BB=para.coef_bend;
     double curv_t0 = para.sp_curv;
     // lap_bel:Laplace Beltrami operator for sphere is 2\kappa\nhat
     // nhat is outward normal.
-    POSITION lap_bel,lap_bel_t0,nhat;
+    Vec3d lap_bel,lap_bel_t0,nhat;
     // double curv_t0 = 2e0/para.radius;
     cot_times_rij.x = 0e0;
     cot_times_rij.y = 0e0;
     cot_times_rij.z = 0e0;
     //
     if (method=="voro_negative"){
-        double idx_ener;
         double rij_dot_rij;
-        int i, k, kp;
-        int j;
-        double cot_su;
+        int i;
         // double curvature;
-        POSITION cot_theta_rij, rij, rik, rikp;
+        Vec3d cot_theta_rij, rij, rik, rikp;
         //
         sigma_i = 0e0;
         //
@@ -188,49 +184,40 @@ double bending_energy_ipart(POSITION *pos, int *node_nbr, int2 *bond_nbr, int nu
         //     //
         //     cot_sum=0.5*(cotangent(pos[idx],pos[k],pos[j]) +
         //                  cotangent(pos[idx],pos[kp],pos[j]));
-        //     rij = Position_add(pos[idx], pos[j], -1e0);
-        //     // rik = Position_add(pos[idx], pos[k], -1e0);
-        //     // rikp = Position_add(pos[idx], pos[kp], -1e0);
+        //     rij = Vec3d_add(pos[idx], pos[j], -1e0);
+        //     // rik = Vec3d_add(pos[idx], pos[k], -1e0);
+        //     // rikp = Vec3d_add(pos[idx], pos[kp], -1e0);
         //     // area = area+sqrt(inner_product(cross_product(rij,rik),cross_product(rij,rik)))+
         //     //             sqrt(inner_product(cross_product(rij,rikp),cross_product(rij,rikp)));
         //     rij_dot_rij = inner_product(rij, rij);
-        //     cot_times_rij  = Position_add(cot_times_rij, rij, cot_sum);
-        //     // cot_times_rij  = Position_add(cot_times_rij, rij, 1/sqrt(3));
+        //     cot_times_rij  = Vec3d_add(cot_times_rij, rij, cot_sum);
+        //     // cot_times_rij  = Vec3d_add(cot_times_rij, rij, 1/sqrt(3));
         //     sigma_i = sigma_i + rij_dot_rij*cot_sum;
         // }
         // sigma_i *= 0.25;        
         int jdx,kdx,kpdx;
-        POSITION xij,xik,xjk,xikp,xjkp;
-        double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
-        double lijsq,liksq,ljksq,likpsq,ljkpsq;
+        Vec3d xij,xik,xjk,xikp,xjkp;
+        double cot_kdx,cot_kpdx;
         double cot_sum;
         for (i =0; i < num_nbr; i++){
             jdx = node_nbr[i];
             kdx  = bond_nbr[i].i1; 
             kpdx = bond_nbr[i].i2;
             //
-            cot_jdx_k = cotangent(pos[idx],pos[jdx],pos[kdx]);
             cot_kdx = cotangent(pos[idx],pos[kdx],pos[jdx]);
-            cot_jdx_kp = cotangent(pos[idx],pos[jdx],pos[kpdx]);
             cot_kpdx = cotangent(pos[idx],pos[kpdx],pos[jdx]);
             //
             cot_sum=0.5*(cot_kdx +  cot_kpdx);
             //
-            xij = Position_add(pos[idx], pos[jdx], -1e0);
+            xij = Vec3d_add(pos[idx], pos[jdx], -1e0);
             //
-            lijsq = inner_product(xij,xij);
-            liksq = inner_product(xik,xik);
-            ljksq = inner_product(xjk,xjk);
-            likpsq = inner_product(xikp,xikp);
-            ljkpsq = inner_product(xjkp,xjkp);
-            //
-            // rik = Position_add(pos[idx], pos[k], -1e0);
-            // rikp = Position_add(pos[idx], pos[kp], -1e0);
+            // rik = Vec3d_add(pos[idx], pos[k], -1e0);
+            // rikp = Vec3d_add(pos[idx], pos[kp], -1e0);
             // area = area+sqrt(inner_product(cross_product(rij,rik),cross_product(rij,rik)))+
             //             sqrt(inner_product(cross_product(rij,rikp),cross_product(rij,rikp)));
             rij_dot_rij = inner_product(xij, xij);
-            cot_times_rij  = Position_add(cot_times_rij, xij, cot_sum);
-            // cot_times_rij  = Position_add(cot_times_rij, rij, 1/sqrt(3));
+            cot_times_rij  = Vec3d_add(cot_times_rij, xij, cot_sum);
+            // cot_times_rij  = Vec3d_add(cot_times_rij, rij, 1/sqrt(3));
             sigma_i = sigma_i + 0.25*(cot_sum*rij_dot_rij);
         }
         // is_attractive[idx]=sigma_i<0;
@@ -242,12 +229,12 @@ double bending_energy_ipart(POSITION *pos, int *node_nbr, int2 *bond_nbr, int nu
         double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
         double area_ijk,area_ijkp;
         double lijsq,liksq,ljksq,likpsq,ljkpsq;
-        // POSITION cot_times_rij;
-        POSITION xij,xik,xjk,xikp,xjkp,nhat_local,xijp1;
+        // Vec3d cot_times_rij;
+        Vec3d xij,xik,xjk,xikp,xjkp,nhat_local,xijp1;
         int jdx,kdx,kpdx,jdxp1;
         double cot_sum;
         sigma_i = 0e0;
-        int count=0;
+
         for (int j = 0; j < num_nbr; j++){
             jdx = node_nbr[j];
             jdxp1=node_nbr[(j+1)%num_nbr];
@@ -255,12 +242,12 @@ double bending_energy_ipart(POSITION *pos, int *node_nbr, int2 *bond_nbr, int nu
             kdx  = bond_nbr[j].i1;
             kpdx = bond_nbr[j].i2;
             //
-            xij = Position_add(pos[idx], pos[jdx], -1e0);
-            xijp1 = Position_add(pos[idx], pos[jdxp1], -1e0);
-            xik = Position_add(pos[idx], pos[kdx], -1e0);
-            xjk = Position_add(pos[jdx], pos[kdx], -1e0);
-            xikp = Position_add(pos[idx], pos[kpdx], -1e0);
-            xjkp = Position_add(pos[jdx], pos[kpdx], -1e0);
+            xij = Vec3d_add(pos[idx], pos[jdx], -1e0);
+            xijp1 = Vec3d_add(pos[idx], pos[jdxp1], -1e0);
+            xik = Vec3d_add(pos[idx], pos[kdx], -1e0);
+            xjk = Vec3d_add(pos[jdx], pos[kdx], -1e0);
+            xikp = Vec3d_add(pos[idx], pos[kpdx], -1e0);
+            xjkp = Vec3d_add(pos[jdx], pos[kpdx], -1e0);
             //
             lijsq = inner_product(xij,xij);
             liksq = inner_product(xik,xik);
@@ -286,7 +273,7 @@ double bending_energy_ipart(POSITION *pos, int *node_nbr, int2 *bond_nbr, int nu
             // cot_kpdx = cotangent(pos[idx],pos[kpdx],pos[jdx]);
             // //
             cot_sum = 0.5*(cot_kdx+cot_kpdx);
-            cot_times_rij = Position_add(cot_times_rij, xij, cot_sum);
+            cot_times_rij = Vec3d_add(cot_times_rij, xij, cot_sum);
             // sigma_i = sigma_i + 0.125*( cot_jdx_k*liksq+
             //                             cot_kdx*lijsq+
             //                             cot_jdx_kp*likpsq+
@@ -296,7 +283,7 @@ double bending_energy_ipart(POSITION *pos, int *node_nbr, int2 *bond_nbr, int nu
             sigma_i=sigma_i+voronoi_area(cot_jdx_kp,cot_kpdx,likpsq,lijsq,area_ijkp);
             //
             nhat_local=cross_product(xijp1,xij);
-            nhat=Position_add(nhat,nhat_local,1e0/norm(nhat_local));
+            nhat=Vec3d_add(nhat,nhat_local,1e0/norm(nhat_local));
         }
         nhat = nhat/norm(nhat);
         // nhat=nhat/norm(nhat);
@@ -329,12 +316,12 @@ double bending_energy_ipart(POSITION *pos, int *node_nbr, int2 *bond_nbr, int nu
     return bend_ener;
  }
 
-double bending_energy_ipart_neighbour(POSITION *pos, 
+double bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH mesh, int idx, MBRANE_para para){
 /*    Evaluates the bending energy of all the neighbours*/ 
 /*    of idx particle*/
-   int j, k;
-   int num_nbr_j, cm_idx;
+   int j;
+   int num_nbr_j;
    int nbr, cm_idx_nbr;
    double be;
 
@@ -352,11 +339,11 @@ double bending_energy_ipart_neighbour(POSITION *pos,
    return be;
 } 
 
-double bending_energy_total(POSITION *pos, 
+double bending_energy_total(Vec3d *pos, 
         MESH mesh, MBRANE_para para){
-    int idx, j, k;
+    int idx;
     int num_nbr, cm_idx;
-    double be, curv;
+    double be;
 
     be = 0e0;
     for(idx = 0; idx < para.N; idx++){
@@ -375,10 +362,10 @@ double bending_energy_total(POSITION *pos,
     return be;
 }
 
-double stretch_energy_total(POSITION *pos, 
+double stretch_energy_total(Vec3d *pos, 
         MESH mesh, double *lij_t0,
          MBRANE_para para){
-    int idx, j, k;
+    int idx;
     int num_nbr, cm_idx;
     double se;
 
@@ -425,9 +412,9 @@ double lj_bottom_surface(double zz,
 }
 
 
-double lj_bottom_surf_total(POSITION *pos, 
+double lj_bottom_surf_total(Vec3d *pos, 
         bool *is_attractive, MBRANE_para para){
-    int idx, j, k;
+    int idx;
     double lj_bote;
 
     lj_bote = 0e0;
@@ -442,27 +429,26 @@ double lj_bottom_surf_total(POSITION *pos,
 
 
 
-void identify_attractive_part(POSITION *pos, 
+void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, int N){
 
     int i; 
-    double theta, rr;
+    double theta;
     for(i= 0; i<N; i++){
         theta = pi - acos(pos[i].z);
         is_attractive[i] = theta < pi/6.0;
     }
 }
 
-double lj_afm(POSITION pos, AFM_para afm){
-    int i;
+double lj_afm(Vec3d pos, AFM_para afm){
     double ener_afm, ds;
-    double ds_sig_inv, r6;
-    POSITION dr, pt_pbola;
+    double ds_sig_inv;
+    Vec3d dr, pt_pbola;
     ener_afm = 0e0;
     
     pt_pbola = determine_xyz_parabola(pos, afm);
     if(fabs(afm.tip_pos_z - pt_pbola.z) < 4*afm.sigma) {
-        dr = Position_add(pt_pbola, pos, -1); 
+        dr = Vec3d_add(pt_pbola, pos, -1); 
         ds = (inner_product(dr,dr));
         ds_sig_inv = (afm.sigma*afm.sigma)/ds;
         ener_afm = lj_rep(ds_sig_inv, afm.epsilon);
@@ -472,14 +458,14 @@ double lj_afm(POSITION pos, AFM_para afm){
 };
 
 
-double lj_afm_total(POSITION *pos, 
-        POSITION *afm_force, MBRANE_para para,
+double lj_afm_total(Vec3d *pos, 
+        Vec3d *afm_force, MBRANE_para para,
         AFM_para afm){
-    int idx, j, k;
+    int idx;
     double  ds;
     double lj_afm_e;
     double lj_afm_t;
-    POSITION f_t, pt_pbola, dr;
+    Vec3d f_t, pt_pbola, dr;
 
     lj_afm_e = 0e0;
     f_t.x = 0; f_t.y = 0; f_t.z = 0;
@@ -487,7 +473,7 @@ double lj_afm_total(POSITION *pos,
 
         lj_afm_t = lj_afm(pos[idx], afm);
         pt_pbola = determine_xyz_parabola(pos[idx], afm);
-        dr = Position_add(pt_pbola, pos[idx], -1); 
+        dr = Vec3d_add(pt_pbola, pos[idx], -1); 
         ds = (inner_product(dr,dr));
         f_t.x += 12*lj_afm_t*dr.x/ds;
         f_t.y += 12*lj_afm_t*dr.y/ds;
@@ -502,48 +488,16 @@ double lj_afm_total(POSITION *pos,
 }
 
 
-double lj_afm_pf(POSITION pos, AFM_para afm){
-    int i;
-    double ener_afm, ds;
-    double ds_sig_inv, r6;
-    POSITION dr;
 
-    ener_afm = 0e0;
-    if(fabs(afm.tip_pos_z - pos.z) < 4*afm.sigma) {
-        for(i = 0; i<afm.N; i++) {
-            dr = Position_add(pos, afm.tip_curve[i], -1); 
-            ds = (inner_product(dr,dr));
-            ds_sig_inv = (afm.sigma*afm.sigma)/ds;
-            ener_afm = ener_afm + lj_rep(ds_sig_inv, afm.epsilon);
-        }
-    }
-   return ener_afm;
-
-};
-
-double lj_afm_total_pf(POSITION *pos, MBRANE_para para,
-        AFM_para afm){
-    int idx, j, k;
-    double lj_afm_e;
-
-    lj_afm_e = 0e0;
-    for(idx = 0; idx < para.N; idx++){
-
-        lj_afm_e += lj_afm_pf(pos[idx], afm);
-    }
-    return lj_afm_e;
-}
-
-void volume_area_enclosed_membrane(POSITION *pos, 
+void volume_area_enclosed_membrane(Vec3d *pos, 
     int *triangles, int num_triangles,
     double *avolume, double *aarea){
     int i, j, k, it;
-    POSITION area, rk, ri, rj;
-    POSITION rij, rijk, rik;
-    POSITION rjk, pt; 
-    double dir_norm;
-    double inp_r1, inp_r2, inp_r3;
+    Vec3d area, rk, ri, rj;
+    Vec3d rij, rijk, rik;
+    Vec3d rjk, pt; 
     double volume,tot_area;
+
     volume = 0e0;
     tot_area=0e0;
     i = triangles[0];
@@ -552,23 +506,19 @@ void volume_area_enclosed_membrane(POSITION *pos,
         j = triangles[it+1];
         k = triangles[it+2];
         ri = pos[i]; rj = pos[j]; rk = pos[k];
-        /* ri = Position_add(pos[i], pt, -1); */
-        /* rj = Position_add(pos[j], pt, -1); */
-        /* rk = Position_add(pos[k], pt, -1); */
+        /* ri = Vec3d_add(pos[i], pt, -1); */
+        /* rj = Vec3d_add(pos[j], pt, -1); */
+        /* rk = Vec3d_add(pos[k], pt, -1); */
         
-        rij = Position_add(ri, rj, 1e0);
-        rijk = Position_add(rij, rk, 1e0);
+        rij = Vec3d_add(ri, rj, 1e0);
+        rijk = Vec3d_add(rij, rk, 1e0);
 
         rijk.x = rijk.x/3e0; rijk.y = rijk.y/3e0; rijk.z = rijk.z/3e0;
 
-        rij = Position_add(rj, ri, -1e0);
-        rik = Position_add(rk , ri, -1e0);
+        rij = Vec3d_add(rj, ri, -1e0);
+        rik = Vec3d_add(rk , ri, -1e0);
 
         area = cross_product(rij, rik);
-        dir_norm = (rij.y*rik.z - rij.z*rik.y) + 
-            (rij.z*rik.x - rij.x*rik.z) +
-            (rij.x*rik.y - rij.y*rik.x);
-
         volume = volume + 0.5*fabs(area.x*rijk.x + area.y*rijk.y + area.z*rijk.z);
         tot_area += 0.5*norm(area);
     }
@@ -576,13 +526,13 @@ void volume_area_enclosed_membrane(POSITION *pos,
     *avolume = volume/3e0;
 };
 
-void identify_obtuse(POSITION *pos, int *triangles,
+void identify_obtuse(Vec3d *pos, int *triangles,
        double *obtuse,  int N){
     double piby2;
     int i, j, k, it;
     double a_ij_ik, a_ji_jk, a_ki_kj;
-    POSITION ri, rj, rk;
-    POSITION rij, rik, rkj;
+    Vec3d ri, rj, rk;
+    Vec3d rij, rik, rkj;
     double inp_r1, inp_r2, inp_r3;
 
     piby2 = 0.5*pi;
@@ -595,13 +545,13 @@ void identify_obtuse(POSITION *pos, int *triangles,
         obtuse[it/3] = 0e0;
         ri = pos[i]; rj = pos[j]; rk = pos[k];
 
-        rij = Position_add(ri, rj, -1e0);
+        rij = Vec3d_add(ri, rj, -1e0);
         inp_r1 = inner_product(rij, rij);
 
-        rik = Position_add(ri , rk, -1e0);
+        rik = Vec3d_add(ri , rk, -1e0);
         inp_r2 = inner_product(rik, rik);
 
-        rkj = Position_add(rk , rj, -1e0);
+        rkj = Vec3d_add(rk , rj, -1e0);
         inp_r3 = inner_product(rkj, rkj);
 
         a_ij_ik = (inner_product(rij,rik))/(sqrt(inp_r1*inp_r2));

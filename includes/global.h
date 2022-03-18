@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <iostream>
 #include <cstdlib>
-#include "Position.h"
+#include "Vector.h"
 
 using namespace std;
 #define pi 3.14159265358979
@@ -27,7 +27,6 @@ typedef struct{
     double kBT;
     double delta; // increment of position
     bool is_restart;
-    char *metric;
 }MCpara;
 //
 typedef struct{
@@ -43,7 +42,7 @@ typedef struct{
     double *volume; // these are updated after each monte carlo 
     int N;   // number of particles in mesh
     int num_triangles;  //number of triangles 
-    int num_nbr; // sum  neighbours of all particles
+    int num_nbr; //  neighbours of all particles
 }MBRANE_para;
 //
 typedef struct{
@@ -59,8 +58,6 @@ typedef struct{
 //
 typedef struct{
     int N; // number of points defining in afm tip curve
-    double extent[4]; // extent in x- x+ y- y+
-    POSITION *tip_curve;
     double tip_pos_z; // position of tip in z
     double tip_rad; // radius of the tip
     double sigma, epsilon;
@@ -77,8 +74,8 @@ typedef struct{
 
 //
 typedef struct{
-    int list_ss[200];
-    int cnt_ss;
-}Neighbours;
+    int cnt;
+    int list[200];
+}Nbh_list;
 //
 #endif

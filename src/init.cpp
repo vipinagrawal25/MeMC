@@ -1,5 +1,5 @@
-#include "../include/global.h"
-#include "../include/subroutine.h"
+#include "global.h"
+#include "subroutine.h"
 
 int randint(int n) {
     if ((n - 1) == RAND_MAX) {
@@ -18,7 +18,7 @@ int randint(int n) {
     }
 }
 
-// void initialize_read_config(POSITION *Pos,  
+// void init_read_config(POSITION *Pos,  
 //         MESH mesh,  int *triangles,
 //         MBRANE_para mb_para){
 //     FILE *fid;
@@ -61,69 +61,55 @@ int randint(int n) {
 //     fclose(fid);
 // }
 
-// void initialize_system(POSITION *Pos,  LJpara para, 
-//         MCpara mc_para){
-//     int root_n = 1;
-//     double dr;
-//     bool is_sph, is_cart;
+void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
+    bool is_sph, is_cart;
 
-//     do{ 
-//         root_n++;
-//     }while(root_n*root_n < para.N); 
+    is_sph = false;
+    is_cart = false;
+    if(strcmp(metric, "sph") == 0){
+        is_sph = true;
+    }
+    if(strcmp(metric, "cart") == 0){
+        is_cart = true;
+    }
 
-//     /* metric = "random"; */
-
-//     is_sph = false;
-//     is_cart = false;
-//     if(strcmp(mc_para.metric, "sph") == 0){
-//         is_sph = true;
-//     }
-//     if(strcmp(mc_para.metric, "cart") == 0){
-//         is_cart = true;
-//     }
+    if(!is_cart && !is_sph){
+        fprintf(stderr, "Unknown metric, input should be: \n");
+        fprintf(stderr, "a) cart for a 2d cartesian monte carlo \n");
+        fprintf(stderr, "b) sph  for a monte carlo on the surface of a sphere\n");
+        exit(0);
+    }
 
 
-//     dr = (double)(para.len)/(double)root_n;
-//     dr = dr - dr/64;
 
-//     if(is_cart){
-//         for(int i=0; i<para.N; i++){
-//             /* if(configuration == "regular"){ */
-//                 /* Pos[i].x =  dr*(double)((i%(root_n))%root_n);// + 2*r; */
-//                 /* Pos[i].y =  dr*(double)((i/(root_n)));//+ 2*r; */
-//             /* } */
-//             /* else if(configuration == "random"){ */
-//                 Pos[i].x = drand48()*para.len;
-//                 Pos[i].y = drand48()*para.len;
-//             /* } */
-//         }
-//         Pos[0].x = drand48()*para.len;
-//         Pos[0].y = drand48()*para.len;
-//     }
+    if(is_cart){
+        for(int i=0; i<N; i++){
+            Pos[i].x = drand48()*len;
+            Pos[i].y = drand48()*len;
+        }
+        Pos[0].x = drand48()*len;
+        Pos[0].y = drand48()*len;
+    }
 
-//     if(is_sph){
-//         /* printf("Regular arrangement not coded for spherical"); */
-//         /* printf("Coordinates \n"); */
-//         Pos[0].x = 0;
-//         Pos[0].y = 0;
-//         Pos[1].x = pi;
-//         Pos[1].y = 0;
-//         for(int i=2; i<para.N; i++){
-//             Pos[i].x = acos(2*drand48() - 1); 
-//             Pos[i].y = 2*pi*drand48();
-//             /* printf("Coordinates %lf %lf\n", Pos[i].x, Pos[i].y); */
-//         }
-//         Pos[2].x = acos(2*drand48() - 1); 
-//         Pos[2].y = 2*pi*drand48();
+    if(is_sph){
+        Pos[0].x = 0;
+        Pos[0].y = 0;
+        Pos[1].x = pi;
+        Pos[1].y = 0;
+        for(int i=2; i<N; i++){
+            Pos[i].x = acos(2*drand48() - 1); 
+            Pos[i].y = 2*pi*drand48();
+        }
+        Pos[2].x = acos(2*drand48() - 1); 
+        Pos[2].y = 2*pi*drand48();
 
-//     }
-// }
+    }
+}
 
-void initialize_eval_lij_t0(POSITION *Pos, MESH mesh, 
+void init_eval_lij_t0(Vec3d *Pos, MESH mesh, 
         double *lij_t0, MBRANE_para *para){
 
-    double rij;
-    POSITION dr;
+    Vec3d dr;
     int i,j,k;
     int num_nbr, cm_idx;
     double sum_lij=0;
@@ -142,33 +128,7 @@ void initialize_eval_lij_t0(POSITION *Pos, MESH mesh,
     para->av_bond_len = sum_lij/mesh.cmlist[para->N];
 }
 
-void initialize_afm_tip(AFM_para afm){
-    int i, j;
-    int idx;
-    int iext;
-    double dx;
-    double x, y;
-
-    iext = (int) sqrt(afm.N);
-    dx = (afm.extent[1] - afm.extent[0])/iext;
-
-    for(j=0; j < iext; j++){
-        for(i=0; i < iext; i++){
-            x = afm.extent[0] + dx*(i + 0.5);
-            y = afm.extent[2] + dx*(j + 0.5);
-            idx = j*iext + i;
-            afm.tip_curve[idx].x = x;
-            afm.tip_curve[idx].y = y;
-            afm.tip_curve[idx].z = (x/afm.tip_rad)*(x/afm.tip_rad) +
-                (y/afm.tip_rad)*(y/afm.tip_rad) 
-                + afm.tip_pos_z;
-        }
-
-    }
-
-}
-
-void initialize_read_parameters( MBRANE_para *mbrane, 
+void init_read_parameters( MBRANE_para *mbrane, 
         AFM_para *afm, MCpara *mcpara, string para_file){
     
     char buff[255];
@@ -206,14 +166,6 @@ void initialize_read_parameters( MBRANE_para *mbrane,
         mcpara->tot_mc_iter = t_n2;
         mcpara->dump_skip = t_n3;
         fgets(buff,255,(FILE*)f2);
-        fgets(buff,255,(FILE*)f2);
-        fgets(buff,255,(FILE*)f2); 
-        sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
-        /* fprintf(stderr, "%s\n", buff); */
-        afm->N = t_n; 
-        afm->extent[0] = td1; afm->extent[1]= td2;
-        afm->extent[2] = td3; afm->extent[3]= td3;
-
         fgets(buff,255,(FILE*)f2); 
         fgets(buff,255,(FILE*)f2); 
         sscanf(buff,"%lf %lf %lf %lf", &td1, &td2, &td3, &td4);
@@ -224,15 +176,15 @@ void initialize_read_parameters( MBRANE_para *mbrane,
         afm->epsilon = td4;
     }
     else{
-        fprintf(stderr, "sorry man the specified doesn't exists in current dir .\n");
+        fprintf(stderr, "Mayday Mayday the specified para file doesn't exists\n");
+        fprintf(stderr, "I will just kill myself now\n");
+        exit(0);
     }
     fclose(f2);
     mbrane->num_triangles = 2*mbrane->N - 4;
     mbrane->num_nbr = 3*mbrane->num_triangles;
-    // TODO: compute the average bond length by running over all the lengths.
     // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
    // define the monte carlo parameters
     mcpara->one_mc_iter = 2*mbrane->N;
-    mcpara->metric = "sph";
     mcpara->delta = sqrt(8*pi/(2*mbrane->N-4));
 }

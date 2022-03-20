@@ -53,17 +53,15 @@ int main(int argc, char *argv[]){
     lij_t0 = (double *)calloc(mbrane.num_nbr, sizeof(double));
     is_attractive = (bool *)calloc(mbrane.N, sizeof(bool));
     //
-    if(!mcpara.is_restart){
-        s_t = afm.sigma; 
-        afm.sigma = 0.00;
-        e_t = afm.epsilon; 
-        afm.epsilon = 0.0;
-    }
+    s_t = afm.sigma; 
+    afm.sigma = 0.00;
+    e_t = afm.epsilon; 
+    afm.epsilon = 0.0;
     hdf5_io_read_pos( (double *)Pos,  (char *) "conf/dmemc_conf.h5");
     hdf5_io_read_mesh((int *) mesh.cmlist,
             (int *) mesh.node_nbr_list,  (char *) "conf/dmemc_conf.h5");
     init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane);
-    identify_attractive_part(Pos, is_attractive, mbrane.N);
+    identify_attractive_part(Pos, is_attractive, mbrane.theta, mbrane.N);
     //
     
     Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane);
@@ -90,7 +88,7 @@ int main(int argc, char *argv[]){
         Et[3] = lj_afm_total(Pos, &afm_force, mbrane, afm);
         vol_sph = volume_total(Pos, mesh, mbrane);
         Et[4] = mbrane.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
-        fprintf(stderr, "iter: %d accepted moves: %d total energy: %g volume :%g \n", i, num_moves, mbrane.tot_energy[0], vol_sph);
+        fprintf(stderr, "iter :: %d AcceptedMoves% :: %4.2f total energy :: %g volume :: %g \n", i, 100*(double)num_moves/mcpara.one_mc_iter, mbrane.tot_energy[0], vol_sph);
 
         fprintf(fid, " %d %d %g %g %g %g %g %g\n",
                     i, num_moves, mbrane.tot_energy[0], Et[0], Et[1], Et[2], Et[3], Et[4]);

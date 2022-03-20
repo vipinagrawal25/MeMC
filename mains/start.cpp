@@ -50,7 +50,7 @@ int main(int argc, char **argv){
      mcpara.dfac  = 32;
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
-     mcpara.tot_mc_iter = 60000;
+     mcpara.tot_mc_iter = 301;
      mcpara.dump_skip = 100;
 
      Pos = (Vec2d *)calloc(para.N, sizeof(Vec2d));
@@ -80,8 +80,8 @@ int main(int argc, char **argv){
                 para, mcpara, metric);
         Ener = pairlj_total_energy(Pos, neib, para, 
                 metric);
-        fprintf(stderr, " iter :: %d AcceptedMoves :: %d Energy ::  %g\n",
-                i, num_moves, Ener);
+        fprintf(stderr, " iter :: %d AcceptedMoves% :: %4.2f Energy ::  %g\n",
+                i, 100*(double)num_moves/mcpara.one_mc_iter, Ener);
         make_nlist(Pos, neib,  para, metric);
     }
     fclose(fid);

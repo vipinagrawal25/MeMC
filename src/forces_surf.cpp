@@ -72,7 +72,7 @@ double volume_ipart(Vec3d *pos,
         int *node_nbr, 
         int num_nbr, int idx, MBRANE_para para){
 
-    int i, j, k, kp;
+    int i, j, k;
     double volume1;
     Vec3d area1, area2, rk, ri, rj, rkp;
     Vec3d rij, rijk, rik, rjkp;
@@ -140,7 +140,7 @@ double voronoi_area(double cotJ, double cotK, double jsq, double ksq, double are
 //
 double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
                             int idx, MBRANE_para para){
-    double bend_ener,curvature,sigma_i;
+    double bend_ener,sigma_i;
     Vec3d cot_times_rij;
     double BB=para.coef_bend;
     double curv_t0 = para.sp_curv;
@@ -343,13 +343,13 @@ double lj_bottom_surf_total(Vec3d *pos,
 
 
 void identify_attractive_part(Vec3d *pos, 
-        bool *is_attractive, int N){
+        bool *is_attractive, double theta_attr, int N){
 
     int i; 
     double theta;
     for(i= 0; i<N; i++){
         theta = pi - acos(pos[i].z);
-        is_attractive[i] = theta < pi/6.0;
+        is_attractive[i] = theta < theta_attr;
     }
 }
 

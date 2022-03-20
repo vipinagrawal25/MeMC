@@ -159,12 +159,15 @@ triangles = triangulate(pts_cart)
 sort_tri = sort_simplices(triangles)
 cmlist, node_nbr, bond_nbr = neighbours(Np, sort_tri)
 node_nbr, bond_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr, bond_nbr)
-isFile = os.path.isfile("./conf") 
-if(isFile):
+isDir = os.path.isdir("./conf/") 
+if(isDir):
     write_hdf5(pts_cart, cmlist, node_nbr,
             bond_nbr, triangles, "./conf/dmemc_conf.h5")
 else:
-    print("Create directory conf in simulation directory")
+    os.mkdir("conf")
+    write_hdf5(pts_cart, cmlist, node_nbr,
+            bond_nbr, triangles, "./conf/dmemc_conf.h5")
+
 # write_file(pts_cart, cmlist, node_nbr, bond_nbr)
 
 

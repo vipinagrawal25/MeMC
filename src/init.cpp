@@ -1,66 +1,6 @@
 #include "global.h"
 #include "subroutine.h"
 
-int randint(int n) {
-    if ((n - 1) == RAND_MAX) {
-        return rand();
-    } else {
-        // Chop off all of the values that would cause skew...
-        long end = RAND_MAX / n; // truncate skew
-        assert (end > 0L);
-        end *= n;
-        // ... and ignore results from rand() that fall above that limit.
-        // so we can expect to bail out of this loop pretty quickly.)
-        int r;
-        while ((r = rand()) >= end);
-
-        return r % n;
-    }
-}
-
-// void init_read_config(POSITION *Pos,  
-//         MESH mesh,  int *triangles,
-//         MBRANE_para mb_para){
-//     FILE *fid;
-//     int2 *tmp_nbr_lst;
-
-//     tmp_nbr_lst = mesh.bond_nbr_list;
-//     // Read the particle postions;
-//     //
-//     //
-//     fid = fopen("analysis/positions.dat", "rb");
-//     for(int i=0; i<mb_para.N; i++){
-//         fscanf(fid, "%lf %lf %lf \n", &Pos[i].x, &Pos[i].y, &Pos[i].z);
-//         /* fprintf(stderr, "%lf %lf %lf \n", Pos[i].x, Pos[i].y, Pos[i].z); */
-//     }
-//     fclose(fid);
-
-//     fid = fopen("analysis/cumlist.dat", "rb");
-//     for(int i=0; i<mb_para.N+1; i++){
-//         fscanf(fid, "%d \n", &mesh.cmlist[i]);
-//     }
-//     fclose(fid);
-
-//     fid = fopen("analysis/node_neighbour.dat", "rb");
-//     for(int i=0; i<mesh.cmlist[mb_para.N]; i++){
-//         fscanf(fid, "%d \n", &mesh.node_nbr_list[i]);
-//     }
-//     fclose(fid);
-
-
-//     fid = fopen("analysis/bond_neighbour.dat", "rb");
-//     for(int i=0; i<mesh.cmlist[mb_para.N]; i++){
-//         fscanf(fid, "%d %d\n", &tmp_nbr_lst[i].i1, &tmp_nbr_lst[i].i2);
-//     }
-//     fclose(fid);
-
-//     fid = fopen("analysis/triangles.dat", "rb");
-//     for(int i=0; i<mesh.cmlist[mb_para.N]; i=i+3){
-//         fscanf(fid, "%d %d %d\n", &triangles[i], &triangles[i+1], &triangles[i+2]);
-//     }
-//     fclose(fid);
-// }
-
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
     bool is_sph, is_cart;
 
@@ -129,23 +69,24 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
 }
 
 void init_read_parameters( MBRANE_para *mbrane, 
-        AFM_para *afm, MCpara *mcpara, string para_file){
+        AFM_para *afm, MCpara *mcpara, char *para_file){
     
     char buff[255];
     int t_n, t_n2, t_n3;
     double td1, td2, td3, td4, td5;
     FILE *f2;
-    f2 = fopen(para_file.c_str(), "r");
+    f2 = fopen(para_file, "r");
     if(f2){
         fgets(buff,255,(FILE*)f2); 
         fgets(buff,255,(FILE*)f2); 
         fgets(buff,255,(FILE*)f2);
-        sscanf(buff,"%d %lf %lf %lf", &t_n, &td1, &td2, &td3);
+        sscanf(buff,"%d %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
         /* fprintf(stderr, "%s\n", buff); */
         mbrane->N = t_n;
         mbrane->coef_bend = td1;
         mbrane->coef_str = td2;
         mbrane->coef_vol_expansion = td3;
+        mbrane->sp_curv = td4;
         fgets(buff,255,(FILE*)f2);
         fgets(buff,255,(FILE*)f2);
         sscanf(buff,"%lf %lf %lf %lf %lf", &td1,&td2,&td3,&td4,&td5);
@@ -154,15 +95,14 @@ void init_read_parameters( MBRANE_para *mbrane,
         mbrane->pos_bot_wall = td2;
         mbrane->sigma = td3;
         mbrane->epsilon = td4;
-        mbrane->sp_curv = td5;
+        mbrane->theta = td5;
         fgets(buff,255,(FILE*)f2);
         fgets(buff,255,(FILE*)f2); 
         fgets(buff,255,(FILE*)f2); 
-        sscanf(buff,"%lf %lf %d %d %d", &td1, &td2, &t_n, &t_n2, &t_n3);
+        sscanf(buff,"%lf %lf %d %d %d", &td1, &td2,  &t_n2, &t_n3);
         /* fprintf(stderr, "%s\n", buff); */
         mcpara->dfac = td1;
         mcpara->kBT = td2;
-        mcpara->is_restart = t_n;
         mcpara->tot_mc_iter = t_n2;
         mcpara->dump_skip = t_n3;
         fgets(buff,255,(FILE*)f2);

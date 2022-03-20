@@ -36,7 +36,7 @@ double stretch_energy_total(Vec3d *pos,
         MESH mesh, double *lij_t0,
          MBRANE_para para);
 void identify_attractive_part(Vec3d *pos, 
-        bool *is_attractive, int N);
+        bool *is_attractive, double theta_attr, int N);
 double stretch_energy_ipart(Vec3d *pos, 
         int *node_nbr, double *lij_t0,
         int num_nbr, int idx, MBRANE_para para);
@@ -63,7 +63,7 @@ void init_read_config();
 void init_afm_tip(AFM_para );
 
 void init_read_parameters( MBRANE_para *mbrane, 
-        AFM_para *afm, MCpara *mcpara, string para_file);
+        AFM_para *afm, MCpara *mcpara, char *para_file);
 int randint(int n);
 
 //hdf5_io

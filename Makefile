@@ -26,15 +26,15 @@ all : start memc
 
 start: $(object) obj/start.o
 	echo $(CC) $(object) $(link)
-	$(CC) $(object) obj/start.o $(link) -o exe_start
+	@$(CC) $(object) obj/start.o $(link) -o exe_start
 
 memc: $(object) obj/memc.o
 	echo $(CC) $(object) $(link)
-	$(CC) $(object) obj/memc.o $(link) -o exe_memc
+	@$(CC) $(object) obj/memc.o $(link) -o exe_memc
 
 
 obj/memc.o: mains/memc.cpp $(includes)
-	$(CC) -Jobj -c $< -o $@ $(link)
+	@$(CC) -Jobj -c $< -o $@ $(link)
 # 
 
 obj/start.o: mains/start.cpp $(includes)
@@ -46,12 +46,8 @@ obj/%.o : src/%.cpp $(includes)
 	$(info Compiling $<)
 	$(CC) -Iobj -c $< -o $@ $(link)
 #
-clean:
-	@rm $(object) run
-	@echo "all object file and executables removed"
-#
 distclean:
-	@rm -rf data_0* $(object) run
+	@rm -rf bin $(object) 
 	@echo "all data cleared"
 	@rm -rf $(dir $(wildcard */mc_log))
 	@echo "Deleted all the output data"

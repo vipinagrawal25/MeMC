@@ -53,8 +53,7 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
     cm_idx = mesh.cmlist[idx];
     E_b = bending_energy_ipart(pos, 
             (int *) (mesh.node_nbr_list + cm_idx),
-            (int2 *) (mesh.bond_nbr_list + cm_idx), num_nbr, 
-            idx, mbrane);
+             num_nbr, idx, mbrane);
 
     E_b += bending_energy_ipart_neighbour(pos, 
             mesh, idx, mbrane);
@@ -102,7 +101,6 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
 
         vol_i = volume_ipart(pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
-                (int2 *) (mesh.bond_nbr_list + cm_idx),
                 num_nbr, idx, mbrane);
 
         x_o =   pos[idx].x;
@@ -127,10 +125,9 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
 
         vol_f = volume_ipart(pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
-                (int2 *) (mesh.bond_nbr_list + cm_idx),
                 num_nbr, idx, mbrane);
 
-        dvol =  0.5*(vol_f - vol_i);
+        dvol =  (vol_f - vol_i);
         de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
             + (dvol/ini_vol)*(dvol/ini_vol);
         de_vol = KAPPA*de_vol;

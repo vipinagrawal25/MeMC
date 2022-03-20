@@ -10,8 +10,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <iostream>
 #include <cstdlib>
+#include <random>
 #include "Vector.h"
 
 using namespace std;
@@ -45,19 +45,16 @@ typedef struct{
     int num_nbr; //  neighbours of all particles
 }MBRANE_para;
 //
-typedef struct{
-    int i1, i2;
-}int2;
+
 //
 typedef struct{
     int size_node_nbr;
     int *cmlist;
     int *node_nbr_list;
-    int2 *bond_nbr_list;
 }MESH;
 //
+
 typedef struct{
-    int N; // number of points defining in afm tip curve
     double tip_pos_z; // position of tip in z
     double tip_rad; // radius of the tip
     double sigma, epsilon;

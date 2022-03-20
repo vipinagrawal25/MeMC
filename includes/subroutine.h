@@ -28,16 +28,13 @@ double pairlj_total_energy(Vec2d *Pos, Nbh_list *neib,
 //*************************************************//          
 //forces_surf.c
 double bending_energy_total(Vec3d *pos, MESH mesh, MBRANE_para para);
-double bending_energy_ipart(Vec3d *pos, int *node_nbr, int2 *bond_nbr, 
-        int num_nbr, int idx, MBRANE_para para,
-        string method="curvature");
+double bending_energy_ipart(Vec3d *pos, int *node_nbr,  
+        int num_nbr, int idx, MBRANE_para para);
 double bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH mesh, int idx, MBRANE_para para);
 double stretch_energy_total(Vec3d *pos, 
         MESH mesh, double *lij_t0,
          MBRANE_para para);
-void identify_obtuse(Vec3d *pos, int *triangles, 
-       double *obtuse,  int N);
 void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, int N);
 double stretch_energy_ipart(Vec3d *pos, 
@@ -46,16 +43,12 @@ double stretch_energy_ipart(Vec3d *pos,
 double lj_bottom_surface(double zz,
         bool is_attractive, 
         double sur_pos, double eps, double sigma);
-
+double volume_total(Vec3d *pos, 
+        MESH mesh, MBRANE_para para);
 double lj_bottom_surf_total(Vec3d *pos, 
          bool *is_attractive, MBRANE_para para);
-
-void volume_area_enclosed_membrane(Vec3d *pos, 
-    int *triangles, int num_triangles,
-    double *avolume, double *aarea);
-
 double volume_ipart(Vec3d *pos, 
-        int *node_nbr, int2* bond_nbr,
+        int *node_nbr, 
         int num_nbr, int idx, MBRANE_para para);
 
 double lj_afm(Vec3d , AFM_para);
@@ -73,34 +66,16 @@ void init_read_parameters( MBRANE_para *mbrane,
         AFM_para *afm, MCpara *mcpara, string para_file);
 int randint(int n);
 
-//vtk_io.c
-void vtk_io(double *points, 
-        int *triangles, 
-        int Np, string filename, 
-        string dataname="miketesting");
-void vtk_io_point_data(bool *data, 
-        int Np, string filename, 
-        string dataname);
-void vtk_io_cell_data(double *data, 
-        int Np, string filename, 
-        string dataname);
-
 //hdf5_io
-void hdf5_io_read_pos(double *Pos, int *cmlist,
-        int *node_nbr, int2 *bond_nbr, int *triangles,
-        char input_file[]);
-void hdf5_io_read_config(double *Pos, int *cmlist,
-        int *node_nbr, int2 *bond_nbr, int *triangles,
-        string input_file);
+void hdf5_io_write_pos(double *Pos, int N, char *input_file);
+void hdf5_io_read_pos(double *Pos, char *input_file);
+void hdf5_io_read_mesh(int *cmlist,
+        int *node_nbr, char *input_file);
 void io_dump_config(double *Pos, int N, char *);
 void io_read_config(double *Pos, int N, char *);
 void io_dump_config_ascii(double *Pos, int N, char *);
-void hdf5_io_dump_restart_config(double *Pos, int *cmlist,
-        int *node_nbr, int2 *bond_nbr, 
-        int *triangles, MBRANE_para mbrane,
-        string folder);
-//misc
-bool FileExists(const std::string &s);
+
+//cubic_solve
 int cubic_solve(double, double, double, double, double *);
 
 #endif

@@ -56,9 +56,9 @@ Vec3d determine_xyz_parabola(Vec3d pos, AFM_para afm) {
 
     nroot = cubic_solve(a, b, c, d, roots);
 
-     if(nroot  == 3){
-        fprintf(stderr, "Multiple points satisfy distance minimization \n");
-    }
+/*      if(nroot  == 3){ */
+/*         fprintf(stderr, "Multiple points satisfy distance minimization \n"); */
+/*     } */
 
     pt_pbola.x = roots[0];
     pt_pbola.y = (y0/x0)*roots[0];

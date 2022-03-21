@@ -50,7 +50,7 @@ int main(int argc, char **argv){
      mcpara.dfac  = 32;
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
-     mcpara.tot_mc_iter = 301;
+     mcpara.tot_mc_iter = 60000;
      mcpara.dump_skip = 100;
 
      Pos = (Vec2d *)calloc(para.N, sizeof(Vec2d));

@@ -80,7 +80,7 @@ void init_read_parameters( MBRANE_para *mbrane,
         fgets(buff,255,(FILE*)f2); 
         fgets(buff,255,(FILE*)f2); 
         fgets(buff,255,(FILE*)f2);
-        sscanf(buff,"%d %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
+        sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
         /* fprintf(stderr, "%s\n", buff); */
         mbrane->N = t_n;
         mbrane->coef_bend = td1;

@@ -1,0 +1,11 @@
+## Membrane parameters
+N	coef_bending	coef_stretching	coef_vol_expansion sp_curve
+1024  2.50          25.00            1000000.00        2.0
+radius	pos_bot_wall	sigma	epsilon   theta_attractive
+1.00     -1.05          0.17     4.00     0.52
+## Montecarlo parameters
+Dfac	kBT mc_total_iters	mc_dump_iter
+4       1.00  50            10
+## Afm Tip parameters
+tip_radius	tip_pos_z	afm_sigma	afm_epsilon
+0.20         1.05       0.17         4.00

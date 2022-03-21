@@ -1,5 +1,5 @@
-#include "../include/global.h"
-#include "../include/subroutine.h"
+#include "global.h"
+#include "subroutine.h"
  
 double cal_length(double x1 , double x2, 
         double y1, double y2, double len, char
@@ -17,10 +17,7 @@ double cal_length(double x1 , double x2,
         is_cart = true;
     }
 
-    /* if (metric == "cart" ){ */
-    /* printf("cartesian %s %d %d \n", metric, is_sph, is_cart); */
-    /* } */
-    if (is_cart == 1 ){
+    if (is_cart){
         dx = x2 - x1;
         dy = y2 - y1;
         if(dx >  len*0.5) dx = dx - len; 
@@ -29,9 +26,7 @@ double cal_length(double x1 , double x2,
         if(dy < -len*0.5) dy = dy + len;
         ds = dx*dx + dy*dy;
     }
-    if (is_sph == 1 ){
-        // x = theta
-        // y is the phi
+    if (is_sph){
         spx1 = sin(x1)*cos(y1);
         spy1 = sin(x1)*sin(y1);
         spz1 = cos(x1);
@@ -53,36 +48,27 @@ double cal_length(double x1 , double x2,
 }
 
 
-void make_nlist_pf(POSITION *Pos, Neighbours *neib,
+void make_nlist(Vec2d *Pos, Nbh_list *neib,
         LJpara para, char *metric){
 
-    int cellx,celly;
-    double r2_cut, new_rc;
-    double displ; 
-    int cnt;
+    double  new_rc;
 
-
-    r2_cut = para.r_cut*para.r_cut;
 
     for(int i=0;i < para.N; i++)
-        neib[i].cnt_ss = 0;
+        neib[i].cnt = 0;
 
 
-    displ = 0.0;
-    cnt = 0;
-
-    double cellcut = para.r_cut + R_del; 
-    new_rc = cellcut*cellcut;
+    new_rc = para.r_cut*para.r_cut;
 
     for(int i = 0; i < para.N; i++){
         for(int j = i+1; j < para.N; j++){
             int m = i;
             int n = j;
-            if(len_check_pf(Pos[m], Pos[n],  para.len, new_rc, metric)){
-                neib[m].list_ss[neib[m].cnt_ss] = n;
-                neib[n].list_ss[neib[n].cnt_ss] = m;
-                neib[m].cnt_ss += 1;
-                neib[n].cnt_ss += 1;
+            if(len_check(Pos[m], Pos[n],  para.len, new_rc, metric)){
+                neib[m].list[neib[m].cnt] = n;
+                neib[n].list[neib[n].cnt] = m;
+                neib[m].cnt += 1;
+                neib[n].cnt += 1;
             }
         }
 
@@ -90,7 +76,7 @@ void make_nlist_pf(POSITION *Pos, Neighbours *neib,
 }
 
 
-bool len_check_pf(POSITION s1, POSITION s2,
+bool len_check(Vec2d s1, Vec2d s2,
         double len, double new_rc, char *metric){
 
     double ds;
@@ -102,27 +88,11 @@ bool len_check_pf(POSITION s1, POSITION s2,
     return var;
 }
 
-bool len_check_ss(POSITION s1, POSITION s2, 
-        double len, double new_rc){
-
-    double drx = s1.x - s2.x;
-    double dry = s1.y - s2.y;
-    bool var = false;
-
-    if(drx > len*0.5) drx = drx - len;
-    if(dry > len*0.5) dry = dry - len;
-    if(drx < - len*0.5) drx = drx + len;
-    if(dry < - len*0.5) dry = dry + len;
-    double Sq_dr = drx*drx + dry*dry;
-    var = (Sq_dr < new_rc);
-    return var;
-}
-
-double pairlj_ipart_energy(POSITION *Pos, int *n_list,
+double pairlj_ipart_energy(Vec2d *Pos, int *n_list,
         int ni, int i_p, LJpara para, char *metric){
     double Sq_dr2;
     int j, k;
-    double dx,dy,Sq_dr1,r2,r6;
+    double Sq_dr1,r2,r6;
     double loc_ener;
     double r2_cut;
     double inv_sig_ma, eps, ds;
@@ -142,7 +112,7 @@ double pairlj_ipart_energy(POSITION *Pos, int *n_list,
             if(Sq_dr1 < r2_cut){	
                 r2 = 1.0/Sq_dr2;
                 r6  = r2*r2*r2; 
-                loc_ener += 4.0*eps*r6*(r6);
+                loc_ener += eps*r6*(r6);
             }
         }
     }
@@ -150,17 +120,17 @@ double pairlj_ipart_energy(POSITION *Pos, int *n_list,
 }
 
 
-double pairlj_total_energy(POSITION *Pos, Neighbours *neib,
+double pairlj_total_energy(Vec2d *Pos, Nbh_list *neib,
         LJpara para, char *metric){
-    int i,j,k,ni;
+    int i,ni;
     double j_pe, pe;
 
     pe = 0e0;
     for(i=0;i<para.N;i++){
-        ni = neib[i].cnt_ss;
-        j_pe = pairlj_ipart_energy(Pos, neib[i].list_ss,
+        ni = neib[i].cnt;
+        j_pe = pairlj_ipart_energy(Pos, neib[i].list,
                 ni, i, para, metric);
         pe += j_pe;
     }
-    return pe;
+    return 0.5*pe;
 }

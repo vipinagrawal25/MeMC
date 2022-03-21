@@ -107,8 +107,17 @@ An example shell script to conduct all the steps stated above is stored in
 sh execute.sh
 ```
 
-The code will run for certain minutes. You can relax till then. Once done we have
-provided a gnuplot plot script  and sample histogram of energies from  
+The code will finish in about 30 minutes on Intel(R) Core(TM) i5-8265U CPU. You can
+relax till then. Once done we have provided a gnuplot plot script  and sample
+histogram "hist_start.dat" and "hist_memc.dat" of energies from the same simulation
+we had conducted. Execution of script can be done as:
+```bash 
+gnuplot plot.gnu
+```
+Two plot window should appear. The histogram of energy for the
+data generated locally is plotted using lines and points, whereas the case we have
+done is in points. To make histogram we have used gsl-histogram library. One can
+also use numpy or other standard libraries to do the same. 
 
 # Visualization
 Visualization can be done using [visit](https://visit.org) or [paraview](https://www.paraview.org). We provide a python utility "utils/viz_memc.py". The program takes three arguments: output from the exe_memc stored in the specified folder, the connections set by utils/gen_memc_conf.py, and the output file with extension .vtk. A sample execution will look like

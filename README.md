@@ -39,7 +39,10 @@ pip install numpy-quartenion
 installs numpy-quartenion library.
 
 
-## Example
+# Using the Code:
+
+We shall now dive deeper and explain the different part of the code. As stated previously, the main
+purpose of the MeMC is the Monte-Carlo simulation of enclosed Membranes. For the details check the document on doc/paper.pdf. 
 
 The surface config shown below::
 

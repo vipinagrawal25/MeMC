@@ -63,6 +63,10 @@ inside data_sph.
 
 ```
 
+ Before equilibration      |  After equilibration
+:-------------------------:|:-------------------------:
+![](./doc/figs/surf_mc_random.png)   |  ![](./doc/figs/surf_mc_lattice.png)
+
 ## The turn (Generating the connections)
 
 For MeMC, one needs to triangulate the points generated as described in para above.
@@ -73,14 +77,6 @@ python utils/gen_memc_conf.py data_sph/part_pos0003.bin
 ```
 will write the input file with all the connections in conf/dmemc_conf.h5.  
 
-
-The surface config shown below::
-
-![plot](./doc/figs/surf_mc_random.png)
-
-After 60000 monte-carlo steps become::
-
-![plot](./doc/figs/surf_mc_lattice.png)
 
 
 ## The prestige  

@@ -41,8 +41,16 @@ installs numpy-quartenion library.
 
 # Using the Code:
 
-We shall now dive deeper and explain the different part of the code. As stated previously, the main
-purpose of the MeMC is the Monte-Carlo simulation of enclosed Membranes. For the details check the document on doc/paper.pdf. 
+We shall now dive deeper and explain the different part of the code. As stated
+previously, the main purpose of the MeMC is the Monte-Carlo simulation of enclosed
+Membranes. For the details check the document on doc/paper.pdf. The usage can be
+divided into three distinct part. Since the number is three, we shall borrow the
+quotes from the movie "The Prestige" and call them "the pledge", "the turn" and "the
+prestige"
+
+##  The pledge (Starting the simulation)
+
+To begin the 
 
 The surface config shown below::
 
@@ -51,3 +59,7 @@ The surface config shown below::
 After 60000 monte-carlo steps become::
 
 ![plot](./doc/figs/surf_mc_final.png)
+
+## The turn (Generating the connections)
+
+## The prestige  

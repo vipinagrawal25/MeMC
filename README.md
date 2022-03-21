@@ -58,6 +58,10 @@ files. The following command in the root directory of the repository will genera
 configuration of 1024 points in surface of sphere. All the outputs will be dumped
 inside data_sph.
 
+NOTE :: The simulation will run for 6e4 monte-carlo steps, which amounts to some
+time in intel core. To go ahead with the other part it is sufficient to kill after
+1e3 monte-carlo steps  
+
 ```bash
 ./bin/exe_start 1024 sph data_sph
 
@@ -78,5 +82,41 @@ python utils/gen_memc_conf.py data_sph/part_pos0003.bin
 will write the input file with all the connections in conf/dmemc_conf.h5.  
 
 
-
 ## The prestige  
+Once the connections are set one can do the final simulation with bin/exe_memc. The
+binary takes two arguments parameter file and the folder to write the simulation
+data. One example of the parameter file is given in `Examples/para_file.in` where we give input to the simulation in plain text ascii format. For more details about the various parameters used, see the advanced document of the code.  Along with arguments, it is also expected to have a directory conf with file
+"dmemc_conf.h5" inside it. Once all is set, run the code code with
+
+```bash
+./bin/exe_memc Examples/para_file.in out_memc
+
+```
+
+# Output's
+Apart from the snapshot of the position, the code outputs % of accepted moves in
+second column and total energy of the configuration in the third column in "mc_log".
+The log file is written inside the specified folder.
+
+# Examples
+
+An example shell script to conduct all the steps stated above is stored in
+"Examples/execute.sh".  Change the directory to Examples and run
+
+```bash
+sh execute.sh
+```
+
+The code will run for certain minutes. You can relax till then. Once done we have
+provided a gnuplot plot script  and sample histogram of energies from  
+
+# Visualization
+Visualization can be done using [visit](https://visit.org) or [paraview](https://www.paraview.org). We provide a python utility "utils/viz_memc.py". The program takes three arguments: output from the exe_memc stored in the specified folder, the connections set by utils/gen_memc_conf.py, and the output file with extension .vtk. A sample execution will look like
+```bash
+python utils/viz_memc.py out_memc/snap_0004.h5 conf/dmemc_conf.h5 check_viz.vtk
+```
+
+If the execution is successful, the file "check_viz.vtk" will be written in the root
+directory. In visit load the .vtk file and select `subset->domains` or `mesh->mesh`
+to see the result.
+

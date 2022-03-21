@@ -7,11 +7,11 @@ of relevance for the study of viruses, exosomes, e.t.c.
 If all the prequisites are satisfied, the installation is easy. The following
 commands should do the job
 
-'''bash
+```bash
 git clone https://github.com/vipinagrawal25/MeMC
 cd MeMC
 make
-'''
+```
 
 ## Prequisites
 

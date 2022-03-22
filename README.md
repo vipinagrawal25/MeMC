@@ -61,38 +61,39 @@ The package is built to understand the physics of Exosomes or viruses where the
 thermal noise are relevant. These nano-vesicles are studied experimentally using
 Atomic Force Microscopy. This package tends to simulate the experiment in the best
 possible way. Therefore, we expect the user to have a prior understanding of
-Metropolis algorithm of the Monte Carlo simulation and a basic concept of Elasticity
+the Metropolis algorithm for the Monte Carlo simulation and a basic concept of Elasticity
 pertaining to membranes. Both the concept is described in detail in the document
 doc/paper.pdf.  That being said, we shall now dive deeper and explain how different
 part of the code functions in the following sections:
 
 ## Constructing the membrane
 
-To begin the simulation we generate a equilibrated randomized position.
-For details we refer the reader to section xx.xx of doc/paper.pdf. The main code for
-this purpose is given in `main/start.cpp` and the relevant binary 
-is executable "bin/exe_start". 
+To begin the simulation we generate a equilibrated randomized position on a surface
+of a sphere.  For details we refer the reader to section xx.xx of doc/paper.pdf. The
+main code for this purpose is given in `main/start.cpp` and the relevant  executable is "bin/exe_start". 
 The executable takes three arguments:
 1) Number of random points to be equilibrated
 2) Geometry of the surface "sph" for a
 surface of sphere and "cart" for flat plane
 3) Folder name to write the output files. 
-The following command in the root directory of the repository will generate a
-configuration of 1024 points in surface of sphere. All the outputs will be dumped
-inside data_sph.
 
-NOTE :: The simulation will run for 6e4 monte-carlo steps, which amounts to some
-time in intel core. To go ahead with the other part it is sufficient to kill after
-1e3 monte-carlo steps  
+Rest of the parameter are hard coded. For instance, the radius of the sphere on
+which we generate randomize positions is unity. 
+
+In order to generate a randomized configuration of 1024 points in surface of sphere with radius one, the user can execute
 
 ```bash
 ./bin/exe_start 1024 sph data_sph
 
 ```
+All the outputs will be dumped inside data_sph.
 
- Before equilibration      |  After equilibration
-:-------------------------:|:-------------------------:
-![](./doc/figs/surf_mc_random.png)   |  ![](./doc/figs/surf_mc_lattice.png)
+---
+**NOTE**
+
+The simulation will run for 60000 Monte Carlo steps, which will take more than 2 hours
+to complete. To proceed with the other sections it is sufficient to kill the
+simulation after 1000 Monte Carlo steps. 
 
 ## The turn (Generating the connections)
 
@@ -103,6 +104,11 @@ We rely on the python libraries to do so. The code to do the trick is  utils/gen
 python utils/gen_memc_conf.py data_sph/part_pos0003.bin 
 ```
 will write the input file with all the connections in conf/dmemc_conf.h5.  
+
+ Before equilibration      |  After equilibration
+:-------------------------:|:-------------------------:
+![](./doc/figs/surf_mc_random.png)   |  ![](./doc/figs/surf_mc_lattice.png)
+
 
 
 ## The prestige  

@@ -57,20 +57,27 @@ make CC=/path/to/h5c++.
 
 # Using the Package:
 
-The package is built to understand the physics of Exosomes and viruses where the
-thermal noise are relevant. Therefore, we expect the user to have a prior
-understanding of Metropolis algorithm of the Monte Carlo simulation and basic
-concept of Elasticity. Both the concept is described in detail in the document doc/paper.pdf. 
-That being said, we shall now dive deeper and explain how different part of the
-code functions in the sections that follow. 
+The package is built to understand the physics of Exosomes or viruses where the
+thermal noise are relevant. These nano-vesicles are studied experimentally using
+Atomic Force Microscopy. This package tends to simulate the experiment in the best
+possible way. Therefore, we expect the user to have a prior understanding of
+Metropolis algorithm of the Monte Carlo simulation and a basic concept of Elasticity
+pertaining to membranes. Both the concept is described in detail in the document
+doc/paper.pdf.  That being said, we shall now dive deeper and explain how different
+part of the code functions in the following sections:
 
 ## Constructing the membrane
 
-To begin the simulation we generate a equilibrated randomized position. For this
-purpose use the executable "bin/exe_start". The executable takes three arguments:
-Number of random points to be equilibrated, geometry of the surface "sph" for a
-surface of sphere and "cart" for flat plane and folder name to write the output
-files. The following command in the root directory of the repository will generate a
+To begin the simulation we generate a equilibrated randomized position.
+For details we refer the reader to section xx.xx of doc/paper.pdf. The main code for
+this purpose is given in `main/start.cpp` and the relevant binary 
+is executable "bin/exe_start". 
+The executable takes three arguments:
+1) Number of random points to be equilibrated
+2) Geometry of the surface "sph" for a
+surface of sphere and "cart" for flat plane
+3) Folder name to write the output files. 
+The following command in the root directory of the repository will generate a
 configuration of 1024 points in surface of sphere. All the outputs will be dumped
 inside data_sph.
 

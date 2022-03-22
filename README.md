@@ -139,12 +139,30 @@ tip_radius	tip_pos_z	afm_sigma	afm_epsilon
 Values of the parameter are stored directly below the name. For instance the number
 of points used to represent the membrane above is 1024 (The number below N). The other parameters which can be varied are:
 
-* *Membrane specific parameter*
-+  coef_bending : 
-+  coef_stretching : the Young's modulus doc/paper.pdf
-+  coef_vol_expansion : the bulk's modulus in doc/paper.pdf
-+  sp_curve :: spontaneous curvature. 
-+  radius :: radius (We should probably remove this ) 
+* **Membrane specific parameter**
+    +  coef_bending : 
+    +  coef_stretching : the Young's modulus doc/paper.pdf
+    +  coef_vol_expansion : the bulk's modulus in doc/paper.pdf
+    +  sp_curve :: spontaneous curvature. 
+    +  radius :: radius (We should probably remove this ) 
+
+* **Parameters for the bottom stick wall**
+    + pos_bot_wall :: z-position of the bottom wall. The value must be smaller than the radius
+    + sigma :: The $\sigma$ of the bottom LJ potential
+    + epsilon :: Relative strength LJ potential
+    + theta_attractive :: All the points for which $\theta$ (see fig 11) is less this value will be affected by the attractive surface.
+
+* **Monte Carlo Parameters**
+    + Dfac :: Each  
+    + kBT ::
+    + mc_total_iters ::
+    + mc_dump_iters ::
+* **AFM parameters**
+    + tip_radius ::
+    + tip_pos_z ::
+    + afm_sigma ::
+    + afm_epsilon ::
+
 
 stored and the folder to write the simulation
 data. One example of the parameter file is given in `Examples/para_file.in` where we give input to the simulation in plain text ascii format. For more details about the various parameters used, see the advanced document of the code.  Along with arguments, it is also expected to have a directory conf with file

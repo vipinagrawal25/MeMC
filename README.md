@@ -139,7 +139,7 @@ tip_radius	tip_pos_z	afm_sigma	afm_epsilon
 Values of the parameter are stored directly below the name. For instance the number
 of points used to represent the membrane above is 1024 (The number below N). The other parameters which can be varied are:
 
-* Membrane specific parameter
+* *Membrane specific parameter*
 +  coef_bending : 
 +  coef_stretching : the Young's modulus doc/paper.pdf
 +  coef_vol_expansion : the bulk's modulus in doc/paper.pdf

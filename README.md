@@ -136,7 +136,15 @@ tip_radius	tip_pos_z	afm_sigma	afm_epsilon
 0.20         1.05       0.17         4.00
 `````
 
-Values of the parameter are stored directly below the name.
+Values of the parameter are stored directly below the name. For instance the number
+of points used to represent the membrane above is 1024 (The number below N). The other parameters which can be varied are:
+
+* Membrane specific parameter
++  coef_bending : 
++  coef_stretching : the Young's modulus doc/paper.pdf
++  coef_vol_expansion : the bulk's modulus in doc/paper.pdf
++  sp_curve :: spontaneous curvature. 
++  radius :: radius (We should probably remove this ) 
 
 stored and the folder to write the simulation
 data. One example of the parameter file is given in `Examples/para_file.in` where we give input to the simulation in plain text ascii format. For more details about the various parameters used, see the advanced document of the code.  Along with arguments, it is also expected to have a directory conf with file

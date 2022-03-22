@@ -35,7 +35,7 @@ cd MeMC
 make
 ```
 If successful, one should find an extra "bin" directory in the folder. The bin
-directory will contain the binaries "exe_start" and "exe_memc" inside
+directory will contain the binaries "exe_start" and "exe_memc".
 
 ---
 **NOTE**
@@ -47,23 +47,24 @@ In file included from hdf5.h:22:0,
 H5public.h:68:17: fatal error: mpi.h: No such file or directory
 compilation terminated.
 ```
-then we suggest the user to compile the code using  
+then we suggest the user to compile the code as:
 
 ```bash 
-make CC=/path/to/h5c++
+make CC=/path/to/h5c++.
 ```
 
 
-# Using the Code:
 
-We shall now dive deeper and explain the different part of the code. As stated
-previously, the main purpose of the MeMC is the Monte-Carlo simulation of enclosed
-Membranes. For the details check the document on doc/paper.pdf. The usage can be
-divided into three distinct part. Since the number is three, we shall borrow the
-quotes from the movie "The Prestige" and call them "the pledge", "the turn" and "the
-prestige"
+# Using the Package:
 
-##  The pledge (Starting the simulation)
+The package is built to understand the physics of Exosomes and viruses where the
+thermal noise are relevant. Therefore, we expect the user to have a prior
+understanding of Metropolis algorithm of the Monte Carlo simulation and basic
+concept of Elasticity. Both the concept is described in detail in the document doc/paper.pdf. 
+That being said, we shall now dive deeper and explain how different part of the
+code functions in the sections that follow. 
+
+## Constructing the membrane
 
 To begin the simulation we generate a equilibrated randomized position. For this
 purpose use the executable "bin/exe_start". The executable takes three arguments:

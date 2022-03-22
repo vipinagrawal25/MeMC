@@ -100,20 +100,15 @@ simulation after 1000 Monte Carlo steps.
 The surface of the membrane will respond to all the internal and external forces
 present. The internal ones are due to bending or stretching. If the user has read
 the section xx.xx of the document, then evaluation of these forces requires the
-knowledge of all the neighbours of a point. For this purpose we rely on the python wrapper for [qhull](qhull.org), ConvexHull.  We provide a utility script, `utils/gen_memc_conf.py` which takes the output from the `exe_start`, set all the connections and write the output as `conf/dmemc_conf.h5`.
-
-For MeMC, one needs to triangulate the points generated as described in para above.
-We rely on the python libraries to do so. The code to do the trick is  , which take
-the data to be triangulated as an input.  Executing the following
+knowledge of all the neighbours of a point. For this purpose we rely on the python
+wrapper for [qhull](qhull.org), known as ConvexHull.  We provide a utility script,
+`utils/gen_memc_conf.py` which takes the output from the `exe_start`, set all the
+connections and write the output as `conf/dmemc_conf.h5`. The user can copy paste
+the following command to set the connection for dump `data_sph/part_pos0003.bin`. 
 
 ```bash
-python utils/gen_memc_conf.py data_sph/part_pos0003.bin 
+python utils/gen_memc_conf.py data_sph/part_pos0003.bin.
 ```
-will write the input file with all the connections in conf/dmemc_conf.h5.  
-
- Before equilibration      |  After equilibration
-:-------------------------:|:-------------------------:
-![](./doc/figs/surf_mc_random.png)   |  ![](./doc/figs/surf_mc_lattice.png)
 
 
 
@@ -163,4 +158,9 @@ python utils/viz_memc.py out_memc/snap_0004.h5 conf/dmemc_conf.h5 check_viz.vtk
 If the execution is successful, the file "check_viz.vtk" will be written in the root
 directory. In visit load the .vtk file and select `subset->domains` or `mesh->mesh`
 to see the result.
+
+Before equilibration      |  After equilibration
+:-------------------------:|:-------------------------:
+![](./doc/figs/surf_mc_random.png)   |  ![](./doc/figs/surf_mc_lattice.png)
+
 

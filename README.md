@@ -110,11 +110,35 @@ the following command to set the connection for dump `data_sph/part_pos0003.bin`
 python utils/gen_memc_conf.py data_sph/part_pos0003.bin.
 ```
 
+## MeMC  
 
+Once the connections are set, the executable `bin/exe_memc` can be used to
+numerically study the nano-vesicles. The
+binary takes two arguments:
+1) Name of the parameter file from which all the physical parameters is read.
+2) The folder name to store all the data.
 
-## The prestige  
-Once the connections are set one can do the final simulation with bin/exe_memc. The
-binary takes two arguments parameter file and the folder to write the simulation
+The para file is not a format-free input. The variables has to be in the specified
+format to be read correctly. We urge the user to copy the following block and paste
+them identically to a plain text file for input. 
+
+```text
+## Membrane parameters
+N	coef_bending	coef_stretching	coef_vol_expansion sp_curve
+1024  2.50          25.00            1000000.00        2.0
+radius	pos_bot_wall	sigma	epsilon   theta_attractive
+1.00     -1.05          0.17     4.00     0.52
+## Montecarlo parameters
+Dfac	kBT mc_total_iters	mc_dump_iter
+4       1.00  50000            100
+## Afm Tip parameters
+tip_radius	tip_pos_z	afm_sigma	afm_epsilon
+0.20         1.05       0.17         4.00
+`````
+
+Values of the parameter are stored directly below the name.
+
+stored and the folder to write the simulation
 data. One example of the parameter file is given in `Examples/para_file.in` where we give input to the simulation in plain text ascii format. For more details about the various parameters used, see the advanced document of the code.  Along with arguments, it is also expected to have a directory conf with file
 "dmemc_conf.h5" inside it. Once all is set, run the code code with
 

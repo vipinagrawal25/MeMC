@@ -95,10 +95,16 @@ The simulation will run for 60000 Monte Carlo steps, which will take more than 2
 to complete. To proceed with the other sections it is sufficient to kill the
 simulation after 1000 Monte Carlo steps. 
 
-## The turn (Generating the connections)
+## Triangulating the surface
+
+The surface of the membrane will respond to all the internal and external forces
+present. The internal ones are due to bending or stretching. If the user has read
+the section xx.xx of the document, then evaluation of these forces requires the
+knowledge of all the neighbours of a point. For this purpose we rely on the python wrapper for [qhull](qhull.org), ConvexHull.  We provide a utility script, `utils/gen_memc_conf.py` which takes the output from the `exe_start`, set all the connections and write the output as `conf/dmemc_conf.h5`.
 
 For MeMC, one needs to triangulate the points generated as described in para above.
-We rely on the python libraries to do so. The code to do the trick is  utils/gen_memc_conf.py, which take the data to be triangulated as an input.  Executing the following
+We rely on the python libraries to do so. The code to do the trick is  , which take
+the data to be triangulated as an input.  Executing the following
 
 ```bash
 python utils/gen_memc_conf.py data_sph/part_pos0003.bin 

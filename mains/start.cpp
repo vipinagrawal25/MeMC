@@ -71,8 +71,8 @@ int main(int argc, char **argv){
 
     for(i=0; i<mcpara.tot_mc_iter; i++){
         if(i%mcpara.dump_skip == 0){
-            sprintf(outfile, "%s%s%04d%s",outfolder,"/part_pos",(int)(i/mcpara.dump_skip),".bin");
-            io_dump_config((double *) Pos, 2*para.N, outfile);
+            sprintf(outfile, "%s%s%04d%s",outfolder,"/snap_",(int)(i/mcpara.dump_skip),".h5");
+            hdf5_io_write_pos((double *) Pos, 2*para.N, outfile);
         }
         fprintf(fid, " %d %d %g\n", i, num_moves, Ener);
         fflush(fid);

@@ -169,7 +169,7 @@ Apart from the above, it is also expected to have a directory conf with file "dm
 ./bin/exe_memc para_file.in out_memc
 
 ```
-** NOTE ** The radius is kept unity and all the parameters are scaled accordingly.
+**NOTE** The radius is kept unity and all the parameters are scaled accordingly.
 For example, to study the effect of 10nm AFM tip over a 100nm exosome, one should
 take radius 1 and tip_radius = 1/20.
 
@@ -183,7 +183,7 @@ sh execute.sh
 
 The code takes about 30 minutes on Intel(R) Core(TM) i5-8265U CPU. Once completed,
 we results can be verified against the simulation we have conducted. Please use the
-have provided a [Gnuplot](gnuplot.org) script and sample histogram of total energies `hist_start.dat` and
+have provided a [Gnuplot](https://www.gnuplot.org) script and sample histogram of total energies `hist_start.dat` and
 `hist_memc.dat` of energies from the same simulation we had conducted. Typing the
 following  
 ```bash 
@@ -192,12 +192,15 @@ gnuplot plot.gnu
 should open two plot windows. The histogram of energy for the
 data generated locally is plotted using lines and points, whereas the case we have
 done is in points. 
+
 **NOTE**
 In case the plot script fails to generate the plot, the main reason could be lack of
-[gsl-histogram](gsl.org) in your local machine. We suggest to use numpy or other
+[gsl-histogram](https://www.gsl.org) in your local machine. We suggest to use numpy or other
 standard libraries for the same purpose. 
 
 # Data Structure
+
+
 Apart from the snapshot of the position, the code outputs % of accepted moves in
 second column and total energy of the configuration in the third column in "mc_log".
 The log file is written inside the specified folder.

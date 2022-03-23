@@ -7,7 +7,8 @@ import h5py
     
 
 def read_data(filename):
-    pos = np.fromfile(filename, dtype=np.float64)
+    pos = h5py.File(filename)["pos"][()]
+    pos = np.asarray(pos)
     Np = int(len(pos)/2)
     pts_sph = pos.reshape(Np,2)
     pts_cart = np.asarray([[np.sin(theta)*np.cos(phi), 
@@ -48,11 +49,9 @@ def neighbours(Np, simpl):
 
     cumlst[1:] = np.cumsum(lst)
     node_neighbour = np.zeros(cumlst[-1],dtype=int)
-    bond_neighbour = np.zeros(cumlst[-1],dtype=tuple)
     for i in range(0, cumlst[-1], 1):
         node_neighbour[i]=r2[2*i]
-        bond_neighbour[i]=(r3[2*i],r3[2*i+1])
-    return cumlst,node_neighbour,bond_neighbour
+    return cumlst,node_neighbour
 
 def sort_2Dpoints_theta(x,y):
     len_x = len(x)
@@ -102,7 +101,7 @@ def quater2vec(qq,precision=1e-16):
 
 
 #----------------------------------------------------------------------------#
-def sort_nbrs(R, Np, cmlst, node_nbr, bond_nbr):
+def sort_nbrs(R, Np, cmlst, node_nbr):
     zhat = np.array([0.,0.,1.])
     for i in range(Np):
         nbrs=node_nbr[cmlst[i]:cmlst[i+1]]  # neighbours of ith node
@@ -119,12 +118,10 @@ def sort_nbrs(R, Np, cmlst, node_nbr, bond_nbr):
             # Since all the voronoi cells are rotated, sort them in anticlockwise direction
             sorted_indices = sort_2Dpoints_theta(rotated[:,0],rotated[:,1])[0]
             node_nbr[cmlst[i]:cmlst[i+1]]=nbrs[sorted_indices]
-            bond_nbrs = bond_nbr[cmlst[i]:cmlst[i+1]]
-            bond_nbr[cmlst[i]:cmlst[i+1]]=bond_nbrs[sorted_indices]
-    return node_nbr, bond_nbr
+    return node_nbr
     #
 
-def write_hdf5(R, cmlst, node_nbr, bond_nbr, cells, file):
+def write_hdf5(R, cmlst, node_nbr,  cells, file):
     if file.split(".")[-1]=="h5":
         pass
     else:
@@ -134,14 +131,9 @@ def write_hdf5(R, cmlst, node_nbr, bond_nbr, cells, file):
     hf.create_dataset('cumu_list',data=cmlst.astype(np.int32))
     hf.create_dataset('node_nbr',data=node_nbr.astype(np.int32))
     hf.create_dataset('triangles',data=cells.astype(np.int32))
-    nbn = np.zeros([len(node_nbr),2], dtype=np.int32)
-    for i,bn in enumerate(bond_nbr):
-        nbn[i,0] = bn[0]
-        nbn[i,1] = bn[1]
-    hf.create_dataset('bond_nbr',data=nbn)
     hf.close()
 
-def write_file(pts_cart, cmlist, node_nbr, bond_nbr):
+def write_file(pts_cart, cmlist, node_nbr):
     file = open("../Examples/pts.bin", "wb")
     file.write(pts_cart)
     file.close()
@@ -149,7 +141,6 @@ def write_file(pts_cart, cmlist, node_nbr, bond_nbr):
     file = open("../Examples/mesh.bin", "wb")
     file.write(cmlist)
     file.write(node_nbr)
-    file.write(bond_nbr)
     file.close()
 
 
@@ -157,18 +148,18 @@ inf = sys.argv[1]
 Np, pts_sph, pts_cart = read_data(inf)
 triangles = triangulate(pts_cart)
 sort_tri = sort_simplices(triangles)
-cmlist, node_nbr, bond_nbr = neighbours(Np, sort_tri)
-node_nbr, bond_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr, bond_nbr)
+cmlist, node_nbr = neighbours(Np, sort_tri)
+node_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr)
 isDir = os.path.isdir("./conf/") 
 if(isDir):
     write_hdf5(pts_cart, cmlist, node_nbr,
-            bond_nbr, triangles, "./conf/dmemc_conf.h5")
+             triangles, "./conf/dmemc_conf.h5")
 else:
     os.mkdir("conf")
     write_hdf5(pts_cart, cmlist, node_nbr,
-            bond_nbr, triangles, "./conf/dmemc_conf.h5")
+             triangles, "./conf/dmemc_conf.h5")
 
-# write_file(pts_cart, cmlist, node_nbr, bond_nbr)
+# write_file(pts_cart, cmlist, node_nbr)
 
 
 

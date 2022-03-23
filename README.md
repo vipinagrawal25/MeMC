@@ -231,7 +231,7 @@ If the execution is successful, the file "check_viz.vtk" will be written in the 
 directory. In visit load the .vtk file and select `subset->domains` or `mesh->mesh`
 to see the result.
 
-Before equilibration      |  After equilibration | fluctuating surface
+Random points before equilibration    |  Random lattice ( viz_000.vtk) | Fluctating membrane (viz_010.vtk)
 :-------------------------:|:-------------------------:|:-------------------------:
 ![](./doc/figs/rand_visit.png)   |  ![](./doc/figs/latt_visit.png) |  ![](./doc/figs/exo_visit.png)
 

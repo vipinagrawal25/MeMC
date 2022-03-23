@@ -158,29 +158,24 @@ of points used to represent the membrane above is 1024 (The number below N). The
     + mc_total_iters ::
     + mc_dump_iters ::
 * **AFM parameters**
-    + tip_radius ::
-    + tip_pos_z ::
-    + afm_sigma ::
-    + afm_epsilon ::
+    + tip_radius :: The size of afm tip
+    + tip_pos_z :: Position of the bottom of the tip
+    + afm_sigma :: 
+    + afm_epsilon :: relative strength of the $\sigma_{afm}$ in the document.
 
-
-stored and the folder to write the simulation
-data. One example of the parameter file is given in `Examples/para_file.in` where we give input to the simulation in plain text ascii format. For more details about the various parameters used, see the advanced document of the code.  Along with arguments, it is also expected to have a directory conf with file
-"dmemc_conf.h5" inside it. Once all is set, run the code code with
+Apart from the above, it is also expected to have a directory conf with file "dmemc_conf.h5" inside it in the simulation directory. Once all is ensured, and the parameters are copied in a text file `para_file.in`, copy paste the following to run the simulation. 
 
 ```bash
-./bin/exe_memc Examples/para_file.in out_memc
+./bin/exe_memc para_file.in out_memc
 
 ```
+** NOTE ** The radius is kept unity and all the parameters are scaled accordingly.
+For example, to study the effect of 10nm AFM tip over a 100nm exosome, one should
+take radius 1 and tip_radius = 1/20.
 
-# Output's
-Apart from the snapshot of the position, the code outputs % of accepted moves in
-second column and total energy of the configuration in the third column in "mc_log".
-The log file is written inside the specified folder.
+# Example
 
-# Examples
-
-An example shell script to conduct all the steps stated above is stored in
+An example shell script which does all the things mentioned above to conduct all the steps stated above is stored in
 "Examples/execute.sh".  Change the directory to Examples and run
 
 ```bash
@@ -198,6 +193,11 @@ Two plot window should appear. The histogram of energy for the
 data generated locally is plotted using lines and points, whereas the case we have
 done is in points. To make histogram we have used gsl-histogram library. One can
 also use numpy or other standard libraries to do the same. 
+
+# Output's
+Apart from the snapshot of the position, the code outputs % of accepted moves in
+second column and total energy of the configuration in the third column in "mc_log".
+The log file is written inside the specified folder.
 
 # Visualization
 Visualization can be done using [visit](https://visit.org) or [paraview](https://www.paraview.org). We provide a python utility "utils/viz_memc.py". The program takes three arguments: output from the exe_memc stored in the specified folder, the connections set by utils/gen_memc_conf.py, and the output file with extension .vtk. A sample execution will look like

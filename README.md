@@ -223,16 +223,16 @@ Visualization of membrane can be done using [visit](https://visit.org) or
 
 The user can paste the following in the terminal
 ```bash
-python utils/viz_memc.py out_memc/snap_0004.h5 conf/dmemc_conf.h5 viz_000.vtk 
-python utils/viz_memc.py out_memc/snap_0004.h5 conf/dmemc_conf.h5 viz_004.vtk
+python utils/viz_memc.py out_memc/snap_0000.h5 conf/dmemc_conf.h5 viz_000.vtk 
+python utils/viz_memc.py out_memc/snap_0010.h5 conf/dmemc_conf.h5 viz_010.vtk
 ```
 
 If the execution is successful, the file "check_viz.vtk" will be written in the root
 directory. In visit load the .vtk file and select `subset->domains` or `mesh->mesh`
 to see the result.
 
-Before equilibration      |  After equilibration
-:-------------------------:|:-------------------------:
-![](./doc/figs/surf_mc_random.png)   |  ![](./doc/figs/surf_mc_lattice.png)
+Before equilibration      |  After equilibration | fluctuating surface
+:-------------------------:|:-------------------------:|:-------------------------:
+![](./doc/figs/rand_visit.png)   |  ![](./doc/figs/latt_visit.png) |  ![](./doc/figs/exo_visit.png)
 
 

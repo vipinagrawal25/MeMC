@@ -175,26 +175,29 @@ take radius 1 and tip_radius = 1/20.
 
 # Example
 
-An example shell script which does all the things mentioned above to conduct all the steps stated above is stored in
-"Examples/execute.sh".  Change the directory to Examples and run
+An example shell script with proper calls to the binaries and utilities functions can be found inside folder `Examples` named `execute.sh`. Change the directory to Examples in terminal and paste the following;
 
 ```bash
 sh execute.sh
 ```
 
-The code will finish in about 30 minutes on Intel(R) Core(TM) i5-8265U CPU. You can
-relax till then. Once done we have provided a gnuplot plot script  and sample
-histogram "hist_start.dat" and "hist_memc.dat" of energies from the same simulation
-we had conducted. Execution of script can be done as:
+The code takes about 30 minutes on Intel(R) Core(TM) i5-8265U CPU. Once completed,
+we results can be verified against the simulation we have conducted. Please use the
+have provided a [Gnuplot](gnuplot.org) script and sample histogram of total energies `hist_start.dat` and
+`hist_memc.dat` of energies from the same simulation we had conducted. Typing the
+following  
 ```bash 
 gnuplot plot.gnu
 ```
-Two plot window should appear. The histogram of energy for the
+should open two plot windows. The histogram of energy for the
 data generated locally is plotted using lines and points, whereas the case we have
-done is in points. To make histogram we have used gsl-histogram library. One can
-also use numpy or other standard libraries to do the same. 
+done is in points. 
+**NOTE**
+In case the plot script fails to generate the plot, the main reason could be lack of
+[gsl-histogram](gsl.org) in your local machine. We suggest to use numpy or other
+standard libraries for the same purpose. 
 
-# Output's
+# Data Structure
 Apart from the snapshot of the position, the code outputs % of accepted moves in
 second column and total energy of the configuration in the third column in "mc_log".
 The log file is written inside the specified folder.

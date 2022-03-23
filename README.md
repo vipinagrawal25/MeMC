@@ -200,15 +200,31 @@ standard libraries for the same purpose.
 
 # Data Structure
 
+Both the binaries `exe_start` and `exe_memc` outputs the percentage of accepted
+moves in second column and total energy of the configuration in respectively the
+second and the third column of `mc_log`. In the first column, we write the
+iterations of single Monte Carlo performed. In `mc_log` file written by `exe_memc`
+the fourth, fifth, sixth and the seventh column respectively stores the __stretching,
+bending, energy due to sticking, the afm contribution and the volume__ 
 
-Apart from the snapshot of the position, the code outputs % of accepted moves in
-second column and total energy of the configuration in the third column in "mc_log".
-The log file is written inside the specified folder.
+Apart from the `mc_log` snapshot of the positions constituting the membrane are
+dumped every `mc_dump_skip` step in the para file. We use Hierarchical Data Format
+or the HDF5 library. In both the case, we write the positions in `snap_xx.h5` series,
+where `xx` represents Monte Carlo iterations.
 
 # Visualization
-Visualization can be done using [visit](https://visit.org) or [paraview](https://www.paraview.org). We provide a python utility "utils/viz_memc.py". The program takes three arguments: output from the exe_memc stored in the specified folder, the connections set by utils/gen_memc_conf.py, and the output file with extension .vtk. A sample execution will look like
+
+Visualization of membrane can be done using [visit](https://visit.org) or
+[paraview](https://www.paraview.org). We provide a python utility
+"utils/viz_memc.py". The program takes three arguments:
+1) Snapshot from the `exe_memc`
+2) The file with connections, or `conf/dmemc_conf.h5`
+3) Name of the output file with extension `.vtk` which will be read from Visit.
+
+The user can paste the following in the terminal
 ```bash
-python utils/viz_memc.py out_memc/snap_0004.h5 conf/dmemc_conf.h5 check_viz.vtk
+python utils/viz_memc.py out_memc/snap_0004.h5 conf/dmemc_conf.h5 viz_000.vtk 
+python utils/viz_memc.py out_memc/snap_0004.h5 conf/dmemc_conf.h5 viz_004.vtk
 ```
 
 If the execution is successful, the file "check_viz.vtk" will be written in the root

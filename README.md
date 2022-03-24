@@ -164,6 +164,7 @@ of points used to represent the membrane above is 1024 (The number below N). The
     + afm_epsilon :: relative strength of the $\sigma_{afm}$ in the document.
 
 Apart from the above, it is also expected to have a directory conf with file "dmemc_conf.h5" inside it in the simulation directory. Once all is ensured, and the parameters are copied in a text file `para_file.in`, copy paste the following to run the simulation. 
+![plot](./doc/figs/hist_start.png)
 
 ```bash
 ./bin/exe_memc para_file.in out_memc
@@ -192,6 +193,10 @@ gnuplot plot.gnu
 should open two plot windows. The histogram of energy for the
 data generated locally is plotted using lines and points, whereas the case we have
 done is in points. 
+Energy histogram for randomization    |  Energy histogram for fluctuating membran 
+:-------------------------:|:-------------------------:
+![](./doc/figs/hist_start.png)   |  ![](./doc/figs/hist_memc.png)
+
 
 **NOTE**
 In case the plot script fails to generate the plot, the main reason could be lack of

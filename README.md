@@ -153,7 +153,7 @@ of points used to represent the membrane above is 1024 (The number below N). The
 
 * **Parameters for the bottom stick wall**
     + pos_bot_wall :: z-position of the bottom wall. The value must be smaller than the radius
-    + sigma :: The $$\sigma$$ of the bottom LJ potential
+    + sigma :: The &sigma of the bottom LJ potential
     + epsilon :: Relative strength LJ potential
     + theta_attractive :: All the points for which $\theta$ (see fig 11) is less this value will be affected by the attractive surface.
 

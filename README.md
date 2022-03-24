@@ -164,7 +164,7 @@ of points used to represent the membrane above is 1024 (The number below N). The
     + afm_epsilon :: relative strength of the $\sigma_{afm}$ in the document.
 
 Apart from the above, it is also expected to have a directory conf with file "dmemc_conf.h5" inside it in the simulation directory. Once all is ensured, and the parameters are copied in a text file `para_file.in`, copy paste the following to run the simulation. 
-![plot](./doc/figs/hist_start.png)
+![plot](./doc/figs/describe_theta.png)
 
 ```bash
 ./bin/exe_memc para_file.in out_memc

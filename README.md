@@ -194,8 +194,8 @@ to the histogram for the same (`hist_start.dat` and `hist_memc.dat`) we had eval
 ```bash 
 gnuplot plot.gnu
 ```
-End result will be a plot window with two screens shown should open two plot windows similar to
-[gnu_plta] and [gnu_pltb]. The histogram of energy for the
+end result will be a plot window with two screens shown should open two plot windows similar to
+A[#gnu_plta] and B[#gnu_pltb]. The histogram of energy for the
 data generated locally is plotted using lines and points, whereas the case we have
 done is in points. 
 Energy histogram for randomization    |  Energy histogram for fluctuating membran 

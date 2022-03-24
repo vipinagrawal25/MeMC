@@ -121,13 +121,16 @@ def sort_nbrs(R, Np, cmlst, node_nbr):
     return node_nbr
     #
 
-def write_hdf5(R, cmlst, node_nbr,  cells, file):
+def write_hdf5(R, cmlst, node_nbr,  cells, posfile, file):
     if file.split(".")[-1]=="h5":
         pass
     else:
         file=file+".h5"
-    hf = h5py.File(file,'w')
+    hf = h5py.File(posfile,'w')
     hf.create_dataset('pos',data=R)
+    hf.close()
+
+    hf = h5py.File(file,'w')
     hf.create_dataset('cumu_list',data=cmlst.astype(np.int32))
     hf.create_dataset('node_nbr',data=node_nbr.astype(np.int32))
     hf.create_dataset('triangles',data=cells.astype(np.int32))
@@ -153,11 +156,13 @@ node_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr)
 isDir = os.path.isdir("./conf/") 
 if(isDir):
     write_hdf5(pts_cart, cmlist, node_nbr,
-             triangles, "./conf/dmemc_conf.h5")
+             triangles, "./conf/dmemc_pos.h5",
+             "./conf/dmemc_conf.h5")
 else:
     os.mkdir("conf")
     write_hdf5(pts_cart, cmlist, node_nbr,
-             triangles, "./conf/dmemc_conf.h5")
+             triangles, "./conf/dmemc_pos.h5", 
+             "./conf/dmemc_conf.h5")
 
 # write_file(pts_cart, cmlist, node_nbr)
 

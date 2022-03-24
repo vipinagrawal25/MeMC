@@ -57,7 +57,7 @@ int main(int argc, char *argv[]){
     afm.sigma = 0.00;
     e_t = afm.epsilon; 
     afm.epsilon = 0.0;
-    hdf5_io_read_pos( (double *)Pos,  (char *) "conf/dmemc_conf.h5");
+    hdf5_io_read_pos( (double *)Pos,  (char *) "conf/dmemc_pos.h5");
     hdf5_io_read_mesh((int *) mesh.cmlist,
             (int *) mesh.node_nbr_list,  (char *) "conf/dmemc_conf.h5");
     init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane);

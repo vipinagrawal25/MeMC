@@ -245,4 +245,48 @@ Random points before equilibration    |  Random lattice ( viz_000.vtk) | Fluctat
 :-------------------------:|:-------------------------:|:-------------------------:
 ![](./doc/figs/rand_visit.png)   |  ![](./doc/figs/latt_visit.png) |  ![](./doc/figs/exo_visit.png)
 
+# A typical workflow
+
+We summarize the typical workflow on a Linux Desktop. Our suggestion might not be
+the best. The users are free to decide on the workflow which suits their need the best. 
++ Clone the Repository.
+```bash
+git clone https://github.com/vipinagrawal25/MeMC
+```
++ Change directory to MeMC and install.
+
+```bash
+cd MeMC
+make
+```
++ Create an environment variable say `MEMC_PATH`.
+
+```bash
+MEMC_PATH = $pwd
+```
+
++ Append to environment variable the `bin` directory inside `MeMC`
+
+```bash
+export PATH = $MEMC_PATH/bin:$PATH
+```
+
++ Create a directory anywhere in the machine for the purpose of simulation.
++ In the directory start the randomization of N points.
+
+```bash
+exe_start N sph data_sph
+```
++ Once completed, set the connection using one of the later snap shot, for e.g. 
+
+```bash
+python $MEMC_PATH/utils/gen_memc_conf.py data_sph/snap_0300.h5
+```
+
++ Change N in the parafile to what you had chosen and start the MeMC simulation 
+
+```bash
+exe_memc para_file.in out 
+```
++ Lower the tip position by changing tip_pos_z in parafile. Note, if the tip_pos_z penetrates the membrane then we use the snapshot from earlier simulation where the tip position was higher. Run memc again.
 

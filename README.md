@@ -165,7 +165,7 @@ of points used to represent the membrane above is 1024 (The number below N). The
 
 Apart from the above, it is also expected to have a directory conf with file "dmemc_conf.h5" inside it in the simulation directory. Once all is ensured, and the parameters are copied in a text file `para_file.in`, copy paste the following to run the simulation. 
 
-<img src="./doc/figs/describe_theta.png" width="100" />
+<img src="./doc/figs/describe_theta.png" width="200" />
 
 <!-- ![plot](./doc/figs/describe_theta.png) -->
 

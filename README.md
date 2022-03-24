@@ -1,3 +1,8 @@
+<script
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+  type="text/javascript">
+</script>
+
 # MeMC
 A Monte-Carlo code to simulate of fluctuating enclosed membranes. Such system can be
 of relevance for the study of viruses, exosomes, e.t.c.

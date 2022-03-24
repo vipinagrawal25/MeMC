@@ -86,7 +86,7 @@ In order to generate a randomized configuration of 1024 points in surface of sph
 ./bin/exe_start 1024 sph data_sph
 
 ```
-All the outputs will be dumped inside data_sph.
+All the outputs will be dumped inside `data_sph`.
 
 ---
 **NOTE**
@@ -103,11 +103,12 @@ the section xx.xx of the document, then evaluation of these forces requires the
 knowledge of all the neighbours of a point. For this purpose we rely on the python
 wrapper for [qhull](qhull.org), known as ConvexHull.  We provide a utility script,
 `utils/gen_memc_conf.py` which takes the output from the `exe_start`, set all the
-connections and write the output as `conf/dmemc_conf.h5`. The user can copy paste
-the following command to set the connection for dump `data_sph/part_pos0003.bin`. 
+connections and write the output as `conf/dmemc_conf.h5`. Additionally the positions
+of the particle is written in `conf/dmemc_pos.h5`. The user can copy paste
+the following command to set the connection for dump `data_sph/snap_0003.h5`. 
 
 ```bash
-python utils/gen_memc_conf.py data_sph/part_pos0003.bin.
+python utils/gen_memc_conf.py data_sph/snap_0003.h5.
 ```
 
 ## MeMC  
@@ -180,26 +181,26 @@ take radius 1 and tip_radius = 1/20.
 
 # Example
 
-An example shell script with proper calls to the binaries and utilities functions can be found inside folder `Examples` named `execute.sh`. Change the directory to Examples in terminal and paste the following;
+An example shell script with proper calls to the binaries and utilities functions can be found inside folder `Examples`. The script is named `execute.sh`. Change the directory to Examples in terminal and paste the following for execution.
 
 ```bash
 sh execute.sh
 ```
 
 The code takes about 30 minutes on Intel(R) Core(TM) i5-8265U CPU. Once completed,
-we results can be verified against the simulation we have conducted. Please use the
-have provided a [Gnuplot](https://www.gnuplot.org) script and sample histogram of total energies `hist_start.dat` and
-`hist_memc.dat` of energies from the same simulation we had conducted. Typing the
-following  
+the results can be verified against the simulation we have conducted. Use the
+[Gnuplot](https://www.gnuplot.org) script `plot.gnu`, which compares the histogram of total energies written by `exe_start` and `exe_memc` 
+to the histogram for the same (`hist_start.dat` and `hist_memc.dat`) we had evaluated. The following  command should do the trick.
 ```bash 
 gnuplot plot.gnu
 ```
-should open two plot windows. The histogram of energy for the
+End result will be a plot window with two screens shown should open two plot windows similar to
+[gnu_plta] and [gnu_pltb]. The histogram of energy for the
 data generated locally is plotted using lines and points, whereas the case we have
 done is in points. 
 Energy histogram for randomization    |  Energy histogram for fluctuating membran 
 :-------------------------:|:-------------------------:
-![](./doc/figs/hist_start.png)   |  ![](./doc/figs/hist_memc.png)
+![gnu_plta](./doc/figs/hist_start.png)   |  ![gnu_pltb](./doc/figs/hist_memc.png)
 
 
 **NOTE**

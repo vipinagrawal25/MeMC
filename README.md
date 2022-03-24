@@ -194,8 +194,8 @@ to the histogram for the same (`hist_start.dat` and `hist_memc.dat`) we had eval
 ```bash 
 gnuplot plot.gnu
 ```
-end result will be a plot window with two screens shown should open two plot windows
-similar to [A](#gnu_plta) and [B](#gnu_pltb). In both the figures, the continuous
+Two plot windows similar to [A](#gnu_plta) and [B](#gnu_pltb) should open.
+In both the figures, the continuous
 line is the result from the simulation conducted locally.
 
 Energy histogram for randomization   |  Energy histogram for fluctuating membran

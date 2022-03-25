@@ -152,7 +152,7 @@ of points used to represent the membrane above is 1024 (The number below N). The
     + pos_bot_wall :: z-position of the bottom wall. The value must be smaller than the radius
     + sigma :: The <img src="https://render.githubusercontent.com/render/math?math={\sigma}">  of the bottom LJ potential
     + epsilon :: Relative strength LJ potential
-    + theta_attractive :: All the points for which $\theta$ (see fig 11) is less this value will be affected by the attractive surface.
+    + theta_attractive :: All the points for which <img src="https://render.githubusercontent.com/render/math?math={\Theta}">  (shaded part in the fig just below) is less this value will be affected by the attractive surface.
 
 * **Monte Carlo Parameters**
     + Dfac :: Each  

@@ -3,19 +3,19 @@ title: "MeMC: A package for monte-carlo simulations of spherical shells"
 tags:
 authors:
   - name: Vipin Agrawal
-    orcid: 
+    orcid: 0000-0002-1291-5035
     affiliation: 1,2
   - name: Vikash Pandey
-    orcid:
+    orcid: 0000-0002-5120-2142
     affiliation: 1
   - name: Hanna Kylhammar
-    orcid:
+    orcid: 0000-0001-8578-2272
     affiliation: 3
   - name: Apurba Dev
-    orcid:
+    orcid: 0000-0002-6235-2891
     affiliation: 4,5
   - name: Dhrubaditya Mitra
-    orcid:
+    orcid: 0000-0003-4861-8152
     affiliation: 1
 affiliations:
   - name: Nordita, KTH Royal Institute of Technology and Stockholm University, Roslagstullsbacken 23, 10691 Stockholm, Sweden.

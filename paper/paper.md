@@ -29,8 +29,8 @@ affiliations:
   - name: Department of Applied Physics, School of Engineering Sciences,
           KTH Royal Institute of Technology, Stockholm, Sweden.
     index: 5
-bibliography:
-- paper.bib
+date: XX April 2021
+bibliography: paper.bib
 ---
 
 # Summary
@@ -62,8 +62,7 @@ measure $Y_{\mathrm{3d}}$. Nano vesicles differ from (micro-meter scale) cells i
 two important ways
 
 1.  The nano-vesicles are much smaller hence thermal fluctuations may
-    effectively renormalize the elastic
-    coefficients [@paulose2012fluctuating; @kovsmrlj2017statistical].
+    effectively renormalize the elastic coefficients [@paulose2012fluctuating; @kovsmrlj2017statistical ].
 
 2.  Cell membranes are strongly coupled to an underlying cytoskelton.
     Hence they may be modeled by a solid body [@hw2002stomatocyte] but

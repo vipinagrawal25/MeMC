@@ -225,7 +225,7 @@ by [@seung1988defects]
 ![\textbf{An example of triangulated mesh at the node $i$.} $\alpha_\mathrm{ij},\beta_\mathrm{ij}$ are the
 angles opposite to the bond $ij$. Shaded part is the Voronoi region of
 triangle $T$ defined by nodes ($i,j-1,j$). Here, we consider that the
-triangle $T$ is acute.\label{fig:voronoi}](fig/index_order2_n.pdf){width=300px}
+triangle $T$ is acute.\label{fig:voronoi}](fig/index_order2_n.pdf){width=60%}
 
 To calculate the bending contribution, we need to calculate the
 curvature. In the continuum limit, $N\to\infty$, bending energy

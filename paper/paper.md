@@ -31,6 +31,10 @@ affiliations:
     index: 5
 date: XX April 2021
 bibliography: paper.bib
+output:
+  pdf_document:
+    extra_dependencies: "subfig"
+    bibliography: paper.bib
 ---
 
 # Summary
@@ -68,7 +72,7 @@ two important ways
     Hence they may be modeled by a solid body [@hw2002stomatocyte] but
     nano-vesicles must be modeled as liquid filled elastic membranes.
 
-Hence, to be able to interpret the force-distance curve of nano-vesicles
+Hence, to be able to interpret the force-distance curve of nano-vesicles,
 we need to solve for the elastic response of a thermally fluctuating
 elastic shell.
 
@@ -97,32 +101,34 @@ Let us consider a (three dimensional) material with Young's modulus
 $Y_{\mathrm{3d}}$ and Poisson's ratio $\sigma_{\mathrm{3d}}$ and make a membrane out of it. Then
 the bending modulus and the in-plane Young's modulus is given
 by [@LLelast section 13 and 14]
-$$B = \frac{Y_{\mathrm{3d}} h^3}{12(1-\sigma_{\mathrm{3d}}^2)}\quad\text{and}\quad Y = Y_{\mathrm{3d}} h\/,
-  \label{eq:2d3d}$$ where $h$ is the thickness of the membrane. This
+\begin{equation}
+B = \frac{Y_{\mathrm{3d}} h^3}{12(1-\sigma_{\mathrm{3d}}^2)}\quad\text{and}\quad Y = Y_{\mathrm{3d}} h\/,
+  \label{eq:2d3d} 
+\end{equation}
+where $h$ is the thickness of the membrane. This
 need not necessarily hold for biological membranes. Nevertheless
 consider a fluid enclosed in a solid membrane, as done in
 [@paulose2012fluctuating]. We consider an elastic energy
 
-::: subequations
-$$\begin{aligned}
-  \mathcal{E}\left[w,\mathbf{u}\right] &= \int d^2x\left[ \frac{B}{2}\left( \nabla^2 w \right)^2
-             + \mu u_{ij}^2 + \frac{\lambda}{2}u_{kk}^2 - pw \right] \\ 
-  u_{ij} &= \frac{1}{2}\left( \partial_i u_j + \partial_j u_i + \partial_i w\partial_j w\right)
-            -\delta_{ij}\frac{w}{R}\end{aligned}$$
-:::
+\begin{equation}
+  \mathcal{E}\left[w,\mathbf{u}\right] = \int d^2x\left[ \frac{B}{2}\left( \nabla^2 w \right)^2
+             + \mu u_{ij}^2 + \frac{\lambda}{2}u_{kk}^2 - pw \right]
+  \end{equation}
+  \begin{equation}
+  u_{ij} = \frac{1}{2}\left( \partial_i u_j + \partial_j u_i + \partial_i w\partial_j w\right)
+            -\delta_{ij}\frac{w}{R}
+\end{equation}
 
 where $w$ is the out-of-plane deformation of the shell, and $\mathbf{u}$ is the
 in-plane deformation, $p$ is the pressure, $\lambda$ and $\mu$ are the
 two in-plane Láme coefficients and $B$ is the bending modulus. The Láme
 coefficients are related to other elastic constant as follows [@LLelast]
 
-::: subequations
-$$\begin{aligned}
-    K &= \lambda + \frac{2}{3}\mu \\
-    Y &= \frac{9K\mu}{3K+\mu} \\
-    \sigma & = \frac{1}{2}\frac{3K-2\mu}{3K+\mu}
-  \end{aligned}$$
-:::
+\begin{equation}
+    K = \lambda + \frac{2}{3}\mu, \qquad
+    Y = \frac{9K\mu}{3K+\mu}, \qquad
+    \sigma = \frac{1}{2}\frac{3K-2\mu}{3K+\mu}
+  \end{equation}
 
 Here $K$ is the volume compressibility, $Y$ the Young's modulus, and
 $\sigma$ the Poisson ratio.
@@ -130,10 +136,16 @@ $\sigma$ the Poisson ratio.
 If we consider the material to be incompressible, $K \to \infty$ and
 $\sigma = 1/2$, then there are two elastic constant, the bending
 rigidity $B$ and the Young's modulus $Y$. Consequently, there are two
-dimensionless numbers, the the Föppl--von-Karman number
-$$\mbox{FvK} = \frac{YR^2}{B}
-  \label{eq:fvk}$$ and the Elasto-Thermal number:
-$$\mbox{ET} = \frac{k_\mathrm{B} T}{B}\sqrt{\mbox{FvK}}$$ where $R$ is the radius of the
+dimensionless numbers, the Föppl--von-Karman number
+\begin{equation}
+\mbox{FvK} = \frac{YR^2}{B}
+  \label{eq:fvk}
+  \end{equation}
+  and the Elasto-Thermal number:
+\begin{equation}
+\mbox{ET} = \frac{k_\mathrm{B} T}{B}\sqrt{\mbox{FvK}},
+\end{equation} 
+where $R$ is the radius of the
 spherical shell.
 
 Using values of $Y$ and $B$ from molecular dynamics simulations of lipid
@@ -148,24 +160,23 @@ $\mbox{ET} \approx 10^3$.
 
 Following Ref. [@gompper2004triangulated], we use a triangulated-network
 grid in the following manner. We start with $N$ randomly chosen points
-on a sphere . Then, we run a Monte-Carlo simulation, with a Lenard-Jones
+on a sphere . Then, we run a Monte-Carlo simulation, with a Lennard-Jones
 (LJ) repelling potential, of these points moving on the surface. Once
 the surface Monte-Carlo (SMC) has reached an equilibrium, we use the
 algorithm in Ref. [@caroli2009robust] to construct the Delaunay
 triangulation of these points. The connection between the points thus
-formed is kept unchanged. In the rest of this paper we call this the
-*initial configuration*. A different snapshot from the same equilibrium
-gives an equivalent but differently triangulated grid.
+formed is kept unchanged. In the rest of this paper, we call this the
+*initial configuration*(\autoref{fig:grid}(A)). A different snapshot (\autoref{fig:grid}(B)) from the same equilibrium gives an equivalent but differently triangulated grid.
 
 An alternative is to use a regular
 grid [@vliegenthart2006mechanical; @buenemann2008elastic]. This is
-achieved by approximating the sphere with geodesic polyhedron ( C) .
+achieved by approximating the sphere with geodesic polyhedron (\autoref{fig:grid}(C)).
 They are available from the *Meshzoo* library [@meshzoo]. In this paper
 we use $N=5120$ for the random grid and $N=5292$ for the regular grid.
 
-![image](fig/random.pdf){width="0.65\\columnwidth"}\
-![image](fig/after_surf_mc.pdf){width="0.65\\columnwidth"}
-![image](fig/meshzoo.pdf){width="0.65\\columnwidth"}
+![\textbf{Grid points on a sphere} (A)Triangulated random points on a sphere. (B) Triangulated points on sphere after $60000$ SMC iteration of
+the initial configuration shown in (A). (C) An example of regular grid }
+\label{fig:grid}](fig/spheres.pdf)
 
 ## Energy
 
@@ -174,8 +185,12 @@ well-known [see, e.g., @baumgartner2013applications]. We randomly choose
 a point on the grid and move it by a random amount. We calculate the
 change in energy due to this movement. We accept or reject the move by
 the standard Metropolis algorithm. In our code the energy has the
-following contributions $$E = E_\mathrm{s} + E_\mathrm{bend} + E_\mathrm{bulk}
-  \label{eq:dE}$$ where $E_\mathrm{s}$ is the contribution from stretching, $E_\mathrm{bend}$
+following contributions
+\begin{equation}
+E = E_\mathrm{s} + E_\mathrm{bend} + E_\mathrm{bulk}
+  \label{eq:dE}
+\end{equation}
+where $E_\mathrm{s}$ is the contribution from stretching, $E_\mathrm{bend}$
 is the contribution from bending, and $E_\mathrm{bulk}$ is the contribution from
 the bulk modulus. We describe each of these in turn.
 
@@ -187,104 +202,114 @@ $i$-th point is moved all its bonds with the neighbors change from their
 initial length. We model each of these bonds by a harmonic spring and
 calculate the stretching energy by
 
-::: subequations
-$$\begin{aligned}
-      E_\mathrm{s} &= \frac{1}{2}\sum_i \frac{H}{2}\sum_{j(i)}  \left(R_\mathrm{ij} - \ell^\mathrm{0}_\mathrm{ij}\right)^2 \quad\text{where} \\
-    \mathbf{R}_\mathrm{ij} &\equiv \lvert R_\mathrm{i}- R_\mathrm{j}\rvert \/. 
-    \label{eq:deltaEs}
-  \end{aligned}$$
-:::
 
+\begin{equation}
+      E_\mathrm{s} = \frac{1}{2}\sum_i \frac{H}{2}\sum_{j(i)}  \left(R_\mathrm{ij} - \ell^\mathrm{0}_\mathrm{ij}\right)^2 \quad\text{where}
+\end{equation}
+$$
+    \mathbf{R}_\mathrm{ij} \equiv \lvert R_\mathrm{i}- R_\mathrm{j}\rvert \/. 
+    \label{eq:deltaEs}
+$$
 Here the notation $j(i)$ denotes that the sum is over all the nearest
 neighbors of the $i$-the point.
 
 The Láme coefficients and the Young's modulus are given
 by [@seung1988defects]
-$$\lambda=\mu=\frac{\sqrt{3}}{4}H\/,\quad Y = \frac{2}{\sqrt{3}}H
-  \label{eq:klame}$$
+\begin{equation}
+\lambda=\mu=\frac{\sqrt{3}}{4}H\/,\quad Y = \frac{2}{\sqrt{3}}H
+  \label{eq:klame}
+\end{equation}
 
 ### Bending
 
-![An example of triangulated mesh at the node $i$. $\alpha_\mathrm{ij},\beta_\mathrm{ij}$ are the
+![\textbf{An example of triangulated mesh at the node $i$.} $\alpha_\mathrm{ij},\beta_\mathrm{ij}$ are the
 angles opposite to the bond $ij$. Shaded part is the Voronoi region of
 triangle $T$ defined by nodes ($i,j-1,j$). Here, we consider that the
-triangle $T$ is acute.]
-![image](fig/index_order2_n.pdf){width="0.8\\columnwidth"}
+triangle $T$ is acute.\label{fig:voronoi}](fig/index_order2_n.pdf){width=300px}
 
-To calculate the bending contribution we need to calculate the
+To calculate the bending contribution, we need to calculate the
 curvature. In the continuum limit, $N\to\infty$, bending energy
 [@nelson2004statistical] is:
-$$E_\mathrm{B} = \frac{B}{2}\int (\nabla^2 \mathbf{R})^2 dS,
-  \label{eq:bendE_conti}$$ where $\nabla^2 \mathbf{R}$ is Laplacian of $\mathbf{R}$ on the
+\begin{equation}
+E_\mathrm{B} = \frac{B}{2}\int (\nabla^2 \mathbf{R})^2 dS,
+  \label{eq:bendE_conti} 
+\end{equation}
+where $\nabla^2 \mathbf{R}$ is Laplacian of $\mathbf{R}$ on the
 surface of the sphere.
 
 A general introduction to discretization of Laplacian on a triangulated
 mesh is given in
 Refs.[@itzykson1986proceedings; @hege2003visualization]. Laplacian on a
 $2$D manifold embedded in $\mathbb{R}^3$ is:
-$$\mathbf{L}(\mathbf{R})= 2\kappa(\mathbf{R})\hat{m}(\mathbf{R}),
-  \label{eq:laplace_beltrami}$$ where $\kappa(\mathbf{R})$ is the mean
+\begin{equation}
+\mathbf{L}(\mathbf{R})= 2\kappa(\mathbf{R})\hat{m}(\mathbf{R}),
+  \label{eq:laplace_beltrami} 
+\end{equation}
+where $\kappa(\mathbf{R})$ is the mean
 curvature, and $\hat{m}(\mathbf{R})$ is the normal to the surface at $\mathbf{R}$. Note
 that, $\hat{m}(\mathbf{R})$ is a local property of a point P with coordinates
 $\mathbf{R}$ and it is not necessarily the outward normal of the closed
-surface. In the discrete form
-[@hege2003visualization; @meyer2003discrete],
-<!-- %$$\mathbf{L}_i=\frac{1}{\mathcal{A}_i}{\sum_{j(i)}
-  %\frac{1}{2}\left[\cot(\alpha_\mathrm{ij}) + \cot(\beta_\mathrm{ij})\right]\mathbf{R}_ \mathrm{ij}%%%%%%%%%.$$ Here, -->
+surface. In the discrete form [@hege2003visualization; @meyer2003discrete],
+\begin{equation}
+ \mathbf{L}_i=\frac{1}{\mathcal{A}_i}\sum_{j(i)}
+   \frac{1}{2}\left[\cot(\alpha_\mathrm{ij}) + \cot(\beta_\mathrm{ij})\right]\mathbf{R}_\mathrm{ij}
+   \label{eq:LL}
+\end{equation}
 $\mathcal{A}_i$ is the area of Voronoi dual cell at the node $i$, and
-$\alpha_\mathrm{ij},\beta_\mathrm{ij}$ are the angles opposite to bond $ij$ as shown in . Consider
-the triangle T in defined by its vertices $(i,j-1,j)$. If T is
+$\alpha_\mathrm{ij},\beta_\mathrm{ij}$ are the angles opposite to bond $ij$ as shown in \autoref{fig:voronoi}. Consider
+the triangle T in \autoref{fig:voronoi} defined by its vertices $(i,j-1,j)$. If T is
 non-obtuse its circumcenter lies within it, hence so does the Voronoi
-region. Let $\mathcal{A}^{\rm c}$ be the area of shaded region in given
+region. Let $\mathcal{A}^{\rm c}$ be the area of shaded region in \autoref{fig:voronoi} given
 by [@meyer2003discrete; @hege2003visualization],
-$$\mathcal{A}^{\rm{c}} = \frac{1}{8} \left[R_\mathrm{ij}^2\cot(\alpha_\mathrm{ij}) + R_\mathrm{ij-1}^2\cot(\beta_\mathrm{ij-1}) \right]\/.
-  \label{eq:cA}$$ If there is an obtuse angle in triangle T, the Voronoi
+\begin{equation}
+\mathcal{A}^{\rm{c}} = \frac{1}{8} \left[R_\mathrm{ij}^2\cot(\alpha_\mathrm{ij}) + R_\mathrm{ij-1}^2\cot(\beta_\mathrm{ij-1}) \right]\/.
+  \label{eq:cA} 
+  \end{equation}
+  If there is an obtuse angle in triangle T, the Voronoi
 region is not necessarily enclosed by the
 triangle [@hege2003visualization]. For such cases, instead of
 $\mathcal{A}^{\rm{c}}$, we use $\mathcal{A}^{\rm{b}}$, defined
-as [@hege2003visualization; @meyer2003discrete]: $$\mathcal{A}^{\rm{b}} =
+as [@hege2003visualization; @meyer2003discrete]: 
+\begin{equation}
+\mathcal{A}^{\rm{b}} =
   \left\{
   \begin{array}{ll}
     \frac{\rm{area}(T)}{2}, \rm{angle\ of\ T\ at\ } i \rm{\ is\ obtuse} \\
     \frac{\rm{area}(T)}{4},  \rm{any\ other\ angle\ is\ obtuse} 
   \end{array}
 \right\},
-  \label{eq:bary_area}$$ where
+  \label{eq:bary_area} 
+\end{equation}
+where
 ${\rm area}(T) = 0.5\left\lvert\mathbf{R}_\mathrm{ij} \times \mathbf{R}_\mathrm{ij-1}\right\lvert$ is the
 area of the triangle T. The area $\mathcal{A}_i$ is obtained by summing up the
-contributions from all the triangles in , e.g., the contribution from
+contributions in \autoref{fig:voronoi} from all the triangles in , e.g., the contribution from
 the triangle T is the shaded area.
-
 For a closed surface the bending energy must be calculated relative to
 the spontaneous curvature, i.e., its discretised form is
-
 ::: subequations
-$$\begin{aligned}
-    E_\mathrm{B} &= \frac{B}{2} \mathcal{A}_i
-    \left(\mathbf{L}_i - C\hat{n}\right)^2.
+\begin{equation}
+    E_\mathrm{bend} = \frac{B}{2} \mathcal{A}_i \left(\mathbf{L}_i - C\hat{n}\right)^2.
     \label{eq:bendE}
-  \end{aligned}$$
+\end{equation}
 :::
-
 where $C$ is the spontaneous curvature, for a sphere $C = 2/R$, where
 $R$ is radius of the sphere and $\hat{n}$ is the outward normal to the
 surface. Hence not only the magnitude but also the vector nature of the
 surface Laplacian must be determined. For every triangle in the initial
 configuration, i.e., when all the points lie on the surface of a sphere,
 the outward unit normal can be calculated in a straightforward manner.
-For example, for the triangle T in it can be calculated by finding out
+For example, for the triangle T in \autoref{fig:voronoi}, it can be calculated by finding out
 the unit vector that points along $\mathbf{R}_\mathrm{ij-1}\times\mathbf{R}_\mathrm{ij}$. Hence, at any
 time, if we access the points around the node i in counterclockwise
 manner when viewed from outside we are guaranteed to obtain the outward
 normal. We ensure this by sorting appropriately the points around every
 node in the initial configuration. As the connectivity of the mesh
 remains unchanged this property is preserved at all future times.
-
 To sort the neighbors around any node $i$, we rotate the coordinate
 system such that, the $z$ axis passes through the point i along the
 vector $\mathbf{R}_i$. In this coordinate system we sort the neighbors by their
 azimuthal angle.
-
 Note that unlike Ref. [@gompper2004triangulated] we do not incorporate
 self-avoidance.
 
@@ -293,11 +318,16 @@ self-avoidance.
 We assume that the liquid inside the vesicle is incompressible  [^1].
 This is implemented by adding a energy cost to the volume change. At any
 point, the total contribution to the bulk energy is
-$$E_\mathrm{bulk} = K\left(\frac{V}{V_0} - 1\right)^2\/,$$ where $K$ is bulk
+\begin{equation}
+E_\mathrm{bulk} = K\left(\frac{V}{V_0} - 1\right)^2\/, 
+\end{equation}
+where $K$ is bulk
 modulus, $V$ is current volume, and $V_0$ is the initial volume of
 the vesicle. As we move the point $i$ by a random amount, the change in
 bulk energy is
-$$\Delta E_\mathrm{bulk} = 2K\frac{\Delta V(V  - V_0)}{V_0^2}+ \left(\frac{\Delta V}{V_0}\right)^2,$$
+\begin{equation}
+\Delta E_\mathrm{bulk} = 2K\frac{\Delta V(V  - V_0)}{V_0^2}+ \left(\frac{\Delta V}{V_0}\right)^2,
+\end{equation}
 where $\Delta V$ is the change in volume due to the move.
 
 ### Pressure
@@ -317,35 +347,41 @@ following the procedures as described in Ref. [@cavallaro2019label]. To
 measure the force-distance curve it is necessary to fix an exosome on a
 transparent coverslip. This was done by electrostatic coupling to a PLL
 coated surface by incubating them at room temperature for one hour, see
-Ref [@cavallaro2019label]. As an illustration, in , we show a typical
-experimental measurement of the height above a flat surface as measured
+Ref [@cavallaro2019label]. As an illustration, in \autoref{fig:lineabc}, we show a typical experimental measurement of the height above a flat surface as measured
 by the AFM. After being stuck to the flat surface the free surface forms
 a spherical cap. To reproduce such experiments as closely as possibly we
 need to fix the vesicle to a flat surface. This is implemented by the
-Lenard-Jones potential:
-$$V_\mathrm{LJ}(r) \equiv 4\epsilon_\mathrm{w}\left[\left(\frac{\sigma_\mathrm{w}}{r}\right)^{12}
+Lennard-Jones potential:
+\begin{equation}
+V_\mathrm{LJ}(r) \equiv 4\epsilon_\mathrm{w}\left[\left(\frac{\sigma_\mathrm{w}}{r}\right)^{12}
       -\left(\frac{\sigma_\mathrm{w}}{r}\right)^{6}\right]
-    \label{eq:VLJ}$$ What fraction of the vesicle is fixed to the flat
-surface is parametrized by the angle $\Theta_0$ (see  ) which is a
+    \label{eq:VLJ} 
+\end{equation}
+What fraction of the vesicle is fixed to the flat
+surface is parametrized by the angle $\Theta_0$ (see  \autoref{fig:lineabc}(B)) which is a
 parameter in our code. We choose a system of coordinates with its origin
 at the center of the vesicle and the $z$ axis pointing radially outward
 through the north pole. All the grid points on the surface whose polar
 angle is greater than $\Theta_0$ are selected such that the sticking
-potential acts only on them, see .
+potential acts only on them, see \autoref{fig:lineabc}(B).
 
-![image](fig/exo2.png){width="0.4\\columnwidth"} (-60,108)**(A)**
-![image](fig/describe_theta.png){width="0.25\\columnwidth"} (-60,90)**(B)**\
-![image](fig/line.pdf){width="\\columnwidth"} (-210,50)**(C)**
+![(A) A colormap of the height as measured by the
+AFM. (B) Illustration of the vesicle stuck to a 
+at surface by an angle $\Theta_0$. (C) The height plotted along the line shown in
+(A).\label{fig:lineabc}](fig/lineabc.pdf){width=70%}
 
 ## AFM tip
 
 To model the interaction between AFM tip and the vesicle, We model the
 shape of tip as paraboloid and we use only the repelling part of the
-Lenard-Jones potential:
-$$V_\mathrm{RLJ}(r) \equiv 4\epsilon_\mathrm{A}\left(\frac{\sigma_\mathrm{A}}{r}\right)^{12}
-    \label{eq:VRLJ}$$ For every point on the vesicle we calculate the
+Lennard-Jones potential:
+\begin{equation}
+V_\mathrm{RLJ}(r) \equiv 4\epsilon_\mathrm{A}\left(\frac{\sigma_\mathrm{A}}{r}\right)^{12}
+    \label{eq:VRLJ} 
+\end{equation}
+For every point on the vesicle, we calculate the
 shortest distance of this point to the paraboloid and use this distance
-as the argument of function $V_\mathrm{RLJ}$ in .
+as the argument of function $V_\mathrm{RLJ}$ in \autoref{eq:VRLJ}.
 
 # Dependencies
 
@@ -368,7 +404,7 @@ without any problem in any similar environment. It may also work with
 WINDOWS although we have not tested this aspect.
 
 The github repository [@memc] contains a a file named `README.md` that
-contains instruction to install and run the code. In we show three
+contains instruction to install and run the code. In \autoref{fig:dent} we show three
 typical snapshots from our code for three different position of the AFM
 tip.
 
@@ -381,10 +417,7 @@ after $50,000$ number of monte-carlo steps. By running
 `gnuplot plot.gnu` (this requires the software gnuplot) the user can
 compare the PDF obtained by their run with a PDF that we provide.
 
-::: figure*
-![image](fig/1p05_2_cr.png){width="30%"} ![image](fig/0p9_2_cr.png){width="30%"}
-![image](fig/0p75_2_cr.png){width="30%"}
-:::
+![Representative snapshots from our code for three different positions (tz) of the AFM tip. The origin of our coordinate system is at the center of the undeformed sphere and the radius of the undeformed sphere is unity. The colormap shows the signed curvature (\autoref{eq:laplace_beltrami}; red(positive) and blue (negative). (A) tz = 1.05, (B) tz = 0.9, (C) tz = 0.75 \label{fig:dent}](fig/dent.pdf)
 
 We acknowledge the support of the Swedish Research Council Grant No.
 638-2013-9243 and 2016-05225. The simulations were performed on

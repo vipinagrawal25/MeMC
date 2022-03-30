@@ -1,0 +1,370 @@
+%merlin.mbs apsrev4-1.bst 2010-07-25 4.21a (PWD, AO, DPC) hacked
+%Control: key (0)
+%Control: author (0) dotless jnrlst
+%Control: editor formatted (1) identically to author
+%Control: production of article title (0) allowed
+%Control: page (1) range
+%Control: year (0) verbatim
+%Control: production of eprint (0) enabled
+\begin{thebibliography}{27}%
+\makeatletter
+\providecommand \@ifxundefined [1]{%
+ \@ifx{#1\undefined}
+}%
+\providecommand \@ifnum [1]{%
+ \ifnum #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \@ifx [1]{%
+ \ifx #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \natexlab [1]{#1}%
+\providecommand \enquote  [1]{``#1''}%
+\providecommand \bibnamefont  [1]{#1}%
+\providecommand \bibfnamefont [1]{#1}%
+\providecommand \citenamefont [1]{#1}%
+\providecommand \href@noop [0]{\@secondoftwo}%
+\providecommand \href [0]{\begingroup \@sanitize@url \@href}%
+\providecommand \@href[1]{\@@startlink{#1}\@@href}%
+\providecommand \@@href[1]{\endgroup#1\@@endlink}%
+\providecommand \@sanitize@url [0]{\catcode `\\12\catcode `\$12\catcode
+  `\&12\catcode `\#12\catcode `\^12\catcode `\_12\catcode `\%12\relax}%
+\providecommand \@@startlink[1]{}%
+\providecommand \@@endlink[0]{}%
+\providecommand \url  [0]{\begingroup\@sanitize@url \@url }%
+\providecommand \@url [1]{\endgroup\@href {#1}{\urlprefix }}%
+\providecommand \urlprefix  [0]{URL }%
+\providecommand \Eprint [0]{\href }%
+\providecommand \doibase [0]{http://dx.doi.org/}%
+\providecommand \selectlanguage [0]{\@gobble}%
+\providecommand \bibinfo  [0]{\@secondoftwo}%
+\providecommand \bibfield  [0]{\@secondoftwo}%
+\providecommand \translation [1]{[#1]}%
+\providecommand \BibitemOpen [0]{}%
+\providecommand \bibitemStop [0]{}%
+\providecommand \bibitemNoStop [0]{.\EOS\space}%
+\providecommand \EOS [0]{\spacefactor3000\relax}%
+\providecommand \BibitemShut  [1]{\csname bibitem#1\endcsname}%
+\let\auto@bib@innerbib\@empty
+%</preamble>
+\bibitem [{\citenamefont {Phillips}\ \emph {et~al.}(2012)\citenamefont
+  {Phillips}, \citenamefont {Kondev}, \citenamefont {Theriot}, \citenamefont
+  {Garcia},\ and\ \citenamefont {Orme}}]{phillips2012physical}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Rob}\ \bibnamefont
+  {Phillips}}, \bibinfo {author} {\bibfnamefont {Jane}\ \bibnamefont {Kondev}},
+  \bibinfo {author} {\bibfnamefont {Julie}\ \bibnamefont {Theriot}}, \bibinfo
+  {author} {\bibfnamefont {Hernan~G}\ \bibnamefont {Garcia}}, \ and\ \bibinfo
+  {author} {\bibfnamefont {Nigel}\ \bibnamefont {Orme}},\ }\href@noop {} {\emph
+  {\bibinfo {title} {Physical biology of the cell}}}\ (\bibinfo  {publisher}
+  {Garland Science},\ \bibinfo {year} {2012})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Landau}\ and\ \citenamefont
+  {Lifshitz}(1970)}]{LLelast}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {LD}~\bibnamefont
+  {Landau}}\ and\ \bibinfo {author} {\bibfnamefont {EM}~\bibnamefont
+  {Lifshitz}},\ }\href@noop {} {\emph {\bibinfo {title} {Theory of
+  Elasticity}}},\ \bibinfo {series} {Course of Theoretical Physics},
+  Vol.~\bibinfo {volume} {7}\ (\bibinfo  {publisher} {Pergamon Press Ltd.},\
+  \bibinfo {address} {Oxford, England},\ \bibinfo {year} {1970})\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Paulose}\ \emph {et~al.}(2012)\citenamefont
+  {Paulose}, \citenamefont {Vliegenthart}, \citenamefont {Gompper},\ and\
+  \citenamefont {Nelson}}]{paulose2012fluctuating}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Jayson}\ \bibnamefont
+  {Paulose}}, \bibinfo {author} {\bibfnamefont {Gerard~A}\ \bibnamefont
+  {Vliegenthart}}, \bibinfo {author} {\bibfnamefont {Gerhard}\ \bibnamefont
+  {Gompper}}, \ and\ \bibinfo {author} {\bibfnamefont {David~R}\ \bibnamefont
+  {Nelson}},\ }\bibfield  {title} {\enquote {\bibinfo {title} {Fluctuating
+  shells under pressure},}\ }\href@noop {} {\bibfield  {journal} {\bibinfo
+  {journal} {Proceedings of the National Academy of Sciences}\ }\textbf
+  {\bibinfo {volume} {109}},\ \bibinfo {pages} {19551--19556} (\bibinfo {year}
+  {2012})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Ko{\v{s}}mrlj}\ and\ \citenamefont
+  {Nelson}(2017)}]{kovsmrlj2017statistical}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Andrej}\ \bibnamefont
+  {Ko{\v{s}}mrlj}}\ and\ \bibinfo {author} {\bibfnamefont {David~R}\
+  \bibnamefont {Nelson}},\ }\bibfield  {title} {\enquote {\bibinfo {title}
+  {Statistical mechanics of thin spherical shells},}\ }\href@noop {} {\bibfield
+   {journal} {\bibinfo  {journal} {Physical Review X}\ }\textbf {\bibinfo
+  {volume} {7}},\ \bibinfo {pages} {011002} (\bibinfo {year}
+  {2017})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {HW}\ \emph {et~al.}(2002)\citenamefont {HW},
+  \citenamefont {Wortis},\ and\ \citenamefont
+  {Mukhopadhyay}}]{hw2002stomatocyte}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Gerald~Lim}\
+  \bibnamefont {HW}}, \bibinfo {author} {\bibfnamefont {Michael}\ \bibnamefont
+  {Wortis}}, \ and\ \bibinfo {author} {\bibfnamefont {Ranjan}\ \bibnamefont
+  {Mukhopadhyay}},\ }\bibfield  {title} {\enquote {\bibinfo {title}
+  {Stomatocyte--discocyte--echinocyte sequence of the human red blood cell:
+  Evidence for the bilayer--couple hypothesis from membrane mechanics},}\
+  }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal} {Proceedings of the
+  National Academy of Sciences}\ }\textbf {\bibinfo {volume} {99}},\ \bibinfo
+  {pages} {16766--16769} (\bibinfo {year} {2002})}\BibitemShut {NoStop}%
+\bibitem [{COMSOL()}]{comsol}%
+  \BibitemOpen
+  COMSOL,\ \href@noop {} {}\bibinfo {howpublished}
+  {\url{https://www.comsol.com}}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Goetz}\ \emph {et~al.}(1999)\citenamefont {Goetz},
+  \citenamefont {Gompper},\ and\ \citenamefont {Lipowsky}}]{goetz1999mobility}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R{\"u}diger}\
+  \bibnamefont {Goetz}}, \bibinfo {author} {\bibfnamefont {Gerhard}\
+  \bibnamefont {Gompper}}, \ and\ \bibinfo {author} {\bibfnamefont {Reinhard}\
+  \bibnamefont {Lipowsky}},\ }\bibfield  {title} {\enquote {\bibinfo {title}
+  {Mobility and elasticity of self-assembled membranes},}\ }\href@noop {}
+  {\bibfield  {journal} {\bibinfo  {journal} {Physical review letters}\
+  }\textbf {\bibinfo {volume} {82}},\ \bibinfo {pages} {221} (\bibinfo {year}
+  {1999})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Bowick}\ \emph {et~al.}(2001)\citenamefont {Bowick},
+  \citenamefont {Cacciuto}, \citenamefont {Thorleifsson},\ and\ \citenamefont
+  {Travesset}}]{bowick2001universality}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Mark~J}\ \bibnamefont
+  {Bowick}}, \bibinfo {author} {\bibfnamefont {Angelo}\ \bibnamefont
+  {Cacciuto}}, \bibinfo {author} {\bibfnamefont {Gudmar}\ \bibnamefont
+  {Thorleifsson}}, \ and\ \bibinfo {author} {\bibfnamefont {Alex}\ \bibnamefont
+  {Travesset}},\ }\bibfield  {title} {\enquote {\bibinfo {title} {Universality
+  classes of self-avoiding fixed-connectivity membranes},}\ }\href@noop {}
+  {\bibfield  {journal} {\bibinfo  {journal} {The European Physical Journal E}\
+  }\textbf {\bibinfo {volume} {5}},\ \bibinfo {pages} {149--160} (\bibinfo
+  {year} {2001})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Auth}\ and\ \citenamefont
+  {Gompper}(2005)}]{auth2005fluctuation}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Thorsten}\
+  \bibnamefont {Auth}}\ and\ \bibinfo {author} {\bibfnamefont {Gerhard}\
+  \bibnamefont {Gompper}},\ }\bibfield  {title} {\enquote {\bibinfo {title}
+  {Fluctuation spectrum of membranes with anchored linear and star polymers},}\
+  }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal} {Physical Review
+  E}\ }\textbf {\bibinfo {volume} {72}},\ \bibinfo {pages} {031904} (\bibinfo
+  {year} {2005})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Gompper}\ and\ \citenamefont
+  {Kroll}(2004)}]{gompper2004triangulated}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G}~\bibnamefont
+  {Gompper}}\ and\ \bibinfo {author} {\bibfnamefont {DM}~\bibnamefont
+  {Kroll}},\ }\bibfield  {title} {\enquote {\bibinfo {title}
+  {Triangulated-surface models of fluctuating membranes},}\ }in\ \href@noop {}
+  {\emph {\bibinfo {booktitle} {Statistical mechanics of membranes and
+  surfaces}}},\ \bibinfo {editor} {edited by\ \bibinfo {editor} {\bibfnamefont
+  {David}\ \bibnamefont {Nelson}}, \bibinfo {editor} {\bibfnamefont {Tsvi}\
+  \bibnamefont {Piran}}, \ and\ \bibinfo {editor} {\bibfnamefont {Steven}\
+  \bibnamefont {Weinberg}}}\ (\bibinfo  {publisher} {World Scientific},\
+  \bibinfo {year} {2004})\ pp.\ \bibinfo {pages} {359--426}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Vorselen}\ \emph {et~al.}(2017)\citenamefont
+  {Vorselen}, \citenamefont {MacKintosh}, \citenamefont {Roos},\ and\
+  \citenamefont {Wuite}}]{vorselen2017competition}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Daan}\ \bibnamefont
+  {Vorselen}}, \bibinfo {author} {\bibfnamefont {Fred~C}\ \bibnamefont
+  {MacKintosh}}, \bibinfo {author} {\bibfnamefont {Wouter~H}\ \bibnamefont
+  {Roos}}, \ and\ \bibinfo {author} {\bibfnamefont {Gijs~JL}\ \bibnamefont
+  {Wuite}},\ }\bibfield  {title} {\enquote {\bibinfo {title} {Competition
+  between bending and internal pressure governs the mechanics of fluid
+  nanovesicles},}\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal}
+  {Acs Nano}\ }\textbf {\bibinfo {volume} {11}},\ \bibinfo {pages} {2628--2636}
+  (\bibinfo {year} {2017})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Boek}\ \emph {et~al.}(2005)\citenamefont {Boek},
+  \citenamefont {Padding}, \citenamefont {den Otter},\ and\ \citenamefont
+  {Briels}}]{boek2005mechanical}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {ES}~\bibnamefont
+  {Boek}}, \bibinfo {author} {\bibfnamefont {JT}~\bibnamefont {Padding}},
+  \bibinfo {author} {\bibfnamefont {Wouter~K}\ \bibnamefont {den Otter}}, \
+  and\ \bibinfo {author} {\bibfnamefont {Willem~J}\ \bibnamefont {Briels}},\
+  }\bibfield  {title} {\enquote {\bibinfo {title} {Mechanical properties of
+  surfactant bilayer membranes from atomistic and coarse-grained molecular
+  dynamics simulations},}\ }\href@noop {} {\bibfield  {journal} {\bibinfo
+  {journal} {The Journal of Physical Chemistry B}\ }\textbf {\bibinfo {volume}
+  {109}},\ \bibinfo {pages} {19851--19858} (\bibinfo {year}
+  {2005})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Caroli}\ \emph {et~al.}(2009)\citenamefont {Caroli},
+  \citenamefont {de~Castro}, \citenamefont {Loriot}, \citenamefont {Rouiller},
+  \citenamefont {Teillaud},\ and\ \citenamefont {Wormser}}]{caroli2009robust}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Manuel}\ \bibnamefont
+  {Caroli}}, \bibinfo {author} {\bibfnamefont {Pedro Machado~Manh{\~a}es}\
+  \bibnamefont {de~Castro}}, \bibinfo {author} {\bibfnamefont {Sebastien}\
+  \bibnamefont {Loriot}}, \bibinfo {author} {\bibfnamefont {Olivier}\
+  \bibnamefont {Rouiller}}, \bibinfo {author} {\bibfnamefont {Monique}\
+  \bibnamefont {Teillaud}}, \ and\ \bibinfo {author} {\bibfnamefont {Camille}\
+  \bibnamefont {Wormser}},\ }\emph {\bibinfo {title} {Robust and Efficient
+  Delaunay triangulations of points on or close to a sphere}},\ \href@noop {}
+  {Ph.D. thesis},\ \bibinfo  {school} {INRIA} (\bibinfo {year}
+  {2009})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Vliegenthart}\ and\ \citenamefont
+  {Gompper}(2006)}]{vliegenthart2006mechanical}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Gerard~Adriaan}\
+  \bibnamefont {Vliegenthart}}\ and\ \bibinfo {author} {\bibfnamefont
+  {Gerhard}\ \bibnamefont {Gompper}},\ }\bibfield  {title} {\enquote {\bibinfo
+  {title} {Mechanical deformation of spherical viruses with icosahedral
+  symmetry},}\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal}
+  {Biophysical journal}\ }\textbf {\bibinfo {volume} {91}},\ \bibinfo {pages}
+  {834--841} (\bibinfo {year} {2006})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Buenemann}\ and\ \citenamefont
+  {Lenz}(2008)}]{buenemann2008elastic}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Mathias}\ \bibnamefont
+  {Buenemann}}\ and\ \bibinfo {author} {\bibfnamefont {Peter}\ \bibnamefont
+  {Lenz}},\ }\bibfield  {title} {\enquote {\bibinfo {title} {Elastic properties
+  and mechanical stability of chiral and filled viral capsids},}\ }\href@noop
+  {} {\bibfield  {journal} {\bibinfo  {journal} {Physical Review E}\ }\textbf
+  {\bibinfo {volume} {78}},\ \bibinfo {pages} {051924} (\bibinfo {year}
+  {2008})}\BibitemShut {NoStop}%
+\bibitem [{A simple and fast mesh generator()}]{meshzoo}%
+  \BibitemOpen
+  A simple and fast mesh generator,\ \href@noop {} {}\bibinfo {howpublished}
+  {\url{https://github.com/meshpro/meshzoo}}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Baumg{\"a}rtner}\ \emph {et~al.}(2013)\citenamefont
+  {Baumg{\"a}rtner}, \citenamefont {Binder}, \citenamefont {Hansen},
+  \citenamefont {Kalos}, \citenamefont {Kehr}, \citenamefont {Landau},
+  \citenamefont {Levesque}, \citenamefont {M{\"u}ller-Krumbhaar}, \citenamefont
+  {Rebbi}, \citenamefont {Saito} \emph {et~al.}}]{baumgartner2013applications}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Artur}\ \bibnamefont
+  {Baumg{\"a}rtner}}, \bibinfo {author} {\bibfnamefont {Kurt}\ \bibnamefont
+  {Binder}}, \bibinfo {author} {\bibfnamefont {J-P}\ \bibnamefont {Hansen}},
+  \bibinfo {author} {\bibfnamefont {MH}~\bibnamefont {Kalos}}, \bibinfo
+  {author} {\bibfnamefont {K}~\bibnamefont {Kehr}}, \bibinfo {author}
+  {\bibfnamefont {DP}~\bibnamefont {Landau}}, \bibinfo {author} {\bibfnamefont
+  {D}~\bibnamefont {Levesque}}, \bibinfo {author} {\bibfnamefont
+  {H}~\bibnamefont {M{\"u}ller-Krumbhaar}}, \bibinfo {author} {\bibfnamefont
+  {C}~\bibnamefont {Rebbi}}, \bibinfo {author} {\bibfnamefont {Y}~\bibnamefont
+  {Saito}},  \emph {et~al.},\ }\href@noop {} {\emph {\bibinfo {title}
+  {Applications of the Monte Carlo method in statistical physics}}},\ \bibinfo
+  {series} {Topics in Current Physics}, Vol.~\bibinfo {volume} {36}\ (\bibinfo
+  {publisher} {Springer Science \& Business Media},\ \bibinfo {year}
+  {2013})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Seung}\ and\ \citenamefont
+  {Nelson}(1988)}]{seung1988defects}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Hyunjune~Sebastian}\
+  \bibnamefont {Seung}}\ and\ \bibinfo {author} {\bibfnamefont {David~R}\
+  \bibnamefont {Nelson}},\ }\bibfield  {title} {\enquote {\bibinfo {title}
+  {Defects in flexible membranes with crystalline order},}\ }\href@noop {}
+  {\bibfield  {journal} {\bibinfo  {journal} {Physical Review A}\ }\textbf
+  {\bibinfo {volume} {38}},\ \bibinfo {pages} {1005} (\bibinfo {year}
+  {1988})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Nelson}\ \emph {et~al.}(2004)\citenamefont {Nelson},
+  \citenamefont {Piran},\ and\ \citenamefont
+  {Weinberg}}]{nelson2004statistical}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {David}\ \bibnamefont
+  {Nelson}}, \bibinfo {author} {\bibfnamefont {Tsvi}\ \bibnamefont {Piran}}, \
+  and\ \bibinfo {author} {\bibfnamefont {Steven}\ \bibnamefont {Weinberg}},\
+  }\href@noop {} {\emph {\bibinfo {title} {Statistical mechanics of membranes
+  and surfaces}}}\ (\bibinfo  {publisher} {World Scientific},\ \bibinfo {year}
+  {2004})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Itzykson}(1986)}]{itzykson1986proceedings}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {C}~\bibnamefont
+  {Itzykson}},\ }in\ \href@noop {} {\emph {\bibinfo {booktitle} {Proceedings of
+  the GIFT seminar, Jaca 85}}},\ \bibinfo {editor} {edited by\ \bibinfo
+  {editor} {\bibfnamefont {J~\textit{et al}}\ \bibnamefont {Abad}}}\ (\bibinfo
+  {publisher} {World Scientific Singapore},\ \bibinfo {year} {1986})\ pp.\
+  \bibinfo {pages} {130--188}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Hege}\ and\ \citenamefont
+  {Polthier}(2003)}]{hege2003visualization}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Hans-Christian}\
+  \bibnamefont {Hege}}\ and\ \bibinfo {author} {\bibfnamefont {Konrad}\
+  \bibnamefont {Polthier}},\ }\href@noop {} {\emph {\bibinfo {title}
+  {Visualization and mathematics III}}}\ (\bibinfo  {publisher} {Springer
+  Science \& Business Media},\ \bibinfo {year} {2003})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Meyer}\ \emph {et~al.}(2003)\citenamefont {Meyer},
+  \citenamefont {Desbrun}, \citenamefont {Schr{\"o}der},\ and\ \citenamefont
+  {Barr}}]{meyer2003discrete}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Mark}\ \bibnamefont
+  {Meyer}}, \bibinfo {author} {\bibfnamefont {Mathieu}\ \bibnamefont
+  {Desbrun}}, \bibinfo {author} {\bibfnamefont {Peter}\ \bibnamefont
+  {Schr{\"o}der}}, \ and\ \bibinfo {author} {\bibfnamefont {Alan~H}\
+  \bibnamefont {Barr}},\ }\bibfield  {title} {\enquote {\bibinfo {title}
+  {Discrete differential-geometry operators for triangulated 2-manifolds},}\
+  }in\ \href@noop {} {\emph {\bibinfo {booktitle} {Visualization and
+  mathematics III}}}\ (\bibinfo  {publisher} {Springer},\ \bibinfo {year}
+  {2003})\ pp.\ \bibinfo {pages} {35--57}\BibitemShut {NoStop}%
+\bibitem [{Note1()}]{Note1}%
+  \BibitemOpen
+  \bibinfo {note} {This is different from assuming a semi-permeable membrane,
+  as done in Ref.~\cite {vorselen2017competition}, in which case the liquid can
+  flow in or out and the osmotic pressure of solutes decreases and increases
+  accordingly.}\BibitemShut {Stop}%
+\bibitem [{\citenamefont {Pegtel}\ and\ \citenamefont
+  {Gould}(2019)}]{pegtel2019exosomes}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D~Michiel}\
+  \bibnamefont {Pegtel}}\ and\ \bibinfo {author} {\bibfnamefont {Stephen~J}\
+  \bibnamefont {Gould}},\ }\bibfield  {title} {\enquote {\bibinfo {title}
+  {Exosomes},}\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal}
+  {Annual review of biochemistry}\ }\textbf {\bibinfo {volume} {88}},\ \bibinfo
+  {pages} {487--514} (\bibinfo {year} {2019})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Cavallaro}\ \emph {et~al.}(2019)\citenamefont
+  {Cavallaro}, \citenamefont {Horak}, \citenamefont {H{\aa}{\aa}g},
+  \citenamefont {Gupta}, \citenamefont {Stiller}, \citenamefont {Sahu},
+  \citenamefont {Gorgens}, \citenamefont {Gatty}, \citenamefont {Viktorsson},
+  \citenamefont {El~Andaloussi} \emph {et~al.}}]{cavallaro2019label}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Sara}\ \bibnamefont
+  {Cavallaro}}, \bibinfo {author} {\bibfnamefont {Josef}\ \bibnamefont
+  {Horak}}, \bibinfo {author} {\bibfnamefont {Petra}\ \bibnamefont
+  {H{\aa}{\aa}g}}, \bibinfo {author} {\bibfnamefont {Dhanu}\ \bibnamefont
+  {Gupta}}, \bibinfo {author} {\bibfnamefont {Christiane}\ \bibnamefont
+  {Stiller}}, \bibinfo {author} {\bibfnamefont {Siddharth~S}\ \bibnamefont
+  {Sahu}}, \bibinfo {author} {\bibfnamefont {Andre}\ \bibnamefont {Gorgens}},
+  \bibinfo {author} {\bibfnamefont {Hithesh~K}\ \bibnamefont {Gatty}}, \bibinfo
+  {author} {\bibfnamefont {Kristina}\ \bibnamefont {Viktorsson}}, \bibinfo
+  {author} {\bibfnamefont {Samir}\ \bibnamefont {El~Andaloussi}},  \emph
+  {et~al.},\ }\bibfield  {title} {\enquote {\bibinfo {title} {Label-free
+  surface protein profiling of extracellular vesicles by an electrokinetic
+  sensor},}\ }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal} {ACS
+  sensors}\ }\textbf {\bibinfo {volume} {4}},\ \bibinfo {pages} {1399--1408}
+  (\bibinfo {year} {2019})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Childs}\ \emph {et~al.}(2012)\citenamefont {Childs},
+  \citenamefont {Brugger}, \citenamefont {Whitlock}, \citenamefont {Meredith},
+  \citenamefont {Ahern}, \citenamefont {Pugmire}, \citenamefont {Biagas},
+  \citenamefont {Miller}, \citenamefont {Harrison}, \citenamefont {Weber},
+  \citenamefont {Krishnan}, \citenamefont {Fogal}, \citenamefont {Sanderson},
+  \citenamefont {Garth}, \citenamefont {Bethel}, \citenamefont {Camp},
+  \citenamefont {R\"{u}bel}, \citenamefont {Durant}, \citenamefont {Favre},\
+  and\ \citenamefont {Navr\'{a}til}}]{HPV:VisIt}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Hank}\ \bibnamefont
+  {Childs}}, \bibinfo {author} {\bibfnamefont {Eric}\ \bibnamefont {Brugger}},
+  \bibinfo {author} {\bibfnamefont {Brad}\ \bibnamefont {Whitlock}}, \bibinfo
+  {author} {\bibfnamefont {Jeremy}\ \bibnamefont {Meredith}}, \bibinfo {author}
+  {\bibfnamefont {Sean}\ \bibnamefont {Ahern}}, \bibinfo {author}
+  {\bibfnamefont {David}\ \bibnamefont {Pugmire}}, \bibinfo {author}
+  {\bibfnamefont {Kathleen}\ \bibnamefont {Biagas}}, \bibinfo {author}
+  {\bibfnamefont {Mark}\ \bibnamefont {Miller}}, \bibinfo {author}
+  {\bibfnamefont {Cyrus}\ \bibnamefont {Harrison}}, \bibinfo {author}
+  {\bibfnamefont {Gunther~H.}\ \bibnamefont {Weber}}, \bibinfo {author}
+  {\bibfnamefont {Hari}\ \bibnamefont {Krishnan}}, \bibinfo {author}
+  {\bibfnamefont {Thomas}\ \bibnamefont {Fogal}}, \bibinfo {author}
+  {\bibfnamefont {Allen}\ \bibnamefont {Sanderson}}, \bibinfo {author}
+  {\bibfnamefont {Christoph}\ \bibnamefont {Garth}}, \bibinfo {author}
+  {\bibfnamefont {E.~Wes}\ \bibnamefont {Bethel}}, \bibinfo {author}
+  {\bibfnamefont {David}\ \bibnamefont {Camp}}, \bibinfo {author}
+  {\bibfnamefont {Oliver}\ \bibnamefont {R\"{u}bel}}, \bibinfo {author}
+  {\bibfnamefont {Marc}\ \bibnamefont {Durant}}, \bibinfo {author}
+  {\bibfnamefont {Jean~M.}\ \bibnamefont {Favre}}, \ and\ \bibinfo {author}
+  {\bibfnamefont {Paul}\ \bibnamefont {Navr\'{a}til}},\ }\bibfield  {title}
+  {\enquote {\bibinfo {title} {{VisIt: An End-User Tool For Visualizing and
+  Analyzing Very Large Data}},}\ }in\ \href@noop {} {\emph {\bibinfo
+  {booktitle} {{High Performance Visualization--Enabling Extreme-Scale
+  Scientific Insight}}}}\ (\bibinfo {year} {2012})\ pp.\ \bibinfo {pages}
+  {357--372}\BibitemShut {NoStop}%
+\bibitem [{Monte-Carlo for elastic shells()}]{memc}%
+  \BibitemOpen
+  Monte-Carlo for elastic shells,\ \href@noop {} {}\bibinfo {howpublished}
+  {\url{https://github.com/vipinagrawal25/MeMC}}\BibitemShut {NoStop}%
+\end{thebibliography}%

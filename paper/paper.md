@@ -176,7 +176,7 @@ we use $N=5120$ for the random grid and $N=5292$ for the regular grid.
 
 ![\textbf{Grid points on a sphere} (A)Triangulated random points on a sphere. (B) Triangulated points on sphere after $60000$ SMC iteration of
 the initial configuration shown in (A). (C) An example of regular grid }
-\label{fig:grid}](fig/spheres.pdf)
+\label{fig:grid}](fig/spheres.pdf){width=100%}
 
 ## Energy
 

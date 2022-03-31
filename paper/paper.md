@@ -330,11 +330,11 @@ bulk energy is
 \end{equation}
 where $\Delta V$ is the change in volume due to the move.
 
-### Pressure
+<!-- ### Pressure
 
 With addition of contribution from pressure difference from inside and
 outside the shell our code can also be used for pressurized shells.
-
+ -->
 ## Sticking to a solid surface
 
 As a specific example of nano-vesicle, we consider an exosome. We quote
@@ -392,8 +392,7 @@ The code requires the following:
 
 -   Hdf5 libraries for reading and writing data.
 
--   Python version 3.8 (NOTE:: Cross check versions we use) with scipy,
-    numpy, h5py and numpy-quaternion installed.
+-   Python version 3.8 with scipy,numpy, h5py and numpy-quaternion installed.
 
 -   For three-dimensional visualization we use VisIt [@HPV:VisIt].
 

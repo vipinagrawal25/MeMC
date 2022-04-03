@@ -1,7 +1,16 @@
 
 # MeMC
-A Monte-Carlo code to simulate of fluctuating enclosed membranes. Such system can be
-of relevance for the study of viruses, exosomes, e.t.c.
+The MeMC is an open-source software package for monte-carlo simulation of elastic shells. The package can be useful to study the mechanics of biological nano-vesicles e.g. Exosomes. 
+
+Micro and nano vesicles play a crucial role in biology and medicine. The physical properties of these vesicles play an important role in their biological functions. Hence it is important to measure their elastic constants. One of the ways, to measure elastic constants of cells, is to poke them with AFM tip to compute force-distance curve. Then we model cell as a linear elastic material and by fitting this model to the experimental force-distance curve, we estimate the parameters of elastic model i.e. cell . However nano-vesicles differ from cells in two ways:
+
+ 1) The nano-vesicles are much smaller hence thermal fluctuations may effectively renormalize the elastic coefficients. ([Košmrlj & Nelson, 2017](https://journals.aps.org/prx/abstract/10.1103/PhysRevX.7.011002), [Paulose et al., 2012](https://www.pnas.org/doi/abs/10.1073/pnas.1212268109)).
+ 2) Cell membranes are strongly coupled to an underlying cytoskelton. Hence they may be modeled by a solid body ([HW et al., 2002](https://www.pnas.org/doi/abs/10.1073/pnas.202617299)) but nano-vesicles must be modeled as liquid filled elastic membranes.
+
+Hence, to be able to interpret the force-distance curve of nano-vesicles, we need to solve for the elastic response of thermally fluctuating elastic shell.
+
+There are commercial packages, e.g. [COMSOL](www.comsol.com), to calculate the force-distance curve of solid bodies and closed membranes, but no package that includes thermal effects. The goal of this package is to bridge that gap.
+
 
 ## Prerequisites
 

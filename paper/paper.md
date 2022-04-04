@@ -31,10 +31,6 @@ affiliations:
     index: 5
 date: XX April 2021
 bibliography: paper.bib
-output:
-  pdf_document:
-    extra_dependencies: "subfig"
-    bibliography: paper.bib
 ---
 
 # Summary

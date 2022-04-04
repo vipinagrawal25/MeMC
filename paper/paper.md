@@ -4,7 +4,7 @@ tags:
 authors:
   - name: Vipin Agrawal
     orcid: 0000-0002-1291-5035
-    affiliation: 1,2
+    affiliation: "1, 2"
   - name: Vikash Pandey
     orcid: 0000-0002-5120-2142
     affiliation: 1
@@ -13,7 +13,7 @@ authors:
     affiliation: 3
   - name: Apurba Dev
     orcid: 0000-0002-6235-2891
-    affiliation: 4,5
+    affiliation: "4, 5"
   - name: Dhrubaditya Mitra
     orcid: 0000-0003-4861-8152
     affiliation: 1

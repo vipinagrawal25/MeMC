@@ -25,7 +25,7 @@ MeMC requires following libraries:
 For details of the installation for different packages, check the instructions on the official web page of the packages. If the operating system is Ubuntu then, g++ and hdf5 can be installed using the package manager apt,
 
 ```bash
-apt install g++ hdf5
+apt install g++ libhdf5-dev
 ```
 
 In order to install the required python libraries we suggest using the standard
@@ -121,7 +121,7 @@ the following command to set the connection for dump `data_sph/snap_0003.h5`.
 python utils/gen_memc_conf.py data_sph/snap_0003.h5.
 ```
 
-## MeMC  
+## MeMC
 
 Once the connections are set, the executable `bin/exe_memc` can be used to
 numerically study the nano-vesicles. The

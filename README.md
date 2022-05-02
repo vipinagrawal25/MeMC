@@ -27,6 +27,8 @@ For details of the installation for different packages, check the instructions o
 ```bash
 apt install g++ libhdf5-dev
 ```
+The environment variables for include and library path may not be set properly after the installation.
+In such a scenario, the user should set these paths manually in the Makefile to compile the package.
 
 In order to install the required python libraries we suggest using the standard
 python package manager pip, 
@@ -73,13 +75,13 @@ Atomic Force Microscopy. This package tends to simulate the experiment in the be
 possible way. Therefore, we expect the user to have a prior understanding of
 the Metropolis algorithm for the Monte Carlo simulation and a basic concept of Elasticity
 pertaining to membranes. Both the concept is described in detail in the document
-doc/paper.pdf.  That being said, we shall now dive deeper and explain how different
+paper/paper.pdf.  That being said, we shall now dive deeper and explain how different
 part of the code functions in the following sections:
 
 ## Constructing the membrane
 
 To begin the simulation we generate a equilibrated randomized position on a surface
-of a sphere.  For details we refer the reader to section xx.xx of doc/paper.pdf. The
+of a sphere.  For details we refer the reader to section xx.xx of paper/paper.pdf. The
 main code for this purpose is given in `main/start.cpp` and the relevant  executable is "bin/exe_start". 
 The executable takes three arguments:
 1) Number of random points to be equilibrated
@@ -135,15 +137,15 @@ them identically to a plain text file for input.
 
 ```text
 ## Membrane parameters
-N	coef_bending	coef_stretching	coef_vol_expansion sp_curve
+N   coef_bending    coef_stretching coef_vol_expansion sp_curve
 1024  2.50          25.00            1000000.00        2.0
-radius	pos_bot_wall	sigma	epsilon   theta_attractive
+radius  pos_bot_wall    sigma   epsilon   theta_attractive
 1.00     -1.05          0.17     4.00     0.52
 ## Montecarlo parameters
-Dfac	kBT mc_total_iters	mc_dump_iter
+Dfac    kBT mc_total_iters  mc_dump_iter
 4       1.00  50000            100
 ## Afm Tip parameters
-tip_radius	tip_pos_z	afm_sigma	afm_epsilon
+tip_radius  tip_pos_z   afm_sigma   afm_epsilon
 0.20         1.05       0.17         4.00
 `````
 
@@ -152,8 +154,8 @@ of points used to represent the membrane above is 1024 (The number below N). The
 
 * **Membrane specific parameter**
     +  coef_bending : 
-    +  coef_stretching : the Young's modulus doc/paper.pdf
-    +  coef_vol_expansion : the bulk's modulus in doc/paper.pdf
+    +  coef_stretching : the Young's modulus paper/paper.pdf
+    +  coef_vol_expansion : the bulk's modulus in paper/paper.pdf
     +  sp_curve :: spontaneous curvature. 
     +  radius :: radius (We should probably remove this ) 
 
@@ -176,7 +178,7 @@ of points used to represent the membrane above is 1024 (The number below N). The
 
 Apart from the above, it is also expected to have a directory conf with file "dmemc_conf.h5" inside it in the simulation directory. Once all is ensured, and the parameters are copied in a text file `para_file.in`, copy paste the following to run the simulation. 
 <p align="center">
-<img src="./doc/figs/describe_theta.png" width="200" />
+<img src="./paper/fig/describe_theta.png" width="200" />
 </p>
 
 <!-- ![plot](./doc/figs/describe_theta.png) -->
@@ -210,7 +212,7 @@ line is the result from the simulation conducted locally.
 
 Energy histogram for randomization   |  Energy histogram for fluctuating membran
 :------------------------------------:|:-------------------------:
-![gnu_plta](./doc/figs/hist_start.png) |  ![gnu_pltb](./doc/figs/hist_memc.png)
+![gnu_plta](./paper/fig/hist_start.png) |  ![gnu_pltb](./paper/fig/hist_memc.png)
 
 
 **NOTE**
@@ -224,17 +226,17 @@ Both the binaries `exe_start` and `exe_memc` outputs the percentage of accepted
 moves in second column and total energy of the configuration in respectively the
 second and the third column of `mc_log`. In the first column, we write the
 iterations of single Monte Carlo performed. In `mc_log` file written by `exe_memc`
-the fourth, fifth, sixth and the seventh column respectively stores the __stretching,
+the fourth, fifth, sixth, seventh, and the eigth column respectively stores the __stretching,
 bending, energy due to sticking, the afm contribution and the volume__ 
 
 Apart from the `mc_log` snapshot of the positions constituting the membrane are
-dumped every `mc_dump_skip` step in the para file. We use Hierarchical Data Format
+dumped every `mc_dump_iter` step in the para file. We use Hierarchical Data Format
 or the HDF5 library. In both the case, we write the positions in `snap_xx.h5` series,
-where `xx` represents Monte Carlo iterations.
+where `xx` represents Monte Carlo iterations divide by `mc_dump_iter`.
 
 # Visualization
 
-Visualization of membrane can be done using [visit](https://visit.org) or
+Visualization of membrane can be done using [visit](https://visit-dav.github.io/visit-website/index.html) or
 [paraview](https://www.paraview.org). We provide a python utility
 "utils/viz_memc.py". The program takes three arguments:
 1) Snapshot from the `exe_memc`
@@ -253,7 +255,7 @@ to see the result.
 
 Random points before equilibration    |  Random lattice ( viz_000.vtk) | Fluctating membrane (viz_010.vtk)
 :-------------------------:|:-------------------------:|:-------------------------:
-![](./doc/figs/rand_visit.png)   |  ![](./doc/figs/latt_visit.png) |  ![](./doc/figs/exo_visit.png)
+![](./paper/fig/rand_visit.png)   |  ![](./paper/fig/latt_visit.png) |  ![](./paper/fig/exo_visit.png)
 
 # A typical workflow
 

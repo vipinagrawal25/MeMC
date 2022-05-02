@@ -1,8 +1,7 @@
-
 # MeMC
 The MeMC is an open-source software package for monte-carlo simulation of elastic shells. The package can be useful to study the mechanics of biological nano-vesicles e.g. Exosomes. 
 
-Micro and nano vesicles play a crucial role in biology and medicine. The physical properties of these vesicles play an important role in their biological functions. Hence it is important to measure their elastic constants. One of the ways, to measure elastic constants of cells, is to poke them with AFM tip to compute force-distance curve. Then we model cell as a linear elastic material and by fitting this model to the experimental force-distance curve, we estimate the parameters of elastic model i.e. cell . However nano-vesicles differ from cells in two ways:
+Micro and nano vesicles play a crucial role in biology and medicine. The physical properties of these vesicles play an important role in their biological functions. Hence it is important to measure their elastic constants. One of the ways, to measure elastic constants of cells, is to poke them with AFM tip to compute force-distance curve. Then we model cell as a linear elastic material and by fitting this model to the experimental force-distance curve, we estimate the parameters of elastic model i.e. cell. However nano-vesicles differ from cells in two ways:
 
  1) The nano-vesicles are much smaller hence thermal fluctuations may effectively renormalize the elastic coefficients. ([Košmrlj & Nelson, 2017](https://journals.aps.org/prx/abstract/10.1103/PhysRevX.7.011002), [Paulose et al., 2012](https://www.pnas.org/doi/abs/10.1073/pnas.1212268109)).
  2) Cell membranes are strongly coupled to an underlying cytoskelton. Hence they may be modeled by a solid body ([HW et al., 2002](https://www.pnas.org/doi/abs/10.1073/pnas.202617299)) but nano-vesicles must be modeled as liquid filled elastic membranes.
@@ -33,7 +32,7 @@ In such a scenario, the user should set these paths manually in the Makefile to 
 In order to install the required python libraries we suggest using the standard
 python package manager pip, 
 ```bash
-pip install scipy numpy-quaternion
+pip install scipy numpy-quaternion h5py
 ```
 
 ## Installation
@@ -46,8 +45,8 @@ git clone https://github.com/vipinagrawal25/MeMC
 cd MeMC
 make
 ```
-If successful, one should find an extra "bin" directory in the folder. The bin
-directory will contain the binaries "exe_start" and "exe_memc".
+If successful, one should find an extra `bin` directory in the folder. The bin
+directory will contain the binaries `exe_start` and `exe_memc`.
 
 ---
 **NOTE**
@@ -75,19 +74,19 @@ Atomic Force Microscopy. This package tends to simulate the experiment in the be
 possible way. Therefore, we expect the user to have a prior understanding of
 the Metropolis algorithm for the Monte Carlo simulation and a basic concept of Elasticity
 pertaining to membranes. Both the concept is described in detail in the document
-paper/paper.pdf.  That being said, we shall now dive deeper and explain how different
+`paper/paper.pdf`.  That being said, we shall now dive deeper and explain how different
 part of the code functions in the following sections:
 
 ## Constructing the membrane
 
 To begin the simulation we generate a equilibrated randomized position on a surface
-of a sphere.  For details we refer the reader to section xx.xx of paper/paper.pdf. The
-main code for this purpose is given in `main/start.cpp` and the relevant  executable is "bin/exe_start". 
+of a sphere.  For details we refer the reader to `subsection grid` in `section numerical implementation` of `paper/paper.pdf`. The
+main code for this purpose is given in `main/start.cpp` and the relevant  executable is `bin/exe_start`. 
 The executable takes three arguments:
 1) Number of random points to be equilibrated
-2) Geometry of the surface "sph" for a
-surface of sphere and "cart" for flat plane
-3) Folder name to write the output files. 
+2) Geometry of the surface `sph` for a
+surface of sphere and `cart` for flat plane
+3) Folder name inside which the outputs will be written.
 
 Rest of the parameter are hard coded. For instance, the radius of the sphere on
 which we generate randomize positions is unity. 
@@ -111,7 +110,7 @@ simulation after 1000 Monte Carlo steps.
 
 The surface of the membrane will respond to all the internal and external forces
 present. The internal ones are due to bending or stretching. If the user has read
-the section xx.xx of the document, then evaluation of these forces requires the
+the `subsection energy` in `section numerical implementation`  of the document, then evaluation of these forces requires the
 knowledge of all the neighbours of a point. For this purpose we rely on the python
 wrapper for [qhull](qhull.org), known as ConvexHull.  We provide a utility script,
 `utils/gen_memc_conf.py` which takes the output from the `exe_start`, set all the
@@ -153,11 +152,11 @@ Values of the parameter are stored directly below the name. For instance the num
 of points used to represent the membrane above is 1024 (The number below N). The other parameters which can be varied are:
 
 * **Membrane specific parameter**
-    +  coef_bending : 
-    +  coef_stretching : the Young's modulus paper/paper.pdf
+    +  coef_bending : `B` in paper/paper.pdf
+    +  coef_stretching : Young's modulus (`Y`) in paper/paper.pdf
     +  coef_vol_expansion : the bulk's modulus in paper/paper.pdf
-    +  sp_curve :: spontaneous curvature. 
-    +  radius :: radius (We should probably remove this ) 
+    +  sp_curve :: spontaneous curvature (`C`) in paper/paper.pdf. 
+    +  radius :: `R` in paper/paper.pdf. (**Note**: We have tested the code only for `R=1`)
 
 * **Parameters for the bottom stick wall**
     + pos_bot_wall :: z-position of the bottom wall. The value must be smaller than the radius
@@ -166,17 +165,17 @@ of points used to represent the membrane above is 1024 (The number below N). The
     + theta_attractive :: All the points for which <img src="https://render.githubusercontent.com/render/math?math={\Theta}">  (shaded part in the fig just below) is less this value will be affected by the attractive surface.
 
 * **Monte Carlo Parameters**
-    + Dfac :: Each  
-    + kBT ::
-    + mc_total_iters ::
-    + mc_dump_iters ::
+    + Dfac :: Monte Carlo step is divided by Dfac.
+    + kBT :: Boltzmann constant multiplied by temperature.
+    + mc_total_iters :: Total number of Monte Carlo iterations.
+    + mc_dump_iters :: Position snapshots are dumped after mc_dump_iter.
+    
 * **AFM parameters**
-    + tip_radius :: The size of afm tip
+    + tip_radius :: The size of afm tip (see section `AFM tip` in paper/paper.pdf)
     + tip_pos_z :: Position of the bottom of the tip
-    + afm_sigma :: 
-    + afm_epsilon :: relative strength of the $\sigma_{afm}$ in the document.
+    + afm_sigma :: The <img src="https://render.githubusercontent.com/render/math?math={\sigma}">of the bottom LJ potential
 
-Apart from the above, it is also expected to have a directory conf with file "dmemc_conf.h5" inside it in the simulation directory. Once all is ensured, and the parameters are copied in a text file `para_file.in`, copy paste the following to run the simulation. 
+Apart from the above, it is also expected to have a directory `conf` with file by the name `dmemc_conf.h5` inside it in the simulation directory. Once all is ensured, and the parameters are copied in a text file `para_file.in`, copy paste the following to run the simulation. 
 <p align="center">
 <img src="./paper/fig/describe_theta.png" width="200" />
 </p>
@@ -187,7 +186,7 @@ Apart from the above, it is also expected to have a directory conf with file "dm
 ./bin/exe_memc para_file.in out_memc
 
 ```
-**NOTE** The radius is kept unity and all the parameters are scaled accordingly.
+**NOTE** The radius can be kept unity and all the parameters are scaled accordingly.
 For example, to study the effect of 10nm AFM tip over a 100nm exosome, one should
 take radius 1 and tip_radius = 1/20.
 
@@ -218,16 +217,12 @@ Energy histogram for randomization   |  Energy histogram for fluctuating membran
 **NOTE**
 In case the plot script fails to generate the plot, the main reason could be lack of
 [gsl-histogram](https://www.gsl.org) in your local machine. We suggest to use numpy or other
-standard libraries for the same purpose. 
-
+standard libraries for the same purpose. We have omitted first 6000 data points to generate the histogram.
 # Data Structure
 
 Both the binaries `exe_start` and `exe_memc` outputs the percentage of accepted
-moves in second column and total energy of the configuration in respectively the
-second and the third column of `mc_log`. In the first column, we write the
-iterations of single Monte Carlo performed. In `mc_log` file written by `exe_memc`
-the fourth, fifth, sixth, seventh, and the eigth column respectively stores the __stretching,
-bending, energy due to sticking, the afm contribution and the volume__ 
+moves in the second column and total energy in the third column of the configuration of `mc_log`. In the first column, we write the iteration of Monte Carlo. In `mc_log` file written by `exe_memc`,
+the fourth, fifth, sixth, seventh, and the eighth column respectively stores the energy due to  __stretching,bending, sticking, the afm contribution and the volume__.
 
 Apart from the `mc_log` snapshot of the positions constituting the membrane are
 dumped every `mc_dump_iter` step in the para file. We use Hierarchical Data Format
@@ -237,8 +232,9 @@ where `xx` represents Monte Carlo iterations divide by `mc_dump_iter`.
 # Visualization
 
 Visualization of membrane can be done using [visit](https://visit-dav.github.io/visit-website/index.html) or
-[paraview](https://www.paraview.org). We provide a python utility
-"utils/viz_memc.py". The program takes three arguments:
+[paraview](https://www.paraview.org). We provide a python utility to convert the hdf5 file to vtk format,
+`utils/viz_memc.py`.
+The program takes three arguments:
 1) Snapshot from the `exe_memc`
 2) The file with connections, or `conf/dmemc_conf.h5`
 3) Name of the output file with extension `.vtk` which will be read from Visit.
@@ -289,7 +285,7 @@ export PATH = $MEMC_PATH/bin:$PATH
 ```bash
 exe_start N sph data_sph
 ```
-+ Once completed, set the connection using one of the later snap shot, for e.g. 
++ Once completed, set the connection using one of the later snapshot, e.g. 
 
 ```bash
 python $MEMC_PATH/utils/gen_memc_conf.py data_sph/snap_0300.h5
@@ -300,5 +296,4 @@ python $MEMC_PATH/utils/gen_memc_conf.py data_sph/snap_0300.h5
 ```bash
 exe_memc para_file.in out 
 ```
-+ Lower the tip position by changing tip_pos_z in parafile. Note, if the tip_pos_z penetrates the membrane then we use the snapshot from earlier simulation where the tip position was higher. Run memc again.
-
++ Lower the tip position by changing tip_pos_z in parafile. Note, if the tip_pos_z penetrates the membrane then we use the snapshot from earlier simulation where the tip position was higher. 

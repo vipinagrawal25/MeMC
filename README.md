@@ -1,14 +1,14 @@
 # MeMC
 The MeMC is an open-source software package for monte-carlo simulation of elastic shells. The package can be useful to study the mechanics of biological nano-vesicles e.g. Exosomes. 
 
-Micro and nano vesicles play a crucial role in biology and medicine. The physical properties of these vesicles play an important role in their biological functions. Hence it is important to measure their elastic constants. One of the ways, to measure elastic constants of cells, is to poke them with AFM tip to compute force-distance curve. Then we model cell as a linear elastic material and by fitting this model to the experimental force-distance curve, we estimate the parameters of elastic model i.e. cell. However nano-vesicles differ from cells in two ways:
+Micro and nano vesicles play a crucial role in biology and medicine. The physical properties of these vesicles play an important role in their biological functions. Hence it is important to measure their elastic constants. One of the ways, to measure elastic constants of cells, is to poke them with Atomic Force Microscopy (AFM) tip to compute force-distance curve. Then the cell is modeled as a linear elastic material and by fitting this model to the experimental force-distance curve, the parameters of elastic model i.e. cell is estimated. However nano-vesicles differ from cells in two ways:
 
  1) The nano-vesicles are much smaller hence thermal fluctuations may effectively renormalize the elastic coefficients. ([Košmrlj & Nelson, 2017](https://journals.aps.org/prx/abstract/10.1103/PhysRevX.7.011002), [Paulose et al., 2012](https://www.pnas.org/doi/abs/10.1073/pnas.1212268109)).
  2) Cell membranes are strongly coupled to an underlying cytoskelton. Hence they may be modeled by a solid body ([HW et al., 2002](https://www.pnas.org/doi/abs/10.1073/pnas.202617299)) but nano-vesicles must be modeled as liquid filled elastic membranes.
 
 Hence, to be able to interpret the force-distance curve of nano-vesicles, we need to solve for the elastic response of thermally fluctuating elastic shell.
 
-There are commercial packages, e.g. [COMSOL](www.comsol.com), to calculate the force-distance curve of solid bodies and closed membranes, but no package that includes thermal effects. The goal of this package is to bridge that gap.
+There are commercial packages, e.g. [COMSOL](www.comsol.com), to calculate the force-distance curve of solid bodies and closed membranes, but there are no package that include the thermal effects. The goal of this package is to bridge that gap.
 
 
 ## Prerequisites
@@ -173,7 +173,7 @@ of points used to represent the membrane above is 1024 (The number below N). The
 * **AFM parameters**
     + tip_radius :: The size of afm tip (see section `AFM tip` in paper/paper.pdf)
     + tip_pos_z :: Position of the bottom of the tip
-    + afm_sigma :: The <img src="https://render.githubusercontent.com/render/math?math={\sigma}">of the bottom LJ potential
+    + afm_sigma :: The <img src="https://render.githubusercontent.com/render/math?math={\sigma}"> of the AFM potential (see paper/paper.pdf)
 
 Apart from the above, it is also expected to have a directory `conf` with file by the name `dmemc_conf.h5` inside it in the simulation directory. Once all is ensured, and the parameters are copied in a text file `para_file.in`, copy paste the following to run the simulation. 
 <p align="center">
@@ -217,7 +217,7 @@ Energy histogram for randomization   |  Energy histogram for fluctuating membran
 **NOTE**
 In case the plot script fails to generate the plot, the main reason could be lack of
 [gsl-histogram](https://www.gsl.org) in your local machine. We suggest to use numpy or other
-standard libraries for the same purpose. We have omitted first 6000 data points to generate the histogram.
+standard libraries for the same purpose. We have omitted top 6000 data points while generating the histogram.
 # Data Structure
 
 Both the binaries `exe_start` and `exe_memc` outputs the percentage of accepted

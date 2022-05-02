@@ -249,7 +249,7 @@ python utils/viz_memc.py out_memc/snap_0000.h5 conf/dmemc_conf.h5 viz_000.vtk
 python utils/viz_memc.py out_memc/snap_0010.h5 conf/dmemc_conf.h5 viz_010.vtk
 ```
 
-If the execution is successful, the file "check_viz.vtk" will be written in the root
+If the execution is successful, the file `viz_000.vtk` and `viz_010.vtk` will be written in the root
 directory. In visit load the .vtk file and select `subset->domains` or `mesh->mesh`
 to see the result.
 

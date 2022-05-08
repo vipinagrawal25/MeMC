@@ -34,7 +34,7 @@ if(which_file == 'start'):
 if(which_file == 'memc'):
     ax.plot(np.cos(pts_sph[:,1]), pts_sph[:,2], 's')
 
-ax.set(xlim = [-1.1,1.1], ylim=[-0.1,3.16], 
+ax.set(xlim = [-1.1,1.1], ylim=[-0.1,6.36], 
         xlabel='cos(theta)', ylabel='phi')
 
 plt.show()

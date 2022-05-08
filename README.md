@@ -325,7 +325,7 @@ python utils/check_status.py memc out/snap_0001.h5
 
 The example plot window of good and bad execution of the software is shown below. In
 the figure <img
-src="https://render.githubusercontent.com/render/math?math={\cos(\theta)--\phi}"> is
+src="https://render.githubusercontent.com/render/math?math={\cos(\theta)-\phi}"> is
 plotted as X and Y co-ordinate. A bad execution implies all the points representing
 the Exosome is either NaN or 0.
 

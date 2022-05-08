@@ -322,8 +322,11 @@ Example execution of the script would be;
 python utils/check_status.py start data_sph/snap_0300.h5
 python utils/check_status.py memc out/snap_0001.h5
 ```
-The example plot window of good and bad execution of the software is shown
-below.  
+
+The example plot window of good and bad execution of the software is shown below. In
+the figure <img
+src="https://render.githubusercontent.com/render/math?math={\cos(\sigma--\phi})"> is
+plotted as X and Y co-ordinate.
 
 good execution    |  bad execution 
 :-------------------------:|:-------------------------:

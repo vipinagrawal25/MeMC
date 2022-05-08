@@ -297,3 +297,14 @@ python $MEMC_PATH/utils/gen_memc_conf.py data_sph/snap_0300.h5
 exe_memc para_file.in out 
 ```
 + Lower the tip position by changing tip_pos_z in parafile. Note, if the tip_pos_z penetrates the membrane then we use the snapshot from earlier simulation where the tip position was higher. 
+
+# Checking  Execution Status
+
+Here we discuss various checks that can be done to ensure that the execution of both
+`exe_start` and `exe_memc` is sound.
+
+good execution    |  bad execution 
+:-------------------------:|:-------------------------:
+![](./paper/fig/good_exe.png)   |  ![](./paper/fig/bad_exe.png)
+
+

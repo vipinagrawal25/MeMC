@@ -127,7 +127,7 @@ def write_hdf5(R, cmlst, node_nbr,  cells, posfile, file):
     else:
         file=file+".h5"
     hf = h5py.File(posfile,'w')
-    hf.create_dataset('pos',data=R)
+    hf.create_dataset('pos',data=R.reshape(-1))
     hf.close()
 
     hf = h5py.File(file,'w')
@@ -154,6 +154,7 @@ sort_tri = sort_simplices(triangles)
 cmlist, node_nbr = neighbours(Np, sort_tri)
 node_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr)
 isDir = os.path.isdir("./conf/") 
+pts_cart[:,:] = 0e0
 if(isDir):
     write_hdf5(pts_cart, cmlist, node_nbr,
              triangles, "./conf/dmemc_pos.h5",

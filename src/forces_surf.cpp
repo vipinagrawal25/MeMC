@@ -42,7 +42,11 @@ Vec3d determine_xyz_parabola(Vec3d pos, AFM_para afm) {
 
     // some exception messages
     if(fabs(x0) < 1e-15){
-        fprintf(stderr, "X0 small roots may not be correct\n");
+        if(fabs(y0)< 1e-15 & fabs(z0)< 1e-15 ){
+            fprintf(stderr, "x0 = %g, y0 = %g,  z0 = %g; Points representing exosome very small...\n", x0, y0, z0);
+            fprintf(stderr, "See section Checking execution status in https://github.com/vipinagrawal25/MeMC/blob/main/README.md \n");
+        }
+        x0 = x0 + 2e-12*(2*(drand48() - 1));
     }
 
     a0 = 1./afm.tip_rad;

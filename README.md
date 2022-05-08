@@ -301,10 +301,34 @@ exe_memc para_file.in out
 # Checking  Execution Status
 
 Here we discuss various checks that can be done to ensure that the execution of both
-`exe_start` and `exe_memc` is sound.
+`exe_start` and `exe_memc` is sound. If the user sees following message
+`
+x0 = 0, y0 = 0,  z0 = 0; Points representing exosome very small...
+See section Checking execution status in https://github.com/vipinagrawal25/MeMC/blob/main/README.md 
+`
+printed in the terminal window, the execution of the software is most likely bad.
+
+
+We provide a utility program `utils/check_status.py` to check at what stage the
+execution is failing.
+
+The utility file takes three arguments;
+1) `start` or `memc` depending upon which executable has written the output
+2) The output file name. 
+
+An example execution of the script would be; 
+
+```python
+python utils/check_status.py start data_sph/snap_0300.h5
+python utils/check_status.py memc data_sph/snap_0001.h5
+```
+Example snapshow for each case of good and bad execution of the software is shown
+below. 
 
 good execution    |  bad execution 
 :-------------------------:|:-------------------------:
 ![](./paper/fig/good_exe.png)   |  ![](./paper/fig/bad_exe.png)
+
+
 
 

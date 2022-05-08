@@ -312,23 +312,32 @@ printed in the terminal window, the execution of the software is most likely bad
 We provide a utility program `utils/check_status.py` to check at what stage the
 execution is failing.
 
-The utility file takes three arguments;
+The utility file takes two arguments;
 1) `start` or `memc` depending upon which executable has written the output
-2) The output file name. 
+2) The output file of `exe_start` or `exe_memc` 
 
-An example execution of the script would be; 
+Example execution of the script would be; 
 
 ```python
 python utils/check_status.py start data_sph/snap_0300.h5
-python utils/check_status.py memc data_sph/snap_0001.h5
+python utils/check_status.py memc out/snap_0001.h5
 ```
-Example snapshow for each case of good and bad execution of the software is shown
-below. 
+The example plot window of good and bad execution of the software is shown
+below.  
 
 good execution    |  bad execution 
 :-------------------------:|:-------------------------:
 ![](./paper/fig/good_exe.png)   |  ![](./paper/fig/bad_exe.png)
 
+
+In case user sees the right figure (bad one) for both `exe_start` and `exe_memc`,
+then most likely the hdf5 library is not installed properly. Please reinstall the
+library or modify relevant section of the code inside `src/hdf5_io.cpp` for I/O
+suited for the user.
+
+
+If the plot window show the right figure at `exe_memc` stage only,
+then check the installation of the `h5py` library. 
 
 
 

@@ -310,7 +310,8 @@ printed in the terminal window, the execution of the software is most likely bad
 
 
 We provide a utility program `utils/check_status.py` to check at what stage the
-execution is failing.
+execution is failing. Note that the user needs to install [https://matplotlib.org/](matplotlib). See instructions
+[https://pypi.org/project/matplotlib/](here).
 
 The utility file takes two arguments;
 1) `start` or `memc` depending upon which executable has written the output
@@ -340,8 +341,7 @@ library or modify relevant section of the code inside `src/hdf5_io.cpp` for I/O
 suited for the user.
 
 
-If the plot window show the right figure at `exe_memc` stage only,
-then check the installation of the `h5py` library. 
+In case the bug is in the `h5py`, the user is requested to use the [https://support.hdfgroup.org/products/hdf5_tools/toolsbycat.html](hdf5-tools) to debug. 
 
 
 

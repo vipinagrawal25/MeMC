@@ -283,12 +283,10 @@ contributions in \autoref{fig:voronoi} from all the triangles in , e.g., the con
 the triangle T is the shaded area.
 For a closed surface the bending energy must be calculated relative to
 the spontaneous curvature, i.e., its discretised form is
-::: subequations
 \begin{equation}
     E_\mathrm{bend} = \frac{B}{2} \mathcal{A}_i \left(\mathbf{L}_i - C\hat{n}\right)^2.
     \label{eq:bendE}
 \end{equation}
-:::
 where $C$ is the spontaneous curvature, for a sphere $C = 2/R$, where
 $R$ is radius of the sphere and $\hat{n}$ is the outward normal to the
 surface. Hence not only the magnitude but also the vector nature of the

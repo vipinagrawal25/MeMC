@@ -112,10 +112,9 @@ consider a fluid enclosed in a solid membrane, as done in
   \end{equation}
   \begin{equation}
   u_{ij} = \frac{1}{2}\left( \partial_i u_j + \partial_j u_i + \partial_i w\partial_j w\right)
-            -\delta_{ij}\frac{w}{R}
+            -\delta_{ij}\frac{w}{R},
 \end{equation}
-
-where $w$ is the out-of-plane deformation of the shell, and $\mathbf{u}$ is the
+where $R$ is the radius of the spherical cell, w$ is the out-of-plane deformation, and $\mathbf{u}$ is the
 in-plane deformation, $p$ is the pressure, $\lambda$ and $\mu$ are the
 two in-plane Láme coefficients and $B$ is the bending modulus. The Láme
 coefficients are related to other elastic constant as follows [@LLelast]
@@ -130,7 +129,8 @@ Here $K$ is the volume compressibility, $Y$ the Young's modulus, and
 $\sigma$ the Poisson ratio.
 
 If we consider the material to be incompressible, $K \to \infty$ and
-$\sigma = 1/2$, then there are two elastic constant, the bending
+$\sigma = 1/2$, then $$Y = \frac{\mu}{3}$$.
+Now there are two elastic constant, the bending
 rigidity $B$ and the Young's modulus $Y$. Consequently, there are two
 dimensionless numbers, the Föppl--von-Karman number
 \begin{equation}
@@ -141,8 +141,7 @@ dimensionless numbers, the Föppl--von-Karman number
 \begin{equation}
 \mbox{ET} = \frac{k_\mathrm{B} T}{B}\sqrt{\mbox{FvK}},
 \end{equation} 
-where $R$ is the radius of the
-spherical shell.
+where $k_\mathrm{B}$ is the Boltzmann constant, and $T$ is the temperature.
 
 Using values of $Y$ and $B$ from molecular dynamics simulations of lipid
 bilayers [@boek2005mechanical], $Y = 1.7$N/m and $B = 5 k_\mathrm{B} T$ and
@@ -203,9 +202,10 @@ calculate the stretching energy by
       E_\mathrm{s} = \frac{1}{2}\sum_i \frac{H}{2}\sum_{j(i)}  \left(R_\mathrm{ij} - \ell^\mathrm{0}_\mathrm{ij}\right)^2 \quad\text{where}
 \end{equation}
 $$
-    \mathbf{R}_\mathrm{ij} \equiv \lvert R_\mathrm{i}- R_\mathrm{j}\rvert \/. 
+    \mathbf{R}_\mathrm{ij} \equiv \lvert R_\mathrm{i}- R_\mathrm{j}\rvert \/,
     \label{eq:deltaEs}
 $$
+and $H$ is the stretching coefficient.
 Here the notation $j(i)$ denotes that the sum is over all the nearest
 neighbors of the $i$-the point.
 
@@ -284,8 +284,7 @@ the triangle T is the shaded area.
 For a closed surface the bending energy must be calculated relative to
 the spontaneous curvature, i.e., its discretised form is
 \begin{equation}
-    E_\mathrm{bend} = \frac{B}{2} \mathcal{A}_i \left(\mathbf{L}_i - C\hat{n}\right)^2.
-    \label{eq:bendE}
+    E_\mathrm{bend} = \frac{B}{2} \mathcal{A}_i \left(\mathbf{L}_i - C\hat{n}\right)^2. 
 \end{equation}
 where $C$ is the spontaneous curvature, for a sphere $C = 2/R$, where
 $R$ is radius of the sphere and $\hat{n}$ is the outward normal to the

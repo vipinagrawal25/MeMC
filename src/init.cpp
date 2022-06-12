@@ -95,43 +95,47 @@ void init_read_parameters( MBRANE_para *mbrane,
     //
     //
     char buff[255];
-    int t_n, t_n2, t_n3;
+    int t_n, t_n2, t_n3, err;
     double td1, td2, td3, td4, td5;
     FILE *f2;
     f2 = fopen(para_file, "r");
     if(f2){
-        fgets(buff,255,(FILE*)f2); 
-        fgets(buff,255,(FILE*)f2); 
-        fgets(buff,255,(FILE*)f2);
-        sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
+        if( fgets(buff,255,(FILE*)f2) != NULL); 
+        if( fgets(buff,255,(FILE*)f2) != NULL); 
+        if( fgets(buff,255,(FILE*)f2) != NULL){
+            sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
+        }
         /* fprintf(stderr, "%s\n", buff); */
         mbrane->N = t_n;
         mbrane->coef_bend = td1;
         mbrane->coef_str = td2;
         mbrane->coef_vol_expansion = td3;
         mbrane->sp_curv = td4;
-        fgets(buff,255,(FILE*)f2);
-        fgets(buff,255,(FILE*)f2);
-        sscanf(buff,"%lf %lf %lf %lf %lf", &td1,&td2,&td3,&td4,&td5);
+        if( fgets(buff,255,(FILE*)f2) != NULL);
+        if( fgets(buff,255,(FILE*)f2) != NULL){
+            sscanf(buff,"%lf %lf %lf %lf %lf", &td1,&td2,&td3,&td4,&td5);
+        }
         /* fprintf(stderr, "%s\n", buff); */
         mbrane->radius = td1;
         mbrane->pos_bot_wall = td2;
         mbrane->sigma = td3;
         mbrane->epsilon = td4;
         mbrane->theta = td5;
-        fgets(buff,255,(FILE*)f2);
-        fgets(buff,255,(FILE*)f2); 
-        fgets(buff,255,(FILE*)f2); 
-        sscanf(buff,"%lf %lf %d %d %d", &td1, &td2,  &t_n2, &t_n3);
+        if( fgets(buff,255,(FILE*)f2) != NULL);
+        if( fgets(buff,255,(FILE*)f2) != NULL); 
+        if( fgets(buff,255,(FILE*)f2) != NULL){ 
+            sscanf(buff,"%lf %lf %d %d ", &td1, &td2,  &t_n2, &t_n3);
+        }
         /* fprintf(stderr, "%s\n", buff); */
         mcpara->dfac = td1;
         mcpara->kBT = td2;
         mcpara->tot_mc_iter = t_n2;
         mcpara->dump_skip = t_n3;
-        fgets(buff,255,(FILE*)f2);
-        fgets(buff,255,(FILE*)f2); 
-        fgets(buff,255,(FILE*)f2); 
-        sscanf(buff,"%lf %lf %lf %lf", &td1, &td2, &td3, &td4);
+        if( fgets(buff,255,(FILE*)f2) != NULL);  
+        if( fgets(buff,255,(FILE*)f2) != NULL);   
+        if( fgets(buff,255,(FILE*)f2) != NULL){   
+            sscanf(buff,"%lf %lf %lf %lf", &td1, &td2, &td3, &td4);
+        }
         /* fprintf(stderr, "%s\n", buff); */
         afm->tip_rad = td1;
         afm->tip_pos_z = td2;

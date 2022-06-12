@@ -19,20 +19,21 @@ int main(int argc, char **argv){
      metric = (char *) malloc(128*sizeof(char));
      outfolder = (char *) malloc(128*sizeof(char));
      outfile = (char *) malloc(128*sizeof(char));
-     if(argc!=4){
+     if(argc!=5){
          fprintf(stderr, "\n\n Requiresi argument <Number of points> <output folder>\n\n");
          exit(0);
      }else{
          para.N=atoi(argv[1]);
          metric=argv[2];
          outfolder=argv[3];
+         mcpara.tot_mc_iter = atoi(argv[4]);
          fprintf(stderr, "Monte Carlo of %d particles on %s grid..\n",
                  para.N, metric);
          
      }
      //
     sprintf(syscmds, "%s %s","mkdir ",outfolder);
-    system(syscmds);
+    if(system(syscmds) != 0) fprintf(stderr, "failure in creating folder");
    
 
     init_rng(23077);
@@ -50,7 +51,6 @@ int main(int argc, char **argv){
      mcpara.dfac  = 32;
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
-     mcpara.tot_mc_iter = 60000;
      mcpara.dump_skip = 100;
 
      Pos = (Vec2d *)calloc(para.N, sizeof(Vec2d));
@@ -80,7 +80,7 @@ int main(int argc, char **argv){
                 para, mcpara, metric);
         Ener = pairlj_total_energy(Pos, neib, para, 
                 metric);
-        fprintf(stderr, " iter :: %d AcceptedMoves% :: %4.2f Energy ::  %g\n",
+        fprintf(stderr, " iter = %d percentage of AcceptedMoves = %4.2f Energy = %g\n",
                 i, 100*(double)num_moves/mcpara.one_mc_iter, Ener);
         make_nlist(Pos, neib,  para, metric);
     }

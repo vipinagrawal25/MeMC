@@ -112,7 +112,7 @@ void io_read_config(double *Pos,
     FILE *fid;
 
     fid = fopen(file, "rb");
-    fread(Pos, N*sizeof(double), 1, fid);
+    if(fread(Pos, N*sizeof(double), 1, fid) != 1);
     fclose(fid);
 }
 

@@ -35,9 +35,10 @@ int main(int argc, char *argv[]){
     }
     //
     sprintf(syscmds,"mkdir %s",outfolder);
-    system(syscmds);
+
+    if(system(syscmds) != 0) fprintf(stderr, "failure in creating folder");
     sprintf(syscmds,"%s %s %s%s", (char *)"cp", para_file,outfolder,(char *)"/");
-    system(syscmds);
+    if(system(syscmds) != 0) fprintf(stderr, "failure in copying parafile");
     init_rng(23397);
     // read the input file
     init_read_parameters(&mbrane, &afm, &mcpara, para_file);
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]){
         Et[3] = lj_afm_total(Pos, &afm_force, mbrane, afm);
         vol_sph = volume_total(Pos, mesh, mbrane);
         Et[4] = mbrane.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
-        fprintf(stderr, "iter :: %d AcceptedMoves% :: %4.2f total energy :: %g volume :: %g \n", i, 100*(double)num_moves/mcpara.one_mc_iter, mbrane.tot_energy[0], vol_sph);
+        fprintf(stderr, "iter :: %d percentage of AcceptedMoves :: %4.2f total energy :: %g volume :: %g \n", i, 100*(double)num_moves/mcpara.one_mc_iter, mbrane.tot_energy[0], vol_sph);
 
         fprintf(fid, " %d %d %g %g %g %g %g %g\n",
                     i, num_moves, mbrane.tot_energy[0], Et[0], Et[1], Et[2], Et[3], Et[4]);

@@ -35,7 +35,6 @@ bool Metropolis(double DE, double kbt ){
 double rand_inc_theta(double th0, 
         double dfac){
     /// @brief increment the polar angle randomly  
-    /
     double dth;
     double tmp_th0;
     std::uniform_real_distribution<> rand_real(-1, 1);

@@ -345,4 +345,7 @@ suited for the user.
 In case the bug is in the `h5py`, the user is requested to use the [hdf5-tools](https://support.hdfgroup.org/products/hdf5_tools/toolsbycat.html) to debug. 
 
 
+# Developers Options
+
+For informations on API click [here](./docs/html/index.html)
 

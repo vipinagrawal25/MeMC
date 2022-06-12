@@ -1,0 +1,43 @@
+\hypertarget{cubic__solve_8cpp}{}\doxysection{src/cubic\+\_\+solve.cpp File Reference}
+\label{cubic__solve_8cpp}\index{src/cubic\_solve.cpp@{src/cubic\_solve.cpp}}
+{\ttfamily \#include $<$math.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{cubic__solve_8cpp_ae03afa78adaf570729ca254b69e2fe3f}{cubic\+\_\+solve}} (double a, double b, double c, double d, double $\ast$roots)
+\begin{DoxyCompactList}\small\item\em Contains function to find roots of cubic equation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{cubic__solve_8cpp_ae03afa78adaf570729ca254b69e2fe3f}\label{cubic__solve_8cpp_ae03afa78adaf570729ca254b69e2fe3f}} 
+\index{cubic\_solve.cpp@{cubic\_solve.cpp}!cubic\_solve@{cubic\_solve}}
+\index{cubic\_solve@{cubic\_solve}!cubic\_solve.cpp@{cubic\_solve.cpp}}
+\doxysubsubsection{\texorpdfstring{cubic\_solve()}{cubic\_solve()}}
+{\footnotesize\ttfamily int cubic\+\_\+solve (\begin{DoxyParamCaption}\item[{double}]{a,  }\item[{double}]{b,  }\item[{double}]{c,  }\item[{double}]{d,  }\item[{double $\ast$}]{roots }\end{DoxyParamCaption})}
+
+
+
+Contains function to find roots of cubic equation. 
+
+Solve the roots of equation ax$^\wedge$3 + bx$^\wedge$2 + cx + d = 0
+
+
+\begin{DoxyParams}{Parameters}
+{\em a} & coefficient of x$^\wedge$3 \\
+\hline
+{\em b} & coefficient of x$^\wedge$2 \\
+\hline
+{\em c} & coefficient of x$^\wedge$1 \\
+\hline
+{\em d} & coefficient of x$^\wedge$0 \\
+\hline
+{\em roots} & Roots of the equation; ~\newline
+\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+number of real roots.
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+The array roots is 1 dimensional size 6. The roots are orgainzed as roots\mbox{[}0\mbox{]}, roots\mbox{[}1\mbox{]} will be real and imaginary component of first root.
+\end{DoxyNote}

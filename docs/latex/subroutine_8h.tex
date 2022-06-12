@@ -1,0 +1,640 @@
+\hypertarget{subroutine_8h}{}\doxysection{includes/subroutine.h File Reference}
+\label{subroutine_8h}\index{includes/subroutine.h@{includes/subroutine.h}}
+{\ttfamily \#include \char`\"{}Vector.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}misc.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{subroutine_8h_a7467f20c463f6c4c7132d355b5ab909a}{monte\+\_\+carlo\+\_\+3d}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, double $\ast$lij\+\_\+t0, bool $\ast$is\+\_\+attractive, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} mbrane, \mbox{\hyperlink{structMCpara}{MCpara}} mcpara, \mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}} afm)
+\item 
+int \mbox{\hyperlink{subroutine_8h_a37e5e38e5a80de678a97ddbef5f923f3}{monte\+\_\+carlo\+\_\+surf2d}} (\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$Pos, \mbox{\hyperlink{structNbh__list}{Nbh\+\_\+list}} $\ast$neib, \mbox{\hyperlink{structLJpara}{LJpara}} para, \mbox{\hyperlink{structMCpara}{MCpara}} mcpara, char $\ast$metric)
+\item 
+void \mbox{\hyperlink{subroutine_8h_a970431176c094ec4b67e668151d7fb26}{init\+\_\+rng}} (uint32\+\_\+t seed\+\_\+val)
+\item 
+void \mbox{\hyperlink{subroutine_8h_a5321d1e8917b9f97394b830ab7d49c09}{make\+\_\+nlist}} (\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$Pos, \mbox{\hyperlink{structNbh__list}{Nbh\+\_\+list}} $\ast$neib, \mbox{\hyperlink{structLJpara}{LJpara}} para, char $\ast$metric)
+\item 
+bool \mbox{\hyperlink{subroutine_8h_a64b83bd51cac5c3537862bb5e69eb695}{len\+\_\+check}} (\mbox{\hyperlink{structVec2d}{Vec2d}} s1, \mbox{\hyperlink{structVec2d}{Vec2d}} s2, double len, double new\+\_\+rc, char $\ast$metric)
+\item 
+double \mbox{\hyperlink{subroutine_8h_ae44cf306e75ca953134cb2ab0ce515af}{pairlj\+\_\+ipart\+\_\+energy}} (\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$Pos, int $\ast$n\+\_\+list, int ni, int i\+\_\+p, \mbox{\hyperlink{structLJpara}{LJpara}} para, char $\ast$metric)
+\item 
+double \mbox{\hyperlink{subroutine_8h_a2e75182d3b7b24e1088a3150a610463b}{pairlj\+\_\+total\+\_\+energy}} (\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$Pos, \mbox{\hyperlink{structNbh__list}{Nbh\+\_\+list}} $\ast$neib, \mbox{\hyperlink{structLJpara}{LJpara}} para, char $\ast$metric)
+\item 
+double \mbox{\hyperlink{subroutine_8h_a40206e2bef59655c71040d11242deea6}{bending\+\_\+energy\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{subroutine_8h_a7ed7be9e5adb0de083012ecd2079e7fa}{bending\+\_\+energy\+\_\+ipart}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, int $\ast$node\+\_\+nbr, int num\+\_\+nbr, int idx, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{subroutine_8h_a07555309202fb3fcbf3fe412af8f9cf9}{bending\+\_\+energy\+\_\+ipart\+\_\+neighbour}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, int idx, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{subroutine_8h_a2a873fc263f3d97ead9c4b4c1346d8f1}{stretch\+\_\+energy\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, double $\ast$lij\+\_\+t0, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+void \mbox{\hyperlink{subroutine_8h_ab1f61d95ddd8a42be14dfc3ec5b0674c}{identify\+\_\+attractive\+\_\+part}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, bool $\ast$is\+\_\+attractive, double theta\+\_\+attr, int N)
+\item 
+double \mbox{\hyperlink{subroutine_8h_afd6bed107c42195197bc57ec3558f633}{stretch\+\_\+energy\+\_\+ipart}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, int $\ast$node\+\_\+nbr, double $\ast$lij\+\_\+t0, int num\+\_\+nbr, int idx, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{subroutine_8h_af522065b75e1d0b346519372574fe552}{lj\+\_\+bottom\+\_\+surface}} (double zz, bool is\+\_\+attractive, double sur\+\_\+pos, double eps, double sigma)
+\item 
+double \mbox{\hyperlink{subroutine_8h_ab9b5af92a94d81892d9bf196545fa0b5}{volume\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{subroutine_8h_ac5e5e4d76b0c718cfbcf52e6aa6f8c6a}{lj\+\_\+bottom\+\_\+surf\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, bool $\ast$is\+\_\+attractive, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{subroutine_8h_a9ee584d2fb221f5e73f175ac28db0c17}{volume\+\_\+ipart}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, int $\ast$node\+\_\+nbr, int num\+\_\+nbr, int idx, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{subroutine_8h_a9149b3311a758b3dd805da441b64ada3}{lj\+\_\+afm}} (\mbox{\hyperlink{classVec3d}{Vec3d}}, \mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}})
+\item 
+double \mbox{\hyperlink{subroutine_8h_a93c1473652720909c2d6f4444a918ed0}{lj\+\_\+afm\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$afm\+\_\+force, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para, \mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}} afm)
+\item 
+void \mbox{\hyperlink{subroutine_8h_ac8752add805ef7c0411d08e21628ea1c}{init\+\_\+system\+\_\+random\+\_\+pos}} (\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$Pos, double len, int N, char $\ast$metric)
+\item 
+void \mbox{\hyperlink{subroutine_8h_a58808d4342a38cbc7067d2b570381ed7}{init\+\_\+eval\+\_\+lij\+\_\+t0}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$Pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, double $\ast$lij\+\_\+t0, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} $\ast$para)
+\item 
+void \mbox{\hyperlink{subroutine_8h_a1130265d1a80d79c913449921822453e}{init\+\_\+read\+\_\+config}} ()
+\item 
+void \mbox{\hyperlink{subroutine_8h_a8ef246874bae6fa11417cca5e227ac2f}{init\+\_\+afm\+\_\+tip}} (\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}})
+\item 
+void \mbox{\hyperlink{subroutine_8h_a87fddecd053907151387301cbb5de64c}{init\+\_\+read\+\_\+parameters}} (\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} $\ast$mbrane, \mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}} $\ast$afm, \mbox{\hyperlink{structMCpara}{MCpara}} $\ast$mcpara, char $\ast$para\+\_\+file)
+\item 
+int \mbox{\hyperlink{subroutine_8h_a7c2868f89176b4be6ec5402c904f3694}{randint}} (int n)
+\item 
+void \mbox{\hyperlink{subroutine_8h_a6e6e6468198daf6bbae94dad20f68bed}{hdf5\+\_\+io\+\_\+write\+\_\+pos}} (double $\ast$Pos, int N, char $\ast$input\+\_\+file)
+\begin{DoxyCompactList}\small\item\em hdf5 IO for the mesh ~\newline
+ \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{subroutine_8h_a827fc662791b9ebe3d163623f0e0e6c5}{hdf5\+\_\+io\+\_\+read\+\_\+pos}} (double $\ast$Pos, char $\ast$input\+\_\+file)
+\item 
+void \mbox{\hyperlink{subroutine_8h_abe08ae3f2647dfe9d95c303658aa176a}{hdf5\+\_\+io\+\_\+read\+\_\+mesh}} (int $\ast$cmlist, int $\ast$node\+\_\+nbr, char $\ast$input\+\_\+file)
+\item 
+void \mbox{\hyperlink{subroutine_8h_a67652dfa84808e5cbcea6208a5b49dd4}{io\+\_\+dump\+\_\+config}} (double $\ast$Pos, int N, char $\ast$)
+\item 
+void \mbox{\hyperlink{subroutine_8h_a8456fb83ba7b57415ac3119acb0b59d6}{io\+\_\+read\+\_\+config}} (double $\ast$Pos, int N, char $\ast$)
+\item 
+void \mbox{\hyperlink{subroutine_8h_ab28e6beaf2bb57b7cf625e34c17d9db9}{io\+\_\+dump\+\_\+config\+\_\+ascii}} (double $\ast$Pos, int N, char $\ast$)
+\item 
+int \mbox{\hyperlink{subroutine_8h_a6466d44d586b320447a6c6a23fed7b57}{cubic\+\_\+solve}} (double, double, double, double, double $\ast$)
+\begin{DoxyCompactList}\small\item\em Contains function to find roots of cubic equation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{subroutine_8h_a7ed7be9e5adb0de083012ecd2079e7fa}\label{subroutine_8h_a7ed7be9e5adb0de083012ecd2079e7fa}} 
+\index{subroutine.h@{subroutine.h}!bending\_energy\_ipart@{bending\_energy\_ipart}}
+\index{bending\_energy\_ipart@{bending\_energy\_ipart}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{bending\_energy\_ipart()}{bending\_energy\_ipart()}}
+{\footnotesize\ttfamily double bending\+\_\+energy\+\_\+ipart (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{int $\ast$}]{node\+\_\+nbr,  }\item[{int}]{num\+\_\+nbr,  }\item[{int}]{idx,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the Bending energy contribution when ith particle position changes 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em idx} & index of ith particle; \\
+\hline
+{\em node\+\_\+nbr} & nearest neigbours of idx; \\
+\hline
+{\em num\+\_\+nbr} & number of nearest neigbours of idx; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Bending Energy contribution when ith particle is displaced ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_a07555309202fb3fcbf3fe412af8f9cf9}\label{subroutine_8h_a07555309202fb3fcbf3fe412af8f9cf9}} 
+\index{subroutine.h@{subroutine.h}!bending\_energy\_ipart\_neighbour@{bending\_energy\_ipart\_neighbour}}
+\index{bending\_energy\_ipart\_neighbour@{bending\_energy\_ipart\_neighbour}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{bending\_energy\_ipart\_neighbour()}{bending\_energy\_ipart\_neighbour()}}
+{\footnotesize\ttfamily double bending\+\_\+energy\+\_\+ipart\+\_\+neighbour (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{int}]{idx,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the Bending energy contribution from the neighbours when ith particle position changes 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Bending Energy contribution from the neighbours of ith particle ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_a40206e2bef59655c71040d11242deea6}\label{subroutine_8h_a40206e2bef59655c71040d11242deea6}} 
+\index{subroutine.h@{subroutine.h}!bending\_energy\_total@{bending\_energy\_total}}
+\index{bending\_energy\_total@{bending\_energy\_total}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{bending\_energy\_total()}{bending\_energy\_total()}}
+{\footnotesize\ttfamily double bending\+\_\+energy\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the total Bending energy ~\newline
+ 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total Bending energy ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_a6466d44d586b320447a6c6a23fed7b57}\label{subroutine_8h_a6466d44d586b320447a6c6a23fed7b57}} 
+\index{subroutine.h@{subroutine.h}!cubic\_solve@{cubic\_solve}}
+\index{cubic\_solve@{cubic\_solve}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{cubic\_solve()}{cubic\_solve()}}
+{\footnotesize\ttfamily int cubic\+\_\+solve (\begin{DoxyParamCaption}\item[{double}]{a,  }\item[{double}]{b,  }\item[{double}]{c,  }\item[{double}]{d,  }\item[{double $\ast$}]{roots }\end{DoxyParamCaption})}
+
+
+
+Contains function to find roots of cubic equation. 
+
+Solve the roots of equation ax$^\wedge$3 + bx$^\wedge$2 + cx + d = 0
+
+
+\begin{DoxyParams}{Parameters}
+{\em a} & coefficient of x$^\wedge$3 \\
+\hline
+{\em b} & coefficient of x$^\wedge$2 \\
+\hline
+{\em c} & coefficient of x$^\wedge$1 \\
+\hline
+{\em d} & coefficient of x$^\wedge$0 \\
+\hline
+{\em roots} & Roots of the equation; ~\newline
+\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+number of real roots.
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+The array roots is 1 dimensional size 6. The roots are orgainzed as roots\mbox{[}0\mbox{]}, roots\mbox{[}1\mbox{]} will be real and imaginary component of first root.
+\end{DoxyNote}
+\mbox{\Hypertarget{subroutine_8h_abe08ae3f2647dfe9d95c303658aa176a}\label{subroutine_8h_abe08ae3f2647dfe9d95c303658aa176a}} 
+\index{subroutine.h@{subroutine.h}!hdf5\_io\_read\_mesh@{hdf5\_io\_read\_mesh}}
+\index{hdf5\_io\_read\_mesh@{hdf5\_io\_read\_mesh}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{hdf5\_io\_read\_mesh()}{hdf5\_io\_read\_mesh()}}
+{\footnotesize\ttfamily void hdf5\+\_\+io\+\_\+read\+\_\+mesh (\begin{DoxyParamCaption}\item[{int $\ast$}]{cmlist,  }\item[{int $\ast$}]{node\+\_\+nbr,  }\item[{char $\ast$}]{input\+\_\+file }\end{DoxyParamCaption})}
+
+Read the mesh from the hdf5 file 
+\begin{DoxyParams}{Parameters}
+{\em cmlist} & array containing the number of neighbours for each particle ~\newline
+ \\
+\hline
+{\em node\+\_\+nbr} & array containing the list of neighbours for each particle ~\newline
+ \\
+\hline
+{\em input\+\_\+file} & File name from which co-\/ordinate will be read\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{subroutine_8h_a827fc662791b9ebe3d163623f0e0e6c5}\label{subroutine_8h_a827fc662791b9ebe3d163623f0e0e6c5}} 
+\index{subroutine.h@{subroutine.h}!hdf5\_io\_read\_pos@{hdf5\_io\_read\_pos}}
+\index{hdf5\_io\_read\_pos@{hdf5\_io\_read\_pos}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{hdf5\_io\_read\_pos()}{hdf5\_io\_read\_pos()}}
+{\footnotesize\ttfamily void hdf5\+\_\+io\+\_\+read\+\_\+pos (\begin{DoxyParamCaption}\item[{double $\ast$}]{Pos,  }\item[{char $\ast$}]{input\+\_\+file }\end{DoxyParamCaption})}
+
+Read from the hdf5 file 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em input\+\_\+file} & File name from which co-\/ordinate will be read\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{subroutine_8h_a6e6e6468198daf6bbae94dad20f68bed}\label{subroutine_8h_a6e6e6468198daf6bbae94dad20f68bed}} 
+\index{subroutine.h@{subroutine.h}!hdf5\_io\_write\_pos@{hdf5\_io\_write\_pos}}
+\index{hdf5\_io\_write\_pos@{hdf5\_io\_write\_pos}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{hdf5\_io\_write\_pos()}{hdf5\_io\_write\_pos()}}
+{\footnotesize\ttfamily void hdf5\+\_\+io\+\_\+write\+\_\+pos (\begin{DoxyParamCaption}\item[{double $\ast$}]{Pos,  }\item[{int}]{N,  }\item[{char $\ast$}]{input\+\_\+file }\end{DoxyParamCaption})}
+
+
+
+hdf5 IO for the mesh ~\newline
+ 
+
+hdf5 io for the position 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em N} & number of points \\
+\hline
+{\em input\+\_\+file} & File name to dump all the co-\/ordinate\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{subroutine_8h_ab1f61d95ddd8a42be14dfc3ec5b0674c}\label{subroutine_8h_ab1f61d95ddd8a42be14dfc3ec5b0674c}} 
+\index{subroutine.h@{subroutine.h}!identify\_attractive\_part@{identify\_attractive\_part}}
+\index{identify\_attractive\_part@{identify\_attractive\_part}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{identify\_attractive\_part()}{identify\_attractive\_part()}}
+{\footnotesize\ttfamily void identify\+\_\+attractive\+\_\+part (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{bool $\ast$}]{is\+\_\+attractive,  }\item[{double}]{theta\+\_\+attr,  }\item[{int}]{N }\end{DoxyParamCaption})}
+
+identify all the points which substends theta\+\_\+attr with the centre 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em is\+\_\+attractive} & true for all the particles which sees bottom wall \\
+\hline
+{\em theta\+\_\+attr} & \textbackslash{}\+Theta\+\_\+0 see paper/paper.\+pdf N number of points making the membrane\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{subroutine_8h_a8ef246874bae6fa11417cca5e227ac2f}\label{subroutine_8h_a8ef246874bae6fa11417cca5e227ac2f}} 
+\index{subroutine.h@{subroutine.h}!init\_afm\_tip@{init\_afm\_tip}}
+\index{init\_afm\_tip@{init\_afm\_tip}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{init\_afm\_tip()}{init\_afm\_tip()}}
+{\footnotesize\ttfamily void init\+\_\+afm\+\_\+tip (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}}}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{subroutine_8h_a58808d4342a38cbc7067d2b570381ed7}\label{subroutine_8h_a58808d4342a38cbc7067d2b570381ed7}} 
+\index{subroutine.h@{subroutine.h}!init\_eval\_lij\_t0@{init\_eval\_lij\_t0}}
+\index{init\_eval\_lij\_t0@{init\_eval\_lij\_t0}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{init\_eval\_lij\_t0()}{init\_eval\_lij\_t0()}}
+{\footnotesize\ttfamily void init\+\_\+eval\+\_\+lij\+\_\+t0 (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{Pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{double $\ast$}]{lij\+\_\+t0,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} $\ast$}]{para }\end{DoxyParamCaption})}
+
+evaluates distance between neighbouring points and stores in lij\+\_\+t0 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles\\
+\hline
+{\em lij\+\_\+t0} & initial distance between points of membrane\\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em para} & membrane related parameters ~\newline
+\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{subroutine_8h_a1130265d1a80d79c913449921822453e}\label{subroutine_8h_a1130265d1a80d79c913449921822453e}} 
+\index{subroutine.h@{subroutine.h}!init\_read\_config@{init\_read\_config}}
+\index{init\_read\_config@{init\_read\_config}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{init\_read\_config()}{init\_read\_config()}}
+{\footnotesize\ttfamily void init\+\_\+read\+\_\+config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{subroutine_8h_a87fddecd053907151387301cbb5de64c}\label{subroutine_8h_a87fddecd053907151387301cbb5de64c}} 
+\index{subroutine.h@{subroutine.h}!init\_read\_parameters@{init\_read\_parameters}}
+\index{init\_read\_parameters@{init\_read\_parameters}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{init\_read\_parameters()}{init\_read\_parameters()}}
+{\footnotesize\ttfamily void init\+\_\+read\+\_\+parameters (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} $\ast$}]{mbrane,  }\item[{\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}} $\ast$}]{afm,  }\item[{\mbox{\hyperlink{structMCpara}{MCpara}} $\ast$}]{mcpara,  }\item[{char $\ast$}]{para\+\_\+file }\end{DoxyParamCaption})}
+
+read parameters from para\+\_\+file 
+\begin{DoxyParams}{Parameters}
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em mbrane} & membrane related parameters \\
+\hline
+{\em afm} & AFM related parameters \\
+\hline
+{\em mcpara} & monte-\/carlo related parameters\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{subroutine_8h_a970431176c094ec4b67e668151d7fb26}\label{subroutine_8h_a970431176c094ec4b67e668151d7fb26}} 
+\index{subroutine.h@{subroutine.h}!init\_rng@{init\_rng}}
+\index{init\_rng@{init\_rng}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{init\_rng()}{init\_rng()}}
+{\footnotesize\ttfamily void init\+\_\+rng (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{seed\+\_\+val }\end{DoxyParamCaption})}
+
+Generates random number\mbox{\Hypertarget{subroutine_8h_ac8752add805ef7c0411d08e21628ea1c}\label{subroutine_8h_ac8752add805ef7c0411d08e21628ea1c}} 
+\index{subroutine.h@{subroutine.h}!init\_system\_random\_pos@{init\_system\_random\_pos}}
+\index{init\_system\_random\_pos@{init\_system\_random\_pos}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{init\_system\_random\_pos()}{init\_system\_random\_pos()}}
+{\footnotesize\ttfamily void init\+\_\+system\+\_\+random\+\_\+pos (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$}]{Pos,  }\item[{double}]{len,  }\item[{int}]{N,  }\item[{char $\ast$}]{metric }\end{DoxyParamCaption})}
+
+Initializes the points on surface of sphere or flat plane 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em metric} & Topology of the surface \char`\"{}cart\char`\"{} for flat plane \char`\"{}sph\char`\"{} for sphere \\
+\hline
+{\em len} & length of the domain; \\
+\hline
+{\em N} & number of points;\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{subroutine_8h_a67652dfa84808e5cbcea6208a5b49dd4}\label{subroutine_8h_a67652dfa84808e5cbcea6208a5b49dd4}} 
+\index{subroutine.h@{subroutine.h}!io\_dump\_config@{io\_dump\_config}}
+\index{io\_dump\_config@{io\_dump\_config}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{io\_dump\_config()}{io\_dump\_config()}}
+{\footnotesize\ttfamily void io\+\_\+dump\+\_\+config (\begin{DoxyParamCaption}\item[{double $\ast$}]{Pos,  }\item[{int}]{N,  }\item[{char $\ast$}]{file }\end{DoxyParamCaption})}
+
+dump position to the file; \begin{DoxyNote}{Note}
+The dump is in binary
+\end{DoxyNote}
+\mbox{\Hypertarget{subroutine_8h_ab28e6beaf2bb57b7cf625e34c17d9db9}\label{subroutine_8h_ab28e6beaf2bb57b7cf625e34c17d9db9}} 
+\index{subroutine.h@{subroutine.h}!io\_dump\_config\_ascii@{io\_dump\_config\_ascii}}
+\index{io\_dump\_config\_ascii@{io\_dump\_config\_ascii}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{io\_dump\_config\_ascii()}{io\_dump\_config\_ascii()}}
+{\footnotesize\ttfamily void io\+\_\+dump\+\_\+config\+\_\+ascii (\begin{DoxyParamCaption}\item[{double $\ast$}]{Pos,  }\item[{int}]{N,  }\item[{char $\ast$}]{file }\end{DoxyParamCaption})}
+
+dump position to the file in ascii;\mbox{\Hypertarget{subroutine_8h_a8456fb83ba7b57415ac3119acb0b59d6}\label{subroutine_8h_a8456fb83ba7b57415ac3119acb0b59d6}} 
+\index{subroutine.h@{subroutine.h}!io\_read\_config@{io\_read\_config}}
+\index{io\_read\_config@{io\_read\_config}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{io\_read\_config()}{io\_read\_config()}}
+{\footnotesize\ttfamily void io\+\_\+read\+\_\+config (\begin{DoxyParamCaption}\item[{double $\ast$}]{Pos,  }\item[{int}]{N,  }\item[{char $\ast$}]{file }\end{DoxyParamCaption})}
+
+Read position from the file; \begin{DoxyNote}{Note}
+The dump should be in binary
+\end{DoxyNote}
+\mbox{\Hypertarget{subroutine_8h_a64b83bd51cac5c3537862bb5e69eb695}\label{subroutine_8h_a64b83bd51cac5c3537862bb5e69eb695}} 
+\index{subroutine.h@{subroutine.h}!len\_check@{len\_check}}
+\index{len\_check@{len\_check}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{len\_check()}{len\_check()}}
+{\footnotesize\ttfamily bool len\+\_\+check (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structVec2d}{Vec2d}}}]{s1,  }\item[{\mbox{\hyperlink{structVec2d}{Vec2d}}}]{s2,  }\item[{double}]{len,  }\item[{double}]{new\+\_\+rc,  }\item[{char $\ast$}]{metric }\end{DoxyParamCaption})}
+
+checks the distance between s1 and s2 
+\begin{DoxyParams}{Parameters}
+{\em s1} & coordinate of first particle \\
+\hline
+{\em s2} & coordinate of second particle \\
+\hline
+{\em new\+\_\+rc} & square of the cutoff length \\
+\hline
+{\em metric} & Topology of the surface \char`\"{}cart\char`\"{} for flat plane \char`\"{}sph\char`\"{} for sphere \\
+\hline
+{\em len} & length of the domain \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+~\newline
+ True if (s2 -\/ s1)$^\wedge$2 is smaller than ds, False otherwise
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_a9149b3311a758b3dd805da441b64ada3}\label{subroutine_8h_a9149b3311a758b3dd805da441b64ada3}} 
+\index{subroutine.h@{subroutine.h}!lj\_afm@{lj\_afm}}
+\index{lj\_afm@{lj\_afm}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{lj\_afm()}{lj\_afm()}}
+{\footnotesize\ttfamily double lj\+\_\+afm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{pos,  }\item[{\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}}}]{afm }\end{DoxyParamCaption})}
+
+Energy contribution from AFM tip to ith point in membrane 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & co-\/ordinates of the ith particle \\
+\hline
+{\em afm} & afm related parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Energy contribution when form tip to the ith particle
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_a93c1473652720909c2d6f4444a918ed0}\label{subroutine_8h_a93c1473652720909c2d6f4444a918ed0}} 
+\index{subroutine.h@{subroutine.h}!lj\_afm\_total@{lj\_afm\_total}}
+\index{lj\_afm\_total@{lj\_afm\_total}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{lj\_afm\_total()}{lj\_afm\_total()}}
+{\footnotesize\ttfamily double lj\+\_\+afm\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{afm\+\_\+force,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para,  }\item[{\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}}}]{afm }\end{DoxyParamCaption})}
+
+Energy contribution from AFM tip to all the point in membrane 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & co-\/ordinates of the ith particle \\
+\hline
+{\em para} & Membrane related parameters \\
+\hline
+{\em afm\+\_\+force} & Total force exerted by afm tip on shell. \\
+\hline
+{\em afm} & afm related parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total Energy contribution form the tip to the particle
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_ac5e5e4d76b0c718cfbcf52e6aa6f8c6a}\label{subroutine_8h_ac5e5e4d76b0c718cfbcf52e6aa6f8c6a}} 
+\index{subroutine.h@{subroutine.h}!lj\_bottom\_surf\_total@{lj\_bottom\_surf\_total}}
+\index{lj\_bottom\_surf\_total@{lj\_bottom\_surf\_total}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{lj\_bottom\_surf\_total()}{lj\_bottom\_surf\_total()}}
+{\footnotesize\ttfamily double lj\+\_\+bottom\+\_\+surf\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{bool $\ast$}]{is\+\_\+attractive,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the total Sticking ~\newline
+ 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em is\+\_\+attractive} & true for all the particles which sees bottom wall \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total Energy contribution from Sticking to bottom surface
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_af522065b75e1d0b346519372574fe552}\label{subroutine_8h_af522065b75e1d0b346519372574fe552}} 
+\index{subroutine.h@{subroutine.h}!lj\_bottom\_surface@{lj\_bottom\_surface}}
+\index{lj\_bottom\_surface@{lj\_bottom\_surface}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{lj\_bottom\_surface()}{lj\_bottom\_surface()}}
+{\footnotesize\ttfamily double lj\+\_\+bottom\+\_\+surface (\begin{DoxyParamCaption}\item[{double}]{zz,  }\item[{bool}]{is\+\_\+attractive,  }\item[{double}]{sur\+\_\+pos,  }\item[{double}]{eps,  }\item[{double}]{sigma }\end{DoxyParamCaption})}
+
+Sticking of the bottom surface using LJ potential 
+\begin{DoxyParams}{Parameters}
+{\em zz} & z-\/coordinate of a point in shell \\
+\hline
+{\em eps} & coefficient of the potential \\
+\hline
+{\em sigma} & sigma in the expression of LJ potential \\
+\hline
+{\em sur\+\_\+pos} & position of the bottom wall \\
+\hline
+{\em is\+\_\+attractive} & true if the zz sees the bottom wall \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Energy evaluated using Lennard-\/\+Jones potential.
+\end{DoxyReturn}
+see \href{https://en.wikipedia.org/wiki/Lennard-Jones_potential}{\texttt{ https\+://en.\+wikipedia.\+org/wiki/\+Lennard-\/\+Jones\+\_\+potential}}\mbox{\Hypertarget{subroutine_8h_a5321d1e8917b9f97394b830ab7d49c09}\label{subroutine_8h_a5321d1e8917b9f97394b830ab7d49c09}} 
+\index{subroutine.h@{subroutine.h}!make\_nlist@{make\_nlist}}
+\index{make\_nlist@{make\_nlist}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{make\_nlist()}{make\_nlist()}}
+{\footnotesize\ttfamily void make\+\_\+nlist (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$}]{Pos,  }\item[{\mbox{\hyperlink{structNbh__list}{Nbh\+\_\+list}} $\ast$}]{neib,  }\item[{\mbox{\hyperlink{structLJpara}{LJpara}}}]{para,  }\item[{char $\ast$}]{metric }\end{DoxyParamCaption})}
+
+Makes a list of neighbouring particles for every particle ~\newline
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em neib} & array containing array of neigbours for each particle ~\newline
+ \\
+\hline
+{\em para} & Parameters of lennard jones potential \\
+\hline
+{\em metric} & Topology of the surface \char`\"{}cart\char`\"{} for flat plane \char`\"{}sph\char`\"{} for sphere\\
+\hline
+\end{DoxyParams}
+calculates distance between the particle and stores the index of particle lying within a circle of certain radius in neib\mbox{\Hypertarget{subroutine_8h_a7467f20c463f6c4c7132d355b5ab909a}\label{subroutine_8h_a7467f20c463f6c4c7132d355b5ab909a}} 
+\index{subroutine.h@{subroutine.h}!monte\_carlo\_3d@{monte\_carlo\_3d}}
+\index{monte\_carlo\_3d@{monte\_carlo\_3d}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{monte\_carlo\_3d()}{monte\_carlo\_3d()}}
+{\footnotesize\ttfamily int monte\+\_\+carlo\+\_\+3d (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{double $\ast$}]{lij\+\_\+t0,  }\item[{bool $\ast$}]{is\+\_\+attractive,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{mbrane,  }\item[{\mbox{\hyperlink{structMCpara}{MCpara}}}]{mcpara,  }\item[{\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}}}]{afm }\end{DoxyParamCaption})}
+
+Monte-\/\+Carlo routine for the membrane 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information \\
+\hline
+{\em lij\+\_\+t0} & initial distance between points of membrane \\
+\hline
+{\em is\+\_\+attractive} & true if the zz sees the bottom wall \\
+\hline
+{\em mbrane} & Membrane related parameters; \\
+\hline
+{\em mcpara} & Monte-\/\+Carlo related parameters \\
+\hline
+{\em AFM} & afm related parameter \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+number of accepted moves ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_a37e5e38e5a80de678a97ddbef5f923f3}\label{subroutine_8h_a37e5e38e5a80de678a97ddbef5f923f3}} 
+\index{subroutine.h@{subroutine.h}!monte\_carlo\_surf2d@{monte\_carlo\_surf2d}}
+\index{monte\_carlo\_surf2d@{monte\_carlo\_surf2d}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{monte\_carlo\_surf2d()}{monte\_carlo\_surf2d()}}
+{\footnotesize\ttfamily int monte\+\_\+carlo\+\_\+surf2d (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$}]{Pos,  }\item[{\mbox{\hyperlink{structNbh__list}{Nbh\+\_\+list}} $\ast$}]{neib,  }\item[{\mbox{\hyperlink{structLJpara}{LJpara}}}]{para,  }\item[{\mbox{\hyperlink{structMCpara}{MCpara}}}]{mcpara,  }\item[{char $\ast$}]{metric }\end{DoxyParamCaption})}
+
+Monte-\/\+Carlo routine for the points on the surface of sphere or flat plane 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em neib} & Neighbour list information for the particle \\
+\hline
+{\em para} & parameters related to LJ potential \\
+\hline
+{\em mcpara} & Monte-\/\+Carlo related parameters \\
+\hline
+{\em metric} & Topology of the surface \char`\"{}cart\char`\"{} for flat plane \char`\"{}sph\char`\"{} for sphere \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+number of accepted moves ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_ae44cf306e75ca953134cb2ab0ce515af}\label{subroutine_8h_ae44cf306e75ca953134cb2ab0ce515af}} 
+\index{subroutine.h@{subroutine.h}!pairlj\_ipart\_energy@{pairlj\_ipart\_energy}}
+\index{pairlj\_ipart\_energy@{pairlj\_ipart\_energy}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{pairlj\_ipart\_energy()}{pairlj\_ipart\_energy()}}
+{\footnotesize\ttfamily double pairlj\+\_\+ipart\+\_\+energy (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$}]{Pos,  }\item[{int $\ast$}]{n\+\_\+list,  }\item[{int}]{ni,  }\item[{int}]{i\+\_\+p,  }\item[{\mbox{\hyperlink{structLJpara}{LJpara}}}]{para,  }\item[{char $\ast$}]{metric }\end{DoxyParamCaption})}
+
+Estimate the energy of ith particle 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em i\+\_\+p} & index of ith particle; \\
+\hline
+{\em n\+\_\+list} & array containing index of particles neibouring i\+\_\+p; \\
+\hline
+{\em ni} & number of neigbours; \\
+\hline
+{\em para} & Parameters of lennard jones potential \\
+\hline
+{\em metric} & Topology of the surface \char`\"{}cart\char`\"{} for flat plane \char`\"{}sph\char`\"{} for sphere \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Energy of the ith particle.
+\end{DoxyReturn}
+see \href{https://en.wikipedia.org/wiki/Lennard-Jones_potential}{\texttt{ https\+://en.\+wikipedia.\+org/wiki/\+Lennard-\/\+Jones\+\_\+potential}}\mbox{\Hypertarget{subroutine_8h_a2e75182d3b7b24e1088a3150a610463b}\label{subroutine_8h_a2e75182d3b7b24e1088a3150a610463b}} 
+\index{subroutine.h@{subroutine.h}!pairlj\_total\_energy@{pairlj\_total\_energy}}
+\index{pairlj\_total\_energy@{pairlj\_total\_energy}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{pairlj\_total\_energy()}{pairlj\_total\_energy()}}
+{\footnotesize\ttfamily double pairlj\+\_\+total\+\_\+energy (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structVec2d}{Vec2d}} $\ast$}]{Pos,  }\item[{\mbox{\hyperlink{structNbh__list}{Nbh\+\_\+list}} $\ast$}]{neib,  }\item[{\mbox{\hyperlink{structLJpara}{LJpara}}}]{para,  }\item[{char $\ast$}]{metric }\end{DoxyParamCaption})}
+
+Estimate the total energy of the system
+
+
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em neib} & array containing list of neibouring particles to each particle; \\
+\hline
+{\em para} & Parameters of lennard jones potential \\
+\hline
+{\em metric} & Topology of the surface \char`\"{}cart\char`\"{} for flat plane \char`\"{}sph\char`\"{} for sphere \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total energy of the system.
+\end{DoxyReturn}
+see \href{https://en.wikipedia.org/wiki/Lennard-Jones_potential}{\texttt{ https\+://en.\+wikipedia.\+org/wiki/\+Lennard-\/\+Jones\+\_\+potential}}\mbox{\Hypertarget{subroutine_8h_a7c2868f89176b4be6ec5402c904f3694}\label{subroutine_8h_a7c2868f89176b4be6ec5402c904f3694}} 
+\index{subroutine.h@{subroutine.h}!randint@{randint}}
+\index{randint@{randint}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{randint()}{randint()}}
+{\footnotesize\ttfamily int randint (\begin{DoxyParamCaption}\item[{int}]{n }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{subroutine_8h_afd6bed107c42195197bc57ec3558f633}\label{subroutine_8h_afd6bed107c42195197bc57ec3558f633}} 
+\index{subroutine.h@{subroutine.h}!stretch\_energy\_ipart@{stretch\_energy\_ipart}}
+\index{stretch\_energy\_ipart@{stretch\_energy\_ipart}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{stretch\_energy\_ipart()}{stretch\_energy\_ipart()}}
+{\footnotesize\ttfamily double stretch\+\_\+energy\+\_\+ipart (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{int $\ast$}]{node\+\_\+nbr,  }\item[{double $\ast$}]{lij\+\_\+t0,  }\item[{int}]{num\+\_\+nbr,  }\item[{int}]{idx,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the Stretching energy contribution when ith particle position changes 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em idx} & index of ith particle; \\
+\hline
+{\em node\+\_\+nbr} & nearest neigbours of idx; \\
+\hline
+{\em lij\+\_\+t0} & initial distance between points of membrane \\
+\hline
+{\em num\+\_\+nbr} & number of nearest neigbours of idx; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Stretching Energy contribution when ith particle is displaced ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_a2a873fc263f3d97ead9c4b4c1346d8f1}\label{subroutine_8h_a2a873fc263f3d97ead9c4b4c1346d8f1}} 
+\index{subroutine.h@{subroutine.h}!stretch\_energy\_total@{stretch\_energy\_total}}
+\index{stretch\_energy\_total@{stretch\_energy\_total}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{stretch\_energy\_total()}{stretch\_energy\_total()}}
+{\footnotesize\ttfamily double stretch\+\_\+energy\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{double $\ast$}]{lij\+\_\+t0,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the total Stretching energy ~\newline
+ 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em lij\+\_\+t0} & initial distance between points of membrane \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total Stretching energy ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_a9ee584d2fb221f5e73f175ac28db0c17}\label{subroutine_8h_a9ee584d2fb221f5e73f175ac28db0c17}} 
+\index{subroutine.h@{subroutine.h}!volume\_ipart@{volume\_ipart}}
+\index{volume\_ipart@{volume\_ipart}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{volume\_ipart()}{volume\_ipart()}}
+{\footnotesize\ttfamily double volume\+\_\+ipart (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{int $\ast$}]{node\+\_\+nbr,  }\item[{int}]{num\+\_\+nbr,  }\item[{int}]{idx,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the volume substended by voronoi area of the ith particle 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em idx} & index of ith particle; \\
+\hline
+{\em node\+\_\+nbr} & nearest neigbours of idx; \\
+\hline
+{\em num\+\_\+nbr} & number of nearest neigbours of idx; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Volume substended by ith particle.
+\end{DoxyReturn}
+\mbox{\Hypertarget{subroutine_8h_ab9b5af92a94d81892d9bf196545fa0b5}\label{subroutine_8h_ab9b5af92a94d81892d9bf196545fa0b5}} 
+\index{subroutine.h@{subroutine.h}!volume\_total@{volume\_total}}
+\index{volume\_total@{volume\_total}!subroutine.h@{subroutine.h}}
+\doxysubsubsection{\texorpdfstring{volume\_total()}{volume\_total()}}
+{\footnotesize\ttfamily double volume\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the total volume of the shell 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total volume of the shell ~\newline
+
+\end{DoxyReturn}

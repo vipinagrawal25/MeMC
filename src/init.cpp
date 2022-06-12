@@ -2,6 +2,14 @@
 #include "subroutine.h"
 
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
+
+    /// @brief Initializes the points on surface of sphere or flat plane
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param metric Topology of the surface "cart" for flat plane "sph" for
+    /// sphere
+    ///  @param len length of the domain;
+    ///  @param N number of points;
+
     bool is_sph, is_cart;
 
     is_sph = false;
@@ -49,6 +57,13 @@ void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
 void init_eval_lij_t0(Vec3d *Pos, MESH mesh, 
         double *lij_t0, MBRANE_para *para){
 
+    /// @brief evaluates distance between neighbouring points and stores in lij_t0
+    ///  @param Pos array containing co-ordinates of all the particles
+   /// @param lij_t0 initial distance between points of membrane
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    /// information; 
+    ///  @param para membrane related parameters 
+  
     Vec3d dr;
     int i,j,k;
     int num_nbr, cm_idx;
@@ -70,7 +85,15 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
 
 void init_read_parameters( MBRANE_para *mbrane, 
         AFM_para *afm, MCpara *mcpara, char *para_file){
-    
+ 
+    /// @brief read parameters from para_file 
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    /// information; 
+    ///  @param mbrane membrane related parameters
+    ///  @param afm AFM related parameters
+    ///  @param mcpara monte-carlo related parameters
+    //
+    //
     char buff[255];
     int t_n, t_n2, t_n3;
     double td1, td2, td3, td4, td5;

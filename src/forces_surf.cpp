@@ -157,7 +157,6 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     cot_times_rij.z = 0e0;
     //
 
-
     double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
     double area_ijk,area_ijkp;
     double lijsq,liksq,ljksq,likpsq,ljkpsq;

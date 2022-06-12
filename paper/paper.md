@@ -129,7 +129,7 @@ Here $K$ is the volume compressibility, $Y$ the Young's modulus, and
 $\sigma$ the Poisson ratio.
 
 If we consider the material to be incompressible, $K \to \infty$ and
-$\sigma = 1/2$, then $$Y = \frac{\mu}{3}$$.
+$\sigma = 1/2$, then $$Y = \frac{\mu}{3}. $$
 Now there are two elastic constant, the bending
 rigidity $B$ and the Young's modulus $Y$. Consequently, there are two
 dimensionless numbers, the Föppl--von-Karman number
@@ -196,7 +196,6 @@ $R_\mathrm{i}$ and $R_\mathrm{j}$ are connected by a bond of length $\ell^\mathr
 $i$-th point is moved all its bonds with the neighbors change from their
 initial length. We model each of these bonds by a harmonic spring and
 calculate the stretching energy by
-
 
 \begin{equation}
       E_\mathrm{s} = \frac{1}{2}\sum_i \frac{H}{2}\sum_{j(i)}  \left(R_\mathrm{ij} - \ell^\mathrm{0}_\mathrm{ij}\right)^2 \quad\text{where}

@@ -1,0 +1,82 @@
+`Consider fixing the compilation warnings listed below:
+src/init.cpp: In function ‘void init_read_parameters(MBRANE_para*, AFM_para*, MCpara*, char*)’:
+src/init.cpp:102:37: warning: format ‘%d’ expects a matching ‘int*’ argument [-Wformat=] ...`
+We have fixed all the errors in the current version.
+
+`Is there a reason to use 60000 MC steps by default? Should this parameter be
+accessible to the user in the exe_start driver?`
+Thank you for the suggestion. In the current version, we have made this parameter accessible
+to the user. The forth command line argument to exe_start driver is now the MC steps.
+
+Code organization:
+`Consider generating a library so that external application codes can link to it.
+Consider moving the bulk of the work performed in the drivers start.cpp and
+memc.cpp to separate functions located at the src/ folder. This way, you can create
+a library that distributes those functionalities to external users.`
+
+
+`I could not find API documentation anywhere. For example, what are the meanings of the
+input/output parameters used in functions such as monte_carlo_surf2d,
+pairlj_total_energy, and monte_carlo_3d? Consider using a documentation generator
+tool such as Doxygen. Note that functions should be annotated to be able to
+automatically generate the documentation.`
+We have generated the documentation using Doxygen and is now hosted at vipinagrawal25.github.io/memc.
+
+`Add a make clean target (could be the same as make distclean).`
+We have added make clean, which removes all the object and executable files.
+
+
+`Code performance:
+Have you considered multithreading, e.g., via OpenMP, to speedup functions that take
+most of the execution time? For example, Gprof indicates that cal_length takes up to
+70% of the execution time of exe_start and bending_energy_ipart takes up to 90% of
+the execution time of exe_memc. Would it be possible to reduce the execution time of
+these particular functions?`
+
+We have not considered multi-threading as of now. In this Monte-Carlo simulations, 
+the parallelization is not straightforward as one is allowed to move one particle randomly in any instance. 
+In parallelization it may happen that multiple moves are conducted at the same time. Although, we agree that certain routines can be made parallel 
+using OpenMP. We plan to work on those aspect in the future. 
+
+Minor changes in the text:
+`Lines 60-61: did you mean: there are two elastic constants to be determined? Can you
+elaborate on this statement?`
+In the theory of elasticity, a 2-dimensional material embedded in 3D has an in-plane motion (amplitude depends upon bending rigidity, B) and out-of-plane motion (depends upon Young's modulus, Y). In addition to this, compressibility of the material, measure of expansion/contraction in the perpendicular direction to the load (Poisson ratio, \sigma), is taken into account to describe an entire material. Another way to define properties of material can be done using two in-plane Lame coefficient, \lambda, \mu. In equation (4), we describe the relation between Lame coefficient and other parameters.
+
+If we consider the material to be incompressible then K \to \infty, \sigma = 1.2, so Y = 1/3\mu.
+Now there are only two elastic coefficients, bending rigidity B and the Young's modulus Y to be determined.
+
+We have added the last paragraph in the text for more clarification.
+
+`Line 64: should the definition of R be moved closer to its first appearance, i.e.,
+closer to Equation 3?`
+Yes. We now define R below equation 3.
+
+`What is the meaning of K_B in Equation 6?`
+k_B is the boltzmann constant (1.380649 × 10-23 SI units). We have also added the definition in the text as well. 
+
+`What is the meaning of H in Equation 9?`
+H is the stretching coefficient, which was already defined below equation (8).
+
+`Lines 110-113, 119, 127: which subsubsection are you talking about? I cannot see the
+numbers.`
+In the earlier version, the referencing was done incorrectly. Now we have fixed it.
+
+`In Equation 17, how \Delta V is computed? Is it simply V - V_0?`
+\Delta V is the change in volume in the subsequent Monte-Carlo iteration due to the move. It is explained below equation (17). Hence it is different from V-V_0 \equiv current_volume - initial_volume.
+
+`Line 121-122: remove the text ::: subequations :::`
+Done.
+
+`Add community guidelines which should contain information about how to:
+Contribute to the software.`
+
+`Report issues or problems with the software.
+Seek support.`
+
+`Add white background to the figure: https://github.com/vipinagrawal25/MeMC/blob/main/paper/fig/describe_theta.png`
+
+
+Update links in https://github.com/vipinagrawal25/MeMC/blob/main/README.md#example
+gnuplot: http://www.gnuplot.info/
+GNU GSL: https://www.gnu.org/software/gsl/

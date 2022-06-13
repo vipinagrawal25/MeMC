@@ -50,6 +50,7 @@ obj/%.o : src/%.cpp $(includes)
 clean:
 	@rm -rf bin $(object)
 	@echo "all obj bin cleared"
+
 distclean:
 	@rm -rf bin $(object) 
 	@echo "all data cleared"

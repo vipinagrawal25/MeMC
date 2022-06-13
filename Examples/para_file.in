@@ -5,7 +5,7 @@ radius	pos_bot_wall	sigma	epsilon   theta_attractive
 1.00     -1.05          0.17     4.00     0.52
 ## Montecarlo parameters
 Dfac	kBT mc_total_iters	mc_dump_iter
-4       1.00  50000            100
+4       1.00  10000            100
 ## Afm Tip parameters
 tip_radius	tip_pos_z	afm_sigma	afm_epsilon
 0.20         1.05       0.17         4.00

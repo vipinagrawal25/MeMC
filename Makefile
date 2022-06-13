@@ -1,9 +1,10 @@
-CC = g++ 
+CC = h5c++ 
 #
-opt = -O3
-ifeq ($(debug), y)
-	opt = -g3  -Wall -pedantic
-endif
+# opt = -O3
+opt= -pg
+# ifeq ($(debug), y)
+# 	opt = -g3  -Wall -pedantic
+# endif
 
 link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes
 # 
@@ -46,6 +47,9 @@ obj/%.o : src/%.cpp $(includes)
 	$(info Compiling $<)
 	$(CC) -Iobj -c $< -o $@ $(link)
 #
+clean:
+	@rm -rf bin $(object)
+	@echo "all obj bin cleared"
 distclean:
 	@rm -rf bin $(object) 
 	@echo "all data cleared"

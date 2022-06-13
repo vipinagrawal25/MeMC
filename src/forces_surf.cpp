@@ -152,11 +152,10 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     // nhat is outward normal.
     Vec3d lap_bel,lap_bel_t0,nhat;
     // double curv_t0 = 2e0/para.radius;
-    cot_times_rij.x = 0e0;
-    cot_times_rij.y = 0e0;
-    cot_times_rij.z = 0e0;
+    // cot_times_rij.x = 0e0;
+    // cot_times_rij.y = 0e0;
+    // cot_times_rij.z = 0e0;
     //
-
     double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
     double area_ijk,area_ijkp;
     double lijsq,liksq,ljksq,likpsq,ljkpsq;
@@ -165,7 +164,6 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     int jdx,kdx,kpdx,jdxp1;
     double cot_sum;
     sigma_i = 0e0;
-
     for (int j = 0; j < num_nbr; j++){
         jdx = node_nbr[j];
         jdxp1=node_nbr[(j+1)%num_nbr];
@@ -177,12 +175,19 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
         /* printf("%05d %05d %05d %05d %05d\n", idx, kdx, kpdx, */
                 /* node_nbr[(j+1+num_nbr)%num_nbr], node_nbr[(j-1+num_nbr)%num_nbr]); */
         //
-        xij = Vec3d_add(pos[idx], pos[jdx], -1e0);
-        xijp1 = Vec3d_add(pos[idx], pos[jdxp1], -1e0);
-        xik = Vec3d_add(pos[idx], pos[kdx], -1e0);
-        xjk = Vec3d_add(pos[jdx], pos[kdx], -1e0);
-        xikp = Vec3d_add(pos[idx], pos[kpdx], -1e0);
-        xjkp = Vec3d_add(pos[jdx], pos[kpdx], -1e0);
+        xij = pos[idx]- pos[jdx];
+        xijp1 = pos[idx]- pos[jdxp1];
+        xik = pos[idx]- pos[kdx];
+        xjk = pos[jdx]- pos[kdx]; 
+        xikp = pos[idx]- pos[kpdx];
+        xjkp = pos[jdx]- pos[kpdx];
+        //
+        // xij = Vec3d_add(pos[idx], pos[jdx], -1e0);
+        // xijp1 = Vec3d_add(pos[idx], pos[jdxp1], -1e0);
+        // xik = Vec3d_add(pos[idx], pos[kdx], -1e0);
+        // xjk = Vec3d_add(pos[jdx], pos[kdx], -1e0);
+        // xikp = Vec3d_add(pos[idx], pos[kpdx], -1e0);
+        // xjkp = Vec3d_add(pos[jdx], pos[kpdx], -1e0);
         //
         lijsq = inner_product(xij,xij);
         liksq = inner_product(xik,xik);
@@ -402,4 +407,3 @@ double lj_afm_total(Vec3d *pos,
     *afm_force  = f_t;
     return lj_afm_e;
 }
-

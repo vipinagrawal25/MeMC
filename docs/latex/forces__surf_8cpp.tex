@@ -1,0 +1,406 @@
+\hypertarget{forces__surf_8cpp}{}\doxysection{src/forces\+\_\+surf.cpp File Reference}
+\label{forces__surf_8cpp}\index{src/forces\_surf.cpp@{src/forces\_surf.cpp}}
+{\ttfamily \#include \char`\"{}global.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}subroutine.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{forces__surf_8cpp_ac740756f75e53153605d2702b30d2a9d}{sign}}(x)~((x $>$ 0) ? 1 \+: ((x $<$ 0) ? -\/1 \+: 0))
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a17dc827c024797f1305a86c826e6a4d9}{cotangent}} (\mbox{\hyperlink{classVec3d}{Vec3d}} si, \mbox{\hyperlink{classVec3d}{Vec3d}} sk, \mbox{\hyperlink{classVec3d}{Vec3d}} sj)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a2de86cec6d7112714c243bcfab6eace3}{cotangent}} (double a, double b, double c)
+\item 
+\mbox{\hyperlink{classVec3d}{Vec3d}} \mbox{\hyperlink{forces__surf_8cpp_ad5371fa8097b5d37b9bdb9259a4bad07}{determine\+\_\+xyz\+\_\+parabola}} (\mbox{\hyperlink{classVec3d}{Vec3d}} pos, \mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}} afm)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a9ee584d2fb221f5e73f175ac28db0c17}{volume\+\_\+ipart}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, int $\ast$node\+\_\+nbr, int num\+\_\+nbr, int idx, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_afd6bed107c42195197bc57ec3558f633}{stretch\+\_\+energy\+\_\+ipart}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, int $\ast$node\+\_\+nbr, double $\ast$lij\+\_\+t0, int num\+\_\+nbr, int idx, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a153f7173662da5a11c83efc37ac36ddd}{voronoi\+\_\+area}} (double cotJ, double cotK, double jsq, double ksq, double area)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a7ed7be9e5adb0de083012ecd2079e7fa}{bending\+\_\+energy\+\_\+ipart}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, int $\ast$node\+\_\+nbr, int num\+\_\+nbr, int idx, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a07555309202fb3fcbf3fe412af8f9cf9}{bending\+\_\+energy\+\_\+ipart\+\_\+neighbour}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, int idx, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_ab9b5af92a94d81892d9bf196545fa0b5}{volume\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a40206e2bef59655c71040d11242deea6}{bending\+\_\+energy\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a2a873fc263f3d97ead9c4b4c1346d8f1}{stretch\+\_\+energy\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{structMESH}{MESH}} mesh, double $\ast$lij\+\_\+t0, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a02c3860fc4bb2c72fa3f3d5e49eb00f7}{lj\+\_\+rep}} (double sqdr, double eps)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a6ada87d9f1bd665ff2404b3527983271}{lj\+\_\+attr}} (double sqdr, double eps)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_af522065b75e1d0b346519372574fe552}{lj\+\_\+bottom\+\_\+surface}} (double zz, bool is\+\_\+attractive, double sur\+\_\+pos, double eps, double sigma)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_ac5e5e4d76b0c718cfbcf52e6aa6f8c6a}{lj\+\_\+bottom\+\_\+surf\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, bool $\ast$is\+\_\+attractive, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para)
+\item 
+void \mbox{\hyperlink{forces__surf_8cpp_ab1f61d95ddd8a42be14dfc3ec5b0674c}{identify\+\_\+attractive\+\_\+part}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, bool $\ast$is\+\_\+attractive, double theta\+\_\+attr, int N)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a8d5b03c42e074491e80c33d6a0b2050d}{lj\+\_\+afm}} (\mbox{\hyperlink{classVec3d}{Vec3d}} pos, \mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}} afm)
+\item 
+double \mbox{\hyperlink{forces__surf_8cpp_a93c1473652720909c2d6f4444a918ed0}{lj\+\_\+afm\+\_\+total}} (\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, \mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$afm\+\_\+force, \mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}} para, \mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}} afm)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{forces__surf_8cpp_ac740756f75e53153605d2702b30d2a9d}\label{forces__surf_8cpp_ac740756f75e53153605d2702b30d2a9d}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!sign@{sign}}
+\index{sign@{sign}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{sign}{sign}}
+{\footnotesize\ttfamily \#define sign(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~((x $>$ 0) ? 1 \+: ((x $<$ 0) ? -\/1 \+: 0))}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{forces__surf_8cpp_a7ed7be9e5adb0de083012ecd2079e7fa}\label{forces__surf_8cpp_a7ed7be9e5adb0de083012ecd2079e7fa}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!bending\_energy\_ipart@{bending\_energy\_ipart}}
+\index{bending\_energy\_ipart@{bending\_energy\_ipart}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{bending\_energy\_ipart()}{bending\_energy\_ipart()}}
+{\footnotesize\ttfamily double bending\+\_\+energy\+\_\+ipart (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{int $\ast$}]{node\+\_\+nbr,  }\item[{int}]{num\+\_\+nbr,  }\item[{int}]{idx,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the Bending energy contribution when ith particle position changes 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em idx} & index of ith particle; \\
+\hline
+{\em node\+\_\+nbr} & nearest neigbours of idx; \\
+\hline
+{\em num\+\_\+nbr} & number of nearest neigbours of idx; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Bending Energy contribution when ith particle is displaced ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a07555309202fb3fcbf3fe412af8f9cf9}\label{forces__surf_8cpp_a07555309202fb3fcbf3fe412af8f9cf9}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!bending\_energy\_ipart\_neighbour@{bending\_energy\_ipart\_neighbour}}
+\index{bending\_energy\_ipart\_neighbour@{bending\_energy\_ipart\_neighbour}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{bending\_energy\_ipart\_neighbour()}{bending\_energy\_ipart\_neighbour()}}
+{\footnotesize\ttfamily double bending\+\_\+energy\+\_\+ipart\+\_\+neighbour (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{int}]{idx,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the Bending energy contribution from the neighbours when ith particle position changes 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Bending Energy contribution from the neighbours of ith particle ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a40206e2bef59655c71040d11242deea6}\label{forces__surf_8cpp_a40206e2bef59655c71040d11242deea6}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!bending\_energy\_total@{bending\_energy\_total}}
+\index{bending\_energy\_total@{bending\_energy\_total}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{bending\_energy\_total()}{bending\_energy\_total()}}
+{\footnotesize\ttfamily double bending\+\_\+energy\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the total Bending energy ~\newline
+ 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total Bending energy ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a2de86cec6d7112714c243bcfab6eace3}\label{forces__surf_8cpp_a2de86cec6d7112714c243bcfab6eace3}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!cotangent@{cotangent}}
+\index{cotangent@{cotangent}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{cotangent()}{cotangent()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily double cotangent (\begin{DoxyParamCaption}\item[{double}]{a,  }\item[{double}]{b,  }\item[{double}]{c }\end{DoxyParamCaption})}
+
+a, b, c are the length of the sides of a triangle
+
+\begin{DoxyReturn}{Returns}
+0.\+25$\ast$(a$\ast$a+b$\ast$b-\/c$\ast$c)/area; where area is the area of triangle
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a17dc827c024797f1305a86c826e6a4d9}\label{forces__surf_8cpp_a17dc827c024797f1305a86c826e6a4d9}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!cotangent@{cotangent}}
+\index{cotangent@{cotangent}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{cotangent()}{cotangent()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily double cotangent (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{si,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{sk,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{sj }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em si} & coordinate of ith point \\
+\hline
+{\em sk} & coordinate of kth point \\
+\hline
+{\em sj} & coordinate of jth point ~\newline
+\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+(\{si-\/sk\}.\{sj-\/sk\})/sqrt((\{si-\/sk\}x\{sj-\/sk\})$^\wedge$2) angle between vector si and sj
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_ad5371fa8097b5d37b9bdb9259a4bad07}\label{forces__surf_8cpp_ad5371fa8097b5d37b9bdb9259a4bad07}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!determine\_xyz\_parabola@{determine\_xyz\_parabola}}
+\index{determine\_xyz\_parabola@{determine\_xyz\_parabola}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{determine\_xyz\_parabola()}{determine\_xyz\_parabola()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classVec3d}{Vec3d}} determine\+\_\+xyz\+\_\+parabola (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{pos,  }\item[{\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}}}]{afm }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & position of a point in membrane \\
+\hline
+{\em afm} & parameters of AFM tip\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+position of point on afm tip nearest to pos
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_ab1f61d95ddd8a42be14dfc3ec5b0674c}\label{forces__surf_8cpp_ab1f61d95ddd8a42be14dfc3ec5b0674c}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!identify\_attractive\_part@{identify\_attractive\_part}}
+\index{identify\_attractive\_part@{identify\_attractive\_part}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{identify\_attractive\_part()}{identify\_attractive\_part()}}
+{\footnotesize\ttfamily void identify\+\_\+attractive\+\_\+part (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{bool $\ast$}]{is\+\_\+attractive,  }\item[{double}]{theta\+\_\+attr,  }\item[{int}]{N }\end{DoxyParamCaption})}
+
+identify all the points which substends theta\+\_\+attr with the centre 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em is\+\_\+attractive} & true for all the particles which sees bottom wall \\
+\hline
+{\em theta\+\_\+attr} & \textbackslash{}\+Theta\+\_\+0 see paper/paper.\+pdf N number of points making the membrane\\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{forces__surf_8cpp_a8d5b03c42e074491e80c33d6a0b2050d}\label{forces__surf_8cpp_a8d5b03c42e074491e80c33d6a0b2050d}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!lj\_afm@{lj\_afm}}
+\index{lj\_afm@{lj\_afm}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{lj\_afm()}{lj\_afm()}}
+{\footnotesize\ttfamily double lj\+\_\+afm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{pos,  }\item[{\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}}}]{afm }\end{DoxyParamCaption})}
+
+Energy contribution from AFM tip to ith point in membrane 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & co-\/ordinates of the ith particle \\
+\hline
+{\em afm} & afm related parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Energy contribution when form tip to the ith particle
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a93c1473652720909c2d6f4444a918ed0}\label{forces__surf_8cpp_a93c1473652720909c2d6f4444a918ed0}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!lj\_afm\_total@{lj\_afm\_total}}
+\index{lj\_afm\_total@{lj\_afm\_total}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{lj\_afm\_total()}{lj\_afm\_total()}}
+{\footnotesize\ttfamily double lj\+\_\+afm\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{afm\+\_\+force,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para,  }\item[{\mbox{\hyperlink{structAFM__para}{AFM\+\_\+para}}}]{afm }\end{DoxyParamCaption})}
+
+Energy contribution from AFM tip to all the point in membrane 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & co-\/ordinates of the ith particle \\
+\hline
+{\em para} & Membrane related parameters \\
+\hline
+{\em afm\+\_\+force} & Total force exerted by afm tip on shell. \\
+\hline
+{\em afm} & afm related parameters \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total Energy contribution form the tip to the particle
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a6ada87d9f1bd665ff2404b3527983271}\label{forces__surf_8cpp_a6ada87d9f1bd665ff2404b3527983271}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!lj\_attr@{lj\_attr}}
+\index{lj\_attr@{lj\_attr}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{lj\_attr()}{lj\_attr()}}
+{\footnotesize\ttfamily double lj\+\_\+attr (\begin{DoxyParamCaption}\item[{double}]{sqdr,  }\item[{double}]{eps }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em sqdr} & square of the distance between two points \\
+\hline
+{\em eps} & coefficient of the potential \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Energy evaluated using Lennard-\/\+Jones potential.
+\end{DoxyReturn}
+see \href{https://en.wikipedia.org/wiki/Lennard-Jones_potential}{\texttt{ https\+://en.\+wikipedia.\+org/wiki/\+Lennard-\/\+Jones\+\_\+potential}}\mbox{\Hypertarget{forces__surf_8cpp_ac5e5e4d76b0c718cfbcf52e6aa6f8c6a}\label{forces__surf_8cpp_ac5e5e4d76b0c718cfbcf52e6aa6f8c6a}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!lj\_bottom\_surf\_total@{lj\_bottom\_surf\_total}}
+\index{lj\_bottom\_surf\_total@{lj\_bottom\_surf\_total}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{lj\_bottom\_surf\_total()}{lj\_bottom\_surf\_total()}}
+{\footnotesize\ttfamily double lj\+\_\+bottom\+\_\+surf\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{bool $\ast$}]{is\+\_\+attractive,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the total Sticking ~\newline
+ 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em is\+\_\+attractive} & true for all the particles which sees bottom wall \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total Energy contribution from Sticking to bottom surface
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_af522065b75e1d0b346519372574fe552}\label{forces__surf_8cpp_af522065b75e1d0b346519372574fe552}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!lj\_bottom\_surface@{lj\_bottom\_surface}}
+\index{lj\_bottom\_surface@{lj\_bottom\_surface}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{lj\_bottom\_surface()}{lj\_bottom\_surface()}}
+{\footnotesize\ttfamily double lj\+\_\+bottom\+\_\+surface (\begin{DoxyParamCaption}\item[{double}]{zz,  }\item[{bool}]{is\+\_\+attractive,  }\item[{double}]{sur\+\_\+pos,  }\item[{double}]{eps,  }\item[{double}]{sigma }\end{DoxyParamCaption})}
+
+Sticking of the bottom surface using LJ potential 
+\begin{DoxyParams}{Parameters}
+{\em zz} & z-\/coordinate of a point in shell \\
+\hline
+{\em eps} & coefficient of the potential \\
+\hline
+{\em sigma} & sigma in the expression of LJ potential \\
+\hline
+{\em sur\+\_\+pos} & position of the bottom wall \\
+\hline
+{\em is\+\_\+attractive} & true if the zz sees the bottom wall \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Energy evaluated using Lennard-\/\+Jones potential.
+\end{DoxyReturn}
+see \href{https://en.wikipedia.org/wiki/Lennard-Jones_potential}{\texttt{ https\+://en.\+wikipedia.\+org/wiki/\+Lennard-\/\+Jones\+\_\+potential}}\mbox{\Hypertarget{forces__surf_8cpp_a02c3860fc4bb2c72fa3f3d5e49eb00f7}\label{forces__surf_8cpp_a02c3860fc4bb2c72fa3f3d5e49eb00f7}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!lj\_rep@{lj\_rep}}
+\index{lj\_rep@{lj\_rep}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{lj\_rep()}{lj\_rep()}}
+{\footnotesize\ttfamily double lj\+\_\+rep (\begin{DoxyParamCaption}\item[{double}]{sqdr,  }\item[{double}]{eps }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em sqdr} & square of the distance between two points \\
+\hline
+{\em eps} & coefficient of the potential \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+repulsive part of the Lennard-\/\+Jones potential.
+\end{DoxyReturn}
+see \href{https://en.wikipedia.org/wiki/Lennard-Jones_potential}{\texttt{ https\+://en.\+wikipedia.\+org/wiki/\+Lennard-\/\+Jones\+\_\+potential}}\mbox{\Hypertarget{forces__surf_8cpp_afd6bed107c42195197bc57ec3558f633}\label{forces__surf_8cpp_afd6bed107c42195197bc57ec3558f633}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!stretch\_energy\_ipart@{stretch\_energy\_ipart}}
+\index{stretch\_energy\_ipart@{stretch\_energy\_ipart}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{stretch\_energy\_ipart()}{stretch\_energy\_ipart()}}
+{\footnotesize\ttfamily double stretch\+\_\+energy\+\_\+ipart (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{int $\ast$}]{node\+\_\+nbr,  }\item[{double $\ast$}]{lij\+\_\+t0,  }\item[{int}]{num\+\_\+nbr,  }\item[{int}]{idx,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the Stretching energy contribution when ith particle position changes 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em idx} & index of ith particle; \\
+\hline
+{\em node\+\_\+nbr} & nearest neigbours of idx; \\
+\hline
+{\em lij\+\_\+t0} & initial distance between points of membrane \\
+\hline
+{\em num\+\_\+nbr} & number of nearest neigbours of idx; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Stretching Energy contribution when ith particle is displaced ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a2a873fc263f3d97ead9c4b4c1346d8f1}\label{forces__surf_8cpp_a2a873fc263f3d97ead9c4b4c1346d8f1}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!stretch\_energy\_total@{stretch\_energy\_total}}
+\index{stretch\_energy\_total@{stretch\_energy\_total}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{stretch\_energy\_total()}{stretch\_energy\_total()}}
+{\footnotesize\ttfamily double stretch\+\_\+energy\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{double $\ast$}]{lij\+\_\+t0,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the total Stretching energy ~\newline
+ 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em lij\+\_\+t0} & initial distance between points of membrane \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total Stretching energy ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a9ee584d2fb221f5e73f175ac28db0c17}\label{forces__surf_8cpp_a9ee584d2fb221f5e73f175ac28db0c17}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!volume\_ipart@{volume\_ipart}}
+\index{volume\_ipart@{volume\_ipart}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{volume\_ipart()}{volume\_ipart()}}
+{\footnotesize\ttfamily double volume\+\_\+ipart (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{int $\ast$}]{node\+\_\+nbr,  }\item[{int}]{num\+\_\+nbr,  }\item[{int}]{idx,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the volume substended by voronoi area of the ith particle 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em idx} & index of ith particle; \\
+\hline
+{\em node\+\_\+nbr} & nearest neigbours of idx; \\
+\hline
+{\em num\+\_\+nbr} & number of nearest neigbours of idx; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Volume substended by ith particle.
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_ab9b5af92a94d81892d9bf196545fa0b5}\label{forces__surf_8cpp_ab9b5af92a94d81892d9bf196545fa0b5}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!volume\_total@{volume\_total}}
+\index{volume\_total@{volume\_total}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{volume\_total()}{volume\_total()}}
+{\footnotesize\ttfamily double volume\+\_\+total (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{\mbox{\hyperlink{structMESH}{MESH}}}]{mesh,  }\item[{\mbox{\hyperlink{structMBRANE__para}{MBRANE\+\_\+para}}}]{para }\end{DoxyParamCaption})}
+
+Estimate the total volume of the shell 
+\begin{DoxyParams}{Parameters}
+{\em Pos} & array containing co-\/ordinates of all the particles \\
+\hline
+{\em mesh} & mesh related parameters -- connections and neighbours information; \\
+\hline
+{\em para} & Membrane related parameters; \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total volume of the shell ~\newline
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{forces__surf_8cpp_a153f7173662da5a11c83efc37ac36ddd}\label{forces__surf_8cpp_a153f7173662da5a11c83efc37ac36ddd}} 
+\index{forces\_surf.cpp@{forces\_surf.cpp}!voronoi\_area@{voronoi\_area}}
+\index{voronoi\_area@{voronoi\_area}!forces\_surf.cpp@{forces\_surf.cpp}}
+\doxysubsubsection{\texorpdfstring{voronoi\_area()}{voronoi\_area()}}
+{\footnotesize\ttfamily double voronoi\+\_\+area (\begin{DoxyParamCaption}\item[{double}]{cotJ,  }\item[{double}]{cotK,  }\item[{double}]{jsq,  }\item[{double}]{ksq,  }\item[{double}]{area }\end{DoxyParamCaption})}
+
+Estimate the area of the voronoi cell 
+\begin{DoxyParams}{Parameters}
+{\em cotJ} & ~\newline
+ \\
+\hline
+{\em cotK} & \\
+\hline
+{\em jsqr} & \\
+\hline
+{\em ksq} & \\
+\hline
+{\em area} & \\
+\hline
+{\em para} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Given two cotangent angles, it returns either the area due to perpendicular bisector,
+\end{DoxyReturn}
+or the barycenter.

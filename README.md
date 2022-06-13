@@ -87,6 +87,7 @@ The executable takes three arguments:
 2) Geometry of the surface `sph` for a
 surface of sphere and `cart` for flat plane
 3) Folder name inside which the outputs will be written.
+4) Number of monte-carlo steps 
 
 Rest of the parameter are hard coded. For instance, the radius of the sphere on
 which we generate randomize positions is unity. 
@@ -94,7 +95,7 @@ which we generate randomize positions is unity.
 In order to generate a randomized configuration of 1024 points in surface of sphere with radius one, the user can execute
 
 ```bash
-./bin/exe_start 1024 sph data_sph
+./bin/exe_start 1024 sph data_sph 60000
 
 ```
 All the outputs will be dumped inside `data_sph`.
@@ -104,7 +105,7 @@ All the outputs will be dumped inside `data_sph`.
 
 The simulation will run for 60000 Monte Carlo steps, which will take more than 2 hours
 to complete. To proceed with the other sections it is sufficient to kill the
-simulation after 1000 Monte Carlo steps. 
+simulation after 1000 Monte Carlo steps. The user can give smaller steps as well.
 
 ## Triangulating the surface
 
@@ -344,4 +345,7 @@ suited for the user.
 In case the bug is in the `h5py`, the user is requested to use the [hdf5-tools](https://support.hdfgroup.org/products/hdf5_tools/toolsbycat.html) to debug. 
 
 
+# Developers Options
+
+For informations on API click [here](./docs/html/index.html)
 

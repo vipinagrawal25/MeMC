@@ -2,8 +2,19 @@
 #include "global.h"
 #include "misc.h"
 #include <unistd.h>
-
+ /**  
+ *  @brief hdf5 IO for the mesh  
+ *  
+ */
+ 
 void hdf5_io_write_pos(double *Pos, int N, char *input_file){
+
+	 ///  @brief hdf5 io for  the position 
+	 ///  @param Pos array containing co-ordinates of all the particles
+	 ///  @param N number of points 
+	 ///  @param input_file File name to dump all the co-ordinate
+	 /// 
+
 
     hid_t   file_id, dset1, space_id;  /* identifiers */
     herr_t  status;
@@ -28,6 +39,12 @@ void hdf5_io_write_pos(double *Pos, int N, char *input_file){
 
 void hdf5_io_read_pos(double *Pos, char *input_file){
 
+    ///  @brief Read from the hdf5 file
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param input_file File name from which co-ordinate will be read
+    /// 
+
+
     hid_t   file_id,dataset_id;  /* identifiers */
     herr_t  status;
 
@@ -51,6 +68,12 @@ void hdf5_io_read_pos(double *Pos, char *input_file){
 
 void hdf5_io_read_mesh(int *cmlist,
         int *node_nbr,  char *input_file){
+
+    ///  @brief Read the mesh from the hdf5 file
+    ///  @param cmlist array containing the number of neighbours for each particle  
+    ///  @param node_nbr array containing the list of neighbours for each particle  
+    ///  @param input_file File name from which co-ordinate will be read
+    /// 
 
     hid_t   file_id, dataset_id;  /* identifiers */
     herr_t  status;
@@ -80,10 +103,16 @@ void hdf5_io_read_mesh(int *cmlist,
 
 void io_read_config(double *Pos, 
         int N, char *file ){
+
+    ///  @brief Read position from the file; 
+    /// @note The dump should be in binary
+    /// 
+
+
     FILE *fid;
 
     fid = fopen(file, "rb");
-    fread(Pos, N*sizeof(double), 1, fid);
+    if(fread(Pos, N*sizeof(double), 1, fid) != 1);
     fclose(fid);
 }
 
@@ -91,6 +120,9 @@ void io_dump_config(double *Pos,
         int N, char *file ){
     FILE *fid;
 
+    ///  @brief dump position to the file; 
+    /// @note The dump is in binary
+    /// 
 
     fid = fopen(file, "wb");
     fwrite(Pos, N*sizeof(double), 1, fid);
@@ -99,6 +131,10 @@ void io_dump_config(double *Pos,
 
 void io_dump_config_ascii(double *Pos, 
         int N, char *file ){
+
+    /// @brief dump position to the file in ascii; 
+    /// 
+
     FILE *fid;
     int i;
     fid = fopen(file, "wb");

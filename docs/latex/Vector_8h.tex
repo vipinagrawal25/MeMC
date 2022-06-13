@@ -1,0 +1,65 @@
+\hypertarget{Vector_8h}{}\doxysection{includes/\+Vector.h File Reference}
+\label{Vector_8h}\index{includes/Vector.h@{includes/Vector.h}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structVec2d}{Vec2d}}
+\item 
+class \mbox{\hyperlink{classVec3d}{Vec3d}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \mbox{\hyperlink{Vector_8h_a6fc0ddce9d958c1cd7758d55f0d6f654}{inner\+\_\+product}} (\mbox{\hyperlink{classVec3d}{Vec3d}} s1, \mbox{\hyperlink{classVec3d}{Vec3d}} s2)
+\item 
+double \mbox{\hyperlink{Vector_8h_ac85699f5aeaa0912222272b457b5a4de}{norm}} (\mbox{\hyperlink{classVec3d}{Vec3d}} s1)
+\item 
+double \mbox{\hyperlink{Vector_8h_add7a1d8b816544cf436346ceee9ebd77}{normsq}} (\mbox{\hyperlink{classVec3d}{Vec3d}} s1)
+\item 
+\mbox{\hyperlink{classVec3d}{Vec3d}} \mbox{\hyperlink{Vector_8h_ab2335ef07559c4335a5218a3d18dd182}{Vec3d\+\_\+add}} (\mbox{\hyperlink{classVec3d}{Vec3d}} s1, \mbox{\hyperlink{classVec3d}{Vec3d}} s2, double fac)
+\item 
+\mbox{\hyperlink{classVec3d}{Vec3d}} \mbox{\hyperlink{Vector_8h_a5cca94a010969d810093686a8abb7c47}{cross\+\_\+product}} (\mbox{\hyperlink{classVec3d}{Vec3d}} s1, \mbox{\hyperlink{classVec3d}{Vec3d}} s2)
+\item 
+void \mbox{\hyperlink{Vector_8h_aebdd6d7febc369afe3a1f78d343d6a32}{print}} (\mbox{\hyperlink{classVec3d}{Vec3d}} a)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{Vector_8h_a5cca94a010969d810093686a8abb7c47}\label{Vector_8h_a5cca94a010969d810093686a8abb7c47}} 
+\index{Vector.h@{Vector.h}!cross\_product@{cross\_product}}
+\index{cross\_product@{cross\_product}!Vector.h@{Vector.h}}
+\doxysubsubsection{\texorpdfstring{cross\_product()}{cross\_product()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classVec3d}{Vec3d}} cross\+\_\+product (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{s1,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{s2 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{Vector_8h_a6fc0ddce9d958c1cd7758d55f0d6f654}\label{Vector_8h_a6fc0ddce9d958c1cd7758d55f0d6f654}} 
+\index{Vector.h@{Vector.h}!inner\_product@{inner\_product}}
+\index{inner\_product@{inner\_product}!Vector.h@{Vector.h}}
+\doxysubsubsection{\texorpdfstring{inner\_product()}{inner\_product()}}
+{\footnotesize\ttfamily double inner\+\_\+product (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{s1,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{s2 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{Vector_8h_ac85699f5aeaa0912222272b457b5a4de}\label{Vector_8h_ac85699f5aeaa0912222272b457b5a4de}} 
+\index{Vector.h@{Vector.h}!norm@{norm}}
+\index{norm@{norm}!Vector.h@{Vector.h}}
+\doxysubsubsection{\texorpdfstring{norm()}{norm()}}
+{\footnotesize\ttfamily double norm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{s1 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{Vector_8h_add7a1d8b816544cf436346ceee9ebd77}\label{Vector_8h_add7a1d8b816544cf436346ceee9ebd77}} 
+\index{Vector.h@{Vector.h}!normsq@{normsq}}
+\index{normsq@{normsq}!Vector.h@{Vector.h}}
+\doxysubsubsection{\texorpdfstring{normsq()}{normsq()}}
+{\footnotesize\ttfamily double normsq (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{s1 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{Vector_8h_aebdd6d7febc369afe3a1f78d343d6a32}\label{Vector_8h_aebdd6d7febc369afe3a1f78d343d6a32}} 
+\index{Vector.h@{Vector.h}!print@{print}}
+\index{print@{print}!Vector.h@{Vector.h}}
+\doxysubsubsection{\texorpdfstring{print()}{print()}}
+{\footnotesize\ttfamily void print (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{a }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{Vector_8h_ab2335ef07559c4335a5218a3d18dd182}\label{Vector_8h_ab2335ef07559c4335a5218a3d18dd182}} 
+\index{Vector.h@{Vector.h}!Vec3d\_add@{Vec3d\_add}}
+\index{Vec3d\_add@{Vec3d\_add}!Vector.h@{Vector.h}}
+\doxysubsubsection{\texorpdfstring{Vec3d\_add()}{Vec3d\_add()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classVec3d}{Vec3d}} Vec3d\+\_\+add (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{s1,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}}}]{s2,  }\item[{double}]{fac }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+

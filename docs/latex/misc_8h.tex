@@ -1,0 +1,139 @@
+\hypertarget{misc_8h}{}\doxysection{includes/misc.h File Reference}
+\label{misc_8h}\index{includes/misc.h@{includes/misc.h}}
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include \char`\"{}Vector.\+h\char`\"{}}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename T $>$ }\\T \mbox{\hyperlink{misc_8h_a9a156df06115c7ed2b60ac35947f91fc}{absolute}} (T value)
+\item 
+double \mbox{\hyperlink{misc_8h_a1d03ebf0f6ab1dc6ca23c05addeb6085}{Sq\+Er}} (double Arr1\mbox{[}$\,$\mbox{]}, double Arr2\mbox{[}$\,$\mbox{]}, int ndim)
+\item 
+bool \mbox{\hyperlink{misc_8h_aa17fec4d0bd1e6ad4f442f9d754bf5e8}{File\+Exists}} (const std\+::string \&s)
+\item 
+void \mbox{\hyperlink{misc_8h_a2f07d657a73de3b8117cbbb7e4105e75}{check\+\_\+param}} ()
+\item 
+void \mbox{\hyperlink{misc_8h_ab72eb44a59905eb761d50c2db94db329}{write\+\_\+param}} (string fname)
+\item 
+void \mbox{\hyperlink{misc_8h_ae66a52d0f4775097eb0779c059697d21}{print}} (double $\ast$, int)
+\item 
+void \mbox{\hyperlink{misc_8h_af7fa7ba81cbf0180fe688a5efd99b24b}{print}} (double $\ast$arr, int np, int pp)
+\item 
+void \mbox{\hyperlink{misc_8h_a7a955a6e82d93d0a3b241808e071fe7e}{print}} (double $\ast$, int start, int skip, int end)
+\item 
+void \mbox{\hyperlink{misc_8h_abc1ef61b2e2c7a587807457048556963}{add}} (double $\ast$added, double $\ast$arr1, double $\ast$arr2, int nn)
+\item 
+void \mbox{\hyperlink{misc_8h_aef2d919c08f3d68910e4b41b6712b14b}{substract}} (double $\ast$subsed, double $\ast$arr1, double $\ast$arr2, int nn)
+\item 
+double \mbox{\hyperlink{misc_8h_a5013e98b6da34b942aa7a5340603cc84}{norm}} (double $\ast$y, int nn)
+\item 
+double \mbox{\hyperlink{misc_8h_a195f2012096347f2530e36fd094a5e5e}{norm}} (const double $\ast$y, int nn)
+\item 
+void \mbox{\hyperlink{misc_8h_a2a9fbbe6d48917306ecf5dee646d9dcd}{down\+Scale}} (double $\ast$yscaled, double $\ast$y, int factor, int nn)
+\item 
+void \mbox{\hyperlink{misc_8h_a7b6f74731d7b0d5a1500c45df88699a8}{zeros}} (double $\ast$yzero, int ndim)
+\item 
+void \mbox{\hyperlink{misc_8h_ad6c4c514464635ae08bb339456af19a3}{max}} (int $\ast$amaxind, double $\ast$amaxval, \mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, int ndim, char dirn=\textquotesingle{}z\textquotesingle{})
+\item 
+void \mbox{\hyperlink{misc_8h_af1aab3eaa748e6bf80b55dad555eb9b2}{min}} (int $\ast$aminind, double $\ast$aminval, \mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$pos, int ndim, char dirn=\textquotesingle{}z\textquotesingle{})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{misc_8h_a9a156df06115c7ed2b60ac35947f91fc}\label{misc_8h_a9a156df06115c7ed2b60ac35947f91fc}} 
+\index{misc.h@{misc.h}!absolute@{absolute}}
+\index{absolute@{absolute}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{absolute()}{absolute()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+T absolute (\begin{DoxyParamCaption}\item[{T}]{value }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_abc1ef61b2e2c7a587807457048556963}\label{misc_8h_abc1ef61b2e2c7a587807457048556963}} 
+\index{misc.h@{misc.h}!add@{add}}
+\index{add@{add}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{add()}{add()}}
+{\footnotesize\ttfamily void add (\begin{DoxyParamCaption}\item[{double $\ast$}]{added,  }\item[{double $\ast$}]{arr1,  }\item[{double $\ast$}]{arr2,  }\item[{int}]{nn }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_a2f07d657a73de3b8117cbbb7e4105e75}\label{misc_8h_a2f07d657a73de3b8117cbbb7e4105e75}} 
+\index{misc.h@{misc.h}!check\_param@{check\_param}}
+\index{check\_param@{check\_param}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{check\_param()}{check\_param()}}
+{\footnotesize\ttfamily void check\+\_\+param (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_a2a9fbbe6d48917306ecf5dee646d9dcd}\label{misc_8h_a2a9fbbe6d48917306ecf5dee646d9dcd}} 
+\index{misc.h@{misc.h}!downScale@{downScale}}
+\index{downScale@{downScale}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{downScale()}{downScale()}}
+{\footnotesize\ttfamily void down\+Scale (\begin{DoxyParamCaption}\item[{double $\ast$}]{yscaled,  }\item[{double $\ast$}]{y,  }\item[{int}]{factor,  }\item[{int}]{nn }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_aa17fec4d0bd1e6ad4f442f9d754bf5e8}\label{misc_8h_aa17fec4d0bd1e6ad4f442f9d754bf5e8}} 
+\index{misc.h@{misc.h}!FileExists@{FileExists}}
+\index{FileExists@{FileExists}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{FileExists()}{FileExists()}}
+{\footnotesize\ttfamily bool File\+Exists (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{s }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_ad6c4c514464635ae08bb339456af19a3}\label{misc_8h_ad6c4c514464635ae08bb339456af19a3}} 
+\index{misc.h@{misc.h}!max@{max}}
+\index{max@{max}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{max()}{max()}}
+{\footnotesize\ttfamily void max (\begin{DoxyParamCaption}\item[{int $\ast$}]{amaxind,  }\item[{double $\ast$}]{amaxval,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{int}]{ndim,  }\item[{char}]{dirn = {\ttfamily \textquotesingle{}z\textquotesingle{}} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_af1aab3eaa748e6bf80b55dad555eb9b2}\label{misc_8h_af1aab3eaa748e6bf80b55dad555eb9b2}} 
+\index{misc.h@{misc.h}!min@{min}}
+\index{min@{min}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{min()}{min()}}
+{\footnotesize\ttfamily void min (\begin{DoxyParamCaption}\item[{int $\ast$}]{aminind,  }\item[{double $\ast$}]{aminval,  }\item[{\mbox{\hyperlink{classVec3d}{Vec3d}} $\ast$}]{pos,  }\item[{int}]{ndim,  }\item[{char}]{dirn = {\ttfamily \textquotesingle{}z\textquotesingle{}} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_a195f2012096347f2530e36fd094a5e5e}\label{misc_8h_a195f2012096347f2530e36fd094a5e5e}} 
+\index{misc.h@{misc.h}!norm@{norm}}
+\index{norm@{norm}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{norm()}{norm()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily double norm (\begin{DoxyParamCaption}\item[{const double $\ast$}]{y,  }\item[{int}]{nn }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_a5013e98b6da34b942aa7a5340603cc84}\label{misc_8h_a5013e98b6da34b942aa7a5340603cc84}} 
+\index{misc.h@{misc.h}!norm@{norm}}
+\index{norm@{norm}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{norm()}{norm()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily double norm (\begin{DoxyParamCaption}\item[{double $\ast$}]{y,  }\item[{int}]{nn }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_a7a955a6e82d93d0a3b241808e071fe7e}\label{misc_8h_a7a955a6e82d93d0a3b241808e071fe7e}} 
+\index{misc.h@{misc.h}!print@{print}}
+\index{print@{print}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{print()}{print()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily void print (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{start,  }\item[{int}]{skip,  }\item[{int}]{end }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_ae66a52d0f4775097eb0779c059697d21}\label{misc_8h_ae66a52d0f4775097eb0779c059697d21}} 
+\index{misc.h@{misc.h}!print@{print}}
+\index{print@{print}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{print()}{print()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily void print (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{nn }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_af7fa7ba81cbf0180fe688a5efd99b24b}\label{misc_8h_af7fa7ba81cbf0180fe688a5efd99b24b}} 
+\index{misc.h@{misc.h}!print@{print}}
+\index{print@{print}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{print()}{print()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily void print (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{np,  }\item[{int}]{pp }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_a1d03ebf0f6ab1dc6ca23c05addeb6085}\label{misc_8h_a1d03ebf0f6ab1dc6ca23c05addeb6085}} 
+\index{misc.h@{misc.h}!SqEr@{SqEr}}
+\index{SqEr@{SqEr}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{SqEr()}{SqEr()}}
+{\footnotesize\ttfamily double Sq\+Er (\begin{DoxyParamCaption}\item[{double}]{Arr1\mbox{[}$\,$\mbox{]},  }\item[{double}]{Arr2\mbox{[}$\,$\mbox{]},  }\item[{int}]{ndim }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_aef2d919c08f3d68910e4b41b6712b14b}\label{misc_8h_aef2d919c08f3d68910e4b41b6712b14b}} 
+\index{misc.h@{misc.h}!substract@{substract}}
+\index{substract@{substract}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{substract()}{substract()}}
+{\footnotesize\ttfamily void substract (\begin{DoxyParamCaption}\item[{double $\ast$}]{subsed,  }\item[{double $\ast$}]{arr1,  }\item[{double $\ast$}]{arr2,  }\item[{int}]{nn }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_ab72eb44a59905eb761d50c2db94db329}\label{misc_8h_ab72eb44a59905eb761d50c2db94db329}} 
+\index{misc.h@{misc.h}!write\_param@{write\_param}}
+\index{write\_param@{write\_param}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{write\_param()}{write\_param()}}
+{\footnotesize\ttfamily void write\+\_\+param (\begin{DoxyParamCaption}\item[{string}]{fname }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{misc_8h_a7b6f74731d7b0d5a1500c45df88699a8}\label{misc_8h_a7b6f74731d7b0d5a1500c45df88699a8}} 
+\index{misc.h@{misc.h}!zeros@{zeros}}
+\index{zeros@{zeros}!misc.h@{misc.h}}
+\doxysubsubsection{\texorpdfstring{zeros()}{zeros()}}
+{\footnotesize\ttfamily void zeros (\begin{DoxyParamCaption}\item[{double $\ast$}]{yzero,  }\item[{int}]{ndim }\end{DoxyParamCaption})}
+

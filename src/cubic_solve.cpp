@@ -1,6 +1,28 @@
 #include<math.h>
+/**  
+ *  @brief Contains function to find roots of cubic equation 
+ *  
+ */
+
 int cubic_solve(double a,double b,double c,
         double d, double *roots){
+
+	 ///  @brief Solve the roots of equation ax^3 +  bx^2 + cx + d = 0
+  	 ///
+	 ///  @param a  coefficient of x^3
+	 ///  @param b  coefficient of x^2
+	 ///  @param c  coefficient of x^1
+	 ///  @param d  coefficient of x^0
+	 ///  @param roots  Roots of the equation;   
+     
+	 ///  @return   number of real roots. 
+	 ///
+	 ///  @details
+	 /// 
+ 	 ///  @note     The array roots is 1 dimensional size 6. The roots are orgainzed
+     /// as roots[0], roots[1] will be real and imaginary component of first root.
+     ///         
+
     int nroot;
     double  pi = 3.141592654;
     double DD, p, q, phi, temp1, temp2, y1,y2,y3, u, v, y2r, y2i;

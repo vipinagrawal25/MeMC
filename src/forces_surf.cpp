@@ -4,6 +4,17 @@
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
 double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
+
+  	 ///
+	 ///  @param si  coordinate of ith point
+	 ///  @param sk  coordinate of kth point
+	 ///  @param sj  coordinate of jth point 
+     
+	 ///  @return   ({si-sk}.{sj-sk})/sqrt(({si-sk}x{sj-sk})^2)
+     /// angle between vector si and sj
+	 ///
+
+
     Vec3d drik, drjk, cross;
     double cot_theta;  
     double inner_prod;
@@ -18,6 +29,10 @@ double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
 }
 //
 double cotangent(double a, double b, double c){
+
+  	 /// @brief  a, b, c are the length of the sides of a triangle 
+     
+	 ///  @return   0.25*(a*a+b*b-c*c)/area; where area is the area of triangle
     double s = 0.5*(a+b+c);
     double area = sqrt(s*(s-a)*(s-b)*(s-c));
     double cot_theta=0.25*(a*a+b*b-c*c)/area;
@@ -25,6 +40,15 @@ double cotangent(double a, double b, double c){
 }
 
 Vec3d determine_xyz_parabola(Vec3d pos, AFM_para afm) {
+    ///
+	 ///  @param pos  position of a point in membrane
+	 ///  @param afm  parameters of AFM tip
+     //
+     /// 
+	 ///  @return  position of point on afm tip nearest to pos 
+	 ///
+
+
     int nroot;
     double a, b, c, d;
     double a0, c0;
@@ -75,6 +99,14 @@ Vec3d determine_xyz_parabola(Vec3d pos, AFM_para afm) {
 double volume_ipart(Vec3d *pos, 
         int *node_nbr, 
         int num_nbr, int idx, MBRANE_para para){
+     /// @brief Estimate the volume substended by voronoi area of the ith particle
+	 ///  @param Pos array containing co-ordinates of all the particles
+	 ///  @param idx index of ith particle;
+	 ///  @param node_nbr nearest neigbours of idx; 
+	 ///  @param num_nbr number of nearest neigbours of idx; 
+	 ///  @param para  Membrane related parameters;
+     /// @return Volume substended by ith particle.
+
 
     int i, j, k;
     double volume1;
@@ -105,6 +137,17 @@ double volume_ipart(Vec3d *pos,
 double stretch_energy_ipart(Vec3d *pos, 
         int *node_nbr, double *lij_t0,
         int num_nbr, int idx, MBRANE_para para){
+
+    /// @brief Estimate the Stretching energy contribution when ith particle position changes
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param idx index of ith particle;
+    ///  @param node_nbr nearest neigbours of idx; 
+    /// @param lij_t0 initial distance between points of membrane
+    ///  @param num_nbr number of nearest neigbours of idx; 
+    ///  @param para  Membrane related parameters;
+    /// @return Stretching Energy contribution when ith particle is displaced 
+
+
     //
     double HH;
     double idx_ener;
@@ -127,7 +170,19 @@ double stretch_energy_ipart(Vec3d *pos,
 //
 //Q. Given two cotangent angles, it returns either the area due to perpendicular bisector,
 // or the barycenter.
-double voronoi_area(double cotJ, double cotK, double jsq, double ksq, double area){
+double voronoi_area(double cotJ, double cotK, 
+        double jsq, double ksq, double area){
+    /// @brief Estimate the area of the voronoi cell 
+    ///  @param cotJ  
+    ///  @param cotK 
+    ///  @param jsqr
+    /// @param ksq 
+    ///  @param area
+    ///  @param para 
+    /// @return  Given two cotangent angles, it returns either the area due to perpendicular bisector,
+/// or the barycenter.
+
+
     double sigma;
     if (cotJ>0 && cotK>0){
         if (cotJ*cotK<1){
@@ -144,6 +199,16 @@ double voronoi_area(double cotJ, double cotK, double jsq, double ksq, double are
 //
 double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
                             int idx, MBRANE_para para){
+
+    /// @brief Estimate the Bending energy contribution when ith particle position changes
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param idx index of ith particle;
+    ///  @param node_nbr nearest neigbours of idx; 
+    ///  @param num_nbr number of nearest neigbours of idx; 
+    ///  @param para  Membrane related parameters;
+    /// @return Bending Energy contribution when ith particle is displaced 
+
+
     double bend_ener,sigma_i;
     Vec3d cot_times_rij;
     double BB=para.coef_bend;
@@ -222,8 +287,14 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
 
 double bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH mesh, int idx, MBRANE_para para){
-/*    Evaluates the bending energy of all the neighbours*/ 
-/*    of idx particle*/
+
+    /// @brief Estimate the Bending energy contribution from the neighbours when ith particle position changes
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    /// information; 
+    ///  @param para  Membrane related parameters;
+    /// @return Bending Energy contribution from the neighbours of ith particle 
+
    int j;
    int num_nbr_j;
    int nbr, cm_idx_nbr;
@@ -246,6 +317,15 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 
 double volume_total(Vec3d *pos, 
         MESH mesh, MBRANE_para para){
+
+    /// @brief Estimate the total volume of the shell 
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    /// information; 
+    ///  @param para  Membrane related parameters;
+    /// @return Total volume of the shell 
+
+
     int idx;
     int num_nbr, cm_idx;
     double vol;
@@ -265,6 +345,15 @@ double volume_total(Vec3d *pos,
 
 double bending_energy_total(Vec3d *pos, 
         MESH mesh, MBRANE_para para){
+
+    /// @brief Estimate the total Bending energy  
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    /// information; 
+    ///  @param para  Membrane related parameters;
+    /// @return Total Bending energy 
+
+
     int idx;
     int num_nbr, cm_idx;
     double be;
@@ -286,6 +375,16 @@ double bending_energy_total(Vec3d *pos,
 double stretch_energy_total(Vec3d *pos, 
         MESH mesh, double *lij_t0,
          MBRANE_para para){
+
+    /// @brief Estimate the total Stretching energy  
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    /// information; 
+    /// @param lij_t0 initial distance between points of membrane
+    ///  @param para  Membrane related parameters;
+    /// @return Total Stretching energy 
+
+
     int idx;
     int num_nbr, cm_idx;
     double se;
@@ -306,12 +405,26 @@ double stretch_energy_total(Vec3d *pos,
 
 
 double lj_rep(double sqdr, double eps){
+
+    /// @param sqdr square of the distance between two points
+    /// @param eps coefficient of the potential 
+    /// @return repulsive part of the Lennard-Jones potential.
+    ///  @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
+
+
     double r6;
     r6 = sqdr*sqdr*sqdr;
     return eps*(r6*(r6));
 }
 
 double lj_attr(double sqdr, double eps){
+
+    /// @param sqdr square of the distance between two points
+    /// @param eps coefficient of the potential 
+    /// @return Energy evaluated using Lennard-Jones potential.
+    ///  @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
+
+
     double r6;
     r6 = sqdr*sqdr*sqdr;
     return 4*eps*(r6*(r6-1));
@@ -320,6 +433,16 @@ double lj_attr(double sqdr, double eps){
 double lj_bottom_surface(double zz, 
         bool is_attractive, 
         double sur_pos, double eps, double sigma){
+
+    /// @brief Sticking of the bottom surface using LJ potential 
+    /// @param zz z-coordinate of a point in shell
+    /// @param eps coefficient of the potential 
+    /// @param sigma sigma in the expression of LJ potential 
+    /// @param sur_pos position of the bottom wall 
+    /// @param is_attractive true if the zz sees the  bottom wall 
+    /// @return Energy evaluated using Lennard-Jones potential.
+    ///  @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
+
 
     double inv_sqdz, ds;
 
@@ -335,6 +458,13 @@ double lj_bottom_surface(double zz,
 
 double lj_bottom_surf_total(Vec3d *pos, 
         bool *is_attractive, MBRANE_para para){
+
+    /// @brief Estimate the total Sticking  
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param is_attractive true for all the particles which sees bottom wall 
+    ///  @param para  Membrane related parameters;
+    /// @return Total Energy contribution from Sticking to bottom surface
+
     int idx;
     double lj_bote;
 
@@ -353,6 +483,12 @@ double lj_bottom_surf_total(Vec3d *pos,
 void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, double theta_attr, int N){
 
+    /// @brief identify all the points which substends theta_attr with the centre 
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param is_attractive true for all the particles which sees bottom wall 
+    ///  @param theta_attr \Theta_0 see paper/paper.pdf 
+    /// N number of points making the membrane
+    ///
     int i; 
     double theta;
     for(i= 0; i<N; i++){
@@ -362,6 +498,12 @@ void identify_attractive_part(Vec3d *pos,
 }
 
 double lj_afm(Vec3d pos, AFM_para afm){
+
+    /// @brief Energy contribution from AFM tip to ith point in membrane 
+    ///  @param Pos co-ordinates of the ith particle 
+    ///  @param afm afm related parameters
+    /// @return Energy contribution when form tip to the ith particle
+    //
     double ener_afm, ds;
     double ds_sig_inv;
     Vec3d dr, pt_pbola;
@@ -382,6 +524,15 @@ double lj_afm(Vec3d pos, AFM_para afm){
 double lj_afm_total(Vec3d *pos, 
         Vec3d *afm_force, MBRANE_para para,
         AFM_para afm){
+
+    /// @brief Energy contribution from AFM tip to all the point in membrane 
+    ///  @param Pos co-ordinates of the ith particle 
+    ///  @param para Membrane related parameters
+    ///  @param afm_force Total force exerted by afm tip on shell.
+    ///  @param afm afm related parameters
+    /// @return  Total Energy contribution form the tip to the particle
+    //
+
     int idx;
     double  ds;
     double lj_afm_e;

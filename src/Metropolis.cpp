@@ -8,10 +8,18 @@
 std::mt19937 rng;
 
 void init_rng(uint32_t seed_val){
+
+	 ///  @brief Generates random number 
     rng.seed(seed_val);
 }
 
 bool Metropolis(double DE, double kbt ){
+    /// @brief Metropolis algorithm
+    /// @param DE change in energy
+    /// @param kbt boltzmann constant times temperature
+    /// @return True if DE< 0 or the random number generated is less than
+    /// exp(-DE/kbt)
+    /// @details see https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm 
     bool yes;
     double rand;
     std::uniform_real_distribution<> rand_real(0, 1);
@@ -26,6 +34,7 @@ bool Metropolis(double DE, double kbt ){
 
 double rand_inc_theta(double th0, 
         double dfac){
+    /// @brief increment the polar angle randomly  
     double dth;
     double tmp_th0;
     std::uniform_real_distribution<> rand_real(-1, 1);
@@ -40,9 +49,23 @@ double rand_inc_theta(double th0,
 }
 
 double energy_mc_3d(Vec3d *pos, MESH mesh, 
-        double *lij_t0, bool *is_attractive, int idx, bool *is_be_pos,
+        double *lij_t0, bool *is_attractive, int idx,
         MBRANE_para mbrane, 
         MCpara mcpara, AFM_para afm){
+
+    /// @brief Estimate the contribution from all the energies when a particle is moved randomly 
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    ///information
+    /// @param lij_t0 initial distance between points of membrane
+    /// @param is_attractive true if the zz sees the  bottom wall 
+    ///  @param idx index of ith particle which is moved;
+    ///  @param mbrane  Membrane related parameters;
+    /// @param mcpara Monte-Carlo related parameters
+    /// @param AFM afm related parameter 
+    /// @return Change in Energy when idx particle is moved
+
+
     double E_b, E_s;
     double E_stick;
     double  E_afm;
@@ -67,7 +90,6 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
             mbrane.pos_bot_wall, mbrane.epsilon, mbrane.sigma);
 
     E_afm = lj_afm(pos[idx], afm);
-    *is_be_pos = E_b > 0;
 
     return E_b + E_s + E_stick + E_afm;
 }
@@ -76,6 +98,18 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
                 double *lij_t0, bool *is_attractive, 
                 MBRANE_para mbrane, 
                 MCpara mcpara, AFM_para afm){
+
+    /// @brief Monte-Carlo routine for the membrane 
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    ///information
+    /// @param lij_t0 initial distance between points of membrane
+    /// @param is_attractive true if the zz sees the  bottom wall 
+    ///  @param mbrane  Membrane related parameters;
+    /// @param mcpara Monte-Carlo related parameters
+    /// @param AFM afm related parameter 
+    /// @return number of accepted moves 
+
     int i, move;
     int num_nbr, cm_idx;
     double x_o, y_o, z_o, x_n, y_n, z_n;
@@ -84,7 +118,6 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
     double vol_i, vol_f;
     double dvol, de_vol, ini_vol;
     double KAPPA;
-    bool is_be_pos;
     std::uniform_int_distribution<uint32_t> rand_int(0,mbrane.N-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
     ini_vol = (4./3.)*pi*pow(mbrane.radius,3);
@@ -97,7 +130,7 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
 
         Eini = energy_mc_3d(pos, mesh, 
                 lij_t0, is_attractive, 
-                idx, &is_be_pos, mbrane, mcpara, afm);
+                idx,  mbrane, mcpara, afm);
 
         vol_i = volume_ipart(pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
@@ -121,7 +154,7 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
 
         Efin = energy_mc_3d(pos, mesh, 
                 lij_t0, is_attractive, 
-                idx, &is_be_pos,  mbrane, mcpara, afm);
+                idx,   mbrane, mcpara, afm);
 
         vol_f = volume_ipart(pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
@@ -149,6 +182,18 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
 int monte_carlo_surf2d(Vec2d *Pos, 
         Nbh_list *neib, LJpara para, 
         MCpara mcpara, char *metric){
+
+    /// @brief Monte-Carlo routine for the points on the surface of sphere or flat
+    /// plane
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param neib Neighbour list information for the particle 
+    ///  @param para parameters related to LJ potential 
+    /// @param mcpara Monte-Carlo related parameters
+    ///  @param metric Topology of the surface "cart" for flat plane "sph" for
+    /// sphere
+    /// @return number of accepted moves 
+
+
     int i, move;
     double x_o, y_o, x_n, y_n;
     double de,  Eini, Efin;

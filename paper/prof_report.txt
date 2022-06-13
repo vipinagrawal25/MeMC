@@ -1,0 +1,12 @@
+Original code -> 
+	total run time = 157 sec.
+	85.9%(53.60+81.22se) in bending_energy_ipart
+	mc_total_iters=1e4.
+	report in analysis0.txt
+commenting line 155-157:
+	total run time = 153.56 sec.
+	85.7% (50.38s+81.21s) in bending_energy_ipart
+	report in analysis1.txt
+Use overloaded parameters instead of inline functions:
+	83%(47.52+80.81s)
+89% of the time is spent in bending_energy_ipart function for mc_total_iters>1e4.

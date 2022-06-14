@@ -1,3 +1,9 @@
+compile with debug=y
+After the compilation, 'exe_memc' is executed using para_file (given below).
+From the gmon.out generated, the report is generated using the command
+gprof /path/to/exe_memc gmon.out > prof_report.txt
+
+###########################PARAMETERS########################
 ## Membrane parameters
 N coef_bending  coef_stretching coef_vol_expansion sp_curve
 512  2.50          25.00            1000000.00        2.0
@@ -9,13 +15,7 @@ Dfac  kBT mc_total_iters  mc_dump_iter
 ## Afm Tip parameters
 tip_radius  tip_pos_z afm_sigma afm_epsilon
 0.20         1.05       0.17         4.00
-
-compiled with flag '-pg'.
-After the compilation, run the code with para_file (given above).
-This will generate gmon.out in the respected directory.
-To get an analysis report use : gprof /path/to/exe_memc gmon.out > analysis.txt
-
-after compilation run from example folder ../bin/exe_memc para_file.in out
+##################################################
 
 Flat profile:
 

@@ -1,0 +1,616 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 33.13      4.87     4.87 14288498     0.00     0.00  bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para)
+ 15.00      7.08     2.21 1268284713     0.00     0.00  Vec3d::Vec3d()
+ 11.63      8.79     1.71 530110262     0.00     0.00  Vec3d::operator-(Vec3d)
+  7.96      9.96     1.17 270153928     0.00     0.00  cross_product(Vec3d, Vec3d)
+  5.44     10.76     0.80 740825952     0.00     0.00  inner_product(Vec3d, Vec3d)
+  4.59     11.43     0.68 233156330     0.00     0.00  Vec3d_add(Vec3d, Vec3d, double)
+  4.15     12.04     0.61 171940588     0.00     0.00  voronoi_area(double, double, double, double, double)
+  3.74     12.59     0.55 272199380     0.00     0.00  norm(Vec3d)
+  1.97     12.88     0.29  2048512     0.00     0.00  volume_ipart(Vec3d*, int*, int, int, MBRANE_para)
+  1.90     13.16     0.28 14288498     0.00     0.00  Vec3d::operator*(double)
+  1.53     13.39     0.23        1   225.00   225.00  _GLOBAL__sub_I__Z22init_system_random_posP5Vec2ddiPc
+  1.22     13.57     0.18 12243046     0.00     0.00  std::abs(double)
+  1.02     13.72     0.15  2048512     0.00     0.00  stretch_energy_ipart(Vec3d*, int*, double*, int, int, MBRANE_para)
+  0.85     13.84     0.13  3904219     0.00     0.00  double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+  0.75     13.95     0.11 28576996     0.00     0.00  Vec3d::operator/(double)
+  0.75     14.06     0.11  7808438     0.00     0.00  std::log(long double)
+  0.68     14.16     0.10  2048000     0.00     0.01  energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para)
+  0.48     14.23     0.07  2048000     0.00     0.01  bending_energy_ipart_neighbour(Vec3d*, MESH, int, MBRANE_para)
+  0.44     14.30     0.07  8832438     0.00     0.00  std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::operator()()
+  0.41     14.36     0.06    14155     0.00     0.00  std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::_M_gen_rand()
+  0.34     14.41     0.05  2049024     0.00     0.00  cubic_solve(double, double, double, double, double*)
+  0.34     14.46     0.05     1000     0.05    14.45  monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para)
+  0.31     14.50     0.05 14288498     0.00     0.00  normsq(Vec3d)
+  0.20     14.53     0.03  2049024     0.00     0.00  determine_xyz_parabola(Vec3d, AFM_para)
+  0.14     14.55     0.02  3904219     0.00     0.00  double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+  0.14     14.57     0.02  2048512     0.00     0.00  lj_afm(Vec3d, AFM_para)
+  0.14     14.59     0.02        1    20.00    20.00  _GLOBAL__sub_I_rng
+  0.10     14.61     0.02  7808438     0.00     0.00  std::uniform_real_distribution<double>::param_type::a() const
+  0.10     14.62     0.02  3904219     0.00     0.00  std::uniform_real_distribution<double>::param_type::b() const
+  0.07     14.63     0.01 11712657     0.00     0.00  std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::min()
+  0.07     14.64     0.01  3904219     0.00     0.00  double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_real_distribution<double>::param_type const&)
+  0.07     14.65     0.01  3904219     0.00     0.00  std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::operator()()
+  0.07     14.66     0.01  3904219     0.00     0.00  unsigned long const& std::max<unsigned long>(unsigned long const&, unsigned long const&)
+  0.07     14.67     0.01  2048512     0.00     0.00  lj_bottom_surface(double, bool, double, double, double)
+  0.07     14.68     0.01  1024000     0.00     0.00  unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned int>::param_type const&)
+  0.07     14.69     0.01     1000     0.01     0.01  std::uniform_int_distribution<unsigned int>::param_type::param_type(unsigned int, unsigned int)
+  0.07     14.70     0.01     1000     0.01     0.02  std::uniform_int_distribution<unsigned int>::uniform_int_distribution(unsigned int, unsigned int)
+  0.00     14.70     0.00  4099050     0.00     0.00  __gnu_cxx::__promote_2<double, int, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<int, std::__is_integer<int>::__value>::__type>::__type std::pow<double, int>(double, int)
+  0.00     14.70     0.00  3904219     0.00     0.00  std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::max()
+  0.00     14.70     0.00  3904219     0.00     0.00  std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::_Adaptor(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+  0.00     14.70     0.00  2048000     0.00     0.00  std::uniform_int_distribution<unsigned int>::param_type::a() const
+  0.00     14.70     0.00  1025000     0.00     0.00  std::uniform_real_distribution<double>::param_type::param_type(double, double)
+  0.00     14.70     0.00  1025000     0.00     0.00  std::uniform_real_distribution<double>::uniform_real_distribution(double, double)
+  0.00     14.70     0.00  1024000     0.00     0.00  Metropolis(double, double)
+  0.00     14.70     0.00  1024000     0.00     0.00  std::uniform_int_distribution<unsigned int>::param_type::b() const
+  0.00     14.70     0.00  1024000     0.00     0.00  unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+  0.00     14.70     0.00   147837     0.00     0.00  lj_attr(double, double)
+  0.00     14.70     0.00     1248     0.00     0.00  std::__detail::_Mod<unsigned long, 4294967296ul, 1ul, 0ul, true, true>::__calc(unsigned long)
+  0.00     14.70     0.00     1248     0.00     0.00  unsigned long std::__detail::__mod<unsigned long, 4294967296ul, 1ul, 0ul>(unsigned long)
+  0.00     14.70     0.00     1246     0.00     0.00  std::__detail::_Mod<unsigned long, 624ul, 1ul, 0ul, true, true>::__calc(unsigned long)
+  0.00     14.70     0.00     1246     0.00     0.00  unsigned long std::__detail::__mod<unsigned long, 624ul, 1ul, 0ul>(unsigned long)
+  0.00     14.70     0.00        2     0.00     0.00  std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::seed(unsigned long)
+  0.00     14.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z10cal_lengthdddddPc
+  0.00     14.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z17hdf5_io_write_posPdiPc
+  0.00     14.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z4SqErPdS_i
+  0.00     14.70     0.00        1     0.00     0.00  _GLOBAL__sub_I__Z9cotangent5Vec3dS_S_
+  0.00     14.70     0.00        1     0.00     0.00  _GLOBAL__sub_I_main
+  0.00     14.70     0.00        1     0.00     0.05  lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para)
+  0.00     14.70     0.00        1     0.00     0.21  volume_total(Vec3d*, MESH, MBRANE_para)
+  0.00     14.70     0.00        1     0.00     0.00  hdf5_io_read_pos(double*, char*)
+  0.00     14.70     0.00        1     0.00     0.00  init_eval_lij_t0(Vec3d*, MESH, double*, MBRANE_para*)
+  0.00     14.70     0.00        1     0.00     0.00  hdf5_io_read_mesh(int*, int*, char*)
+  0.00     14.70     0.00        1     0.00     0.45  bending_energy_total(Vec3d*, MESH, MBRANE_para)
+  0.00     14.70     0.00        1     0.00     0.00  init_read_parameters(MBRANE_para*, AFM_para*, MCpara*, char*)
+  0.00     14.70     0.00        1     0.00     0.00  lj_bottom_surf_total(Vec3d*, bool*, MBRANE_para)
+  0.00     14.70     0.00        1     0.00     0.06  stretch_energy_total(Vec3d*, MESH, double*, MBRANE_para)
+  0.00     14.70     0.00        1     0.00     0.00  identify_attractive_part(Vec3d*, bool*, double, int)
+  0.00     14.70     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00     14.70     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00     14.70     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00     14.70     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00     14.70     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00     14.70     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00     14.70     0.00        1     0.00     0.00  __static_initialization_and_destruction_0(int, int)
+  0.00     14.70     0.00        1     0.00     0.00  init_rng(unsigned int)
+  0.00     14.70     0.00        1     0.00     0.00  std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::mersenne_twister_engine(unsigned long)
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2021 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 2 byte(s) for 0.07% of 14.70 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     98.3    0.00   14.46                 main [1]
+                0.05   14.40    1000/1000        monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+                0.00    0.00       1/1           bending_energy_total(Vec3d*, MESH, MBRANE_para) [42]
+                0.00    0.00       1/1           volume_total(Vec3d*, MESH, MBRANE_para) [43]
+                0.00    0.00       1/1           stretch_energy_total(Vec3d*, MESH, double*, MBRANE_para) [44]
+                0.00    0.00       1/1           lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para) [45]
+                0.00    0.00       1/1           lj_bottom_surf_total(Vec3d*, bool*, MBRANE_para) [46]
+                0.00    0.00       1/1268284713     Vec3d::Vec3d() [7]
+                0.00    0.00       1/1           init_eval_lij_t0(Vec3d*, MESH, double*, MBRANE_para*) [47]
+                0.00    0.00       2/4099050     __gnu_cxx::__promote_2<double, int, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<int, std::__is_integer<int>::__value>::__type>::__type std::pow<double, int>(double, int) [4361]
+                0.00    0.00       1/1           init_rng(unsigned int) [4390]
+                0.00    0.00       1/1           init_read_parameters(MBRANE_para*, AFM_para*, MCpara*, char*) [4381]
+                0.00    0.00       1/1           hdf5_io_read_pos(double*, char*) [4379]
+                0.00    0.00       1/1           hdf5_io_read_mesh(int*, int*, char*) [4380]
+                0.00    0.00       1/1           identify_attractive_part(Vec3d*, bool*, double, int) [4382]
+-----------------------------------------------
+                0.05   14.40    1000/1000        main [1]
+[2]     98.3    0.05   14.40    1000         monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+                0.10   12.99 2048000/2048000     energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para) [3]
+                0.29    0.54 2048000/2048512     volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [11]
+                0.02    0.33 3072000/3904219     double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [14]
+                0.00    0.09 1024000/1024000     Metropolis(double, double) [27]
+                0.00    0.02 1024000/1024000     unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [32]
+                0.01    0.01    1000/1000        std::uniform_int_distribution<unsigned int>::uniform_int_distribution(unsigned int, unsigned int) [34]
+                0.00    0.00    1000/1025000     std::uniform_real_distribution<double>::uniform_real_distribution(double, double) [4366]
+                0.00    0.00    1000/4099050     __gnu_cxx::__promote_2<double, int, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<int, std::__is_integer<int>::__value>::__type>::__type std::pow<double, int>(double, int) [4361]
+-----------------------------------------------
+                0.10   12.99 2048000/2048000     monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+[3]     89.1    0.10   12.99 2048000         energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para) [3]
+                0.07   10.78 2048000/2048000     bending_energy_ipart_neighbour(Vec3d*, MESH, int, MBRANE_para) [5]
+                0.70    1.11 2048000/14288498     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+                0.15    0.07 2048000/2048512     stretch_energy_ipart(Vec3d*, int*, double*, int, int, MBRANE_para) [21]
+                0.02    0.09 2048000/2048512     lj_afm(Vec3d, AFM_para) [25]
+                0.01    0.00 2048000/2048512     lj_bottom_surface(double, bool, double, double, double) [40]
+-----------------------------------------------
+                0.00    0.00     512/14288498     bending_energy_total(Vec3d*, MESH, MBRANE_para) [42]
+                0.70    1.11 2048000/14288498     energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para) [3]
+                4.17    6.60 12239986/14288498     bending_energy_ipart_neighbour(Vec3d*, MESH, int, MBRANE_para) [5]
+[4]     85.6    4.87    7.71 14288498         bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+                1.71    0.92 530110262/530110262     Vec3d::operator-(Vec3d) [6]
+                1.12    0.45 257910882/270153928     cross_product(Vec3d, Vec3d) [8]
+                0.55    0.29 272199380/272199380     norm(Vec3d) [10]
+                0.50    0.30 171940588/233156330     Vec3d_add(Vec3d, Vec3d, double) [9]
+                0.61    0.00 171940588/171940588     voronoi_area(double, double, double, double, double) [13]
+                0.46    0.00 429851470/740825952     inner_product(Vec3d, Vec3d) [12]
+                0.28    0.02 14288498/14288498     Vec3d::operator*(double) [18]
+                0.27    0.00 157173478/1268284713     Vec3d::Vec3d() [7]
+                0.11    0.05 28576996/28576996     Vec3d::operator/(double) [23]
+                0.05    0.02 14288498/14288498     normsq(Vec3d) [29]
+-----------------------------------------------
+                0.07   10.78 2048000/2048000     energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para) [3]
+[5]     73.8    0.07   10.78 2048000         bending_energy_ipart_neighbour(Vec3d*, MESH, int, MBRANE_para) [5]
+                4.17    6.60 12239986/14288498     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+-----------------------------------------------
+                1.71    0.92 530110262/530110262     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[6]     17.9    1.71    0.92 530110262         Vec3d::operator-(Vec3d) [6]
+                0.92    0.00 530110262/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.00    0.00       1/1268284713     init_eval_lij_t0(Vec3d*, MESH, double*, MBRANE_para*) [47]
+                0.00    0.00       1/1268284713     main [1]
+                0.00    0.00       3/1268284713     lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para) [45]
+                0.00    0.00 2048512/1268284713     stretch_energy_ipart(Vec3d*, int*, double*, int, int, MBRANE_para) [21]
+                0.00    0.00 2049024/1268284713     determine_xyz_parabola(Vec3d, AFM_para) [28]
+                0.01    0.00 4097024/1268284713     lj_afm(Vec3d, AFM_para) [25]
+                0.02    0.00 14288498/1268284713     Vec3d::operator*(double) [18]
+                0.05    0.00 26630656/1268284713     volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [11]
+                0.05    0.00 28576996/1268284713     Vec3d::operator/(double) [23]
+                0.27    0.00 157173478/1268284713     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+                0.41    0.00 233156330/1268284713     Vec3d_add(Vec3d, Vec3d, double) [9]
+                0.47    0.00 270153928/1268284713     cross_product(Vec3d, Vec3d) [8]
+                0.92    0.00 530110262/1268284713     Vec3d::operator-(Vec3d) [6]
+[7]     15.0    2.21    0.00 1268284713         Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.05    0.02 12243046/270153928     volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [11]
+                1.12    0.45 257910882/270153928     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[8]     11.2    1.17    0.47 270153928         cross_product(Vec3d, Vec3d) [8]
+                0.47    0.00 270153928/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.00    0.00     512/233156330     lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para) [45]
+                0.04    0.02 12243046/233156330     stretch_energy_ipart(Vec3d*, int*, double*, int, int, MBRANE_para) [21]
+                0.14    0.09 48972184/233156330     volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [11]
+                0.50    0.30 171940588/233156330     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[9]      7.3    0.68    0.41 233156330         Vec3d_add(Vec3d, Vec3d, double) [9]
+                0.41    0.00 233156330/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.55    0.29 272199380/272199380     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[10]     5.7    0.55    0.29 272199380         norm(Vec3d) [10]
+                0.29    0.00 272199380/740825952     inner_product(Vec3d, Vec3d) [12]
+-----------------------------------------------
+                0.00    0.00     512/2048512     volume_total(Vec3d*, MESH, MBRANE_para) [43]
+                0.29    0.54 2048000/2048512     monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+[11]     5.7    0.29    0.54 2048512         volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [11]
+                0.14    0.09 48972184/233156330     Vec3d_add(Vec3d, Vec3d, double) [9]
+                0.18    0.00 12243046/12243046     std::abs(double) [22]
+                0.05    0.02 12243046/270153928     cross_product(Vec3d, Vec3d) [8]
+                0.05    0.00 26630656/1268284713     Vec3d::Vec3d() [7]
+                0.01    0.00 12243046/740825952     inner_product(Vec3d, Vec3d) [12]
+-----------------------------------------------
+                0.00    0.00     512/740825952     lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para) [45]
+                0.01    0.00 12243046/740825952     volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [11]
+                0.01    0.00 12243046/740825952     stretch_energy_ipart(Vec3d*, int*, double*, int, int, MBRANE_para) [21]
+                0.02    0.00 14288498/740825952     normsq(Vec3d) [29]
+                0.29    0.00 272199380/740825952     norm(Vec3d) [10]
+                0.46    0.00 429851470/740825952     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[12]     5.4    0.80    0.00 740825952         inner_product(Vec3d, Vec3d) [12]
+-----------------------------------------------
+                0.61    0.00 171940588/171940588     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[13]     4.1    0.61    0.00 171940588         voronoi_area(double, double, double, double, double) [13]
+-----------------------------------------------
+                0.00    0.09  832219/3904219     Metropolis(double, double) [27]
+                0.02    0.33 3072000/3904219     monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+[14]     3.0    0.02    0.42 3904219         double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [14]
+                0.01    0.41 3904219/3904219     double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_real_distribution<double>::param_type const&) [15]
+-----------------------------------------------
+                0.01    0.41 3904219/3904219     double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [14]
+[15]     2.8    0.01    0.41 3904219         double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_real_distribution<double>::param_type const&) [15]
+                0.01    0.37 3904219/3904219     std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::operator()() [16]
+                0.02    0.00 7808438/7808438     std::uniform_real_distribution<double>::param_type::a() const [36]
+                0.02    0.00 3904219/3904219     std::uniform_real_distribution<double>::param_type::b() const [37]
+                0.00    0.00 3904219/3904219     std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::_Adaptor(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [4363]
+-----------------------------------------------
+                0.01    0.37 3904219/3904219     double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_real_distribution<double>::param_type const&) [15]
+[16]     2.6    0.01    0.37 3904219         std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::operator()() [16]
+                0.13    0.24 3904219/3904219     double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [17]
+-----------------------------------------------
+                0.13    0.24 3904219/3904219     std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::operator()() [16]
+[17]     2.5    0.13    0.24 3904219         double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [17]
+                0.06    0.05 7808438/8832438     std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::operator()() [24]
+                0.11    0.00 7808438/7808438     std::log(long double) [26]
+                0.01    0.00 11712657/11712657     std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::min() [38]
+                0.01    0.00 3904219/3904219     unsigned long const& std::max<unsigned long>(unsigned long const&, unsigned long const&) [39]
+                0.00    0.00 3904219/3904219     std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::max() [4362]
+-----------------------------------------------
+                0.28    0.02 14288498/14288498     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[18]     2.1    0.28    0.02 14288498         Vec3d::operator*(double) [18]
+                0.02    0.00 14288498/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                                                 <spontaneous>
+[19]     1.7    0.00    0.25                 __libc_csu_init [19]
+                0.23    0.00       1/1           _GLOBAL__sub_I__Z22init_system_random_posP5Vec2ddiPc [20]
+                0.02    0.00       1/1           _GLOBAL__sub_I_rng [35]
+                0.00    0.00       1/1           _GLOBAL__sub_I_main [4378]
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z4SqErPdS_i [4376]
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z17hdf5_io_write_posPdiPc [4375]
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z9cotangent5Vec3dS_S_ [4377]
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z10cal_lengthdddddPc [4374]
+-----------------------------------------------
+                0.23    0.00       1/1           __libc_csu_init [19]
+[20]     1.5    0.23    0.00       1         _GLOBAL__sub_I__Z22init_system_random_posP5Vec2ddiPc [20]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [4384]
+-----------------------------------------------
+                0.00    0.00     512/2048512     stretch_energy_total(Vec3d*, MESH, double*, MBRANE_para) [44]
+                0.15    0.07 2048000/2048512     energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para) [3]
+[21]     1.5    0.15    0.07 2048512         stretch_energy_ipart(Vec3d*, int*, double*, int, int, MBRANE_para) [21]
+                0.04    0.02 12243046/233156330     Vec3d_add(Vec3d, Vec3d, double) [9]
+                0.01    0.00 12243046/740825952     inner_product(Vec3d, Vec3d) [12]
+                0.00    0.00 2048512/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.18    0.00 12243046/12243046     volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [11]
+[22]     1.2    0.18    0.00 12243046         std::abs(double) [22]
+-----------------------------------------------
+                0.11    0.05 28576996/28576996     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[23]     1.1    0.11    0.05 28576996         Vec3d::operator/(double) [23]
+                0.05    0.00 28576996/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.01    0.01 1024000/8832438     unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned int>::param_type const&) [33]
+                0.06    0.05 7808438/8832438     double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [17]
+[24]     0.9    0.07    0.06 8832438         std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::operator()() [24]
+                0.06    0.00   14155/14155       std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::_M_gen_rand() [30]
+-----------------------------------------------
+                0.00    0.00     512/2048512     lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para) [45]
+                0.02    0.09 2048000/2048512     energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para) [3]
+[25]     0.8    0.02    0.09 2048512         lj_afm(Vec3d, AFM_para) [25]
+                0.03    0.05 2048512/2049024     determine_xyz_parabola(Vec3d, AFM_para) [28]
+                0.01    0.00 4097024/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.11    0.00 7808438/7808438     double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [17]
+[26]     0.7    0.11    0.00 7808438         std::log(long double) [26]
+-----------------------------------------------
+                0.00    0.09 1024000/1024000     monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+[27]     0.6    0.00    0.09 1024000         Metropolis(double, double) [27]
+                0.00    0.09  832219/3904219     double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [14]
+                0.00    0.00 1024000/1025000     std::uniform_real_distribution<double>::uniform_real_distribution(double, double) [4366]
+-----------------------------------------------
+                0.00    0.00     512/2049024     lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para) [45]
+                0.03    0.05 2048512/2049024     lj_afm(Vec3d, AFM_para) [25]
+[28]     0.6    0.03    0.05 2049024         determine_xyz_parabola(Vec3d, AFM_para) [28]
+                0.05    0.00 2049024/2049024     cubic_solve(double, double, double, double, double*) [31]
+                0.00    0.00 2049024/1268284713     Vec3d::Vec3d() [7]
+                0.00    0.00 4098048/4099050     __gnu_cxx::__promote_2<double, int, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<int, std::__is_integer<int>::__value>::__type>::__type std::pow<double, int>(double, int) [4361]
+-----------------------------------------------
+                0.05    0.02 14288498/14288498     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+[29]     0.4    0.05    0.02 14288498         normsq(Vec3d) [29]
+                0.02    0.00 14288498/740825952     inner_product(Vec3d, Vec3d) [12]
+-----------------------------------------------
+                0.06    0.00   14155/14155       std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::operator()() [24]
+[30]     0.4    0.06    0.00   14155         std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::_M_gen_rand() [30]
+-----------------------------------------------
+                0.05    0.00 2049024/2049024     determine_xyz_parabola(Vec3d, AFM_para) [28]
+[31]     0.3    0.05    0.00 2049024         cubic_solve(double, double, double, double, double*) [31]
+-----------------------------------------------
+                0.00    0.02 1024000/1024000     monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+[32]     0.2    0.00    0.02 1024000         unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [32]
+                0.01    0.01 1024000/1024000     unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned int>::param_type const&) [33]
+-----------------------------------------------
+                0.01    0.01 1024000/1024000     unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [32]
+[33]     0.2    0.01    0.01 1024000         unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned int>::param_type const&) [33]
+                0.01    0.01 1024000/8832438     std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::operator()() [24]
+                0.00    0.00 2048000/2048000     std::uniform_int_distribution<unsigned int>::param_type::a() const [4364]
+                0.00    0.00 1024000/1024000     std::uniform_int_distribution<unsigned int>::param_type::b() const [4367]
+-----------------------------------------------
+                0.01    0.01    1000/1000        monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+[34]     0.1    0.01    0.01    1000         std::uniform_int_distribution<unsigned int>::uniform_int_distribution(unsigned int, unsigned int) [34]
+                0.01    0.00    1000/1000        std::uniform_int_distribution<unsigned int>::param_type::param_type(unsigned int, unsigned int) [41]
+-----------------------------------------------
+                0.02    0.00       1/1           __libc_csu_init [19]
+[35]     0.1    0.02    0.00       1         _GLOBAL__sub_I_rng [35]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [4386]
+-----------------------------------------------
+                0.02    0.00 7808438/7808438     double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_real_distribution<double>::param_type const&) [15]
+[36]     0.1    0.02    0.00 7808438         std::uniform_real_distribution<double>::param_type::a() const [36]
+-----------------------------------------------
+                0.02    0.00 3904219/3904219     double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_real_distribution<double>::param_type const&) [15]
+[37]     0.1    0.02    0.00 3904219         std::uniform_real_distribution<double>::param_type::b() const [37]
+-----------------------------------------------
+                0.01    0.00 11712657/11712657     double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [17]
+[38]     0.1    0.01    0.00 11712657         std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::min() [38]
+-----------------------------------------------
+                0.01    0.00 3904219/3904219     double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [17]
+[39]     0.1    0.01    0.00 3904219         unsigned long const& std::max<unsigned long>(unsigned long const&, unsigned long const&) [39]
+-----------------------------------------------
+                0.00    0.00     512/2048512     lj_bottom_surf_total(Vec3d*, bool*, MBRANE_para) [46]
+                0.01    0.00 2048000/2048512     energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para) [3]
+[40]     0.1    0.01    0.00 2048512         lj_bottom_surface(double, bool, double, double, double) [40]
+                0.00    0.00  147837/147837      lj_attr(double, double) [4368]
+-----------------------------------------------
+                0.01    0.00    1000/1000        std::uniform_int_distribution<unsigned int>::uniform_int_distribution(unsigned int, unsigned int) [34]
+[41]     0.1    0.01    0.00    1000         std::uniform_int_distribution<unsigned int>::param_type::param_type(unsigned int, unsigned int) [41]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[42]     0.0    0.00    0.00       1         bending_energy_total(Vec3d*, MESH, MBRANE_para) [42]
+                0.00    0.00     512/14288498     bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[43]     0.0    0.00    0.00       1         volume_total(Vec3d*, MESH, MBRANE_para) [43]
+                0.00    0.00     512/2048512     volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [11]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[44]     0.0    0.00    0.00       1         stretch_energy_total(Vec3d*, MESH, double*, MBRANE_para) [44]
+                0.00    0.00     512/2048512     stretch_energy_ipart(Vec3d*, int*, double*, int, int, MBRANE_para) [21]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[45]     0.0    0.00    0.00       1         lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para) [45]
+                0.00    0.00     512/2048512     lj_afm(Vec3d, AFM_para) [25]
+                0.00    0.00     512/2049024     determine_xyz_parabola(Vec3d, AFM_para) [28]
+                0.00    0.00     512/233156330     Vec3d_add(Vec3d, Vec3d, double) [9]
+                0.00    0.00     512/740825952     inner_product(Vec3d, Vec3d) [12]
+                0.00    0.00       3/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[46]     0.0    0.00    0.00       1         lj_bottom_surf_total(Vec3d*, bool*, MBRANE_para) [46]
+                0.00    0.00     512/2048512     lj_bottom_surface(double, bool, double, double, double) [40]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[47]     0.0    0.00    0.00       1         init_eval_lij_t0(Vec3d*, MESH, double*, MBRANE_para*) [47]
+                0.00    0.00       1/1268284713     Vec3d::Vec3d() [7]
+-----------------------------------------------
+                0.00    0.00       2/4099050     main [1]
+                0.00    0.00    1000/4099050     monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+                0.00    0.00 4098048/4099050     determine_xyz_parabola(Vec3d, AFM_para) [28]
+[4361]   0.0    0.00    0.00 4099050         __gnu_cxx::__promote_2<double, int, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<int, std::__is_integer<int>::__value>::__type>::__type std::pow<double, int>(double, int) [4361]
+-----------------------------------------------
+                0.00    0.00 3904219/3904219     double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [17]
+[4362]   0.0    0.00    0.00 3904219         std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::max() [4362]
+-----------------------------------------------
+                0.00    0.00 3904219/3904219     double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_real_distribution<double>::param_type const&) [15]
+[4363]   0.0    0.00    0.00 3904219         std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::_Adaptor(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&) [4363]
+-----------------------------------------------
+                0.00    0.00 2048000/2048000     unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned int>::param_type const&) [33]
+[4364]   0.0    0.00    0.00 2048000         std::uniform_int_distribution<unsigned int>::param_type::a() const [4364]
+-----------------------------------------------
+                0.00    0.00 1025000/1025000     std::uniform_real_distribution<double>::uniform_real_distribution(double, double) [4366]
+[4365]   0.0    0.00    0.00 1025000         std::uniform_real_distribution<double>::param_type::param_type(double, double) [4365]
+-----------------------------------------------
+                0.00    0.00    1000/1025000     monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [2]
+                0.00    0.00 1024000/1025000     Metropolis(double, double) [27]
+[4366]   0.0    0.00    0.00 1025000         std::uniform_real_distribution<double>::uniform_real_distribution(double, double) [4366]
+                0.00    0.00 1025000/1025000     std::uniform_real_distribution<double>::param_type::param_type(double, double) [4365]
+-----------------------------------------------
+                0.00    0.00 1024000/1024000     unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned int>::param_type const&) [33]
+[4367]   0.0    0.00    0.00 1024000         std::uniform_int_distribution<unsigned int>::param_type::b() const [4367]
+-----------------------------------------------
+                0.00    0.00  147837/147837      lj_bottom_surface(double, bool, double, double, double) [40]
+[4368]   0.0    0.00    0.00  147837         lj_attr(double, double) [4368]
+-----------------------------------------------
+                0.00    0.00    1248/1248        unsigned long std::__detail::__mod<unsigned long, 4294967296ul, 1ul, 0ul>(unsigned long) [4370]
+[4369]   0.0    0.00    0.00    1248         std::__detail::_Mod<unsigned long, 4294967296ul, 1ul, 0ul, true, true>::__calc(unsigned long) [4369]
+-----------------------------------------------
+                0.00    0.00    1248/1248        std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::seed(unsigned long) [4373]
+[4370]   0.0    0.00    0.00    1248         unsigned long std::__detail::__mod<unsigned long, 4294967296ul, 1ul, 0ul>(unsigned long) [4370]
+                0.00    0.00    1248/1248        std::__detail::_Mod<unsigned long, 4294967296ul, 1ul, 0ul, true, true>::__calc(unsigned long) [4369]
+-----------------------------------------------
+                0.00    0.00    1246/1246        unsigned long std::__detail::__mod<unsigned long, 624ul, 1ul, 0ul>(unsigned long) [4372]
+[4371]   0.0    0.00    0.00    1246         std::__detail::_Mod<unsigned long, 624ul, 1ul, 0ul, true, true>::__calc(unsigned long) [4371]
+-----------------------------------------------
+                0.00    0.00    1246/1246        std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::seed(unsigned long) [4373]
+[4372]   0.0    0.00    0.00    1246         unsigned long std::__detail::__mod<unsigned long, 624ul, 1ul, 0ul>(unsigned long) [4372]
+                0.00    0.00    1246/1246        std::__detail::_Mod<unsigned long, 624ul, 1ul, 0ul, true, true>::__calc(unsigned long) [4371]
+-----------------------------------------------
+                0.00    0.00       1/2           init_rng(unsigned int) [4390]
+                0.00    0.00       1/2           std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::mersenne_twister_engine(unsigned long) [4391]
+[4373]   0.0    0.00    0.00       2         std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::seed(unsigned long) [4373]
+                0.00    0.00    1248/1248        unsigned long std::__detail::__mod<unsigned long, 4294967296ul, 1ul, 0ul>(unsigned long) [4370]
+                0.00    0.00    1246/1246        unsigned long std::__detail::__mod<unsigned long, 624ul, 1ul, 0ul>(unsigned long) [4372]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [19]
+[4374]   0.0    0.00    0.00       1         _GLOBAL__sub_I__Z10cal_lengthdddddPc [4374]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [4383]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [19]
+[4375]   0.0    0.00    0.00       1         _GLOBAL__sub_I__Z17hdf5_io_write_posPdiPc [4375]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [4387]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [19]
+[4376]   0.0    0.00    0.00       1         _GLOBAL__sub_I__Z4SqErPdS_i [4376]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [4388]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [19]
+[4377]   0.0    0.00    0.00       1         _GLOBAL__sub_I__Z9cotangent5Vec3dS_S_ [4377]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [4385]
+-----------------------------------------------
+                0.00    0.00       1/1           __libc_csu_init [19]
+[4378]   0.0    0.00    0.00       1         _GLOBAL__sub_I_main [4378]
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [4389]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[4379]   0.0    0.00    0.00       1         hdf5_io_read_pos(double*, char*) [4379]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[4380]   0.0    0.00    0.00       1         hdf5_io_read_mesh(int*, int*, char*) [4380]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[4381]   0.0    0.00    0.00       1         init_read_parameters(MBRANE_para*, AFM_para*, MCpara*, char*) [4381]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[4382]   0.0    0.00    0.00       1         identify_attractive_part(Vec3d*, bool*, double, int) [4382]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z10cal_lengthdddddPc [4374]
+[4383]   0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [4383]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z22init_system_random_posP5Vec2ddiPc [20]
+[4384]   0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [4384]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z9cotangent5Vec3dS_S_ [4377]
+[4385]   0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [4385]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I_rng [35]
+[4386]   0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [4386]
+                0.00    0.00       1/1           std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::mersenne_twister_engine(unsigned long) [4391]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z17hdf5_io_write_posPdiPc [4375]
+[4387]   0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [4387]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I__Z4SqErPdS_i [4376]
+[4388]   0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [4388]
+-----------------------------------------------
+                0.00    0.00       1/1           _GLOBAL__sub_I_main [4378]
+[4389]   0.0    0.00    0.00       1         __static_initialization_and_destruction_0(int, int) [4389]
+-----------------------------------------------
+                0.00    0.00       1/1           main [1]
+[4390]   0.0    0.00    0.00       1         init_rng(unsigned int) [4390]
+                0.00    0.00       1/2           std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::seed(unsigned long) [4373]
+-----------------------------------------------
+                0.00    0.00       1/1           __static_initialization_and_destruction_0(int, int) [4386]
+[4391]   0.0    0.00    0.00       1         std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::mersenne_twister_engine(unsigned long) [4391]
+                0.00    0.00       1/2           std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::seed(unsigned long) [4373]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2021 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+ [4374] _GLOBAL__sub_I__Z10cal_lengthdddddPc [44] stretch_energy_total(Vec3d*, MESH, double*, MBRANE_para) [4362] std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::max()
+ [4375] _GLOBAL__sub_I__Z17hdf5_io_write_posPdiPc [28] determine_xyz_parabola(Vec3d, AFM_para) [38] std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::min()
+  [20] _GLOBAL__sub_I__Z22init_system_random_posP5Vec2ddiPc [4382] identify_attractive_part(Vec3d*, bool*, double, int) [4373] std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::seed(unsigned long)
+ [4376] _GLOBAL__sub_I__Z4SqErPdS_i [5] bending_energy_ipart_neighbour(Vec3d*, MESH, int, MBRANE_para) [4391] std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::mersenne_twister_engine(unsigned long)
+ [4377] _GLOBAL__sub_I__Z9cotangent5Vec3dS_S_ [4383] __static_initialization_and_destruction_0(int, int) [24] std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::operator()()
+ [4378] _GLOBAL__sub_I_main [4384] __static_initialization_and_destruction_0(int, int) [41] std::uniform_int_distribution<unsigned int>::param_type::param_type(unsigned int, unsigned int)
+  [35] _GLOBAL__sub_I_rng   [4385] __static_initialization_and_destruction_0(int, int) [34] std::uniform_int_distribution<unsigned int>::uniform_int_distribution(unsigned int, unsigned int)
+  [27] Metropolis(double, double) [4386] __static_initialization_and_destruction_0(int, int) [32] unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+  [31] cubic_solve(double, double, double, double, double*) [4387] __static_initialization_and_destruction_0(int, int) [33] unsigned int std::uniform_int_distribution<unsigned int>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_int_distribution<unsigned int>::param_type const&)
+   [3] energy_mc_3d(Vec3d*, MESH, double*, bool*, int, MBRANE_para, MCpara, AFM_para) [4388] __static_initialization_and_destruction_0(int, int) [4365] std::uniform_real_distribution<double>::param_type::param_type(double, double)
+  [45] lj_afm_total(Vec3d*, Vec3d*, MBRANE_para, AFM_para) [4389] __static_initialization_and_destruction_0(int, int) [4366] std::uniform_real_distribution<double>::uniform_real_distribution(double, double)
+  [11] volume_ipart(Vec3d*, int*, int, int, MBRANE_para) [10] norm(Vec3d) [14] double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+  [43] volume_total(Vec3d*, MESH, MBRANE_para) [25] lj_afm(Vec3d, AFM_para) [15] double std::uniform_real_distribution<double>::operator()<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&, std::uniform_real_distribution<double>::param_type const&)
+  [13] voronoi_area(double, double, double, double, double) [29] normsq(Vec3d) [4369] std::__detail::_Mod<unsigned long, 4294967296ul, 1ul, 0ul, true, true>::__calc(unsigned long)
+   [8] cross_product(Vec3d, Vec3d) [4368] lj_attr(double, double) [4371] std::__detail::_Mod<unsigned long, 624ul, 1ul, 0ul, true, true>::__calc(unsigned long)
+  [12] inner_product(Vec3d, Vec3d) [4390] init_rng(unsigned int) [4370] unsigned long std::__detail::__mod<unsigned long, 4294967296ul, 1ul, 0ul>(unsigned long)
+   [2] monte_carlo_3d(Vec3d*, MESH, double*, bool*, MBRANE_para, MCpara, AFM_para) [9] Vec3d_add(Vec3d, Vec3d, double) [4372] unsigned long std::__detail::__mod<unsigned long, 624ul, 1ul, 0ul>(unsigned long)
+ [4379] hdf5_io_read_pos(double*, char*) [7] Vec3d::Vec3d() [4363] std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::_Adaptor(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+  [47] init_eval_lij_t0(Vec3d*, MESH, double*, MBRANE_para*) [23] Vec3d::operator/(double) [16] std::__detail::_Adaptor<std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>, double>::operator()()
+ [4380] hdf5_io_read_mesh(int*, int*, char*) [6] Vec3d::operator-(Vec3d) [17] double std::generate_canonical<double, 53ul, std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul> >(std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>&)
+  [40] lj_bottom_surface(double, bool, double, double, double) [18] Vec3d::operator*(double) [22] std::abs(double)
+   [4] bending_energy_ipart(Vec3d*, int*, int, int, MBRANE_para) [4364] std::uniform_int_distribution<unsigned int>::param_type::a() const [26] std::log(long double)
+  [42] bending_energy_total(Vec3d*, MESH, MBRANE_para) [4367] std::uniform_int_distribution<unsigned int>::param_type::b() const [39] unsigned long const& std::max<unsigned long>(unsigned long const&, unsigned long const&)
+ [4381] init_read_parameters(MBRANE_para*, AFM_para*, MCpara*, char*) [36] std::uniform_real_distribution<double>::param_type::a() const [4361] __gnu_cxx::__promote_2<double, int, __gnu_cxx::__promote<double, std::__is_integer<double>::__value>::__type, __gnu_cxx::__promote<int, std::__is_integer<int>::__value>::__type>::__type std::pow<double, int>(double, int)
+  [46] lj_bottom_surf_total(Vec3d*, bool*, MBRANE_para) [37] std::uniform_real_distribution<double>::param_type::b() const
+  [21] stretch_energy_ipart(Vec3d*, int*, double*, int, int, MBRANE_para) [30] std::mersenne_twister_engine<unsigned long, 32ul, 624ul, 397ul, 31ul, 2567483615ul, 11ul, 4294967295ul, 7ul, 2636928640ul, 15ul, 4022730752ul, 18ul, 1812433253ul>::_M_gen_rand()

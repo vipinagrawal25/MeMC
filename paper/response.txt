@@ -1,18 +1,29 @@
 `Consider fixing the compilation warnings listed below:
 src/init.cpp: In function ‘void init_read_parameters(MBRANE_para*, AFM_para*, MCpara*, char*)’:
 src/init.cpp:102:37: warning: format ‘%d’ expects a matching ‘int*’ argument [-Wformat=] ...`
-We have fixed all the errors in the current version.
+
+We have fixed all the compilation warnings in the current version. We have checked
+this with compiler version gcc-5.4 and gcc-12.1. 
 
 `Is there a reason to use 60000 MC steps by default? Should this parameter be
 accessible to the user in the exe_start driver?`
+
 Thank you for the suggestion. In the current version, we have made this parameter accessible
-to the user. The forth command line argument to exe_start driver is now the MC steps.
+to the user. The user can input this parameter as the fourth command line argument
+to `exe_start` driver. 
 
 Code organization:
+
 `Consider generating a library so that external application codes can link to it.
 Consider moving the bulk of the work performed in the drivers start.cpp and
 memc.cpp to separate functions located at the src/ folder. This way, you can create
 a library that distributes those functionalities to external users.`
+
+The code was already organized in the suggested manner. All the functions are
+defined in the files stored in `src/` folder and only the function calls are done
+from `start.cpp` and `memc.cpp`. Since the compilation time itself of our package is
+very small, we have not considered generating a library. As we develop further and
+the code grows we will surely make a library for the functions in `src/`.
 
 
 `I could not find API documentation anywhere. For example, what are the meanings of the
@@ -20,10 +31,13 @@ input/output parameters used in functions such as monte_carlo_surf2d,
 pairlj_total_energy, and monte_carlo_3d? Consider using a documentation generator
 tool such as Doxygen. Note that functions should be annotated to be able to
 automatically generate the documentation.`
+
 We have generated the documentation using Doxygen and is now hosted at vipinagrawal25.github.io/memc.
 
 `Add a make clean target (could be the same as make distclean).`
-We have added make clean, which removes all the object and executable files.
+
+We have added the make clean target in the Makefile to remove all the build objects
+and executables.
 
 
 `Code performance:
@@ -33,10 +47,19 @@ most of the execution time? For example, Gprof indicates that cal_length takes u
 the execution time of exe_memc. Would it be possible to reduce the execution time of
 these particular functions?`
 
-We have not considered multi-threading as of now. In this Monte-Carlo simulations, 
-the parallelization is not straightforward as one is allowed to move one particle randomly in any instance. 
-In parallelization it may happen that multiple moves are conducted at the same time. Although, we agree that certain routines can be made parallel 
-using OpenMP. We plan to work on those aspect in the future. 
+
+
+
+We have not considered multi-threading as of now. In the Monte-Carlo simulations, 
+the parallelization is not straightforward as only one particle can be moved
+randomly in a time. 
+During parallelization it may happen that multiple moves are made simultaneously
+which would
+lead to errors. Although, as suggested, we agree that certain routines can be made parallel 
+using OpenMP. 
+The current problems that we are trying to solve using the code requires a lot of ensemble
+averaging. Therefore, parallelization using OpenMP Pragma is not beneficial for us
+at this moment. We have added the suggestion in the todo list and will test  in future.
 
 Minor changes in the text:
 `Lines 60-61: did you mean: there are two elastic constants to be determined? Can you

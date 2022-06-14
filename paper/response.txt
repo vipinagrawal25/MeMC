@@ -3,7 +3,7 @@ src/init.cpp: In function ‘void init_read_parameters(MBRANE_para*, AFM_para*, 
 src/init.cpp:102:37: warning: format ‘%d’ expects a matching ‘int*’ argument [-Wformat=] ...`
 
 We have fixed all the compilation warnings in the current version. We have checked
-this with compiler version gcc-5.4 and gcc-12.1. 
+that the fix works with compiler version gcc-5.4 and gcc-12.1. 
 
 `Is there a reason to use 60000 MC steps by default? Should this parameter be
 accessible to the user in the exe_start driver?`
@@ -47,19 +47,32 @@ most of the execution time? For example, Gprof indicates that cal_length takes u
 the execution time of exe_memc. Would it be possible to reduce the execution time of
 these particular functions?`
 
+We thank the referee for the comment. The number of calls to `cal_length` in
+`exe_start` is considerably large. Therefore, we expect this function to be the
+bottleneck. The sole purpose of `exe_start` is to generate initial configuration to be
+fed into `exe_memc`. A single simulation can generate multiple such configurations
+and the user need not execute `exe_start` again. Thus, optimizing this driver is not
+beneficial. 
 
-
+The second comment regarding optimizing `exe_memc` was useful. We were able to optimize the
+`bending_energy_ipart` further by vectorizing some operations and reduce the compute time by 4%. 
+However, this routine is called the atleast 6 times more than any other functions. 
+and the number of floating point operations in the function is significantly large.
+It is natural to expect this function to be a major bottleneck in the code.
+Although, we have included the current profile report in the repository (paper/prof_report.txt).
 
 We have not considered multi-threading as of now. In the Monte-Carlo simulations, 
 the parallelization is not straightforward as only one particle can be moved
-randomly in a time. 
+randomly at a given instance. 
 During parallelization it may happen that multiple moves are made simultaneously
 which would
 lead to errors. Although, as suggested, we agree that certain routines can be made parallel 
 using OpenMP. 
 The current problems that we are trying to solve using the code requires a lot of ensemble
 averaging. Therefore, parallelization using OpenMP Pragma is not beneficial for us
-at this moment. We have added the suggestion in the todo list and will test  in future.
+at this moment. We have added the suggestion in the todo list and will test them in future.
+
+
 
 Minor changes in the text:
 `Lines 60-61: did you mean: there are two elastic constants to be determined? Can you
@@ -93,13 +106,23 @@ Done.
 
 `Add community guidelines which should contain information about how to:
 Contribute to the software.`
-
 `Report issues or problems with the software.
 Seek support.`
 
+# Contributing to the software :
+The software is hosted in github and any contribution can be made by sending pull
+requests. Any querries can be made by opening an issue.
+
+
+
 `Add white background to the figure: https://github.com/vipinagrawal25/MeMC/blob/main/paper/fig/describe_theta.png`
 
+We have now made background white.
 
-Update links in https://github.com/vipinagrawal25/MeMC/blob/main/README.md#example
+
+`Update links in https://github.com/vipinagrawal25/MeMC/blob/main/README.md#example
 gnuplot: http://www.gnuplot.info/
-GNU GSL: https://www.gnu.org/software/gsl/
+GNU GSL: https://www.gnu.org/software/gsl/`
+
+We have fixed all the links
+

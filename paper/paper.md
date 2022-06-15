@@ -321,6 +321,15 @@ bulk energy is
 \Delta E_\mathrm{bulk} = 2K\frac{\Delta V(V  - V_0)}{V_0^2}+ \left(\frac{\Delta V}{V_0}\right)^2,
 \end{equation}
 where $\Delta V$ is the change in volume due to the move.
+Since we update the position of only one node at a time, $\Delta V$ is equal to the change in volume of the tetrahedrons $V_{\rm T}$, enclosed by all the neighboring triangles around node $i$ and center of the shell.
+We write
+\begin{equation}
+  V_{\rm T}  \equiv \frac{1}{3} \left(\mathbf{\nabla} \cdot \mathbf{r} \right) V_{\rm T}  \equal 
+              \frac{1}{3} \left(\mathbf{r}\cdot\mathbf{\hat{n}}\right) S_{\rm T} \/,
+\end{equation}
+where $\mathbf {r}$ is the position of the centroid and $S_{\rm T}$ is the surface area of the respective triangle.
+The first equality is uses $\left(\mathbf{\nabla} \cdot \mathbf{r} \right) = 3$ for a sphere, and the second equality is the result of Gauss divergence theorem.
+
 
 <!-- ### Pressure
 

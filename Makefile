@@ -1,7 +1,7 @@
 CC = h5c++ 
 #
-# opt = -O3
-opt= -pg
+#opt=-O3
+opt=-pg
 # ifeq ($(debug), y)
 # 	opt = -g3  -Wall -pedantic
 # endif

@@ -83,22 +83,22 @@ int main(int argc, char *argv[]){
     fprintf(fid, "%s\n", log_headers);
     num_moves = 0;
     for(i=0; i < mcpara.tot_mc_iter; i++){
-        Et[0] =  stretch_energy_total(Pos, mesh, lij_t0, mbrane);
-        Et[1] =  bending_energy_total(Pos, mesh, mbrane);
-        Et[2] = lj_bottom_surf_total(Pos, is_attractive, mbrane);
-        Et[3] = lj_afm_total(Pos, &afm_force, mbrane, afm);
-        vol_sph = volume_total(Pos, mesh, mbrane);
-        Et[4] = mbrane.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
-        fprintf(stderr, "iter :: %d percentage of AcceptedMoves :: %4.2f total energy :: %g volume :: %g \n", i, 100*(double)num_moves/mcpara.one_mc_iter, mbrane.tot_energy[0], vol_sph);
+        //Et[0] =  stretch_energy_total(Pos, mesh, lij_t0, mbrane);
+        //Et[1] =  bending_energy_total(Pos, mesh, mbrane);
+        //Et[2] = lj_bottom_surf_total(Pos, is_attractive, mbrane);
+        //Et[3] = lj_afm_total(Pos, &afm_force, mbrane, afm);
+        //vol_sph = volume_total(Pos, mesh, mbrane);
+        //Et[4] = mbrane.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
+        //fprintf(stderr, "iter :: %d percentage of AcceptedMoves :: %4.2f total energy :: %g volume :: %g \n", i, 100*(double)num_moves/mcpara.one_mc_iter, mbrane.tot_energy[0], vol_sph);
 
-        fprintf(fid, " %d %d %g %g %g %g %g %g\n",
-                    i, num_moves, mbrane.tot_energy[0], Et[0], Et[1], Et[2], Et[3], Et[4]);
-        fflush(fid);
-        if(i%mcpara.dump_skip == 0){
+        //fprintf(fid, " %d %d %g %g %g %g %g %g\n",
+          //          i, num_moves, mbrane.tot_energy[0], Et[0], Et[1], Et[2], Et[3], Et[4]);
+        //fflush(fid);
+      //  if(i%mcpara.dump_skip == 0){
 
-            sprintf(outfile,"%s/snap_%04d.h5",outfolder,(int)(i/mcpara.dump_skip));
-            hdf5_io_write_pos((double*) Pos, 3*mbrane.N, outfile);
-        }
+    //        sprintf(outfile,"%s/snap_%04d.h5",outfolder,(int)(i/mcpara.dump_skip));
+  //          hdf5_io_write_pos((double*) Pos, 3*mbrane.N, outfile);
+//        }
         if(i == 10*mcpara.dump_skip){
             afm.sigma = s_t;
             afm.epsilon = e_t;

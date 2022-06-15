@@ -206,8 +206,8 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     ///  @param node_nbr nearest neigbours of idx; 
     ///  @param num_nbr number of nearest neigbours of idx; 
     ///  @param para  Membrane related parameters;
+    /// @todo try openMP Pragmas;
     /// @return Bending Energy contribution when ith particle is displaced 
-
 
     double bend_ener,sigma_i;
     Vec3d cot_times_rij;

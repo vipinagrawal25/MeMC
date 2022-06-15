@@ -48,46 +48,54 @@ most of the execution time? For example, Gprof indicates that cal_length takes u
 the execution time of exe_memc. Would it be possible to reduce the execution time of
 these particular functions?`
 
-We thank the referee for this suggestion. Regarding optimizing `exe_memc`: we are able to optimize the `bending_energy_ipart` further by vectorizing some operations and reducing the compute time by 4%. 
+We thank the referee for this suggestion. Regarding optimizing `exe_memc`: we are able to optimize the `bending_energy_ipart` further by vectorizing some operations and reduce the compute time of bending_energy_ipart 4%. 
 However, this routine is called the atleast 6 times more than any other functions, 
 and the number of floating point operations in the function is large.
 It is natural to expect this function to be a major bottleneck in the code.
 The current profile report is included in the repository (paper/prof_report.txt).
 
-The number of calls to `cal_length` in `exe_start` is considerably large. Therefore, we expect this function to be the bottleneck too. However, the sole purpose of `exe_start` is to generate initial configuration to be fed into `exe_memc`. A single simulation can generate multiple such configurations and the user need not execute `exe_start` again. Thus, optimizing this driver is not so urgent.
+`The number of calls to `cal_length` in `exe_start` is considerably large. Therefore, we expect this function to be the bottleneck too. However, the sole purpose of `exe_start` is to generate initial configuration to be fed into `exe_memc`. A single simulation can generate multiple such configurations and the user need not execute `exe_start` again. Thus, optimizing this driver is not so urgent.'
 
 We agree with the referee that openMP parallelization can be helpful. However, in the Monte-Carlo simulations, the parallelization is not immediately obvious as only one particle can be moved
 randomly at a given instance. During parallelization it may happen that multiple moves are made simultaneously. For this reason, we have postponed openMP parallelization till careful consideration. We have added the suggestion in the todo list and will implement them in future.
 
-Minor changes in the text:
+`Minor changes in the text:'
 `Lines 60-61: did you mean: there are two elastic constants to be determined? Can you
 elaborate on this statement?`
+
 They are not to be determined but they are input parameters. We have clarified this in the text lines 61--63.
 
 `Line 64: should the definition of R be moved closer to its first appearance, i.e.,
 closer to Equation 3?`
+
 Yes. We now define R below equation 3.
 
 `What is the meaning of K_B in Equation 6?`
+
 k_B is the Boltzmann constant (1.380649 × 10-23 SI units). We have also added the definition in the text. 
 
 `What is the meaning of H in Equation 9?`
+
 H is the spring constant of the individual bonds between the nodes. Itzykson (see the paper cited in line 229) has shown that for a randomly triangulated membrane, the Young's modulus Y=2H/sqrt{3}. 
 
 `Lines 110-113, 119, 127: which subsubsection are you talking about? I cannot see the
 numbers.`
+
 In the earlier version, the referencing was done incorrectly. Now we have fixed it.
 
 `In Equation 17, how \Delta V is computed? Is it simply V - V_0?`
+
 No, it is not. We have now added a paragraph below equation (17) to clarify this confusion.
 
 `Line 121-122: remove the text ::: subequations :::`
+
 Done.
 
 `Add community guidelines which should contain information about how to:
 Contribute to the software.`
 `Report issues or problems with the software.
 Seek support.`
+
 We have added the following to the text:
 # How to contribute
 The code is licensed under GPL-3.0 and hosted at [here](https://github.com/vipinagrawal25/MeMC).
@@ -95,25 +103,25 @@ For any contribution, the developer can send a [pull request](https://github.com
 For any queries, the user should open an [issue](https://github.com/vipinagrawal25/MeMC/issues) on github.
 
 `Add white background to the figure: https://github.com/vipinagrawal25/MeMC/blob/main/paper/fig/describe_theta.png`.
+
 We have now made the background white.
 
 
 `Update links in https://github.com/vipinagrawal25/MeMC/blob/main/README.md#example
 gnuplot: http://www.gnuplot.info/
 GNU GSL: https://www.gnu.org/software/gsl/`
+
 We have fixed all the links
 
 
 `Statement of need The target audience is somewhat implicit.'
+
 The target audience are physicists and biologists working in soft matter.
 
-References The (n.d. …) style references are syntactically correct?
+`References The (n.d. …) style references are syntactically correct?'
+
 We have now fixed it.
 
 Functionality/Performance No performance claims.
-We haven't tested the code in various platform to comment on the performance.
 
-Documentation/Functionality documentation No API or very minimal documentation is provided inline with the source code. The sw usage is well described, but the code is missing any kind of description, considering file, method, or instruction level. No documentation support is provided for the developer trying to understand or contribute to the software logic.
-
-Documentation/Community guidelines I have not found any clear guidelines about contributions for third parties.
-Add a section in the paper "contributing to the code."
+We have not tested the code in various platform to comment on the performance.

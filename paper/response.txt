@@ -72,7 +72,7 @@ Yes. We now define R below equation 3.
 k_B is the Boltzmann constant (1.380649 × 10-23 SI units). We have also added the definition in the text. 
 
 `What is the meaning of H in Equation 9?`
-H is the spring constant of the individual bonds between the nodes. Itzykson (see the paper cited in line 224) has shown that for a randomly triangulated membrane, the Young's modulus Y=2H/sqrt{3}. 
+H is the spring constant of the individual bonds between the nodes. Itzykson (see the paper cited in line 232) has shown that for a randomly triangulated membrane, the Young's modulus Y=2H/sqrt{3}. 
 
 `Lines 110-113, 119, 127: which subsubsection are you talking about? I cannot see the
 numbers.`

@@ -172,13 +172,13 @@ double stretch_energy_ipart(Vec3d *pos,
 // or the barycenter.
 double voronoi_area(double cotJ, double cotK, 
         double jsq, double ksq, double area){
-    /// @brief Estimate the area of the voronoi cell 
-    ///  @param cotJ  
-    ///  @param cotK 
-    ///  @param jsqr
-    /// @param ksq 
-    ///  @param area
-    ///  @param para 
+    /// @brief Estimate the area of the voronoi cell. If I J K are the nodes of
+    /// triangle
+    ///  @param cotJ angle at node j (see paper/paper.pdf)
+    ///  @param cotK angle at node k (see paper/paper.pdf)
+    ///  @param jsqr square of the length of bond i-k
+    /// @param ksq square of the length of bond i-j  
+    ///  @param area area of the triangle 
     /// @return  Given two cotangent angles, it returns either the area due to perpendicular bisector,
 /// or the barycenter.
 

@@ -201,7 +201,7 @@ sh execute.sh
 
 The code takes about 30 minutes on Intel(R) Core(TM) i5-8265U CPU. Once completed,
 the results can be verified against the simulation we have conducted. Use the
-[Gnuplot](https://www.gnuplot.org) script `plot.gnu`, which compares the histogram of total energies written by `exe_start` and `exe_memc` 
+[Gnuplot](https://www.gnuplot.info) script `plot.gnu`, which compares the histogram of total energies written by `exe_start` and `exe_memc` 
 to the histogram for the same (`hist_start.dat` and `hist_memc.dat`) we had evaluated. The following  command should do the trick.
 ```bash 
 gnuplot plot.gnu
@@ -217,7 +217,7 @@ Energy histogram for randomization   |  Energy histogram for fluctuating membran
 
 **NOTE**
 In case the plot script fails to generate the plot, the main reason could be lack of
-[gsl-histogram](https://www.gsl.org) in your local machine. We suggest to use numpy or other
+[gsl-histogram](https://www.gnu.org/software/gsl) in your local machine. We suggest to use numpy or other
 standard libraries for the same purpose. We have omitted top 6000 data points while generating the histogram.
 # Data Structure
 
@@ -347,5 +347,5 @@ In case the bug is in the `h5py`, the user is requested to use the [hdf5-tools](
 
 # Developers Options
 
-For informations on API click [here](./docs/html/index.html)
+For informations on API click [here](https://vipinagrawal25.github.io/MeMC/)
 

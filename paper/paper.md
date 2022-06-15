@@ -326,7 +326,7 @@ where $\Delta V$ is the change in volume due to the move.
 Since we update the position of only one node at a time, $\Delta V$ is equal to the change in volume of the tetrahedrons $V_{\rm T}$, enclosed by all the neighboring triangles around node $i$ and center of the shell.
 Hence
 \begin{equation}
-  V_{\rm T}  \equiv \frac{1}{3} \left(\mathbf{\nabla} \cdot \mathbf{r} \right) V_{\rm T}  \equal 
+  V_{\rm T}  \equiv \frac{1}{3} \left(\mathbf{\nabla} \cdot \mathbf{r} \right) V_{\rm T} = 
               \frac{1}{3} \left(\mathbf{r}\cdot\mathbf{\hat{n}}\right) S_{\rm T} \/,
 \end{equation}
 where $\mathbf {r}$ is the position of the centroid and $S_{\rm T}$ is the surface area of the respective triangle.

@@ -82,7 +82,7 @@ part of the code functions in the following sections:
 To begin the simulation we generate a equilibrated randomized position on a surface
 of a sphere.  For details we refer the reader to `subsection grid` in `section numerical implementation` of `paper/paper.pdf`. The
 main code for this purpose is given in `main/start.cpp` and the relevant  executable is `bin/exe_start`. 
-The executable takes three arguments:
+The executable takes four arguments:
 1) Number of random points to be equilibrated
 2) Geometry of the surface `sph` for a
 surface of sphere and `cart` for flat plane

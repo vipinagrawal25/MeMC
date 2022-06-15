@@ -81,7 +81,9 @@ fluctuations, have been done for more than three
 decades [@goetz1999mobility; @bowick2001universality; @auth2005fluctuation; @paulose2012fluctuating],
 see also [@gompper2004triangulated for a review ]. But to the best of
 our knowledge there are no open-source code available. The goal of this
-package is to fill this gap in open-source software.
+package is to fill this gap in open-source software. 
+Our software is targeted towards physicists and biologists working in soft matter.
+
 
 # Theoretical background
 
@@ -314,7 +316,7 @@ point, the total contribution to the bulk energy is
 E_\mathrm{bulk} = K\left(\frac{V}{V_0} - 1\right)^2\/, 
 \end{equation}
 where $K$ is bulk
-modulus, $V$ is current volume, and $V_0$ is the initial volume of
+modulus, $V$ is current volume, and $V_0=(4/3)\pi R^3$ is the initial volume of
 the vesicle. As we move the point $i$ by a random amount, the change in
 bulk energy is
 \begin{equation}
@@ -322,13 +324,13 @@ bulk energy is
 \end{equation}
 where $\Delta V$ is the change in volume due to the move.
 Since we update the position of only one node at a time, $\Delta V$ is equal to the change in volume of the tetrahedrons $V_{\rm T}$, enclosed by all the neighboring triangles around node $i$ and center of the shell.
-We write
+Hence
 \begin{equation}
   V_{\rm T}  \equiv \frac{1}{3} \left(\mathbf{\nabla} \cdot \mathbf{r} \right) V_{\rm T}  \equal 
               \frac{1}{3} \left(\mathbf{r}\cdot\mathbf{\hat{n}}\right) S_{\rm T} \/,
 \end{equation}
 where $\mathbf {r}$ is the position of the centroid and $S_{\rm T}$ is the surface area of the respective triangle.
-The first equality is uses $\left(\mathbf{\nabla} \cdot \mathbf{r} \right) = 3$ for a sphere, and the second equality is the result of Gauss divergence theorem.
+The first equality uses $\left(\mathbf{\nabla} \cdot \mathbf{r} \right) = 3$ for a sphere, and the second equality is the result of Gauss divergence theorem.
 
 
 <!-- ### Pressure
@@ -429,4 +431,8 @@ resources provided by the Swedish National Infrastructure for Computing
     flow in or out and the osmotic pressure of solutes decreases and
     increases accordingly.
 
+# How to contribute
+The code is licensed under GPL-3.0 and hosted at [here](https://github.com/vipinagrawal25/MeMC).
+For any contribution, the developer can send a [pull request](https://github.com/vipinagrawal25/MeMC/pulls).
+For any queries, the user should open an [issue](https://github.com/vipinagrawal25/MeMC/issues) on github.
 # References

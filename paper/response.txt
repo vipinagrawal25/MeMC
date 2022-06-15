@@ -39,7 +39,6 @@ We have generated the documentation using Doxygen and is now hosted at vipinagra
 We have added the make clean target in the Makefile to remove all the build objects
 and executables.
 
-
 `Code performance:
 Have you considered multithreading, e.g., via OpenMP, to speedup functions that take
 most of the execution time? For example, Gprof indicates that cal_length takes up to
@@ -72,8 +71,6 @@ The current problems that we are trying to solve using the code requires a lot o
 averaging. Therefore, parallelization using OpenMP Pragma is not beneficial for us
 at this moment. We have added the suggestion in the todo list and will test them in future.
 
-
-
 Minor changes in the text:
 `Lines 60-61: did you mean: there are two elastic constants to be determined? Can you
 elaborate on this statement?`
@@ -99,7 +96,7 @@ numbers.`
 In the earlier version, the referencing was done incorrectly. Now we have fixed it.
 
 `In Equation 17, how \Delta V is computed? Is it simply V - V_0?`
-\Delta V is the change in volume in the subsequent Monte-Carlo iteration due to the move. It is explained below equation (17). Hence it is different from V-V_0 \equiv current_volume - initial_volume.
+\Delta V is the change in volume in the subsequent Monte-Carlo iteration due to the move. Hence it is different from V-V_0 \equiv current_volume - initial_volume. We have added new text below equation (17), which will be useful for the readers.
 
 `Line 121-122: remove the text ::: subequations :::`
 Done.
@@ -126,3 +123,17 @@ GNU GSL: https://www.gnu.org/software/gsl/`
 
 We have fixed all the links
 
+
+Statement of need The target audience is somewhat implicit.
+We believe that this software is will be benefited by the people in the field, who wish to do Monte-Carlo simulation of spherical shells. Although these algorithms were known to the people, 1) there was no open source software available, 2) the software contains many small tricks e.g. -- computation of bending energy, counterclockwise order of the nodes -- which was not easily accessible and we could not find any implementation for simulation.
+
+References The (n.d. …) style references are syntactically correct?
+We have fixed it.
+
+Functionality/Performance No performance claims.
+
+Documentation/Functionality documentation No API or very minimal documentation is provided inline with the source code. The sw usage is well described, but the code is missing any kind of description, considering file, method, or instruction level. No documentation support is provided for the developer trying to understand or contribute to the software logic.
+Iska hamne kar diya hai
+
+Documentation/Community guidelines I have not found any clear guidelines about contributions for third parties.
+Add a section in the paper "contributing to the code."

@@ -20,7 +20,7 @@ authors:
 affiliations:
   - name: Nordita, KTH Royal Institute of Technology and Stockholm University, Roslagstullsbacken 23, 10691 Stockholm, Sweden.
     index: 1
-  - name: Department of Physics, Stockholm university, Stockholm,Sweden.
+  - name: Department of Physics, Stockholm University, Stockholm,Sweden.
     index: 2
   - name: KTH Royal Institute of Technology, Sweden.
     index: 3
@@ -64,7 +64,7 @@ two important ways
 1.  The nano-vesicles are much smaller hence thermal fluctuations may
     effectively renormalize the elastic coefficients [@paulose2012fluctuating; @kovsmrlj2017statistical ].
 
-2.  Cell membranes are strongly coupled to an underlying cytoskelton.
+2.  Cell membranes are strongly coupled to an underlying cytoskeleton.
     Hence they may be modeled by a solid body [@hw2002stomatocyte] but
     nano-vesicles must be modeled as liquid filled elastic membranes.
 
@@ -76,11 +76,11 @@ There are commercial packages, e.g., COMSOL [@comsol], to calculate the
 force-distance curve of solid bodies and closed membranes with fluids
 inside under the action of external forces but to the best of our
 knowledge there is no package that includes thermal effects. Monte Carlo
-simulations of elastic membranes, that does include thermal
+simulations of elastic membranes, that includes thermal
 fluctuations, have been done for more than three
 decades [@goetz1999mobility; @bowick2001universality; @auth2005fluctuation; @paulose2012fluctuating],
-see also [@gompper2004triangulated for a review ]. But to the best of
-our knowledge there are no open-source code available. The goal of this
+see also [@gompper2004triangulated] for a review. But to the best of
+our knowledge there is no open-source code available. The goal of this
 package is to fill this gap in open-source software. 
 Our software is targeted towards physicists and biologists working in soft matter.
 
@@ -90,7 +90,7 @@ Our software is targeted towards physicists and biologists working in soft matte
 Our model of nano-vesicles is an amorphous membrane enclosing an
 incompressible fluid[@vorselen2017competition]. Unlike a solid ball, the
 force-distance relationship for such a model is linear for small
-deformation [@vorselen2017competition; @paulose2012fluctuating] if we
+deformation [@vorselen2017competition; @paulose2012fluctuating], if we
 ignore thermal fluctuations. Ref. [@vorselen2017competition] uses a
 similar model, ignoring thermal fluctuations, to interpret AFM
 measurement of nano-vesicles.
@@ -116,7 +116,7 @@ consider a fluid enclosed in a solid membrane, as done in
   u_{ij} = \frac{1}{2}\left( \partial_i u_j + \partial_j u_i + \partial_i w\partial_j w\right)
             -\delta_{ij}\frac{w}{R},
 \end{equation}
-where $R$ is the radius of the spherical cell, w$ is the out-of-plane deformation, and $\mathbf{u}$ is the
+where $R$ is the radius of the spherical cell, $w$ is the out-of-plane deformation, and $\mathbf{u}$ is the
 in-plane deformation, $p$ is the pressure, $\lambda$ and $\mu$ are the
 two in-plane Láme coefficients and $B$ is the bending modulus. The Láme
 coefficients are related to other elastic constant as follows [@LLelast]
@@ -167,12 +167,12 @@ formed is kept unchanged. In the rest of this paper, we call this the
 
 An alternative is to use a regular
 grid [@vliegenthart2006mechanical; @buenemann2008elastic]. This is
-achieved by approximating the sphere with geodesic polyhedron (\autoref{fig:grid}(C)).
+achieved by approximating the sphere with a geodesic polyhedron (\autoref{fig:grid}(C)).
 They are available from the *Meshzoo* library [@meshzoo]. In this paper
 we use $N=5120$ for the random grid and $N=5292$ for the regular grid.
 
 ![\textbf{Grid points on a sphere} (A)Triangulated random points on a sphere. (B) Triangulated points on sphere after $60000$ SMC iteration of
-the initial configuration shown in (A). (C) An example of regular grid }
+the initial configuration shown in (A). (C) An example of regular grid
 \label{fig:grid}](fig/spheres.pdf){width=100%}
 
 ## Energy
@@ -340,11 +340,11 @@ outside the shell our code can also be used for pressurized shells.
  -->
 ## Sticking to a solid surface
 
-As a specific example of nano-vesicle, we consider an exosome. We quote
-from Ref. [@pegtel2019exosomes] " Exosomes are small, single-membrane,
+As a specific example of a nano-vesicle, we consider an exosome. We quote
+from Ref. [@pegtel2019exosomes] "Exosomes are small, single-membrane,
 secreted organelles of $\sim 30$ to $\sim 200$ nm in diameter that have
 the same topology as the cell and are enriched in selected proteins,
-lipids, nucleic acids, and glycoconjugates. " The exosomes that we
+lipids, nucleic acids, and glycoconjugates." The exosomes that we
 consider here were collected from immortalized cell line and extracted
 following the procedures as described in Ref. [@cavallaro2019label]. To
 measure the force-distance curve it is necessary to fix an exosome on a
@@ -369,8 +369,7 @@ angle is greater than $\Theta_0$ are selected such that the sticking
 potential acts only on them, see \autoref{fig:lineabc}(B).
 
 ![(A) A colormap of the height as measured by the
-AFM. (B) Illustration of the vesicle stuck to a 
-at surface by an angle $\Theta_0$. (C) The height plotted along the line shown in
+AFM. (B) Illustration of the vesicle stuck to a surface by an angle $\Theta_0$. (C) The height plotted along the line shown in
 (A).\label{fig:lineabc}](fig/lineabc.pdf){width=70%}
 
 ## AFM tip
@@ -401,11 +400,11 @@ The code requires the following:
 
 # Typical workflow and test
 
-We have tested our code in LINUX operating system. We expect it to work
+We have tested our code in a LINUX operating system. We expect it to work
 without any problem in any similar environment. It may also work with
 WINDOWS although we have not tested this aspect.
 
-The github repository [@memc] contains a a file named `README.md` that
+The github repository [@memc] contains a file named `README.md` that
 contains instruction to install and run the code. In \autoref{fig:dent} we show three
 typical snapshots from our code for three different position of the AFM
 tip.
@@ -415,7 +414,7 @@ In the github repository, we also provide a subdirectory called
 the user can run the code (without the AFM tip and the bottom plate). It
 takes almost $30$ minutes on Intel(R) Core(TM) i5-8265U CPU. The run
 produces a probability distribution function (PDF) of the total energy
-after $50,000$ number of monte carlo steps. By running
+after $50,000$ monte carlo steps. By running
 `gnuplot plot.gnu` (this requires the software gnuplot) the user can
 compare the PDF obtained by their run with a PDF that we provide.
 
@@ -432,7 +431,7 @@ resources provided by the Swedish National Infrastructure for Computing
     increases accordingly.
 
 # How to contribute
-The code is licensed under GPL-3.0 and hosted at [here](https://github.com/vipinagrawal25/MeMC).
+The code is licensed under GPL-3.0 and hosted [here](https://github.com/vipinagrawal25/MeMC).
 For any contribution, the developer can send a [pull request](https://github.com/vipinagrawal25/MeMC/pulls).
 For any queries, the user should open an [issue](https://github.com/vipinagrawal25/MeMC/issues) on github.
 

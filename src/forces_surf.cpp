@@ -4,7 +4,6 @@
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
 double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
-
   	 ///
 	 ///  @param si  coordinate of ith point
 	 ///  @param sk  coordinate of kth point
@@ -13,8 +12,6 @@ double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
 	 ///  @return   ({si-sk}.{sj-sk})/sqrt(({si-sk}x{sj-sk})^2)
      /// angle between vector si and sj
 	 ///
-
-
     Vec3d drik, drjk, cross;
     double cot_theta;  
     double inner_prod;
@@ -156,7 +153,8 @@ double stretch_energy_ipart(Vec3d *pos,
     int i,j;
     //
     idx_ener = 0e0;
-    HH = para.coef_str/(para.av_bond_len*para.av_bond_len);
+    // HH = para.coef_str/(para.av_bond_len*para.av_bond_len);
+    HH = para.YY*sqrt(3)/2;
     for (i =0; i < num_nbr; i++){
         j = node_nbr[i];
         rij = Vec3d_add(pos[idx], pos[j], -1e0);

@@ -3,9 +3,10 @@
 #include <random>
 #include <unistd.h>
 
-
-
 int main(int argc, char **argv){
+     pid_t pid = getpid();
+     cout << "# ID for this process is: " << pid << endl;
+     //
      int i,  num_moves;
      double Ener;
      Vec2d *Pos;
@@ -15,12 +16,13 @@ int main(int argc, char **argv){
      FILE *fid;
      char *metric, *outfolder, *outfile;
      char syscmds[128], log_file[128];
-
+     SPRING_para spring;
+     //
      metric = (char *) malloc(128*sizeof(char));
      outfolder = (char *) malloc(128*sizeof(char));
      outfile = (char *) malloc(128*sizeof(char));
      if(argc!=5){
-         fprintf(stderr, "\n\n Requiresi argument <Number of points> <output folder>\n\n");
+         fprintf(stderr, "\n\n Requires argument <Number of points> <output folder>\n\n");
          exit(0);
      }else{
          para.N=atoi(argv[1]);
@@ -34,11 +36,8 @@ int main(int argc, char **argv){
      //
     sprintf(syscmds, "%s %s","mkdir ",outfolder);
     if(system(syscmds) != 0) fprintf(stderr, "failure in creating folder");
-   
-
     init_rng(23077);
     /* define all the paras */ 
-
      para.len = 2*pi;
      para.epsilon = 1;
      if(strcmp(metric,"cart")==0){
@@ -89,4 +88,3 @@ int main(int argc, char **argv){
     free(neib);
     return 0;
 }
-

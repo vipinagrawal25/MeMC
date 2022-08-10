@@ -84,8 +84,8 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
 }
 
 void init_read_parameters( MBRANE_para *mbrane, 
-        AFM_para *afm, MCpara *mcpara, char *para_file){
- 
+        AFM_para *afm, MCpara *mcpara, SPRING_para *spring,
+        char *para_file){
     /// @brief read parameters from para_file 
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
@@ -100,47 +100,66 @@ void init_read_parameters( MBRANE_para *mbrane,
     FILE *f2;
     f2 = fopen(para_file, "r");
     if(f2){
-        if( fgets(buff,255,(FILE*)f2) != NULL); 
-        if( fgets(buff,255,(FILE*)f2) != NULL); 
-        if( fgets(buff,255,(FILE*)f2) != NULL){
-            sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
+        if(fgets(buff,255,(FILE*)f2) != NULL); 
+        if(fgets(buff,255,(FILE*)f2) != NULL); 
+        if(fgets(buff,255,(FILE*)f2) != NULL){
+            sscanf(buff,"%d %lf %lf %lf %lf %lf", 
+                &t_n, &td1, &td2, &td3, &td4, &td5);
         }
         /* fprintf(stderr, "%s\n", buff); */
         mbrane->N = t_n;
         mbrane->coef_bend = td1;
-        mbrane->coef_str = td2;
+        mbrane->YY = td2;       // Young's modulus        
         mbrane->coef_vol_expansion = td3;
         mbrane->sp_curv = td4;
+        mbrane->radius = td5;
         if( fgets(buff,255,(FILE*)f2) != NULL);
-        if( fgets(buff,255,(FILE*)f2) != NULL){
-            sscanf(buff,"%lf %lf %lf %lf %lf", &td1,&td2,&td3,&td4,&td5);
+        if( fgets(buff,255,(FILE*)f2) != NULL);
+        if( fgets(buff,255,(FILE*)f2) != NULL);{
+            sscanf(buff,"%lf %lf %lf %lf", &td1,&td2,&td3,&td4);
         }
         /* fprintf(stderr, "%s\n", buff); */
-        mbrane->radius = td1;
-        mbrane->pos_bot_wall = td2;
-        mbrane->sigma = td3;
-        mbrane->epsilon = td4;
-        mbrane->theta = td5;
+        mbrane->pos_bot_wall = td1;
+        mbrane->sigma = td2;
+        mbrane->epsilon = td3;
+        mbrane->theta = td4;
+        if (fabs(mbrane->epsilon)<1e-16 || fabs(mbrane->theta) < 1e-16){
+            mbrane->istick = 0;        // second line done   
+        }
         if( fgets(buff,255,(FILE*)f2) != NULL);
         if( fgets(buff,255,(FILE*)f2) != NULL); 
         if( fgets(buff,255,(FILE*)f2) != NULL){ 
-            sscanf(buff,"%lf %lf %d %d ", &td1, &td2,  &t_n2, &t_n3);
+            sscanf(buff,"%lf %lf %d %d %d %lf", &td1, &td2, &t_n, &t_n2, &t_n3, &td3);
         }
         /* fprintf(stderr, "%s\n", buff); */
         mcpara->dfac = td1;
         mcpara->kBT = td2;
+        mcpara->is_restart = t_n;
+        cout << "mcpara->is_restart" << "\t"<<mcpara->is_restart<<endl;
         mcpara->tot_mc_iter = t_n2;
         mcpara->dump_skip = t_n3;
+        mcpara->activity = td3;
         if( fgets(buff,255,(FILE*)f2) != NULL);  
         if( fgets(buff,255,(FILE*)f2) != NULL);   
         if( fgets(buff,255,(FILE*)f2) != NULL){   
-            sscanf(buff,"%lf %lf %lf %lf", &td1, &td2, &td3, &td4);
+            sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
         }
         /* fprintf(stderr, "%s\n", buff); */
         afm->tip_rad = td1;
         afm->tip_pos_z = td2;
         afm->sigma = td3;
         afm->epsilon = td4;
+        if (fabs(afm->epsilon)<1e-16){
+            afm->icompute=0;
+        }
+        if( fgets(buff,255,(FILE*)f2) != NULL);  
+        if( fgets(buff,255,(FILE*)f2) != NULL);   
+        if( fgets(buff,255,(FILE*)f2) != NULL){
+            sscanf(buff,"%d %lf %lf", &t_n, &td1, &td2);
+        }
+        spring -> icompute = t_n;
+        spring -> nPole_eq_z = td1;
+        spring -> sPole_eq_z = td2;
     }
     else{
         fprintf(stderr, "Mayday Mayday the specified para file doesn't exists\n");

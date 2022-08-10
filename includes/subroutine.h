@@ -63,7 +63,8 @@ void init_read_config();
 void init_afm_tip(AFM_para );
 
 void init_read_parameters( MBRANE_para *mbrane, 
-        AFM_para *afm, MCpara *mcpara, char *para_file);
+        AFM_para *afm, MCpara *mcpara, SPRING_para *spring,
+        char *para_file);
 int randint(int n);
 
 //hdf5_io

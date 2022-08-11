@@ -51,8 +51,7 @@ double rand_inc_theta(double th0,
 double energy_mc_3d(Vec3d *pos, MESH mesh, 
         double *lij_t0, bool *is_attractive, int idx,
         MBRANE_para mbrane, 
-        MCpara mcpara, AFM_para afm){
-
+        MCpara mcpara, AFM_para afm, SPRING_para spring){
     /// @brief Estimate the contribution from all the energies when a particle is moved randomly 
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param mesh mesh related parameters -- connections and neighbours
@@ -66,9 +65,7 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
     /// @return Change in Energy when idx particle is moved
 
 
-    double E_b, E_s;
-    double E_stick;
-    double  E_afm;
+    double E_b, E_s, E_stick, E_afm, E_spr;
     int cm_idx, num_nbr;
 
     E_b = 0; E_s = 0; E_stick = 0; E_afm = 0;
@@ -91,13 +88,14 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
 
     E_afm = lj_afm(pos[idx], afm);
 
-    return E_b + E_s + E_stick + E_afm;
+    E_spr = spring_energy(pos[idx], idx, mesh, spring);
+    return E_b + E_s + E_stick + E_afm + E_spr;
 }
 
 int monte_carlo_3d(Vec3d *pos, MESH mesh, 
                 double *lij_t0, bool *is_attractive, 
                 MBRANE_para mbrane, 
-                MCpara mcpara, AFM_para afm){
+                MCpara mcpara, AFM_para afm, SPRING_para spring){
 
     /// @brief Monte-Carlo routine for the membrane 
     ///  @param Pos array containing co-ordinates of all the particles
@@ -116,7 +114,7 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
     double de,  Eini, Efin;
     double dxinc, dyinc, dzinc;
     double vol_i, vol_f;
-    double dvol, de_vol, ini_vol;
+    double dvol, de_vol, ini_vol, de_pressure;
     double KAPPA;
     std::uniform_int_distribution<uint32_t> rand_int(0,mbrane.N-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
@@ -130,7 +128,7 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
 
         Eini = energy_mc_3d(pos, mesh, 
                 lij_t0, is_attractive, 
-                idx,  mbrane, mcpara, afm);
+                idx,  mbrane, mcpara, afm, spring);
 
         vol_i = volume_ipart(pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
@@ -154,18 +152,20 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
 
         Efin = energy_mc_3d(pos, mesh, 
                 lij_t0, is_attractive, 
-                idx,   mbrane, mcpara, afm);
+                idx,   mbrane, mcpara, afm, spring);
 
         vol_f = volume_ipart(pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
                 num_nbr, idx, mbrane);
 
-        dvol =  (vol_f - vol_i);
-        de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
-            + (dvol/ini_vol)*(dvol/ini_vol);
-        de_vol = KAPPA*de_vol;
-        de = (Efin - Eini) + de_vol;
-        if (Metropolis(de,mcpara.kBT)){
+        dvol=0.5*(vol_f - vol_i);
+        de_vol = vol_energy_change(mbrane,dvol);
+        de_pressure = PV_change(mbrane,dvol);
+        // de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
+        //     + (dvol/ini_vol)*(dvol/ini_vol);
+        // de_vol = KAPPA*de_vol;
+        de = (Efin - Eini) + de_vol + de_pressure;
+        if (Metropolis(de,mcpara)){
             move = move + 1;
             mbrane.tot_energy[0] +=  de;
             mbrane.volume[0] += dvol;
@@ -253,4 +253,3 @@ int monte_carlo_surf2d(Vec2d *Pos,
     }
     return move;
 }
-

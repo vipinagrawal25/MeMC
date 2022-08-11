@@ -1,8 +1,6 @@
 #include "global.h"
 #include "subroutine.h"
-
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
-
 double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
   	 ///
 	 ///  @param si  coordinate of ith point
@@ -517,8 +515,6 @@ double lj_afm(Vec3d pos, AFM_para afm){
    return ener_afm;
 
 };
-
-
 double lj_afm_total(Vec3d *pos, 
         Vec3d *afm_force, MBRANE_para para,
         AFM_para afm){
@@ -530,7 +526,6 @@ double lj_afm_total(Vec3d *pos,
     ///  @param afm afm related parameters
     /// @return  Total Energy contribution form the tip to the particle
     //
-
     int idx;
     double  ds;
     double lj_afm_e;
@@ -556,3 +551,46 @@ double lj_afm_total(Vec3d *pos,
     *afm_force  = f_t;
     return lj_afm_e;
 }
+double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
+                               MESH mesh, SPRING_para spring){
+    double kk = spring.constant;
+    double nZeq = spring.nPole_eq_z;
+    double sZeq = spring.sPole_eq_z;
+    double ener_spr = kk*pow((Pos[mesh.nPole].z-nZeq),2)/2 +
+                      kk*pow((Pos[mesh.sPole].z-sZeq),2)/2 ;
+    spring_force[0].z = kk*(nZeq-Pos[mesh.nPole].z);
+    spring_force[1].z = kk*(sZeq-Pos[mesh.sPole].z);
+    return ener_spr;
+}
+//
+double vol_energy_change(MBRANE_para mbrane,double dvol){
+    double KAPPA = mbrane.coef_vol_expansion;
+    double de_vol=0.0;
+    double ini_vol = (4./3.)*pi*pow(mbrane.radius,3);
+    if (fabs(KAPPA)>1e-16){
+        de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
+            + (dvol/ini_vol)*(dvol/ini_vol);
+       de_vol = KAPPA*de_vol;
+    }
+    return de_vol;
+}
+//
+double PV_change(MBRANE_para mbrane, double dvol){ 
+    return 2*mbrane.pressure*dvol;
+}
+//
+double spring_energy(Vec3d pos, int idx, MESH mesh, SPRING_para spring){
+    if (spring.icompute==0) return 0;
+    double ener_spr=0e0;
+    double kk=spring.constant;
+    double nZeq = spring.nPole_eq_z;
+    double sZeq = spring.sPole_eq_z;
+    if (mesh.nPole==idx){
+        ener_spr=kk*pow((pos.z-nZeq),2)/2;
+    }
+    if (mesh.sPole==idx){
+        ener_spr=kk*pow((pos.z-sZeq),2)/2;
+    }
+    return ener_spr;
+}
+//

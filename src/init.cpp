@@ -1,6 +1,5 @@
 #include "global.h"
 #include "subroutine.h"
-
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
 
     /// @brief Initializes the points on surface of sphere or flat plane
@@ -55,19 +54,18 @@ void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
 }
 
 void init_eval_lij_t0(Vec3d *Pos, MESH mesh, 
-        double *lij_t0, MBRANE_para *para){
-
+        double *lij_t0, MBRANE_para *para, SPRING_para *spring){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
    /// @param lij_t0 initial distance between points of membrane
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
     ///  @param para membrane related parameters 
-  
     Vec3d dr;
     int i,j,k;
     int num_nbr, cm_idx;
     double sum_lij=0;
+    double r0;
     for(i = 0; i < para->N; i++){
         num_nbr = mesh.cmlist[i + 1] - mesh.cmlist[i];
         cm_idx = mesh.cmlist[i];
@@ -81,6 +79,8 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
         }
     }
     para->av_bond_len = sum_lij/mesh.cmlist[para->N];
+    r0=para->av_bond_len;
+    spring->constant=para->coef_bend/(r0*r0);
 }
 
 void init_read_parameters( MBRANE_para *mbrane, 
@@ -173,4 +173,18 @@ void init_read_parameters( MBRANE_para *mbrane,
    // define the monte carlo parameters
     mcpara->one_mc_iter = 2*mbrane->N;
     mcpara->delta = sqrt(8*pi/(2*mbrane->N-4));
+}
+//
+void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, SPRING_para spring){
+    double FvK = mbrane.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
+    ofstream paramfile;
+    paramfile.open( fname );
+    paramfile << "# =========== Model Parameters ==========" << endl
+            << "# Foppl von Karman number: FvK = " << FvK << endl
+            << "# Elasto-thermal number: ET = " << mcpara.kBT/mbrane.coef_bend*sqrt(FvK) << endl
+            << "# average bond length: r0 = " << mbrane.av_bond_len << endl;
+    if (spring.icompute!=0){
+       paramfile << "# Spring constant: Ki = " << spring.constant << endl;    
+    }
+    paramfile.close();
 }

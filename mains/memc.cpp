@@ -92,6 +92,7 @@ int main(int argc, char *argv[]){
     /*****  initialize energy values *****/
     Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane);
     Et[1] = bending_energy_total(Pos, mesh, mbrane);
+    exit(1);
     Et[2] = lj_bottom_surf_total(Pos, is_attractive, mbrane);
     Et[3] = lj_afm_total(Pos, &afm_force, mbrane, afm);
     vol_sph = volume_total(Pos, mesh, mbrane);
@@ -128,6 +129,8 @@ int main(int argc, char *argv[]){
             outfile=outfolder+"/snap_"+ZeroPadNumber(i/mcpara.dump_skip)+".h5";
             // sprintf(outfile,"%s/snap_%04d.h5",outfolder,(int)(i/mcpara.dump_skip));
             hdf5_io_write_pos((double*) Pos, 3*mbrane.N, outfile);
+            syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
+            system(syscmds.c_str());
         }
         if(i == 10*mcpara.dump_skip && !mcpara.is_restart){
             afm.sigma = s_t;

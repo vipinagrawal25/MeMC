@@ -2,14 +2,14 @@
 #include "subroutine.h"
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
-  	 ///
-	 ///  @param si  coordinate of ith point
-	 ///  @param sk  coordinate of kth point
-	 ///  @param sj  coordinate of jth point 
+     ///
+     ///  @param si  coordinate of ith point
+     ///  @param sk  coordinate of kth point
+     ///  @param sj  coordinate of jth point 
      
-	 ///  @return   ({si-sk}.{sj-sk})/sqrt(({si-sk}x{sj-sk})^2)
+     ///  @return   ({si-sk}.{sj-sk})/sqrt(({si-sk}x{sj-sk})^2)
      /// angle between vector si and sj
-	 ///
+     ///
     Vec3d drik, drjk, cross;
     double cot_theta;  
     double inner_prod;
@@ -25,9 +25,9 @@ double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
 //
 double cotangent(double a, double b, double c){
 
-  	 /// @brief  a, b, c are the length of the sides of a triangle 
+     /// @brief  a, b, c are the length of the sides of a triangle 
      
-	 ///  @return   0.25*(a*a+b*b-c*c)/area; where area is the area of triangle
+     ///  @return   0.25*(a*a+b*b-c*c)/area; where area is the area of triangle
     double s = 0.5*(a+b+c);
     double area = sqrt(s*(s-a)*(s-b)*(s-c));
     double cot_theta=0.25*(a*a+b*b-c*c)/area;
@@ -36,12 +36,12 @@ double cotangent(double a, double b, double c){
 
 Vec3d determine_xyz_parabola(Vec3d pos, AFM_para afm) {
     ///
-	 ///  @param pos  position of a point in membrane
-	 ///  @param afm  parameters of AFM tip
+     ///  @param pos  position of a point in membrane
+     ///  @param afm  parameters of AFM tip
      //
      /// 
-	 ///  @return  position of point on afm tip nearest to pos 
-	 ///
+     ///  @return  position of point on afm tip nearest to pos 
+     ///
 
 
     int nroot;
@@ -95,11 +95,11 @@ double volume_ipart(Vec3d *pos,
         int *node_nbr, 
         int num_nbr, int idx, MBRANE_para para){
      /// @brief Estimate the volume substended by voronoi area of the ith particle
-	 ///  @param Pos array containing co-ordinates of all the particles
-	 ///  @param idx index of ith particle;
-	 ///  @param node_nbr nearest neigbours of idx; 
-	 ///  @param num_nbr number of nearest neigbours of idx; 
-	 ///  @param para  Membrane related parameters;
+     ///  @param Pos array containing co-ordinates of all the particles
+     ///  @param idx index of ith particle;
+     ///  @param node_nbr nearest neigbours of idx; 
+     ///  @param num_nbr number of nearest neigbours of idx; 
+     ///  @param para  Membrane related parameters;
      /// @return Volume substended by ith particle.
 
 

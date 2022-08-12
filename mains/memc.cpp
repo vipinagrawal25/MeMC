@@ -14,16 +14,16 @@ int main(int argc, char *argv[]){
     MCpara mcpara;
     AFM_para afm;
     MESH mesh, mes_t;
-    Vec3d afm_force;
+    Vec3d afm_force,spring_force[2];
     FILE *fid;
     double *lij_t0;
-    char *log_file, *outfile, *para_file;
-    string outfolder,syscmds;
-    outfolder = (char *)malloc(128*sizeof(char));
-    syscmds = (char *)malloc(128*sizeof(char));
-    log_file = (char *)malloc(128*sizeof(char));
-    outfile = (char *)malloc(128*sizeof(char));
-    para_file = (char *)malloc(128*sizeof(char));
+    double Pole_zcoord;
+    string outfolder,syscmds, para_file, log_file, outfile;
+    // outfolder = (char *)malloc(128*sizeof(char));
+    // syscmds = (char *)malloc(128*sizeof(char));
+    // log_file = (char *)malloc(128*sizeof(char));
+    // outfile = (char *)malloc(128*sizeof(char));
+    // para_file = (char *)malloc(128*sizeof(char));
     double YY=mbrane.YY;
     double BB = mbrane.coef_bend;
     char log_headers[] = "# iter acceptedmoves total_ener stretch_ener bend_ener stick_ener afm_ener ener_volume";
@@ -38,13 +38,13 @@ int main(int argc, char *argv[]){
     /**** create folder and copy parameter file *****/
     syscmds="mkdir outfolder";
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder\n");
-    syscmds="cp "+para_file+outfolder+"/"
+    syscmds="cp "+para_file+" "+outfolder+"/";
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in copying parafile\n");
     write_param(outfolder + "/para.out",mbrane,mcpara,spring);
     /*************************************************/
     init_rng(23397);
     // read the input file
-    init_read_parameters(&mbrane, &afm, &mcpara, para_file);
+    init_read_parameters(&mbrane, &afm, &mcpara, &spring, para_file);
    /* define all the paras */ 
     mbrane.volume = (double *)calloc(1, sizeof(double)); 
     mbrane.volume[0] = (4./3.)*pi*pow(mbrane.radius,3);
@@ -65,22 +65,22 @@ int main(int argc, char *argv[]){
     }
     //
     if(!mcpara.is_restart){
-        hdf5_io_read_pos( (double *)Pos,  (char *) "conf/dmemc_pos.h5");
+        hdf5_io_read_pos( (double *)Pos,  "conf/dmemc_pos.h5");
         hdf5_io_read_mesh((int *) mesh.cmlist,
-                (int *) mesh.node_nbr_list,  (char *) "conf/dmemc_conf.h5");
+                (int *) mesh.node_nbr_list, "conf/dmemc_conf.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane, &spring);
         identify_attractive_part(Pos, is_attractive, mbrane.theta, mbrane.N);
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane.N);
     }else{
-        hdf5_io_read_pos( (double *)Pos,  (char *) outfolder+"/dmemc_pos.h5");
+        hdf5_io_read_pos( (double *)Pos,   outfolder+"/dmemc_pos.h5");
         hdf5_io_read_mesh((int *) mesh.cmlist,
-                (int *) mesh.node_nbr_list,  (char *) outfolder+"/dmemc_conf.h5");
+                (int *) mesh.node_nbr_list,  outfolder+"/dmemc_conf.h5");
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane.N);
         init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane, &spring);
         identify_attractive_part(Pos, is_attractive, mbrane.theta, mbrane.N);
-        hdf5_io_read_pos( (double *)Pos,  (char *) outfolder+"/restart.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/restart.h5");
     }
     /***** Copy initial things to the folder *****/
     if (!mcpara.is_restart){
@@ -106,8 +106,9 @@ int main(int argc, char *argv[]){
     cout << "# Foppl von Karman (FvK): " 
          << YY*mbrane.radius*mbrane.radius/BB << endl;
     //
-    sprintf(log_file,"%s/mc_log",outfolder);
-    fid = fopen(log_file, "a");
+    // sprintf(log_file,"%s/mc_log",outfolder);
+    log_file=outfolder+"/mc_log";
+    fid = fopen(log_file.c_str(), "a");
     wHeader(fid,mbrane,afm,spring);
     num_moves = 0;
     for(i=0; i < mcpara.tot_mc_iter; i++){
@@ -120,12 +121,12 @@ int main(int argc, char *argv[]){
         Et[5] = spring_tot_energy_force(Pos, spring_force, mesh, spring);
         Et[6] = -mbrane.pressure*vol_sph;
         cout << "iter = " << i << "; Accepted Moves = " << (double) num_moves*100/mcpara.one_mc_iter << " %;"<<  
-                " totalener = "<< mbrane.tot_energy[0] << "; volume = " << vol_sph << 
-                "; area = " << area_sph << endl;
+                " totalener = "<< mbrane.tot_energy[0] << "; volume = " << vol_sph << endl;
         wDiag(fid, mbrane, afm, spring, mesh, i, num_moves, Et,  &afm_force,  spring_force,
-              vol_sph, area_sph,  Pos);
+              vol_sph, Pos);
         if(i%mcpara.dump_skip == 0){
-            sprintf(outfile,"%s/snap_%04d.h5",outfolder,(int)(i/mcpara.dump_skip));
+            outfile=outfolder+"/snap_"+ZeroPadNumber(i/mcpara.dump_skip)+".h5";
+            // sprintf(outfile,"%s/snap_%04d.h5",outfolder,(int)(i/mcpara.dump_skip));
             hdf5_io_write_pos((double*) Pos, 3*mbrane.N, outfile);
         }
         if(i == 10*mcpara.dump_skip && !mcpara.is_restart){

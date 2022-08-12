@@ -72,15 +72,15 @@ void init_read_config();
 void init_afm_tip(AFM_para );
 void init_read_parameters( MBRANE_para *mbrane, 
         AFM_para *afm, MCpara *mcpara, SPRING_para *spring, 
-        char *para_file);
+        string para_file);
 int randint(int n);
 void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, 
                 SPRING_para spring);
 //hdf5_io
-void hdf5_io_write_pos(double *Pos, int N, char *input_file);
-void hdf5_io_read_pos(double *Pos, char *input_file);
+void hdf5_io_write_pos(double *Pos, int N, string input_file);
+void hdf5_io_read_pos(double *Pos, string input_file);
 void hdf5_io_read_mesh(int *cmlist,
-        int *node_nbr, char *input_file);
+        int *node_nbr, string input_file);
 void io_dump_config(double *Pos, int N, char *);
 void io_read_config(double *Pos, int N, char *);
 void io_dump_config_ascii(double *Pos, int N, char *);

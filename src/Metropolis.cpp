@@ -12,8 +12,7 @@ void init_rng(uint32_t seed_val){
 	 ///  @brief Generates random number 
     rng.seed(seed_val);
 }
-
-bool Metropolis(double DE, double kbt ){
+bool Metropolis(double DE, MCpara mcpara){
     /// @brief Metropolis algorithm
     /// @param DE change in energy
     /// @param kbt boltzmann constant times temperature
@@ -22,16 +21,15 @@ bool Metropolis(double DE, double kbt ){
     /// @details see https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm 
     bool yes;
     double rand;
+    DE += mcpara.activity;
     std::uniform_real_distribution<> rand_real(0, 1);
-
     yes = (DE <= 0.e0);
     if (!yes){
         rand = rand_real(rng);
-        yes = rand < exp(-DE/kbt);
+        yes = rand < exp(-DE/mcpara.kBT);
     }
     return yes;
 }
-
 double rand_inc_theta(double th0, 
         double dfac){
     /// @brief increment the polar angle randomly  
@@ -243,7 +241,7 @@ int monte_carlo_surf2d(Vec2d *Pos,
         Efin =  pairlj_ipart_energy(Pos, neib[idx].list,
                 neib[idx].cnt, idx, para, metric);
         de = (Efin - Eini);
-        if(Metropolis(de, mcpara.kBT)){
+        if(Metropolis(de, mcpara)){
             move = move + 1;
         }
         else{

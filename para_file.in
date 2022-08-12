@@ -1,0 +1,15 @@
+## Membrane parameters
+N 	coef_bending 		Y coef_vol_expansion sp_curv pressure radius
+5120 4.00 		6250000.00 		0.00			2		0		1	
+## Sticking parameters
+pos_bot_wall sigma epsilon th_cr
+-1.05 0.16 1000 0.52
+## Montecarlo parameters
+Dfac kBT is_restart mc_total_iters	mc_dump_iter e_activity
+128 1.00 	0 			10000 			1000	4
+## Afm Tip parameters
+tip_radius tip_pos_z afm_sigma afm_epsilon
+0.12 			200 	0 			0
+##Spring parameters
+spr_compute nPole_eq_z sPole_eq_z
+	1			1		-1

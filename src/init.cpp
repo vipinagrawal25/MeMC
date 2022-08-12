@@ -85,7 +85,7 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
 
 void init_read_parameters( MBRANE_para *mbrane, 
         AFM_para *afm, MCpara *mcpara, SPRING_para *spring,
-        char *para_file){
+        string para_file){
     /// @brief read parameters from para_file 
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
@@ -96,15 +96,15 @@ void init_read_parameters( MBRANE_para *mbrane,
     //
     char buff[255];
     int t_n, t_n2, t_n3, err;
-    double td1, td2, td3, td4, td5;
+    double td1, td2, td3, td4, td5, td6;
     FILE *f2;
-    f2 = fopen(para_file, "r");
+    f2 = fopen(para_file.c_str(), "r");
     if(f2){
         if(fgets(buff,255,(FILE*)f2) != NULL); 
         if(fgets(buff,255,(FILE*)f2) != NULL); 
         if(fgets(buff,255,(FILE*)f2) != NULL){
-            sscanf(buff,"%d %lf %lf %lf %lf %lf", 
-                &t_n, &td1, &td2, &td3, &td4, &td5);
+            sscanf(buff,"%d %lf %lf %lf %lf %lf %lf", 
+                &t_n, &td1, &td2, &td3, &td4, &td5, &td6);
         }
         /* fprintf(stderr, "%s\n", buff); */
         mbrane->N = t_n;
@@ -112,7 +112,8 @@ void init_read_parameters( MBRANE_para *mbrane,
         mbrane->YY = td2;       // Young's modulus        
         mbrane->coef_vol_expansion = td3;
         mbrane->sp_curv = td4;
-        mbrane->radius = td5;
+        mbrane->pressure = td5;
+        mbrane->radius = td6;
         if( fgets(buff,255,(FILE*)f2) != NULL);
         if( fgets(buff,255,(FILE*)f2) != NULL);
         if( fgets(buff,255,(FILE*)f2) != NULL);{

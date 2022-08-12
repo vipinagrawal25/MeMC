@@ -313,7 +313,6 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 
 double volume_total(Vec3d *pos, 
         MESH mesh, MBRANE_para para){
-
     /// @brief Estimate the total volume of the shell 
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param mesh mesh related parameters -- connections and neighbours
@@ -338,6 +337,7 @@ double volume_total(Vec3d *pos,
     }
     return vol/3e0;
 }
+
 
 double bending_energy_total(Vec3d *pos, 
         MESH mesh, MBRANE_para para){

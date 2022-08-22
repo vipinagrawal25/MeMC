@@ -1,7 +1,8 @@
 #include "global.h"
 #include "subroutine.h"
 
-void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
+void init_system_random_pos(Vec2d *Pos,  double len, 
+        int N, char *metric, int bdry_condt ){
 
     /// @brief Initializes the points on surface of sphere or flat plane
     ///  @param Pos array containing co-ordinates of all the particles
@@ -11,6 +12,11 @@ void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
     ///  @param N number of points;
 
     bool is_sph, is_cart;
+
+
+    // this should be calculated or passed parameters
+    int n_ghost;
+    // remove it once debugged 
 
     is_sph = false;
     is_cart = false;
@@ -29,16 +35,35 @@ void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
     }
 
 
-
+     
     if(is_cart){
-        for(int i=0; i<N; i++){
-            Pos[i].x = drand48()*len;
-            Pos[i].y = drand48()*len;
+        switch (bdry_condt) {
+            case 0:
+            // This is a channel ; read bdry_condt as 0 
+            // n_ghost has to be even for logic to work;
+            n_ghost = 2*(int) sqrt(N);
+            for(int i=0; i<n_ghost/2; i++){
+                    Pos[i].x = i*(2*len/n_ghost);
+                    Pos[i].y = 0.0; 
+            }
+            for(int i=n_ghost/2; i<n_ghost; i++){
+                Pos[i].x = (i - n_ghost/2 + 0.5)*(2*len/n_ghost);
+                Pos[i].y = len; 
+            }
+            for(int i=n_ghost; i<N; i++){
+                Pos[i].x = drand48()*len;
+                Pos[i].y = drand48()*len;
+            }
+            break;
+            default:
+                for(int i=0; i<N; i++){
+                    Pos[i].x = drand48()*len;
+                    Pos[i].y = drand48()*len;
+                }
+                Pos[0].x = drand48()*len;
+                Pos[0].y = drand48()*len;
         }
-        Pos[0].x = drand48()*len;
-        Pos[0].y = drand48()*len;
     }
-
     if(is_sph){
         Pos[0].x = 0;
         Pos[0].y = 0;
@@ -52,6 +77,12 @@ void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
         Pos[2].y = 2*pi*drand48();
 
     }
+    /* for(int i=0; i<N; i++){ */
+    /*     printf("%lf %lf \n", Pos[i].x); */
+    /*     Pos[i].x = drand48()*len; */
+    /*     Pos[i].y = drand48()*len; */
+    /* } */
+
 }
 
 void init_eval_lij_t0(Vec3d *Pos, MESH mesh, 

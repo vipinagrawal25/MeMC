@@ -56,7 +56,7 @@ double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         MBRANE_para para, AFM_para afm);
 
 //init.c
-void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric);
+void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
 void init_eval_lij_t0(Vec3d *Pos, MESH mesh, 
         double *lij_t0, MBRANE_para *para);
 void init_read_config();

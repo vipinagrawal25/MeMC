@@ -199,8 +199,18 @@ int monte_carlo_surf2d(Vec2d *Pos,
     double de,  Eini, Efin;
     double dxinc, dyinc;
     bool is_sph, is_cart;
+    int bdry_condt, n_ghost;
 
-    std::uniform_int_distribution<uint32_t> rand_int(0,para.N-1);
+    bdry_condt = 0;
+    switch (bdry_condt){
+        case 0:
+            //This is the channel
+            n_ghost = 2*(int)sqrt(para.N);
+            break;
+        default:
+            n_ghost = 0;
+    }
+    std::uniform_int_distribution<uint32_t> rand_int(n_ghost,para.N-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
 
     is_sph = false;

@@ -101,13 +101,12 @@ typedef struct{
     /// @param sigma, epsilon; sigma epsilon of the LJ potential used to model AFM
     /// @param len length of the box
     /// @param r_cut cutoff length of the potential taken as 4 sigma
-
-
     int N;
     double sigma;
     double epsilon;
     double len;
     double r_cut;
+    int bdry_condt;
 }LJpara;
 
 //

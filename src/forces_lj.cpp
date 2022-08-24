@@ -4,7 +4,7 @@
 
 double cal_length(double x1 , double x2, 
         double y1, double y2, double len, char
-        *metric){
+        *metric, int bdry_condt){
 
 	 ///  @brief Calculate the length between points x1,y1 and x2,y2 
   	 ///
@@ -38,12 +38,22 @@ double cal_length(double x1 , double x2,
     if (is_cart){
         dx = x2 - x1;
         dy = y2 - y1;
-        if(dx >  len*0.5) dx = dx - len; 
-        if(dy >  len*0.5) dy = dy - len;
-        if(dx < -len*0.5) dx = dx + len;
-        if(dy < -len*0.5) dy = dy + len;
+
+        switch (bdry_condt){
+            case 0:
+                if(dx >  len*0.5) dx = dx - len; 
+                if(dx < -len*0.5) dx = dx + len;
+                break;
+            default:
+                if(dx >  len*0.5) dx = dx - len; 
+                if(dx < -len*0.5) dx = dx + len;
+
+                if(dy >  len*0.5) dy = dy - len;
+                if(dy < -len*0.5) dy = dy + len;
+        }   
         ds = dx*dx + dy*dy;
     }
+    
     if (is_sph){
         spx1 = sin(x1)*cos(y1);
         spy1 = sin(x1)*sin(y1);
@@ -82,21 +92,18 @@ void make_nlist(Vec2d *Pos, Nbh_list *neib,
     double  new_rc;
 
 
-    for(int i=0;i < para.N; i++)
-        neib[i].cnt = 0;
+    for(int i=0;i < para.N; i++)neib[i].cnt = 0;
 
 
-    new_rc = para.r_cut*para.r_cut;
+    new_rc = (para.r_cut + para.sigma/2)*(para.r_cut + para.sigma/2);
 
     for(int i = 0; i < para.N; i++){
         for(int j = i+1; j < para.N; j++){
-            int m = i;
-            int n = j;
-            if(len_check(Pos[m], Pos[n],  para.len, new_rc, metric)){
-                neib[m].list[neib[m].cnt] = n;
-                neib[n].list[neib[n].cnt] = m;
-                neib[m].cnt += 1;
-                neib[n].cnt += 1;
+            if(len_check(Pos[i], Pos[j],  para.len, new_rc, metric, para.bdry_condt)){
+                neib[i].list[neib[i].cnt] = j;
+                neib[j].list[neib[j].cnt] = i;
+                neib[i].cnt += 1;
+                neib[j].cnt += 1;
             }
         }
 
@@ -105,7 +112,7 @@ void make_nlist(Vec2d *Pos, Nbh_list *neib,
 
 
 bool len_check(Vec2d s1, Vec2d s2,
-        double len, double new_rc, char *metric){
+        double len, double cutoff, char *metric ,int bdry_condt){
 
 	 ///  @brief checks the distance between  s1 and s2 
      ///  @param s1 coordinate of first particle
@@ -121,8 +128,8 @@ bool len_check(Vec2d s1, Vec2d s2,
     bool var = false;
 
     ds = cal_length(s1.x , s2.x, 
-            s1.y, s2.y, len, metric);
-    var = (ds < new_rc);
+            s1.y, s2.y, len, metric, bdry_condt);
+    var = (ds < cutoff);
     return var;
 }
 
@@ -140,29 +147,24 @@ double pairlj_ipart_energy(Vec2d *Pos, int *n_list,
      ///  @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
 
 
-    double Sq_dr2;
     int j, k;
-    double Sq_dr1,r2,r6;
+    double r2,r6;
     double loc_ener;
     double r2_cut;
-    double inv_sig_ma, eps, ds;
+    double inv_sig_ma, ds2;
 
 
     loc_ener = 0e0;
     for(j=0; j < ni; j++){
         k = n_list[j];
         if( k != i_p ){
-            ds = cal_length(Pos[i_p].x , Pos[k].x, 
-                    Pos[i_p].y , Pos[k].y, para.len, metric);
-            Sq_dr1 = ds;
-            inv_sig_ma = 1e0/(para.sigma*para.sigma);
-            eps = para.epsilon;
+            ds2 = cal_length(Pos[i_p].x , Pos[k].x, 
+                    Pos[i_p].y , Pos[k].y, para.len, metric, para.bdry_condt);
             r2_cut = para.r_cut*para.r_cut;
-            Sq_dr2 = Sq_dr1*inv_sig_ma;
-            if(Sq_dr1 < r2_cut){	
-                r2 = 1.0/Sq_dr2;
-                r6  = r2*r2*r2; 
-                loc_ener += eps*r6*(r6);
+            if(ds2 < r2_cut){	
+                /* printf("%lf %lf\n", r2_cut, ds2); */
+                r6  = pow(para.sigma*para.sigma/ds2, 3);  
+                loc_ener += para.epsilon*r6*(r6 - 1);
             }
         }
     }

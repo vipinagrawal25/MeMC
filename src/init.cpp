@@ -48,6 +48,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
             }
             for(int i=n_ghost/2; i<n_ghost; i++){
                 Pos[i].x = (i - n_ghost/2 + 0.5)*(2*len/n_ghost);
+                /* Pos[i].x = (i - n_ghost/2)*(2*(len + 0.5)/n_ghost); */
                 Pos[i].y = len; 
             }
             for(int i=n_ghost; i<N; i++){

@@ -15,12 +15,13 @@ int main(int argc, char **argv){
      FILE *fid;
      char *metric, *outfolder, *outfile;
      char syscmds[128], log_file[128];
+     int bdry_condt = 0;
 
      metric = (char *) malloc(128*sizeof(char));
      outfolder = (char *) malloc(128*sizeof(char));
      outfile = (char *) malloc(128*sizeof(char));
      if(argc!=5){
-         fprintf(stderr, "\n\n Requiresi argument <Number of points> <output folder>\n\n");
+         fprintf(stderr, "\n\n Requires argument <Number of points> <output folder>\n\n");
          exit(0);
      }else{
          para.N=atoi(argv[1]);
@@ -41,6 +42,8 @@ int main(int argc, char **argv){
 
      para.len = 2*pi;
      para.epsilon = 1;
+     para.bdry_condt = 0;
+     // 0 for channel; default is periodic;
      if(strcmp(metric,"cart")==0){
          para.sigma = para.len/sqrt((double)para.N);
      }else if(strcmp(metric,"sph")==0){
@@ -48,7 +51,7 @@ int main(int argc, char **argv){
      }
 
      para.r_cut = 4*para.sigma;
-     mcpara.dfac  = 32;
+     mcpara.dfac  = 16;
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
      mcpara.dump_skip = 100;
@@ -56,7 +59,7 @@ int main(int argc, char **argv){
      Pos = (Vec2d *)calloc(para.N, sizeof(Vec2d));
      neib = (Nbh_list *) calloc(para.N, sizeof(Nbh_list));
 
-     init_system_random_pos(Pos, para.len, para.N, metric);
+     init_system_random_pos(Pos, para.len, para.N, metric, para.bdry_condt );
 
      fprintf(stderr, "For N = %d, sigma = %lf, and epsilon=%lf \n", para.N,
              para.sigma, para.epsilon);

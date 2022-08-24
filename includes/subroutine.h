@@ -19,9 +19,12 @@ void init_rng(uint32_t seed_val);
 //forces_lj.c
 void make_nlist(Vec2d *Pos, Nbh_list *neib,
         LJpara para, char *metric);
-bool len_check(Vec2d s1, Vec2d s2, double len, double new_rc, char* metric);
+bool len_check(Vec2d s1, Vec2d s2, double len, 
+        double new_rc, char* metric, int);
+
 double pairlj_ipart_energy(Vec2d *Pos, int *n_list,
         int ni, int i_p, LJpara para, char *metric);
+
 double pairlj_total_energy(Vec2d *Pos, Nbh_list *neib,
         LJpara para, char *metric);
 

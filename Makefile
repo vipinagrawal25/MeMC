@@ -21,13 +21,13 @@ includes += includes/global.h includes/subroutine.h includes/Vector.h
 bindir = ./bin
 #
 #
-all : flat memc
+all : start memc
 	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
 	mv exe* $(bindir)/
 
-flat: $(object) obj/flat.o
+start: $(object) obj/start.o
 	echo $(CC) $(object) $(link)
-	@$(CC) $(object) obj/flat.o $(link) -o exe_flat
+	@$(CC) $(object) obj/start.o $(link) -o exe_start
 
 memc: $(object) obj/memc.o
 	echo $(CC) $(object) $(link)
@@ -38,7 +38,7 @@ obj/memc.o: mains/memc.cpp $(includes)
 	@$(CC) -Jobj -c $< -o $@ $(link)
 # 
 
-obj/flat.o: mains/flat.cpp $(includes)
+obj/start.o: mains/start.cpp $(includes)
 	$(CC) -Jobj -c $< -o $@ $(link)
 
 object : $(object)

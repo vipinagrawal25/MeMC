@@ -199,12 +199,10 @@ int monte_carlo_surf2d(Vec2d *Pos,
     double de,  Eini, Efin;
     double dxinc, dyinc;
     bool is_sph, is_cart;
-    int bdry_condt, n_ghost;
+    int n_ghost;
 
-    bdry_condt = 0;
-    switch (bdry_condt){
+    switch (para.bdry_condt){
         case 0:
-            //This is the channel
             n_ghost = 2*(int)sqrt(para.N);
             break;
         default:
@@ -234,16 +232,17 @@ int monte_carlo_surf2d(Vec2d *Pos,
         y_o =   Pos[idx].y;
 
         if(is_cart){
-            dxinc = (para.sigma/mcpara.dfac)*(2*rand_real(rng) - 1);
-            dyinc = (para.sigma/mcpara.dfac)*(2*rand_real(rng) - 1);
+            dxinc = (para.sigma/mcpara.dfac)*rand_real(rng);
             x_n = fmod((x_o + dxinc + 30*para.len), para.len);
-            y_n = fmod((y_o + dyinc + 30*para.len), para.len);
             Pos[idx].x = x_n;
+
+            dyinc = (para.sigma/mcpara.dfac)*rand_real(rng);
+            y_n = fmod((y_o + dyinc + 30*para.len), para.len);
             Pos[idx].y = y_n;
         }
         if(is_sph){
             dxinc = rand_inc_theta(Pos[idx].x, mcpara.dfac);
-            dyinc = (para.sigma/mcpara.dfac)*(2*rand_real(rng) - 1);
+            dyinc = (para.sigma/mcpara.dfac)*(rand_real(rng));
             x_n = x_o + para.sigma*dxinc;
             y_n = fmod((y_o + dyinc + 30*2*pi), 2*pi);
             Pos[idx].x = x_n;

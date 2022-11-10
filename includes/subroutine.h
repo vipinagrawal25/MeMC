@@ -71,7 +71,7 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
 void init_read_config();
 void init_afm_tip(AFM_para );
 void init_read_parameters( MBRANE_para *mbrane, 
-        AFM_para *afm, MCpara *mcpara, SPRING_para *spring, 
+        AFM_para *afm, MCpara *mcpara, ActivePara *, SPRING_para *spring, 
         string para_file);
 int randint(int n);
 void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, 

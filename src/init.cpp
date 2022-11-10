@@ -84,8 +84,8 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
 }
 
 void init_read_parameters( MBRANE_para *mbrane, 
-        AFM_para *afm, MCpara *mcpara, SPRING_para *spring,
-        string para_file){
+        AFM_para *afm, MCpara *mcpara, ActivePara *activity,
+        SPRING_para *spring, string para_file){
     /// @brief read parameters from para_file 
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
@@ -97,6 +97,7 @@ void init_read_parameters( MBRANE_para *mbrane,
     char buff[255];
     int t_n, t_n2, t_n3, err;
     double td1, td2, td3, td4, td5, td6;
+    string which_activity;
     FILE *f2;
     f2 = fopen(para_file.c_str(), "r");
     if(f2){
@@ -130,22 +131,34 @@ void init_read_parameters( MBRANE_para *mbrane,
         if( fgets(buff,255,(FILE*)f2) != NULL);
         if( fgets(buff,255,(FILE*)f2) != NULL); 
         if( fgets(buff,255,(FILE*)f2) != NULL){ 
-            sscanf(buff,"%lf %lf %d %d %d %lf", &td1, &td2, &t_n, &t_n2, &t_n3, &td3);
+            sscanf(buff,"%lf %lf %d %d %d", &td1, &td2, &t_n, &t_n2, &t_n3);
         }
         /* fprintf(stderr, "%s\n", buff); */
         mcpara->dfac = td1;
         mcpara->kBT = td2;
         mcpara->is_restart = t_n;
-        cout << "mcpara->is_restart" << "\t"<<mcpara->is_restart<<endl;
         mcpara->tot_mc_iter = t_n2;
         mcpara->dump_skip = t_n3;
-        mcpara->activity = td3;
+        /* mcpara->activity = td3; */
         if( fgets(buff,255,(FILE*)f2) != NULL);  
         if( fgets(buff,255,(FILE*)f2) != NULL);   
         if( fgets(buff,255,(FILE*)f2) != NULL){   
             sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
         }
+        if( fgets(buff,255,(FILE*)f2) != NULL);  
+        if( fgets(buff,255,(FILE*)f2) != NULL);   
+        /* if( fgets(buff,255,(FILE*)f2) != NULL){ */   
+            getline(f2, which_activity, buff);
+        cout << "activity" << "\t"<<which_activity<<endl;
+             fgets(buff,255,(FILE*)f2);
+        cout << "activity" << "\t"<<f2<<endl;
+            /* sscanf(buff,"%s %lf %lf", which_activity, &td1, &td2); */
+        /* } */
+       /* activity->act = which_activity; */
+       /* activity->minA = td1; */
+       /* activity->maxA = td2; */
         /* fprintf(stderr, "%s\n", buff); */
+        exit(0);
         afm->tip_rad = td1;
         afm->tip_pos_z = td2;
         afm->sigma = td3;
@@ -161,7 +174,9 @@ void init_read_parameters( MBRANE_para *mbrane,
         spring -> icompute = t_n;
         spring -> nPole_eq_z = td1;
         spring -> sPole_eq_z = td2;
+
     }
+
     else{
         fprintf(stderr, "Mayday Mayday the specified para file doesn't exists\n");
         fprintf(stderr, "I will just kill myself now\n");

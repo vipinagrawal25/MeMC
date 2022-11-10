@@ -36,8 +36,14 @@ typedef struct{
     double kBT;
     double delta; // increment of position
     bool is_restart;
-    double activity;
-}MCpara;
+ }MCpara;
+
+typedef struct{
+    string act;
+    double minA, maxA;
+    double *activity;
+}ActivePara;
+
 //
 typedef struct{
     /// @brief Membrane Structure

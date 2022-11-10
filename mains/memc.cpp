@@ -13,6 +13,7 @@ int main(int argc, char *argv[]){
     MBRANE_para mbrane;
     MCpara mcpara;
     AFM_para afm;
+    ActivePara activity;
     MESH mesh, mes_t;
     Vec3d afm_force,spring_force[2];
     FILE *fid;
@@ -36,7 +37,8 @@ int main(int argc, char *argv[]){
         outfolder=argv[2];
     }
     /**** create folder and copy parameter file *****/
-    syscmds="mkdir outfolder";
+    syscmds="mkdir " + outfolder;
+        
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder\n");
     syscmds="cp "+para_file+" "+outfolder+"/";
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in copying parafile\n");
@@ -44,7 +46,7 @@ int main(int argc, char *argv[]){
     /*************************************************/
     init_rng(23397);
     // read the input file
-    init_read_parameters(&mbrane, &afm, &mcpara, &spring, para_file);
+    init_read_parameters(&mbrane, &afm, &mcpara, &activity,  &spring, para_file);
    /* define all the paras */ 
     mbrane.volume = (double *)calloc(1, sizeof(double)); 
     mbrane.volume[0] = (4./3.)*pi*pow(mbrane.radius,3);
@@ -92,7 +94,6 @@ int main(int argc, char *argv[]){
     /*****  initialize energy values *****/
     Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane);
     Et[1] = bending_energy_total(Pos, mesh, mbrane);
-    exit(1);
     Et[2] = lj_bottom_surf_total(Pos, is_attractive, mbrane);
     Et[3] = lj_afm_total(Pos, &afm_force, mbrane, afm);
     vol_sph = volume_total(Pos, mesh, mbrane);

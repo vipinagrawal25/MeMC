@@ -21,7 +21,7 @@ bool Metropolis(double DE, MCpara mcpara){
     /// @details see https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm 
     bool yes;
     double rand;
-    DE += mcpara.activity;
+    /* DE += mcpara.activity; */
     std::uniform_real_distribution<> rand_real(0, 1);
     yes = (DE <= 0.e0);
     if (!yes){

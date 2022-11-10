@@ -14,13 +14,14 @@ int main(int argc, char **argv){
      LJpara  para;
      MCpara mcpara;
      FILE *fid;
-     char *metric, *outfolder, *outfile;
-     char syscmds[128], log_file[128];
+     string outfolder,outfile,syscmds;
+     char *metric;
+     char log_file[128];
      SPRING_para spring;
      //
      metric = (char *) malloc(128*sizeof(char));
-     outfolder = (char *) malloc(128*sizeof(char));
-     outfile = (char *) malloc(128*sizeof(char));
+     // outfolder = (char *) malloc(128*sizeof(char));
+     // outfile = (char *) malloc(128*sizeof(char));
      if(argc!=5){
          fprintf(stderr, "\n\n Requires argument <Number of points> <output folder>\n\n");
          exit(0);
@@ -34,8 +35,9 @@ int main(int argc, char **argv){
          
      }
      //
-    sprintf(syscmds, "%s %s","mkdir ",outfolder);
-    if(system(syscmds) != 0) fprintf(stderr, "failure in creating folder");
+     syscmds="mkdir "+outfolder;
+    // sprintf(syscmds, "%s %s","mkdir ",outfolder);
+    if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder");
     init_rng(23077);
     /* define all the paras */ 
      para.len = 2*pi;
@@ -65,12 +67,13 @@ int main(int argc, char **argv){
 
     Ener = pairlj_total_energy(Pos, neib,  para, metric);
 
-    sprintf(log_file, "%s%s",outfolder,"/mc_log");
+    sprintf(log_file, "%s%s",outfolder.c_str(),"/mc_log");
     fid = fopen(log_file, "a");
 
     for(i=0; i<mcpara.tot_mc_iter; i++){
         if(i%mcpara.dump_skip == 0){
-            sprintf(outfile, "%s%s%04d%s",outfolder,"/snap_",(int)(i/mcpara.dump_skip),".h5");
+          outfile=outfolder+"/snap_"+ZeroPadNumber(i/mcpara.dump_skip)+".h5";
+            // sprintf(outfile, "%s%s%04d%s",outfolder,"/snap_",(int)(i/mcpara.dump_skip),".h5");
             hdf5_io_write_pos((double *) Pos, 2*para.N, outfile);
         }
         fprintf(fid, " %d %d %g\n", i, num_moves, Ener);

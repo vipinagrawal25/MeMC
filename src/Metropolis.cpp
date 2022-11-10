@@ -31,6 +31,18 @@ bool Metropolis(double DE, double activity, MCpara mcpara){
     }
     return yes;
 }
+bool Glauber(double DE, double activity, MCpara mcpara){
+    /// @brief Glauber algorithm
+    /// @param DE change in energy
+    /// @param kbt boltzmann constant times temperature
+    bool yes;
+    double rand;
+    DE += activity;
+    std::uniform_real_distribution<> rand_real(0, 1);
+    rand = rand_real(rng);
+    yes=rand < 1/(1+exp(DE/mcpara.kBT));
+    return yes;
+}
 double rand_inc_theta(double th0, 
         double dfac){
     /// @brief increment the polar angle randomly  
@@ -115,6 +127,7 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
     double vol_i, vol_f;
     double dvol, de_vol, ini_vol, de_pressure;
     double KAPPA;
+    bool yes;
     std::uniform_int_distribution<uint32_t> rand_int(0,mbrane.N-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
     ini_vol = (4./3.)*pi*pow(mbrane.radius,3);
@@ -164,12 +177,16 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
         //     + (dvol/ini_vol)*(dvol/ini_vol);
         // de_vol = KAPPA*de_vol;
         de = (Efin - Eini) + de_vol + de_pressure;
-        if (Metropolis(de, activity.activity[idx], mcpara)){
+        if (mcpara.algo == "mpolis"){
+            yes=Metropolis(de, activity.activity[idx], mcpara);
+        }else if(mcpara.algo == "glauber"){
+            yes=Glauber(de, activity.activity[idx], mcpara);
+        }
+        if (yes){
             move = move + 1;
             mbrane.tot_energy[0] +=  de;
             mbrane.volume[0] += dvol;
-        }
-        else{
+        }else{
             pos[idx].x = x_o;
             pos[idx].y = y_o;
             pos[idx].z = z_o;

@@ -30,6 +30,7 @@ typedef struct{
     /// @param dump_skip the config file is dumped every this many iters 
     /// @param kBT Boltzmann  constant times temperature
     /// @param delta approximated value of lattice spacing
+    string algo;
     double dfac;
     int one_mc_iter;
     int tot_mc_iter;

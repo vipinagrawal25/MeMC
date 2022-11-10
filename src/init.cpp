@@ -97,6 +97,7 @@ void init_read_parameters( MBRANE_para *mbrane,
     //
     //
     char buff[255];
+    char temp_algo[char_len];
     int t_n, t_n2, t_n3, err;
     double td1, td2, td3, td4, td5, td6;
     char which_act[char_len];
@@ -133,9 +134,10 @@ void init_read_parameters( MBRANE_para *mbrane,
         if( fgets(buff,255,(FILE*)f2) != NULL);
         if( fgets(buff,255,(FILE*)f2) != NULL); 
         if( fgets(buff,255,(FILE*)f2) != NULL){ 
-            sscanf(buff,"%lf %lf %d %d %d", &td1, &td2, &t_n, &t_n2, &t_n3);
+            sscanf(buff,"%s %lf %lf %d %d %d", temp_algo, &td1, &td2, &t_n, &t_n2, &t_n3);
         }
         /* fprintf(stderr, "%s\n", buff); */
+        mcpara->algo=temp_algo;
         mcpara->dfac = td1;
         mcpara->kBT = td2;
         mcpara->is_restart = t_n;

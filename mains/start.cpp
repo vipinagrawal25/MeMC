@@ -15,7 +15,6 @@ int main(int argc, char **argv){
      FILE *fid;
      char *metric, *outfolder, *outfile;
      char syscmds[128], log_file[128];
-     int bdry_condt = 0;
 
      metric = (char *) malloc(128*sizeof(char));
      outfolder = (char *) malloc(128*sizeof(char));
@@ -42,8 +41,8 @@ int main(int argc, char **argv){
 
      para.len = 2*pi;
      para.epsilon = 1;
-     para.bdry_condt = 0;
-     // 0 for channel; default is periodic;
+     para.bdry_condt = 1;
+     // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          para.sigma = para.len/sqrt((double)para.N);
      }else if(strcmp(metric,"sph")==0){

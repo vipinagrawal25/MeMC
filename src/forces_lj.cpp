@@ -44,6 +44,9 @@ double cal_length(double x1 , double x2,
                 if(dx >  len*0.5) dx = dx - len; 
                 if(dx < -len*0.5) dx = dx + len;
                 break;
+            case 1:
+                // frame
+                break;
             default:
                 if(dx >  len*0.5) dx = dx - len; 
                 if(dx < -len*0.5) dx = dx + len;

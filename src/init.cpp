@@ -12,7 +12,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
     ///  @param N number of points;
 
     bool is_sph, is_cart;
-
+    double dl;
 
     // this should be calculated or passed parameters
     int n_ghost;
@@ -42,12 +42,13 @@ void init_system_random_pos(Vec2d *Pos,  double len,
             // This is a channel ; read bdry_condt as 0 
             // n_ghost has to be even for logic to work;
             n_ghost = 2*(int) sqrt(N);
+            dl = (2*len/n_ghost);
             for(int i=0; i<n_ghost/2; i++){
-                    Pos[i].x = i*(2*len/n_ghost);
+                    Pos[i].x = i*dl;
                     Pos[i].y = 0.0; 
             }
             for(int i=n_ghost/2; i<n_ghost; i++){
-                Pos[i].x = (i - n_ghost/2 + 0.5)*(2*len/n_ghost);
+                Pos[i].x = (i - n_ghost/2 + 0.5)*dl;
                 /* Pos[i].x = (i - n_ghost/2)*(2*(len + 0.5)/n_ghost); */
                 Pos[i].y = len; 
             }
@@ -56,6 +57,35 @@ void init_system_random_pos(Vec2d *Pos,  double len,
                 Pos[i].y = drand48()*len;
             }
             break;
+      case 1:
+            // This is a frame ;
+            // n_ghost has to be even for logic to work;
+            n_ghost = 4*(int) sqrt(N);
+            dl = (4*len/n_ghost);
+            for(int i=0; i<n_ghost/4; i++){
+                Pos[i].x = i*dl;
+                Pos[i].y = 0.0; 
+            }
+            for(int i=n_ghost/4; i<n_ghost/2; i++){
+                Pos[i].x = (i - n_ghost/4 + 0.5)*dl;
+                Pos[i].y = len; 
+            }
+            for(int i=n_ghost/2; i<3*n_ghost/4; i++){
+                Pos[i].x = 0.0;
+                Pos[i].y = (i - n_ghost/2 + 0.5)*dl; 
+            }
+
+            for(int i=3*n_ghost/4; i<n_ghost; i++){
+                Pos[i].x = len;
+                Pos[i].y = (i - 3*n_ghost/4)*dl; 
+                }
+            for(int i=n_ghost; i<N; i++){
+                Pos[i].x = drand48()*len;
+                Pos[i].y = drand48()*len;
+            }
+
+            break;
+       
             default:
                 for(int i=0; i<N; i++){
                     Pos[i].x = drand48()*len;

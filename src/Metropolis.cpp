@@ -205,6 +205,10 @@ int monte_carlo_surf2d(Vec2d *Pos,
         case 0:
             n_ghost = 2*(int)sqrt(para.N);
             break;
+        case 1:
+            n_ghost = 4*(int)sqrt(para.N);
+            break;
+
         default:
             n_ghost = 0;
     }

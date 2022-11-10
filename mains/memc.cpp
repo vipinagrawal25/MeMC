@@ -51,7 +51,9 @@ int main(int argc, char *argv[]){
     mbrane.volume = (double *)calloc(1, sizeof(double)); 
     mbrane.volume[0] = (4./3.)*pi*pow(mbrane.radius,3);
     mbrane.tot_energy = (double *)calloc(1, sizeof(double));
+    activity.activity = (double *)calloc(mbrane.N, sizeof(double));
     mbrane.tot_energy[0] = 0e0;
+    init_activity(activity, mbrane.N);
     // allocate arrays
     Pos = (Vec3d *)calloc(mbrane.N, sizeof(Vec3d));
     mesh.cmlist = (int *)calloc(mbrane.N+1, sizeof(int));
@@ -140,7 +142,7 @@ int main(int argc, char *argv[]){
             mbrane.tot_energy[0] += e_t;
         }
         num_moves = monte_carlo_3d(Pos, mesh, lij_t0, is_attractive, 
-                mbrane, mcpara, afm, spring);
+                mbrane, mcpara, afm, activity,  spring);
     }
     fclose(fid);
     free(Pos);

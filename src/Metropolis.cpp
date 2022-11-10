@@ -1,3 +1,4 @@
+
 #include "global.h"
 #include "subroutine.h"
 #include <random>
@@ -12,7 +13,7 @@ void init_rng(uint32_t seed_val){
 	 ///  @brief Generates random number 
     rng.seed(seed_val);
 }
-bool Metropolis(double DE, MCpara mcpara){
+bool Metropolis(double DE, double activity, MCpara mcpara){
     /// @brief Metropolis algorithm
     /// @param DE change in energy
     /// @param kbt boltzmann constant times temperature
@@ -21,7 +22,7 @@ bool Metropolis(double DE, MCpara mcpara){
     /// @details see https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm 
     bool yes;
     double rand;
-    /* DE += mcpara.activity; */
+    DE += activity;
     std::uniform_real_distribution<> rand_real(0, 1);
     yes = (DE <= 0.e0);
     if (!yes){
@@ -48,8 +49,8 @@ double rand_inc_theta(double th0,
 
 double energy_mc_3d(Vec3d *pos, MESH mesh, 
         double *lij_t0, bool *is_attractive, int idx,
-        MBRANE_para mbrane, 
-        MCpara mcpara, AFM_para afm, SPRING_para spring){
+        MBRANE_para mbrane, MCpara mcpara, AFM_para afm,
+         SPRING_para spring){
     /// @brief Estimate the contribution from all the energies when a particle is moved randomly 
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param mesh mesh related parameters -- connections and neighbours
@@ -92,8 +93,8 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
 
 int monte_carlo_3d(Vec3d *pos, MESH mesh, 
                 double *lij_t0, bool *is_attractive, 
-                MBRANE_para mbrane, 
-                MCpara mcpara, AFM_para afm, SPRING_para spring){
+                MBRANE_para mbrane, MCpara mcpara, AFM_para afm, 
+                ActivePara activity, SPRING_para spring){
 
     /// @brief Monte-Carlo routine for the membrane 
     ///  @param Pos array containing co-ordinates of all the particles
@@ -163,7 +164,7 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
         //     + (dvol/ini_vol)*(dvol/ini_vol);
         // de_vol = KAPPA*de_vol;
         de = (Efin - Eini) + de_vol + de_pressure;
-        if (Metropolis(de,mcpara)){
+        if (Metropolis(de, activity.activity[idx], mcpara)){
             move = move + 1;
             mbrane.tot_energy[0] +=  de;
             mbrane.volume[0] += dvol;
@@ -241,7 +242,7 @@ int monte_carlo_surf2d(Vec2d *Pos,
         Efin =  pairlj_ipart_energy(Pos, neib[idx].list,
                 neib[idx].cnt, idx, para, metric);
         de = (Efin - Eini);
-        if(Metropolis(de, mcpara)){
+        if(Metropolis(de, 0.0,  mcpara)){
             move = move + 1;
         }
         else{

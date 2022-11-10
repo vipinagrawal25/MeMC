@@ -1,5 +1,7 @@
 #include "global.h"
 #include "subroutine.h"
+std::mt19937 rng2;
+
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
 
     /// @brief Initializes the points on surface of sphere or flat plane
@@ -97,7 +99,7 @@ void init_read_parameters( MBRANE_para *mbrane,
     char buff[255];
     int t_n, t_n2, t_n3, err;
     double td1, td2, td3, td4, td5, td6;
-    string which_activity;
+    char which_act[char_len];
     FILE *f2;
     f2 = fopen(para_file.c_str(), "r");
     if(f2){
@@ -143,22 +145,19 @@ void init_read_parameters( MBRANE_para *mbrane,
         if( fgets(buff,255,(FILE*)f2) != NULL);  
         if( fgets(buff,255,(FILE*)f2) != NULL);   
         if( fgets(buff,255,(FILE*)f2) != NULL){   
-            sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
+            sscanf(buff,"%s %lf %lf", which_act, &td1, &td2);
         }
-        if( fgets(buff,255,(FILE*)f2) != NULL);  
-        if( fgets(buff,255,(FILE*)f2) != NULL);   
-        /* if( fgets(buff,255,(FILE*)f2) != NULL){ */   
-            getline(f2, which_activity, buff);
-        cout << "activity" << "\t"<<which_activity<<endl;
-             fgets(buff,255,(FILE*)f2);
-        cout << "activity" << "\t"<<f2<<endl;
-            /* sscanf(buff,"%s %lf %lf", which_activity, &td1, &td2); */
-        /* } */
-       /* activity->act = which_activity; */
-       /* activity->minA = td1; */
-       /* activity->maxA = td2; */
+        /* cout << "activity" << "\t"<<f2<<endl; */
+       activity->act = which_act;
+       activity->minA = td1;
+       activity->maxA = td2;
         /* fprintf(stderr, "%s\n", buff); */
-        exit(0);
+       if( fgets(buff,255,(FILE*)f2) != NULL);  
+       if( fgets(buff,255,(FILE*)f2) != NULL);   
+       if( fgets(buff,255,(FILE*)f2) != NULL){   
+           sscanf(buff,"%s %lf %lf", which_act, &td1, &td2);
+       }
+
         afm->tip_rad = td1;
         afm->tip_pos_z = td2;
         afm->sigma = td3;
@@ -203,4 +202,19 @@ void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, SPRING_para sp
        paramfile << "# Spring constant: Ki = " << spring.constant << endl;    
     }
     paramfile.close();
+}
+
+void init_activity(ActivePara activity, int N){
+
+    int i;
+    std::uniform_real_distribution<> rand_real(activity.minA, activity.maxA);
+
+    if(activity.act == "random"){
+        for(i=0;i<N;i++) activity.activity[i] = rand_real(rng2);
+    }
+ 
+    if(activity.act == "constant"){
+        for(i=0;i<N;i++) activity.activity[i] = activity.maxA;
+    }
+   
 }

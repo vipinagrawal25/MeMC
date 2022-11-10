@@ -12,8 +12,8 @@ using namespace std;
 int monte_carlo_3d(Vec3d *pos, MESH mesh, 
                 double *lij_t0, bool *is_attractive, 
                 MBRANE_para mbrane,
-                MCpara mcpara, AFM_para afm, SPRING_para spring);
-bool Metropolis(double DE, MCpara mcpara);
+                MCpara mcpara, AFM_para afm, ActivePara activity,  SPRING_para spring);
+bool Metropolis(double DE, double, MCpara mcpara);
 // double rand_inc_theta(double th0, double dfac);
 // double energy_mc_3d(Vec3d *pos, MESH mesh, 
 //         double *lij_t0, bool *is_attractive, int idx, bool *is_be_pos,
@@ -73,6 +73,7 @@ void init_afm_tip(AFM_para );
 void init_read_parameters( MBRANE_para *mbrane, 
         AFM_para *afm, MCpara *mcpara, ActivePara *, SPRING_para *spring, 
         string para_file);
+void init_activity(ActivePara, int );
 int randint(int n);
 void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, 
                 SPRING_para spring);

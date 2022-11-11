@@ -1,5 +1,5 @@
-# CC=h5c++
-CC=mpic++ -O2 -DNDEBUG -Wno-deprecated -Wno-unused-result
+HOST=su
+include hosts/$(HOST)
 #
 #opt=-O3
 opt=-pg

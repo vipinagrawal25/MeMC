@@ -20,11 +20,6 @@ int main(int argc, char *argv[]){
     double *lij_t0;
     double Pole_zcoord;
     string outfolder,syscmds, para_file, log_file, outfile;
-    // outfolder = (char *)malloc(128*sizeof(char));
-    // syscmds = (char *)malloc(128*sizeof(char));
-    // log_file = (char *)malloc(128*sizeof(char));
-    // outfile = (char *)malloc(128*sizeof(char));
-    // para_file = (char *)malloc(128*sizeof(char));
     double YY=mbrane.YY;
     double BB = mbrane.coef_bend;
     char log_headers[] = "# iter acceptedmoves total_ener stretch_ener bend_ener stick_ener afm_ener ener_volume";
@@ -67,17 +62,17 @@ int main(int argc, char *argv[]){
     }
     //
     if(!mcpara.is_restart){
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/dmemc_pos.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.cmlist,
-                (int *) mesh.node_nbr_list, outfolder+"/dmemc_conf.h5");
+                (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane, &spring);
         identify_attractive_part(Pos, is_attractive, mbrane.theta, mbrane.N);
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane.N);
     }else{
-        hdf5_io_read_pos( (double *)Pos,   outfolder+"/dmemc_pos.h5");
+        hdf5_io_read_pos( (double *)Pos,   outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.cmlist,
-                (int *) mesh.node_nbr_list,  outfolder+"/dmemc_conf.h5");
+                (int *) mesh.node_nbr_list,  outfolder+"/input.h5");
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane.N);
         init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane, &spring);

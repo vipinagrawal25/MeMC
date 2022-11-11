@@ -28,25 +28,23 @@ int main(int argc, char *argv[]){
     double YY=mbrane.YY;
     double BB = mbrane.coef_bend;
     char log_headers[] = "# iter acceptedmoves total_ener stretch_ener bend_ener stick_ener afm_ener ener_volume";
-    SPRING_para spring;    
-    if(argc!=3){
-        printf("\n\n mayday.. requires an argument <parameter file> <output folder>\n\n");
-        exit(0);
-    }else{
-        para_file=argv[1];
-        outfolder=argv[2];
-    }
-    /**** create folder and copy parameter file *****/
-    syscmds="mkdir " + outfolder;
-        
-    if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder\n");
-    syscmds="cp "+para_file+" "+outfolder+"/";
-    if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in copying parafile\n");
+    SPRING_para spring;
+    //
+    mpi_err = MPI_Init(0x0, 0x0);
+    mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    seed_v = (uint32_t) 7*3*11*(mpi_rank+1)*rand();
+    init_rng(seed_v);
+    //
+    outfolder = ZeroPadNumber(mpi_rank)+"/";
+    cout << "I am in folder "+ outfolder << endl;
+    filename = outfolder + "/para_file.in";
     write_param(outfolder + "/para.out",mbrane,mcpara,spring);
+        // ---------- open outfile_terminal ------------------- //
+    fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     /*************************************************/
-    init_rng(23397);
     // read the input file
-    init_read_parameters(&mbrane, &afm, &mcpara, &activity,  &spring, para_file);
+    init_read_parameters(&mbrane, &afm, &mcpara, &activity, 
+                        &spring, filename);
    /* define all the paras */ 
     mbrane.volume = (double *)calloc(1, sizeof(double)); 
     mbrane.volume[0] = (4./3.)*pi*pow(mbrane.radius,3);
@@ -69,9 +67,9 @@ int main(int argc, char *argv[]){
     }
     //
     if(!mcpara.is_restart){
-        hdf5_io_read_pos( (double *)Pos,  "conf/dmemc_pos.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/dmemc_pos.h5");
         hdf5_io_read_mesh((int *) mesh.cmlist,
-                (int *) mesh.node_nbr_list, "conf/dmemc_conf.h5");
+                (int *) mesh.node_nbr_list, outfolder+"/dmemc_conf.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane, &spring);
         identify_attractive_part(Pos, is_attractive, mbrane.theta, mbrane.N);
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane.N);
@@ -85,13 +83,6 @@ int main(int argc, char *argv[]){
         init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane, &spring);
         identify_attractive_part(Pos, is_attractive, mbrane.theta, mbrane.N);
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/restart.h5");
-    }
-    /***** Copy initial things to the folder *****/
-    if (!mcpara.is_restart){
-        syscmds="cp conf/dmemc_pos.h5 "+outfolder+"/";
-        system(syscmds.c_str());
-        syscmds="cp conf/dmemc_conf.h5 "+outfolder+"/";
-        system(syscmds.c_str());
     }
     /*****  initialize energy values *****/
     Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane);
@@ -110,7 +101,6 @@ int main(int argc, char *argv[]){
     cout << "# Foppl von Karman (FvK): " 
          << YY*mbrane.radius*mbrane.radius/BB << endl;
     //
-    // sprintf(log_file,"%s/mc_log",outfolder);
     log_file=outfolder+"/mc_log";
     fid = fopen(log_file.c_str(), "a");
     wHeader(fid,mbrane,afm,spring);
@@ -128,6 +118,8 @@ int main(int argc, char *argv[]){
                 " totalener = "<< mbrane.tot_energy[0] << "; volume = " << vol_sph << endl;
         wDiag(fid, mbrane, afm, spring, mesh, i, num_moves, Et,  &afm_force,  spring_force,
               vol_sph, Pos);
+        outfile_terminal << "iter = " << i << "; Accepted Moves = " << (double) num_moves*100/mcpara.one_mc_iter << " %;"<<  
+                " totalener = "<< mbrane.tot_energy[0] << "; volume = " << mbrane.volume[0]<< "; area = " << area_sph << endl;
         if(i%mcpara.dump_skip == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(i/mcpara.dump_skip)+".h5";
             // sprintf(outfile,"%s/snap_%04d.h5",outfolder,(int)(i/mcpara.dump_skip));
@@ -148,5 +140,7 @@ int main(int argc, char *argv[]){
     free(Pos);
     free(lij_t0);
     free(mesh.node_nbr_list);
+    mpi_err = MPI_Finalize();
+    outfile_terminal.close();
     return 0;
 }

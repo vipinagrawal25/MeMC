@@ -1,4 +1,5 @@
-CC = h5c++ 
+# CC=h5c++
+CC=mpic++ -O2 -DNDEBUG -Wno-deprecated -Wno-unused-result
 #
 #opt=-O3
 opt=-pg

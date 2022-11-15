@@ -48,9 +48,23 @@ void print(double *arr, int start, int skip, int end){
   cout << endl;
 }
 /*-----------------------------------------------*/
+void print(float *arr, int start, int skip, int end){
+  for (int in = 0; in < int(end/skip); ++in){
+      cout << arr[skip*in+start] << " ";
+  }
+  cout << endl;
+}
+/*-----------------------------------------------*/
 void print(double *arr, int nn){
   for (int in = 0; in < nn; ++in){
       cout << arr[in] << "\t";
+  }
+  cout << endl;
+}
+/*-----------------------------------------------*/
+void print(int *arr, int nn){
+  for (int in = 0; in < nn; ++in){
+      cout << arr[in] << "\n";
   }
   cout << endl;
 }

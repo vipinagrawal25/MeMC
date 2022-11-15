@@ -13,6 +13,7 @@ bool FileExists(const std::string &s);
 void check_param() ;
 void write_param(string fname);
 void print(double*, int);
+void print(int*, int);
 void print(double *arr, int np, int pp);
 void print(double*, int start, int skip, int end);
 void add(double *added, double *arr1, double *arr2, int nn);

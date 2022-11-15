@@ -22,13 +22,6 @@ int main(int argc, char *argv[]){
     string outfolder,syscmds, para_file, log_file, outfile, filename;
     int mpi_err,mpi_rank;
     uint32_t seed_v;
-    // outfolder = (char *)malloc(128*sizeof(char));
-    // syscmds = (char *)malloc(128*sizeof(char));
-    // log_file = (char *)malloc(128*sizeof(char));
-    // outfile = (char *)malloc(128*sizeof(char));
-    // para_file = (char *)malloc(128*sizeof(char));
-    double YY=mbrane.YY;
-    double BB = mbrane.coef_bend;
     char log_headers[] = "# iter acceptedmoves total_ener stretch_ener bend_ener stick_ener afm_ener ener_volume";
     SPRING_para spring;
     //
@@ -100,8 +93,8 @@ int main(int argc, char *argv[]){
     mbrane.tot_energy[0] = Ener_t;
     mbrane.volume[0] = vol_sph;
     /************************************/
-    cout << "# Foppl von Karman (FvK): " 
-         << YY*mbrane.radius*mbrane.radius/BB << endl;
+    // cout << "# Foppl von Karman (FvK): " 
+         // << YY*mbrane.radius*mbrane.radius/BB << endl;
     //
     log_file=outfolder+"/mc_log";
     fid = fopen(log_file.c_str(), "a");
@@ -116,6 +109,8 @@ int main(int argc, char *argv[]){
         Et[4] = mbrane.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
         Et[5] = spring_tot_energy_force(Pos, spring_force, mesh, spring);
         Et[6] = -mbrane.pressure*vol_sph;
+        // cout << "iter = " << i << "; Accepted Moves = " << (double) num_moves*100/mcpara.one_mc_iter << " %;"<<  
+        //         " totalener = "<< mbrane.tot_energy[0] << "; volume = " << vol_sph << endl;
         outfile_terminal << "iter = " << i << "; Accepted Moves = " << (double) num_moves*100/mcpara.one_mc_iter << " %;"<<  
                 " totalener = "<< mbrane.tot_energy[0] << "; volume = " << vol_sph << endl;
         wDiag(fid, mbrane, afm, spring, mesh, i, num_moves, Et,  &afm_force,  spring_force,

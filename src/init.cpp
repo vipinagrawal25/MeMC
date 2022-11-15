@@ -159,7 +159,6 @@ void init_read_parameters( MBRANE_para *mbrane,
        if( fgets(buff,255,(FILE*)f2) != NULL){   
            sscanf(buff,"%s %lf %lf", which_act, &td1, &td2);
        }
-
         afm->tip_rad = td1;
         afm->tip_pos_z = td2;
         afm->sigma = td3;
@@ -207,16 +206,12 @@ void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, SPRING_para sp
 }
 
 void init_activity(ActivePara activity, int N){
-
     int i;
     std::uniform_real_distribution<> rand_real(activity.minA, activity.maxA);
-
     if(activity.act == "random"){
         for(i=0;i<N;i++) activity.activity[i] = rand_real(rng2);
     }
- 
     if(activity.act == "constant"){
         for(i=0;i<N;i++) activity.activity[i] = activity.maxA;
-    }
-   
+    }  
 }

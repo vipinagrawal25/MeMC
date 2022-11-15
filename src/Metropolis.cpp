@@ -1,4 +1,3 @@
-
 #include "global.h"
 #include "subroutine.h"
 #include <random>
@@ -102,7 +101,6 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
     E_spr = spring_energy(pos[idx], idx, mesh, spring);
     return E_b + E_s + E_stick + E_afm + E_spr;
 }
-
 int monte_carlo_3d(Vec3d *pos, MESH mesh, 
                 double *lij_t0, bool *is_attractive, 
                 MBRANE_para mbrane, MCpara mcpara, AFM_para afm, 
@@ -118,7 +116,6 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
     /// @param mcpara Monte-Carlo related parameters
     /// @param AFM afm related parameter 
     /// @return number of accepted moves 
-
     int i, move;
     int num_nbr, cm_idx;
     double x_o, y_o, z_o, x_n, y_n, z_n;
@@ -194,11 +191,9 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
     }
     return move;
 }
-
 int monte_carlo_surf2d(Vec2d *Pos, 
         Nbh_list *neib, LJpara para, 
         MCpara mcpara, char *metric){
-
     /// @brief Monte-Carlo routine for the points on the surface of sphere or flat
     /// plane
     ///  @param Pos array containing co-ordinates of all the particles
@@ -208,30 +203,22 @@ int monte_carlo_surf2d(Vec2d *Pos,
     ///  @param metric Topology of the surface "cart" for flat plane "sph" for
     /// sphere
     /// @return number of accepted moves 
-
-
     int i, move;
     double x_o, y_o, x_n, y_n;
     double de,  Eini, Efin;
     double dxinc, dyinc;
     bool is_sph, is_cart;
-
     std::uniform_int_distribution<uint32_t> rand_int(0,para.N-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
-
     is_sph = false;
     is_cart = false;
-
     if(strcmp(metric, "sph") == 0){
         is_sph = true;
     }
     if(strcmp(metric, "cart") == 0){
         is_cart = true;
     }
-
-
     move = 0;
-
     for(i = 0; i< mcpara.one_mc_iter; i++){
         int idx = rand_int(rng);
         Eini =  pairlj_ipart_energy(Pos, neib[idx].list,

@@ -6,6 +6,7 @@
 #include "global.h"
 #include <iomanip>
 #include <sstream>
+#include <string>
 using namespace std;
 /*-----------------------------------------------*/
 double SqEr(double Arr1[], double Arr2[],int nn){
@@ -219,3 +220,19 @@ void wDiag(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring, MESH
     fflush(fid);
 }
 /*-----------------------------------------------*/
+// int lastfile(dirname,file_prefix='',zfill=5,suffix="h5,vtk"){
+//     ''' The function returns the complete path of last file in the 
+//         directory. Here, we use binary search.'''
+//     int low=2
+//     int high=2**13
+    
+//     while(abs(low-high)>1):
+//         if(FileExists(dirname+"/"+file_prefix+str(high).zfill(zfill)+'.npy')){
+//             low=high
+//             high*=2
+//         }else{
+//             high=int((low+high)/2)
+//           }
+//     return low
+// }
+// /*-----------------------------------------------*/

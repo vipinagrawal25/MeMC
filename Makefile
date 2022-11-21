@@ -57,3 +57,12 @@ distclean:
 	@echo "all data cleared"
 	@rm -rf $(dir $(wildcard */mc_log))
 	@echo "Deleted all the output data"
+
+energy:
+	$(object) obj/energy.o
+	echo $(CC) $(object) $(link)
+	@$(CC) $(object) obj/energy.o $(link) -o exe_energy
+	mv exe_energy $(bindir)
+
+obj/energy.o: utils/energy.cpp $(includes)
+	@$(CC) -Jobj -c $< -o $@ $(link)

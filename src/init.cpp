@@ -204,7 +204,7 @@ void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, SPRING_para sp
     }
     paramfile.close();
 }
-
+//
 void init_activity(ActivePara activity, int N){
     int i;
     std::uniform_real_distribution<> rand_real(activity.minA, activity.maxA);

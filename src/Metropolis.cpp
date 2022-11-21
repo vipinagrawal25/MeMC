@@ -6,7 +6,6 @@
 #include <sstream>
 #include <iomanip>
 std::mt19937 rng;
-
 void init_rng(uint32_t seed_val){
 
 	 ///  @brief Generates random number 

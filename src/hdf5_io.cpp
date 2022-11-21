@@ -42,9 +42,7 @@ void hdf5_io_read_pos(double *Pos, string input_file){
     ///  @brief Read from the hdf5 file
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param input_file File name from which co-ordinate will be read
-    /// 
-
-
+    ///
     hid_t   file_id,dataset_id;  /* identifiers */
     herr_t  status;
 

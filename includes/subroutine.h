@@ -87,4 +87,6 @@ void io_read_config(double *Pos, int N, char *);
 void io_dump_config_ascii(double *Pos, int N, char *);
 //cubic_solve
 int cubic_solve(double, double, double, double, double *);
+// visit_io
+void visit_vtk_io(double *points, int Np, string filename);
 #endif

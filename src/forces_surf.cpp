@@ -178,7 +178,6 @@ double voronoi_area(double cotJ, double cotK,
     /// @return  Given two cotangent angles, it returns either the area due to perpendicular bisector,
 /// or the barycenter.
 
-
     double sigma;
     if (cotJ>0 && cotK>0){
         if (cotJ*cotK<1){
@@ -348,8 +347,7 @@ double bending_energy_total(Vec3d *pos,
     /// information; 
     ///  @param para  Membrane related parameters;
     /// @return Total Bending energy 
-
-
+    
     int idx;
     int num_nbr, cm_idx;
     double be;

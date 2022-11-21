@@ -10,15 +10,17 @@ opt=-pg
 link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes
 # 
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
-sources += src/init.cpp  src/hdf5_io.cpp
+sources += src/init.cpp src/hdf5_io.cpp
 sources += src/cubic_solve.cpp
 sources += src/misc.cpp
+sources += src/visit_io.cpp
 #
 object =  obj/forces_lj.o obj/init.o obj/forces_surf.o obj/Metropolis.o
 object += obj/hdf5_io.o 
 object += obj/cubic_solve.o obj/misc.o
+object += obj/visit_io.o
 #
-includes += includes/global.h includes/subroutine.h includes/Vector.h 
+includes += includes/global.h includes/subroutine.h includes/Vector.h includes/misc.h
 bindir = ./bin
 #
 #
@@ -34,13 +36,20 @@ memc: $(object) obj/memc.o
 	echo $(CC) $(object) $(link)
 	@$(CC) $(object) obj/memc.o $(link) -o exe_memc
 
+energy: $(object) obj/energy.o
+	echo $(CC) $(object) $(link)
+	@$(CC) $(object) obj/energy.o $(link) -o exe_energy
+	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
+	mv exe_energy $(bindir)
 
 obj/memc.o: mains/memc.cpp $(includes)
 	@$(CC) -Jobj -c $< -o $@ $(link)
-# 
-
+#
 obj/start.o: mains/start.cpp $(includes)
 	$(CC) -Jobj -c $< -o $@ $(link)
+#
+obj/energy.o: utils/energy.cpp $(includes)
+	@$(CC) -Jobj -c $< -o $@ $(link)
 
 object : $(object)
 obj/%.o : src/%.cpp $(includes)
@@ -57,12 +66,3 @@ distclean:
 	@echo "all data cleared"
 	@rm -rf $(dir $(wildcard */mc_log))
 	@echo "Deleted all the output data"
-
-energy:
-	$(object) obj/energy.o
-	echo $(CC) $(object) $(link)
-	@$(CC) $(object) obj/energy.o $(link) -o exe_energy
-	mv exe_energy $(bindir)
-
-obj/energy.o: utils/energy.cpp $(includes)
-	@$(CC) -Jobj -c $< -o $@ $(link)

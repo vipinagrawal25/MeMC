@@ -1,5 +1,6 @@
 #include <string>
 #include "Vector.h"
+#include "global.h"
 #include <iomanip>
 #include <sstream>
 #ifndef FILE_MISC_SEEN

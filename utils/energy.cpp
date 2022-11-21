@@ -6,7 +6,7 @@ void init_mbrane(MBRANE_para *mbrane);
 int main(int argc, char const *argv[]){
 	string folder=argv[1];
 	//
-	string prefix="snap_";
+	string prefix="part_";
 	int fnum=0;
 	string extension;
 	Vec3d *Pos;
@@ -40,7 +40,6 @@ int main(int argc, char const *argv[]){
 		}else if(extension==".h5"){
 			hdf5_io_read_pos((double*) Pos, fname);
 		}
-        cout << extension << endl;
 		for(idx = 0; idx < mbrane.N; idx++){
 	        num_nbr = mesh.cmlist[idx + 1] - mesh.cmlist[idx];
 	        cm_idx = mesh.cmlist[idx];
@@ -90,7 +89,7 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0, int N){
     }
 }
 void init_mbrane(MBRANE_para *mbrane){
-	mbrane->N=20252;
+	mbrane->N=5120;
 	mbrane->coef_bend=8.5;
 	mbrane->YY = 4616*mbrane->coef_bend;       // Young's modulus
 	//

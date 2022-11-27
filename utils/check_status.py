@@ -20,15 +20,11 @@ def read_data(filename, which_file):
             np.arctan2(y, x)] for x, y, z in pts_cart]
             ) 
     return Np, pts_sph, pts_cart
-
-
+    
 which_file = sys.argv[1]
 file = sys.argv[2]
-
 fig, ax = plt.subplots()
-
 Np, pts_sph, pts_cart = read_data(file, which_file)
-
 if(which_file == 'start'):
     ax.plot((pts_sph[0:64,0]), pts_sph[0:64,1], 'o')
     ax.plot((pts_sph[64:,0]), pts_sph[64:,1], 'o')
@@ -39,4 +35,3 @@ if(which_file == 'memc'):
 #         xlabel='cos(theta)', ylabel='phi')
 
 plt.show()
-

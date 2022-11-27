@@ -13,7 +13,66 @@ void init_rng(uint32_t seed_val){
     rng.seed(seed_val);
 }
 
-bool Metropolis(double DE, double kbt ){
+int del_nbr(int *nbrs, int numnbr, int idx){
+    // delet int idx between i1 and i2 in the nbrs list
+    int new_numnbr, delete_here;
+    bool logic;
+
+    logic = false;
+    delete_here = 0;
+
+    // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
+        // printf("\n\n");
+
+
+    while(!logic){
+            logic = (nbrs[delete_here] == idx);
+            ++delete_here;
+        }
+
+    printf("delete here %d %d \n\n", idx, delete_here);
+    memcpy(nbrs+delete_here-1, &nbrs[delete_here], sizeof(int) * (numnbr-delete_here+1));
+
+    // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
+        // printf("\n\n");
+
+    return numnbr-1;
+}
+
+
+int add_nbr(int *nbrs, int numnbr, int idx, int i1, int i2){
+    // add int idx between i1 and i2 in the nbrs list
+    int insert_here;
+    bool logic;
+
+    logic = false;
+    insert_here = 0;
+
+    // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
+    //     printf("\n\n");
+
+    while(!logic){
+            logic = (nbrs[insert_here] == i1) || (nbrs[insert_here] == i2);
+            ++insert_here;
+        }
+
+        logic = (nbrs[insert_here] == i1) || (nbrs[insert_here] == i2);
+        if (logic){
+            memcpy(nbrs+insert_here, &nbrs[insert_here-1], sizeof(int) * (numnbr-insert_here+1));
+            nbrs[insert_here] = idx;
+        }else{
+            insert_here = 0;
+            memcpy(nbrs+insert_here, &nbrs[insert_here-1], sizeof(int) * (numnbr-insert_here+1));
+            nbrs[insert_here] = idx;
+        }
+
+    // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
+    //     printf("\n\n");
+
+    return numnbr+1;
+}
+
+bool Metropolis(double DE, double activity, MCpara mcpara){
     /// @brief Metropolis algorithm
     /// @param DE change in energy
     /// @param kbt boltzmann constant times temperature
@@ -22,16 +81,27 @@ bool Metropolis(double DE, double kbt ){
     /// @details see https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm 
     bool yes;
     double rand;
+    DE += activity;
     std::uniform_real_distribution<> rand_real(0, 1);
-
     yes = (DE <= 0.e0);
     if (!yes){
         rand = rand_real(rng);
-        yes = rand < exp(-DE/kbt);
+        yes = rand < exp(-DE/mcpara.kBT);
     }
     return yes;
 }
-
+bool Glauber(double DE, double activity, MCpara mcpara){
+    /// @brief Glauber algorithm
+    /// @param DE change in energy
+    /// @param kbt boltzmann constant times temperature
+    bool yes;
+    double rand;
+    DE += activity;
+    std::uniform_real_distribution<> rand_real(0, 1);
+    rand = rand_real(rng);
+    yes=rand < 1/(1+exp(DE/mcpara.kBT));
+    return yes;
+}
 double rand_inc_theta(double th0, 
         double dfac){
     /// @brief increment the polar angle randomly  
@@ -50,9 +120,8 @@ double rand_inc_theta(double th0,
 
 double energy_mc_3d(Vec3d *pos, MESH mesh, 
         double *lij_t0, bool *is_attractive, int idx,
-        MBRANE_para mbrane, 
-        MCpara mcpara, AFM_para afm){
-
+        MBRANE_para mbrane, MCpara mcpara, AFM_para afm,
+         SPRING_para spring){
     /// @brief Estimate the contribution from all the energies when a particle is moved randomly 
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param mesh mesh related parameters -- connections and neighbours
@@ -66,14 +135,14 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
     /// @return Change in Energy when idx particle is moved
 
 
-    double E_b, E_s;
-    double E_stick;
-    double  E_afm;
+    double E_b, E_s, E_stick, E_afm, E_spr;
     int cm_idx, num_nbr;
 
     E_b = 0; E_s = 0; E_stick = 0; E_afm = 0;
-    num_nbr = mesh.cmlist[idx + 1] - mesh.cmlist[idx];
-    cm_idx = mesh.cmlist[idx];
+    
+    cm_idx = mesh.nghst*idx;
+    num_nbr = mesh.numnbr[idx];
+   
     E_b = bending_energy_ipart(pos, 
             (int *) (mesh.node_nbr_list + cm_idx),
              num_nbr, idx, mbrane);
@@ -83,7 +152,7 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
 
     E_s = stretch_energy_ipart(pos, 
             (int *) (mesh.node_nbr_list + cm_idx),
-            (double *) (lij_t0 + cm_idx), num_nbr, 
+            (lij_t0 + cm_idx), num_nbr,
             idx, mbrane);
 
     E_stick = lj_bottom_surface(pos[idx].z, is_attractive[idx], 
@@ -91,46 +160,50 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
 
     E_afm = lj_afm(pos[idx], afm);
 
-    return E_b + E_s + E_stick + E_afm;
+    E_spr = spring_energy(pos[idx], idx, mesh, spring);
+    return E_b + E_s + E_stick + E_afm + E_spr;
 }
 
 int monte_carlo_3d(Vec3d *pos, MESH mesh, 
                 double *lij_t0, bool *is_attractive, 
-                MBRANE_para mbrane, 
-                MCpara mcpara, AFM_para afm){
+                MBRANE_para mbrane, MCpara mcpara, AFM_para afm, 
+                ActivePara activity, SPRING_para spring){
 
     /// @brief Monte-Carlo routine for the membrane 
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param mesh mesh related parameters -- connections and neighbours
-    ///information
+    /// information
     /// @param lij_t0 initial distance between points of membrane
     /// @param is_attractive true if the zz sees the  bottom wall 
     ///  @param mbrane  Membrane related parameters;
     /// @param mcpara Monte-Carlo related parameters
     /// @param AFM afm related parameter 
     /// @return number of accepted moves 
-
     int i, move;
     int num_nbr, cm_idx;
     double x_o, y_o, z_o, x_n, y_n, z_n;
     double de,  Eini, Efin;
     double dxinc, dyinc, dzinc;
     double vol_i, vol_f;
-    double dvol, de_vol, ini_vol;
+    double dvol, de_vol, ini_vol, de_pressure;
     double KAPPA;
-    std::uniform_int_distribution<uint32_t> rand_int(0,mbrane.N-1);
+    bool yes;
+    //  TODO either figure out periodic boundary triangulation or write it
+    std::uniform_int_distribution<uint32_t> rand_int(128,mbrane.N-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
     ini_vol = (4./3.)*pi*pow(mbrane.radius,3);
     KAPPA = mbrane.coef_vol_expansion;
     move = 0;
     for(i = 0; i< mcpara.one_mc_iter; i++){
         int idx = rand_int(rng);
+        /*
         num_nbr = mesh.cmlist[idx + 1] - mesh.cmlist[idx];
         cm_idx = mesh.cmlist[idx];
+        */
 
         Eini = energy_mc_3d(pos, mesh, 
                 lij_t0, is_attractive, 
-                idx,  mbrane, mcpara, afm);
+                idx,  mbrane, mcpara, afm, spring);
 
         vol_i = volume_ipart(pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
@@ -154,23 +227,29 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
 
         Efin = energy_mc_3d(pos, mesh, 
                 lij_t0, is_attractive, 
-                idx,   mbrane, mcpara, afm);
+                idx,   mbrane, mcpara, afm, spring);
 
         vol_f = volume_ipart(pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
                 num_nbr, idx, mbrane);
 
-        dvol =  (vol_f - vol_i);
-        de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
-            + (dvol/ini_vol)*(dvol/ini_vol);
-        de_vol = KAPPA*de_vol;
-        de = (Efin - Eini) + de_vol;
-        if (Metropolis(de,mcpara.kBT)){
+        dvol=0.5*(vol_f - vol_i);
+        de_vol = vol_energy_change(mbrane,dvol);
+        de_pressure = PV_change(mbrane,dvol);
+        // de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
+        //     + (dvol/ini_vol)*(dvol/ini_vol);
+        // de_vol = KAPPA*de_vol;
+        de = (Efin - Eini) + de_vol + de_pressure;
+        if (mcpara.algo == "mpolis"){
+            yes=Metropolis(de, activity.activity[idx], mcpara);
+        }else if(mcpara.algo == "glauber"){
+            yes=Glauber(de, activity.activity[idx], mcpara);
+        }
+        if (yes){
             move = move + 1;
             mbrane.tot_energy[0] +=  de;
             mbrane.volume[0] += dvol;
-        }
-        else{
+        }else{
             pos[idx].x = x_o;
             pos[idx].y = y_o;
             pos[idx].z = z_o;
@@ -192,8 +271,6 @@ int monte_carlo_surf2d(Vec2d *Pos,
     ///  @param metric Topology of the surface "cart" for flat plane "sph" for
     /// sphere
     /// @return number of accepted moves 
-
-
     int i, move;
     double x_o, y_o, x_n, y_n;
     double de,  Eini, Efin;
@@ -214,20 +291,15 @@ int monte_carlo_surf2d(Vec2d *Pos,
     }
     std::uniform_int_distribution<uint32_t> rand_int(n_ghost,para.N-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
-
     is_sph = false;
     is_cart = false;
-
     if(strcmp(metric, "sph") == 0){
         is_sph = true;
     }
     if(strcmp(metric, "cart") == 0){
         is_cart = true;
     }
-
-
     move = 0;
-
     for(i = 0; i< mcpara.one_mc_iter; i++){
         int idx = rand_int(rng);
         Eini =  pairlj_ipart_energy(Pos, neib[idx].list,
@@ -256,7 +328,7 @@ int monte_carlo_surf2d(Vec2d *Pos,
         Efin =  pairlj_ipart_energy(Pos, neib[idx].list,
                 neib[idx].cnt, idx, para, metric);
         de = (Efin - Eini);
-        if(Metropolis(de, mcpara.kBT)){
+        if(Metropolis(de, 0.0,  mcpara)){
             move = move + 1;
         }
         else{
@@ -267,3 +339,126 @@ int monte_carlo_surf2d(Vec2d *Pos,
     return move;
 }
 
+int monte_carlo_fluid(Vec3d *pos, MESH mesh,
+                MBRANE_para mbrane, MCpara mcpara, AFM_para afm,
+                ActivePara activity, SPRING_para spring){
+
+    /// @brief Monte-Carlo routine for the membrane
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    ///information
+    /// @param lij_t0 initial distance between points of membrane
+    /// @param is_attractive true if the zz sees the  bottom wall
+    ///  @param mbrane  Membrane related parameters;
+    /// @param mcpara Monte-Carlo related parameters
+    /// @param AFM afm related parameter
+    /// @return number of accepted moves
+
+    int i, j, move;
+    int nnbr_del1;
+    int cm_idx_del1, cm_idx_del2;
+    int cm_idx_add1, cm_idx_add2;
+    int idx_del1, idx_del2;
+    int idx_add1, idx_add2;
+
+    int nbr_add_1[12], nbr_add_2[12];
+    int nbr_del_1[12], nbr_del_2[12];
+
+    int N_nbr_del2, N_nbr_del1;
+    int N_nbr_add2, N_nbr_add1;
+    Vec3d bef_ij, aft_ij;
+
+    double KAPPA;
+    bool yes, logic;
+
+    // TODO for now the 128 is hard coded;
+
+    std::uniform_int_distribution<uint32_t> rand_int(128,mbrane.N-1);
+    std::uniform_int_distribution<uint32_t> rand_nbr(1,mesh.nghst-1);
+    std::uniform_real_distribution<> rand_real(-1, 1);
+
+    move = 0;
+
+
+    for(i = 0; i< mcpara.one_mc_iter; i++){
+        // identify the pair to be divorced
+        // stored as idx_del1 and idx_del2
+
+        idx_del1 = rand_int(rng);
+        cm_idx_del1 = mesh.nghst*idx_del1;
+        nnbr_del1 = mesh.numnbr[idx_del1];
+
+        logic = false;
+        int idxn;
+        while (!logic){
+            // for (j = 0; j < 12; j++ ){
+            idxn = rand_nbr(rng);
+            logic = (mesh.node_nbr_list[cm_idx_del1 + idxn] != -1) && (mesh.node_nbr_list[cm_idx_del1 + idxn] > 128);
+            printf("%d\n", logic);
+        }
+
+        idx_del2 = mesh.node_nbr_list[cm_idx_del1 + idxn];
+        cm_idx_del2 = mesh.nghst*idx_del2;
+
+        int up, down;
+
+        // Identify the pairs to be bonded
+        // stored as idx_add1 and idx_add2
+
+        up = (idxn+1+nnbr_del1)%nnbr_del1;
+        down = (idxn-1+nnbr_del1)%nnbr_del1;
+
+        idx_add1 = mesh.node_nbr_list[idx_del1*mesh.nghst + up];
+        idx_add2 = mesh.node_nbr_list[idx_del1*mesh.nghst + down];
+
+        cm_idx_add1 = mesh.nghst*idx_add1;
+        cm_idx_add2 = mesh.nghst*idx_add2;
+
+        // copy the neighbours
+        memcpy(nbr_del_1, &mesh.node_nbr_list[cm_idx_del1], sizeof(int) * mesh.nghst);
+        memcpy(nbr_del_2, &mesh.node_nbr_list[cm_idx_del2], sizeof(int) * mesh.nghst);
+        memcpy(nbr_add_1, &mesh.node_nbr_list[cm_idx_add1], sizeof(int) * mesh.nghst);
+        memcpy(nbr_add_2, &mesh.node_nbr_list[cm_idx_add2], sizeof(int) * mesh.nghst);
+
+
+        // form the bond
+        N_nbr_add1 =  add_nbr(nbr_add_1, mesh.numnbr[idx_add1], idx_add2, idx_del1, idx_del2);
+        N_nbr_add2 = add_nbr(nbr_add_2, mesh.numnbr[idx_add2], idx_add1, idx_del1, idx_del2);
+
+        // get divorced
+        N_nbr_del1 = del_nbr(nbr_del_1, mesh.numnbr[idx_del1], idx_del2);
+        N_nbr_del2 = del_nbr(nbr_del_2, mesh.numnbr[idx_del2], idx_del1);
+
+        // Rudimentary criterion for acceptance and rejection
+
+        bef_ij = pos[idx_del1] - pos[idx_del2];
+        aft_ij = pos[idx_del1] - pos[idx_del2];
+
+        // Eini =  stretch_energy_ipart(pos, nbr_a, num_nbr,
+        //                     idx, mbrane);
+
+        double de = norm(bef_ij) - norm(aft_ij);
+
+        // de = (Efin - Eini) + de_vol + de_pressure;
+        if (mcpara.algo == "mpolis"){
+            yes=Metropolis(de, 0.0e0, mcpara);
+        }else if(mcpara.algo == "glauber"){
+            yes=Glauber(de, 0.0e0, mcpara);
+        }
+        if (yes){
+            move = move + 1;
+            mbrane.tot_energy[0] +=  de;
+
+            memcpy(mesh.node_nbr_list+cm_idx_del1, &nbr_del_1, sizeof(int) * mesh.nghst);
+            memcpy(mesh.node_nbr_list+cm_idx_del2, &nbr_del_2, sizeof(int) * mesh.nghst);
+            mesh.numnbr[idx_del1] = N_nbr_del1;
+            mesh.numnbr[idx_del2] = N_nbr_del2;
+
+            memcpy(mesh.node_nbr_list+cm_idx_add1, &nbr_add_1, sizeof(int) * mesh.nghst);
+            memcpy(mesh.node_nbr_list+cm_idx_add2, &nbr_add_2, sizeof(int) * mesh.nghst);
+            mesh.numnbr[idx_add1] = N_nbr_add1;
+            mesh.numnbr[idx_add2] = N_nbr_add2;
+        }
+        }
+    return move;
+}

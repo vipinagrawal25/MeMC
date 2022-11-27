@@ -1,7 +1,5 @@
 #include "global.h"
 #include "subroutine.h"
-
-
 double cal_length(double x1 , double x2, 
         double y1, double y2, double len, char
         *metric, int bdry_condt){
@@ -77,8 +75,6 @@ double cal_length(double x1 , double x2,
     return ds;
 
 }
-
-
 void make_nlist(Vec2d *Pos, Nbh_list *neib,
         LJpara para, char *metric){
 

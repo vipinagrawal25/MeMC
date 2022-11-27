@@ -1,5 +1,24 @@
 #include "global.h"
 #include "subroutine.h"
+std::mt19937 rng2;
+
+extern "C" void Membrane_listread(int *, double *, double *, double *, 
+        double *, double *, double *, bool *, char *);
+
+extern "C" void Ljbot_listread(double *, double *, double *, 
+        double *,  char *);
+
+extern "C" void  MC_listread(char *, double *, double *, bool *,
+           int *, int *, char *);
+
+extern "C"  void  Activity_listread(char *, double *, double *, char *);
+
+extern "C"  void  afm_listread(double *, double *, double *, double *,
+             char *);
+
+extern "C"  void  spring_listread(int *, double *, double *, char *);
+
+
 
 void init_system_random_pos(Vec2d *Pos,  double len, 
         int N, char *metric, int bdry_condt ){
@@ -116,38 +135,46 @@ void init_system_random_pos(Vec2d *Pos,  double len,
 
 }
 
-void init_eval_lij_t0(Vec3d *Pos, MESH mesh, 
-        double *lij_t0, MBRANE_para *para){
-
+void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0,
+         MBRANE_para *para, SPRING_para *spring){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
    /// @param lij_t0 initial distance between points of membrane
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
     ///  @param para membrane related parameters 
-  
     Vec3d dr;
     int i,j,k;
-    int num_nbr, cm_idx;
+    int num_nbr, cm_idx, npairs;
     double sum_lij=0;
+    double r0;
+    npairs = 0;
     for(i = 0; i < para->N; i++){
-        num_nbr = mesh.cmlist[i + 1] - mesh.cmlist[i];
-        cm_idx = mesh.cmlist[i];
+        num_nbr = mesh.numnbr[i];
+        cm_idx = mesh.nghst * i;
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
             dr.x = Pos[i].x - Pos[j].x;
             dr.y = Pos[i].y - Pos[j].y;
             dr.z = Pos[i].z - Pos[j].z;
             lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
-            sum_lij+=lij_t0[k];
+            sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
+            npairs++;
         }
     }
-    para->av_bond_len = sum_lij/mesh.cmlist[para->N];
+
+
+    para->av_bond_len = sum_lij/npairs;
+    r0=para->av_bond_len;
+    spring->constant=para->coef_bend/(r0*r0);
+    if(para->is_fluid){
+        for(i = 0; i < mesh.nghst*para->N; i++) lij_t0[i] = para->av_bond_len;
+    }
 }
 
 void init_read_parameters( MBRANE_para *mbrane, 
-        AFM_para *afm, MCpara *mcpara, char *para_file){
- 
+        AFM_para *afm, MCpara *mcpara, ActivePara *activity,
+        SPRING_para *spring, string para_file){
     /// @brief read parameters from para_file 
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
@@ -156,64 +183,72 @@ void init_read_parameters( MBRANE_para *mbrane,
     ///  @param mcpara monte-carlo related parameters
     //
     //
-    char buff[255];
-    int t_n, t_n2, t_n3, err;
-    double td1, td2, td3, td4, td5;
-    FILE *f2;
-    f2 = fopen(para_file, "r");
-    if(f2){
-        if( fgets(buff,255,(FILE*)f2) != NULL); 
-        if( fgets(buff,255,(FILE*)f2) != NULL); 
-        if( fgets(buff,255,(FILE*)f2) != NULL){
-            sscanf(buff,"%d %lf %lf %lf %lf", &t_n, &td1, &td2, &td3, &td4);
-        }
-        /* fprintf(stderr, "%s\n", buff); */
-        mbrane->N = t_n;
-        mbrane->coef_bend = td1;
-        mbrane->coef_str = td2;
-        mbrane->coef_vol_expansion = td3;
-        mbrane->sp_curv = td4;
-        if( fgets(buff,255,(FILE*)f2) != NULL);
-        if( fgets(buff,255,(FILE*)f2) != NULL){
-            sscanf(buff,"%lf %lf %lf %lf %lf", &td1,&td2,&td3,&td4,&td5);
-        }
-        /* fprintf(stderr, "%s\n", buff); */
-        mbrane->radius = td1;
-        mbrane->pos_bot_wall = td2;
-        mbrane->sigma = td3;
-        mbrane->epsilon = td4;
-        mbrane->theta = td5;
-        if( fgets(buff,255,(FILE*)f2) != NULL);
-        if( fgets(buff,255,(FILE*)f2) != NULL); 
-        if( fgets(buff,255,(FILE*)f2) != NULL){ 
-            sscanf(buff,"%lf %lf %d %d ", &td1, &td2,  &t_n2, &t_n3);
-        }
-        /* fprintf(stderr, "%s\n", buff); */
-        mcpara->dfac = td1;
-        mcpara->kBT = td2;
-        mcpara->tot_mc_iter = t_n2;
-        mcpara->dump_skip = t_n3;
-        if( fgets(buff,255,(FILE*)f2) != NULL);  
-        if( fgets(buff,255,(FILE*)f2) != NULL);   
-        if( fgets(buff,255,(FILE*)f2) != NULL){   
-            sscanf(buff,"%lf %lf %lf %lf", &td1, &td2, &td3, &td4);
-        }
-        /* fprintf(stderr, "%s\n", buff); */
-        afm->tip_rad = td1;
-        afm->tip_pos_z = td2;
-        afm->sigma = td3;
-        afm->epsilon = td4;
-    }
-    else{
-        fprintf(stderr, "Mayday Mayday the specified para file doesn't exists\n");
-        fprintf(stderr, "I will just kill myself now\n");
-        exit(0);
-    }
-    fclose(f2);
-    mbrane->num_triangles = 2*mbrane->N - 4;
-    mbrane->num_nbr = 3*mbrane->num_triangles;
-    // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
+    char temp_algo[char_len];
+    char which_act[char_len], tmp_fname[char_len];
+
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+
+    Membrane_listread(&mbrane->N, &mbrane->coef_bend,
+            &mbrane->YY, &mbrane->coef_vol_expansion,
+            &mbrane->sp_curv,  &mbrane->pressure, &mbrane->radius,
+            &mbrane->is_fluid, tmp_fname);
+
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    Ljbot_listread(&mbrane->pos_bot_wall, &mbrane->sigma,
+            &mbrane->epsilon, &mbrane->theta,
+            tmp_fname);
+
+
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    spring_listread(&spring->icompute, &spring->nPole_eq_z, &spring->sPole_eq_z, tmp_fname);
+
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    afm_listread(&afm->tip_rad, &afm->tip_pos_z, &afm->sigma, &afm->epsilon,
+             tmp_fname);
+
+
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    MC_listread(temp_algo, &mcpara->dfac, &mcpara->kBT, &mcpara->is_restart,
+            &mcpara->tot_mc_iter, &mcpara->dump_skip, tmp_fname);
+
+    mcpara->algo=temp_algo;
+
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    Activity_listread(which_act, &activity->minA, &activity->maxA, tmp_fname);
+
+    activity->act = which_act;
+
+   /* printf("filename = %s %s\n", para_file.c_str(),  tmp_fname); */
+
+   mbrane->num_triangles = 2*mbrane->N - 4;
+   mbrane->num_nbr = 3*mbrane->num_triangles;
+   // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
    // define the monte carlo parameters
-    mcpara->one_mc_iter = 2*mbrane->N;
-    mcpara->delta = sqrt(8*pi/(2*mbrane->N-4));
+   mcpara->one_mc_iter = 2*mbrane->N;
+   mcpara->delta = sqrt(8*pi/(2*mbrane->N-4));
+}
+//
+void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, SPRING_para spring){
+    double FvK = mbrane.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
+    ofstream paramfile;
+    paramfile.open( fname );
+    paramfile << "# =========== Model Parameters ==========" << endl
+            << "# Foppl von Karman number: FvK = " << FvK << endl
+            << "# Elasto-thermal number: ET = " << mcpara.kBT/mbrane.coef_bend*sqrt(FvK) << endl
+            << "# average bond length: r0 = " << mbrane.av_bond_len << endl;
+    if (spring.icompute!=0){
+       paramfile << "# Spring constant: Ki = " << spring.constant << endl;    
+    }
+    paramfile.close();
+}
+
+void init_activity(ActivePara activity, int N){
+    int i;
+    std::uniform_real_distribution<> rand_real(activity.minA, activity.maxA);
+    if(activity.act == "random"){
+        for(i=0;i<N;i++) activity.activity[i] = rand_real(rng2);
+    }
+    if(activity.act == "constant"){
+        for(i=0;i<N;i++) activity.activity[i] = activity.maxA;
+    }  
 }

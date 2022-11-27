@@ -1,5 +1,7 @@
 #include <string>
 #include "Vector.h"
+#include <iomanip>
+#include <sstream>
 #ifndef FILE_MISC_SEEN
 #define FILE_MISC_SEEN
 using namespace std;
@@ -11,6 +13,7 @@ bool FileExists(const std::string &s);
 void check_param() ;
 void write_param(string fname);
 void print(double*, int);
+void print(int*, int);
 void print(double *arr, int np, int pp);
 void print(double*, int start, int skip, int end);
 void add(double *added, double *arr1, double *arr2, int nn);
@@ -21,6 +24,16 @@ void downScale(double *yscaled, double *y, int factor, int nn );
 void zeros(double *yzero, int ndim);
 void max(int *amaxind, double *amaxval, Vec3d *pos, int ndim, char dirn = 'z');
 void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn='z');
-// void print(vec2 *arr, int nn);
-/* -----------------------------------------------*/
+void wHeader(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring);
+void wDiag(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring, MESH mesh,
+            int i, int num_moves, double *Et,Vec3d *afm_force,
+            Vec3d *spring_force, double vol_sph,Vec3d *Pos);
+/*-----------------------------------------------*/
+template<typename T>
+inline string ZeroPadNumber(T num){
+    ostringstream ss;
+    ss << setw( 5 ) << setfill( '0' ) << (int)num;
+    return ss.str();
+}
+/********************************************************/
 #endif

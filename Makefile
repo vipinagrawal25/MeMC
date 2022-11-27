@@ -1,4 +1,5 @@
-CC = h5c++ 
+HOST=su
+include hosts/$(HOST)
 #
 #opt=-O3
 opt=-pg

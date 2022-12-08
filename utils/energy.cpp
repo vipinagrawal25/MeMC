@@ -3,11 +3,12 @@
 using namespace std;
 void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0, int N);
 void init_mbrane(MBRANE_para *mbrane);
+//
 int main(int argc, char const *argv[]){
 	string folder=argv[1];
 	//
 	string prefix="part_";
-	int fnum=0;
+	int fnum=1;
 	string extension;
 	Vec3d *Pos;
 	MESH mesh;
@@ -37,27 +38,29 @@ int main(int argc, char const *argv[]){
 	while(FileExists(fname)){
 		if (extension==".vtk"){
 			visit_vtk_io((double*) Pos, mbrane.N, fname);
+            print((double*)Pos, 3*mbrane.N);
 		}else if(extension==".h5"){
 			hdf5_io_read_pos((double*) Pos, fname);
 		}
 		for(idx = 0; idx < mbrane.N; idx++){
 	        num_nbr = mesh.cmlist[idx + 1] - mesh.cmlist[idx];
 	        cm_idx = mesh.cmlist[idx];
-	        be  = bending_energy_ipart(Pos, 
+	        be  =bending_energy_ipart(Pos, 
 	                (int *) (mesh.node_nbr_list + cm_idx),
 	                 num_nbr, idx, mbrane);
 	        se  =stretch_energy_ipart(Pos, 
                 (int *) (mesh.node_nbr_list + cm_idx),
                 (double *) (lij_t0 + cm_idx), num_nbr, 
                 idx, mbrane );
-	        bend_fid << be << "\t";
-	        stretch_fid << se << "\t";
+	        bend_fid << be << "\n";
+	        stretch_fid << se << "\n";
     	}
     	bend_fid << "\n";
     	stretch_fid << "\n";
         fnum=fnum+1;
         fname=folder+"/"+prefix+ZeroPadNumber(fnum)+extension;
         cout << fname << endl;
+        exit(1);
     }
     bend_fid.close();
     stretch_fid.close();

@@ -93,9 +93,6 @@ int main(int argc, char *argv[]){
     mbrane.tot_energy[0] = Ener_t;
     mbrane.volume[0] = vol_sph;
     /************************************/
-    // cout << "# Foppl von Karman (FvK): " 
-         // << YY*mbrane.radius*mbrane.radius/BB << endl;
-    //
     log_file=outfolder+"/mc_log";
     fid = fopen(log_file.c_str(), "a");
     wHeader(fid,mbrane,afm,spring);

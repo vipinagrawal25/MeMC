@@ -4,7 +4,7 @@ The MeMC is an open-source software package for monte-carlo simulation of elasti
 Micro and nano vesicles play a crucial role in biology and medicine. The physical properties of these vesicles play an important role in their biological functions. Hence it is important to measure their elastic constants. One of the ways, to measure elastic constants of cells, is to poke them with Atomic Force Microscopy (AFM) tip to compute force-distance curve. Then the cell is modeled as a linear elastic material and by fitting this model to the experimental force-distance curve, the parameters of elastic model i.e. cell is estimated. However nano-vesicles differ from cells in two ways:
 
  1) The nano-vesicles are much smaller hence thermal fluctuations may effectively renormalize the elastic coefficients. ([Košmrlj & Nelson, 2017](https://journals.aps.org/prx/abstract/10.1103/PhysRevX.7.011002), [Paulose et al., 2012](https://www.pnas.org/doi/abs/10.1073/pnas.1212268109)).
- 2) Cell membranes are strongly coupled to an underlying cytoskelton. Hence they may be modeled by a solid body ([HW et al., 2002](https://www.pnas.org/doi/abs/10.1073/pnas.202617299)) but nano-vesicles must be modeled as liquid filled elastic membranes.
+ 2) Cell membranes are coupled to an underlying cytoskelton. Hence they may be modeled by a tethered membrane ([HW et al., 2002](https://www.pnas.org/doi/abs/10.1073/pnas.202617299)) but nano-vesicles must be modeled as liquid filled elastic membranes.
 
 Hence, to be able to interpret the force-distance curve of nano-vesicles, we need to solve for the elastic response of thermally fluctuating elastic shell.
 
@@ -19,7 +19,7 @@ MeMC requires following libraries:
 
 2) [Hdf5](https://www.hdfgroup.org/solutions/hdf5) libraries for reading and writing data.  
 
-3) [Python](https://www.python.org/) version with [scipy](https://www.scipy.org), [numpy](https://www.numpy.org), [h5py](https://www.h5py.org) and [numpy-quartenion](https://https://pypi.org/project/numpy-quaternion/) installed. We have tested the code against python version 3.8 and above.
+3) [Python](https://www.python.org/) version with [scipy](https://www.scipy.org), [numpy](https://www.numpy.org), [h5py](https://www.h5py.org) and [numpy-quartenion](https://pypi.org/project/numpy-quaternion/) installed. We have tested the code against python version 3.8 and above.
 
 For details of the installation for different packages, check the instructions on the official web page of the packages. If the operating system is Ubuntu then, g++ and hdf5 can be installed using the package manager apt,
 
@@ -70,24 +70,23 @@ make CC=/path/to/h5c++.
 
 The package is built to understand the physics of Exosomes or viruses where the
 thermal noise are relevant. These nano-vesicles are studied experimentally using
-Atomic Force Microscopy. This package tends to simulate the experiment in the best
-possible way. Therefore, we expect the user to have a prior understanding of
-the Metropolis algorithm for the Monte Carlo simulation and a basic concept of Elasticity
-pertaining to membranes. Both the concept is described in detail in the document
-`paper/paper.pdf`.  That being said, we shall now dive deeper and explain how different
+Atomic Force Microscopy. This package aims to simulate such experiment. 
+We assume the user to know the Metropolis algorithm for the Monte Carlo simulation 
+and a basic concept of Elasticity of membranes. Both the concepts are described in brief in the document
+`paper/paper.pdf`.  We shall now dive deeper and explain how different
 part of the code functions in the following sections:
 
 ## Constructing the membrane
 
-To begin the simulation we generate a equilibrated randomized position on a surface
+To begin the simulation we generate N equi-spaced random points on the surface
 of a sphere.  For details we refer the reader to `subsection grid` in `section numerical implementation` of `paper/paper.pdf`. The
 main code for this purpose is given in `main/start.cpp` and the relevant  executable is `bin/exe_start`. 
 The executable takes four arguments:
-1) Number of random points to be equilibrated
+1) Number of random points.
 2) Geometry of the surface `sph` for a
-surface of sphere and `cart` for flat plane
+surface of sphere and `cart` for flat plane.
 3) Folder name inside which the outputs will be written.
-4) Number of monte-carlo steps 
+4) Number of monte-carlo steps used find the random points. 
 
 Rest of the parameter are hard coded. For instance, the radius of the sphere on
 which we generate randomize positions is unity. 
@@ -98,7 +97,7 @@ In order to generate a randomized configuration of 1024 points in surface of sph
 ./bin/exe_start 1024 sph data_sph 60000
 
 ```
-All the outputs will be dumped inside `data_sph`.
+All the outputs will be written in `data_sph`.
 
 ---
 **NOTE**

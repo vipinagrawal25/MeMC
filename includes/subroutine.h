@@ -15,14 +15,19 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
                 MCpara mcpara, AFM_para afm, ActivePara activity,  SPRING_para spring);
 bool Metropolis(double DE, double, MCpara mcpara);
 // double rand_inc_theta(double th0, double dfac);
-// double energy_mc_3d(Vec3d *pos, MESH mesh, 
-//         double *lij_t0, bool *is_attractive, int idx, bool *is_be_pos,
-//         MBRANE_para mbrane,MCpara mcpara, AFM_para afm,
-//         SPRING_para spring);
+ double energy_mc_3d(Vec3d *pos, MESH mesh, 
+         double *lij_t0, bool *is_attractive, int idx, bool *is_be_pos,
+         MBRANE_para mbrane,MCpara mcpara, AFM_para afm,
+         SPRING_para spring);
 int monte_carlo_surf2d(Vec2d *Pos, 
         Nbh_list *neib, LJpara para, 
         MCpara mcpara, char *metric);
+
+int monte_carlo_fluid(Vec3d *, MESH , MBRANE_para , MCpara , AFM_para ,
+                ActivePara , SPRING_para );
+
 void init_rng(uint32_t seed_val);
+
 //*************************************************//
 //forces_lj.c
 void make_nlist(Vec2d *Pos, Nbh_list *neib,
@@ -42,14 +47,17 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr,
         int num_nbr, int idx, MBRANE_para para);
 double bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH mesh, int idx, MBRANE_para para);
-double stretch_energy_total(Vec3d *pos, 
-        MESH mesh, double *lij_t0,
-         MBRANE_para para);
+
 void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, double theta_attr, int N);
-double stretch_energy_ipart(Vec3d *pos, 
-        int *node_nbr, double *lij_t0,
-        int num_nbr, int idx, MBRANE_para para);
+
+ double stretch_energy_total(Vec3d *pos,
+         MESH mesh, double *lij_t0, MBRANE_para para);
+
+ double stretch_energy_ipart(Vec3d *pos,
+         int *node_nbr, double *lij_t0, int num_nbr,
+                             int idx, MBRANE_para para);
+
 double lj_bottom_surface(double zz,
         bool is_attractive, 
         double sur_pos, double eps, double sigma);
@@ -72,8 +80,8 @@ double spring_energy(Vec3d pos, int idx, MESH mesh, SPRING_para spring);
 double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
                                MESH mesh, SPRING_para spring);
 //initialise.c
-void init_eval_lij_t0(Vec3d *Pos, MESH mesh, 
-        double *lij_t0, MBRANE_para *para, SPRING_para *spring);
+ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
+         double *lij_t0, MBRANE_para *para, SPRING_para *spring);
 void init_read_config();
 void init_afm_tip(AFM_para );
 void init_read_parameters( MBRANE_para *mbrane, 

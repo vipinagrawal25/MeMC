@@ -68,7 +68,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
             }
             for(int i=n_ghost/2; i<n_ghost; i++){
                 Pos[i].x = (i - n_ghost/2 + 0.5)*dl;
-                /* Pos[i].x = (i - n_ghost/2)*(2*(len + 0.5)/n_ghost); */
+                /* Pos[i].x = (i - n_ghost/2)*(2*(len + 0.5)/n_ghost);  bp*/
                 Pos[i].y = len; 
             }
             for(int i=n_ghost; i<N; i++){
@@ -154,15 +154,14 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0,
         cm_idx = mesh.nghst * i;
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
-            dr.x = Pos[i].x - Pos[j].x;
-            dr.y = Pos[i].y - Pos[j].y;
-            dr.z = Pos[i].z - Pos[j].z;
+            dr = diff_pbc(Pos[i] , Pos[j], para->len);
+            /* dr = Pos[j] - Pos[i]; */
             lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             npairs++;
+            /* printf("%g %g %g %g %g \n", Pos[i].x, Pos[j].x, Pos[i].y, Pos[j].y, lij_t0[k]); */
         }
     }
-
 
     para->av_bond_len = sum_lij/npairs;
     r0=para->av_bond_len;
@@ -241,6 +240,7 @@ void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, SPRING_para sp
     }
     paramfile.close();
 }
+
 
 void init_activity(ActivePara activity, int N){
     int i;

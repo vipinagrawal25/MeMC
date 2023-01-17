@@ -25,6 +25,7 @@ which_file = sys.argv[1]
 file = sys.argv[2]
 fig, ax = plt.subplots()
 Np, pts_sph, pts_cart = read_data(file, which_file)
+np.savetxt('test.dat', pts_sph/(2*np.pi), fmt='%.16f')
 if(which_file == 'start'):
     ax.plot((pts_sph[0:64,0]), pts_sph[0:64,1], 'o')
     ax.plot((pts_sph[64:,0]), pts_sph[64:,1], 'o')

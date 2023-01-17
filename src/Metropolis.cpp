@@ -1,11 +1,87 @@
 #include "global.h"
 #include "subroutine.h"
+#include <cstdio>
 #include <random>
 #include <unistd.h>
 #include <cmath>
 #include <sstream>
 #include <iomanip>
 std::mt19937 rng;
+
+int print_sanity(int *nbr_del1, int *nbr_del2, 
+        int *nbr_add1, int *nbr_add2, int del1, int del2,
+        int add1, int add2, char *fname){
+    FILE *fid;
+    int k=10;
+
+    fid = fopen(fname, "a");
+    /* fprintf(fid, "start\n"); */
+    fprintf(fid, "%06d\t%06d\t%06d\t%06d\t%06d\n", k, del1, del2, add1, add2); 
+    for(int j=0; j<12; j++){
+        fprintf(fid, "%06d\t%06d\t%06d\t%06d\t%06d\n",j, nbr_del1[j],
+                nbr_del2[j], nbr_add1[j], nbr_add2[j]);
+    }
+    fprintf(fid, "next line\n"); 
+    fflush(fid);
+    fclose(fid);
+    return 0;
+}
+
+
+int print_sanity(Vec3d *pos, int *nbr_del1, int *nbr_del2, 
+        int *nbr_add1, int *nbr_add2, int del1, int del2,
+        int add1, int add2, char *ftag, int idx){
+    FILE *fid;
+    char fname[128];
+    int k=10;
+
+    sprintf(fname, "check_pos/%s_pos_%04d_.dat",ftag,idx);
+    fid = fopen(fname, "w");
+    /* fprintf(fid, "start\n"); */
+    fprintf(fid, "1 %g\t%g\n", pos[del1].x, pos[del1].y); 
+    for(int j=0; j<12; j++){
+        if(nbr_del1[j] != -1)
+        fprintf(fid, "1 %g\t%g\n",pos[nbr_del1[j]].x, pos[nbr_del1[j]].y);
+    }
+    fprintf(fid, "\n\n"); 
+
+    fprintf(fid, "2 %g\t%g\n", pos[del2].x, pos[del2].y); 
+    for(int j=0; j<12; j++){
+        if(nbr_del2[j] != -1)
+        fprintf(fid, "2 %g\t%g\n",pos[nbr_del2[j]].x, pos[nbr_del2[j]].y);
+    }
+    fprintf(fid, "\n\n"); 
+
+
+    fprintf(fid, "3 %g\t%g\n", pos[add1].x, pos[add1].y); 
+    for(int j=0; j<12; j++){
+        if(nbr_add1[j] != -1)
+        fprintf(fid, "3 %g\t%g\n",pos[nbr_add1[j]].x, pos[nbr_add1[j]].y);
+    }
+    fprintf(fid, "\n\n"); 
+
+
+    fprintf(fid, "4 %g\t%g\n", pos[add2].x, pos[add2].y); 
+    for(int j=0; j<12; j++){
+        if(nbr_add2[j] != -1)
+        fprintf(fid, "4 %g\t%g\n",pos[nbr_add2[j]].x, pos[nbr_add2[j]].y);
+    }
+    fprintf(fid, "\n\n"); 
+
+    fflush(fid);
+    fclose(fid);
+    return 0;
+}
+
+
+double determinant(Vec3d X1, Vec3d X2, Vec3d X3, double len){
+    Vec3d A = diff_pbc(X1, X2, len);
+    Vec3d B = diff_pbc(X1, X3, len);
+
+    double det = (A.x*B.y - A.y*B.x);
+return det;
+}
+
 
 void init_rng(uint32_t seed_val){
 
@@ -30,7 +106,6 @@ int del_nbr(int *nbrs, int numnbr, int idx){
             ++delete_here;
         }
 
-    printf("delete here %d %d \n\n", idx, delete_here);
     memcpy(nbrs+delete_here-1, &nbrs[delete_here], sizeof(int) * (numnbr-delete_here+1));
 
     // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
@@ -155,13 +230,13 @@ double energy_mc_3d(Vec3d *pos, MESH mesh,
             (lij_t0 + cm_idx), num_nbr,
             idx, mbrane);
 
-    E_stick = lj_bottom_surface(pos[idx].z, is_attractive[idx], 
-            mbrane.pos_bot_wall, mbrane.epsilon, mbrane.sigma);
+    /* E_stick = lj_bottom_surface(pos[idx].z, is_attractive[idx], */ 
+            /* mbrane.pos_bot_wall, mbrane.epsilon, mbrane.sigma); */
 
-    E_afm = lj_afm(pos[idx], afm);
+    /* E_afm = lj_afm(pos[idx], afm); */
 
-    E_spr = spring_energy(pos[idx], idx, mesh, spring);
-    return E_b + E_s + E_stick + E_afm + E_spr;
+    /* E_spr = spring_energy(pos[idx], idx, mesh, spring); */
+    return E_b + E_s; // + E_stick + E_afm + E_spr;
 }
 
 int monte_carlo_3d(Vec3d *pos, MESH mesh, 
@@ -188,12 +263,16 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
     double dvol, de_vol, ini_vol, de_pressure;
     double KAPPA;
     bool yes;
-    //  TODO either figure out periodic boundary triangulation or write it
-    std::uniform_int_distribution<uint32_t> rand_int(128,mbrane.N-1);
+    
+    int nframe;
+    nframe = 4*(int)sqrt(mbrane.N);
+
+    std::uniform_int_distribution<uint32_t> rand_int(nframe,mbrane.N-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
     ini_vol = (4./3.)*pi*pow(mbrane.radius,3);
     KAPPA = mbrane.coef_vol_expansion;
     move = 0;
+
     for(i = 0; i< mcpara.one_mc_iter; i++){
         int idx = rand_int(rng);
         /*
@@ -205,9 +284,9 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
                 lij_t0, is_attractive, 
                 idx,  mbrane, mcpara, afm, spring);
 
-        vol_i = volume_ipart(pos, 
-                (int *) (mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mbrane);
+        /* vol_i = volume_ipart(pos, */ 
+        /*         (int *) (mesh.node_nbr_list + cm_idx), */
+        /*         num_nbr, idx, mbrane); */
 
         x_o =   pos[idx].x;
         y_o =   pos[idx].y;
@@ -229,17 +308,17 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
                 lij_t0, is_attractive, 
                 idx,   mbrane, mcpara, afm, spring);
 
-        vol_f = volume_ipart(pos, 
-                (int *) (mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mbrane);
+        /* vol_f = volume_ipart(pos, */ 
+        /*         (int *) (mesh.node_nbr_list + cm_idx), */
+        /*         num_nbr, idx, mbrane); */
 
-        dvol=0.5*(vol_f - vol_i);
-        de_vol = vol_energy_change(mbrane,dvol);
-        de_pressure = PV_change(mbrane,dvol);
+        /* dvol=0.5*(vol_f - vol_i); */
+        /* de_vol = vol_energy_change(mbrane,dvol); */
+        /* de_pressure = PV_change(mbrane,dvol); */
         // de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
         //     + (dvol/ini_vol)*(dvol/ini_vol);
         // de_vol = KAPPA*de_vol;
-        de = (Efin - Eini) + de_vol + de_pressure;
+        de = (Efin - Eini); //+ de_vol + de_pressure;
         if (mcpara.algo == "mpolis"){
             yes=Metropolis(de, activity.activity[idx], mcpara);
         }else if(mcpara.algo == "glauber"){
@@ -360,105 +439,125 @@ int monte_carlo_fluid(Vec3d *pos, MESH mesh,
     int cm_idx_add1, cm_idx_add2;
     int idx_del1, idx_del2;
     int idx_add1, idx_add2;
+    int nframe;
 
     int nbr_add_1[12], nbr_add_2[12];
     int nbr_del_1[12], nbr_del_2[12];
 
     int N_nbr_del2, N_nbr_del1;
     int N_nbr_add2, N_nbr_add1;
+    double det1, det2;
     Vec3d bef_ij, aft_ij;
 
     double KAPPA;
     bool yes, logic;
 
-    // TODO for now the 128 is hard coded;
+    nframe = 4*(int)sqrt(mbrane.N);
 
-    std::uniform_int_distribution<uint32_t> rand_int(128,mbrane.N-1);
-    std::uniform_int_distribution<uint32_t> rand_nbr(1,mesh.nghst-1);
+    std::uniform_int_distribution<uint32_t> rand_int(nframe,mbrane.N-1);
+    std::uniform_int_distribution<uint32_t> rand_nbr(0,mesh.nghst-1);
     std::uniform_real_distribution<> rand_real(-1, 1);
 
     move = 0;
 
+    int idxn, up, down;
 
     for(i = 0; i< mcpara.one_mc_iter; i++){
         // identify the pair to be divorced
         // stored as idx_del1 and idx_del2
-
-        idx_del1 = rand_int(rng);
-        cm_idx_del1 = mesh.nghst*idx_del1;
-        nnbr_del1 = mesh.numnbr[idx_del1];
-
         logic = false;
-        int idxn;
         while (!logic){
-            // for (j = 0; j < 12; j++ ){
+            idx_del1 = rand_int(rng);
+            cm_idx_del1 = mesh.nghst*idx_del1;
+            nnbr_del1 = mesh.numnbr[idx_del1];
             idxn = rand_nbr(rng);
-            logic = (mesh.node_nbr_list[cm_idx_del1 + idxn] != -1) && (mesh.node_nbr_list[cm_idx_del1 + idxn] > 128);
-            printf("%d\n", logic);
+           if(mesh.node_nbr_list[cm_idx_del1 + idxn] != -1){
+               idx_del2 = mesh.node_nbr_list[cm_idx_del1 + idxn];
+               cm_idx_del2 = mesh.nghst*idx_del2;
+                up = (idxn+1+nnbr_del1)%nnbr_del1;
+                down = (idxn-1+nnbr_del1)%nnbr_del1;
+                idx_add1 = mesh.node_nbr_list[idx_del1*mesh.nghst + up];
+                idx_add2 = mesh.node_nbr_list[idx_del1*mesh.nghst + down];
+                logic = idx_del2 > nframe && idx_add1 > nframe && idx_add2 > nframe; 
+            }
+            else{
+                logic = false;
+            }
         }
 
-        idx_del2 = mesh.node_nbr_list[cm_idx_del1 + idxn];
-        cm_idx_del2 = mesh.nghst*idx_del2;
 
-        int up, down;
-
-        // Identify the pairs to be bonded
-        // stored as idx_add1 and idx_add2
-
-        up = (idxn+1+nnbr_del1)%nnbr_del1;
-        down = (idxn-1+nnbr_del1)%nnbr_del1;
-
-        idx_add1 = mesh.node_nbr_list[idx_del1*mesh.nghst + up];
-        idx_add2 = mesh.node_nbr_list[idx_del1*mesh.nghst + down];
-
+        det1 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del1], mbrane.len);
+        det2 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del2], mbrane.len);
         cm_idx_add1 = mesh.nghst*idx_add1;
         cm_idx_add2 = mesh.nghst*idx_add2;
 
-        // copy the neighbours
-        memcpy(nbr_del_1, &mesh.node_nbr_list[cm_idx_del1], sizeof(int) * mesh.nghst);
-        memcpy(nbr_del_2, &mesh.node_nbr_list[cm_idx_del2], sizeof(int) * mesh.nghst);
-        memcpy(nbr_add_1, &mesh.node_nbr_list[cm_idx_add1], sizeof(int) * mesh.nghst);
-        memcpy(nbr_add_2, &mesh.node_nbr_list[cm_idx_add2], sizeof(int) * mesh.nghst);
+
+        /* print_sanity(mesh.node_nbr_list+cm_idx_del1, mesh.node_nbr_list+cm_idx_del2, */
+        /*         mesh.node_nbr_list+cm_idx_add1, mesh.node_nbr_list+cm_idx_add2, */
+        /*         idx_del1, idx_del2, idx_add1, idx_add2, "check.dat"); */
+
+        if(det1*det2 < 0.0){
+                    // copy the neighbours
+            memcpy(nbr_del_1, &mesh.node_nbr_list[cm_idx_del1], sizeof(int) * mesh.nghst);
+            memcpy(nbr_del_2, &mesh.node_nbr_list[cm_idx_del2], sizeof(int) * mesh.nghst);
+            memcpy(nbr_add_1, &mesh.node_nbr_list[cm_idx_add1], sizeof(int) * mesh.nghst);
+            memcpy(nbr_add_2, &mesh.node_nbr_list[cm_idx_add2], sizeof(int) * mesh.nghst);
+
+            int is_true = 0;
+            
+            // form the bond
+            N_nbr_add1 =  add_nbr(nbr_add_1, mesh.numnbr[idx_add1], idx_add2, idx_del1, idx_del2);
+            N_nbr_add2 = add_nbr(nbr_add_2, mesh.numnbr[idx_add2], idx_add1, idx_del1, idx_del2);
+
+            // get divorced
+            N_nbr_del1 = del_nbr(nbr_del_1, mesh.numnbr[idx_del1], idx_del2);
+            N_nbr_del2 = del_nbr(nbr_del_2, mesh.numnbr[idx_del2], idx_del1);
+
+           
+            bef_ij = pos[idx_del2] - pos[idx_del1];
+            aft_ij = pos[idx_add2] - pos[idx_add1];
+            /* bef_ij = diff_pbc(pos[idx_del1] , pos[idx_del2], mbrane.len); */
+            /* aft_ij = diff_pbc(pos[idx_add1] , pos[idx_add2], mbrane.len); */
+
+            double de = (norm(bef_ij) - mbrane.av_bond_len)*(norm(bef_ij) - mbrane.av_bond_len) -
+                (norm(aft_ij) - mbrane.av_bond_len)*(norm(aft_ij) - mbrane.av_bond_len);
+
+            // de = (Efin - Eini) + de_vol + de_pressure;
+            de = -1e4*de;
+            if (mcpara.algo == "mpolis"){
+                yes=Metropolis(de, 0.0e0, mcpara);
+            }else if(mcpara.algo == "glauber"){
+                yes=Glauber(de, 0.0e0, mcpara);
+            }
+            /* yes = true; */
+            if (yes){
+                move = move + 1;
+                mbrane.tot_energy[0] +=  de;
+
+                /* print_sanity(pos, mesh.node_nbr_list+cm_idx_del1, mesh.node_nbr_list+cm_idx_del2, */
+                /*         mesh.node_nbr_list+cm_idx_add1, mesh.node_nbr_list+cm_idx_add2, */
+                /*         idx_del1, idx_del2, idx_add1, idx_add2, (char*)"bef", i); */
 
 
-        // form the bond
-        N_nbr_add1 =  add_nbr(nbr_add_1, mesh.numnbr[idx_add1], idx_add2, idx_del1, idx_del2);
-        N_nbr_add2 = add_nbr(nbr_add_2, mesh.numnbr[idx_add2], idx_add1, idx_del1, idx_del2);
+                memcpy(mesh.node_nbr_list+cm_idx_del1, &nbr_del_1, sizeof(int) * mesh.nghst);
+                memcpy(mesh.node_nbr_list+cm_idx_del2, &nbr_del_2, sizeof(int) * mesh.nghst);
+                mesh.numnbr[idx_del1] = N_nbr_del1;
+                mesh.numnbr[idx_del2] = N_nbr_del2;
 
-        // get divorced
-        N_nbr_del1 = del_nbr(nbr_del_1, mesh.numnbr[idx_del1], idx_del2);
-        N_nbr_del2 = del_nbr(nbr_del_2, mesh.numnbr[idx_del2], idx_del1);
+                memcpy(mesh.node_nbr_list+cm_idx_add1, &nbr_add_1, sizeof(int) * mesh.nghst);
+                memcpy(mesh.node_nbr_list+cm_idx_add2, &nbr_add_2, sizeof(int) * mesh.nghst);
+                mesh.numnbr[idx_add1] = N_nbr_add1;
+                mesh.numnbr[idx_add2] = N_nbr_add2;
 
-        // Rudimentary criterion for acceptance and rejection
+                /* print_sanity(pos, mesh.node_nbr_list+cm_idx_del1, mesh.node_nbr_list+cm_idx_del2, */
+                /*         mesh.node_nbr_list+cm_idx_add1, mesh.node_nbr_list+cm_idx_add2, */
+                /*         idx_del1, idx_del2, idx_add1, idx_add2, (char*)"aft", i); */
 
-        bef_ij = pos[idx_del1] - pos[idx_del2];
-        aft_ij = pos[idx_del1] - pos[idx_del2];
 
-        // Eini =  stretch_energy_ipart(pos, nbr_a, num_nbr,
-        //                     idx, mbrane);
+                /* exit(0); */
 
-        double de = norm(bef_ij) - norm(aft_ij);
-
-        // de = (Efin - Eini) + de_vol + de_pressure;
-        if (mcpara.algo == "mpolis"){
-            yes=Metropolis(de, 0.0e0, mcpara);
-        }else if(mcpara.algo == "glauber"){
-            yes=Glauber(de, 0.0e0, mcpara);
+            }
         }
-        if (yes){
-            move = move + 1;
-            mbrane.tot_energy[0] +=  de;
-
-            memcpy(mesh.node_nbr_list+cm_idx_del1, &nbr_del_1, sizeof(int) * mesh.nghst);
-            memcpy(mesh.node_nbr_list+cm_idx_del2, &nbr_del_2, sizeof(int) * mesh.nghst);
-            mesh.numnbr[idx_del1] = N_nbr_del1;
-            mesh.numnbr[idx_del2] = N_nbr_del2;
-
-            memcpy(mesh.node_nbr_list+cm_idx_add1, &nbr_add_1, sizeof(int) * mesh.nghst);
-            memcpy(mesh.node_nbr_list+cm_idx_add2, &nbr_add_2, sizeof(int) * mesh.nghst);
-            mesh.numnbr[idx_add1] = N_nbr_add1;
-            mesh.numnbr[idx_add2] = N_nbr_add2;
-        }
-        }
+    }
     return move;
 }

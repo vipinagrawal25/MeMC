@@ -6,7 +6,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <cassert>
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
@@ -14,7 +14,7 @@
 #include <random>
 #include "Vector.h"
 #include <fstream>
-#include <mpi.h>
+//#include <mpi.h>
 using namespace std;
 #define pi 3.14159265358979
 #define R_del 0.05
@@ -78,18 +78,18 @@ typedef struct{
     int N;   // number of particles in mesh
     int num_triangles;  //number of triangles 
     int num_nbr; //  neighbours of all particles
-    bool istick;
+    bool istick, is_fluid;
+    double len;
 }MBRANE_para;
 //
 
 //
 typedef struct{
     /// @brief Mesh Structure
-    /// @param size_node_nbr Number of neighbours 2*N - 4 
-    /// @param cmlist; Cumulative sum of neighbours 
-    /// @param node_nbr_list; list of neighbours of a node 
-    int size_node_nbr;
-    int *cmlist;
+    /// @param numnbr; number of neighbours
+    /// @param node_nbr_list; list of neighbours of a node
+    int nghst;
+    int *numnbr;
     int *node_nbr_list;
     int nPole, sPole;
 }MESH;

@@ -1,5 +1,18 @@
 #include "../includes/global.h"
 #include "../includes/subroutine.h"
+#include<assert.h>
+
+void check_absurd_neighbours(MESH mesh, int N){
+    int i, cmidx, nnbr, j;
+    for(i=0;i < N; i++){
+            cmidx = i*mesh.nghst;
+            nnbr = mesh.numnbr[i];
+            for(j=0; j< nnbr; j++ ){
+                assert(mesh.node_nbr_list[cmidx+j] != -1);
+            }
+
+        }
+}
 //
 int main(int argc, char *argv[]){
     pid_t pid = getpid();
@@ -18,14 +31,16 @@ int main(int argc, char *argv[]){
     double *lij_t0;
     double Pole_zcoord;
     string outfolder,syscmds, para_file, log_file, outfile, filename;
-    int mpi_err,mpi_rank;
+    int mpi_err,mpi_rank=0;
+    int iter;
     uint32_t seed_v;
     char log_headers[] = "# iter acceptedmoves total_ener stretch_ener bend_ener stick_ener afm_ener ener_volume";
     SPRING_para spring;
     //
-    mpi_err = MPI_Init(0x0, 0x0);
-    mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    seed_v = (uint32_t) 7*3*11*(mpi_rank+1)*rand();
+    /* mpi_err = MPI_Init(0x0, 0x0); */
+    /* mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank); */
+    /* seed_v = (uint32_t) 7*3*11*(mpi_rank+1)*rand(); */
+    seed_v = 12343234;
     init_rng(seed_v);
     //
     outfolder = ZeroPadNumber(mpi_rank)+"/";
@@ -49,6 +64,7 @@ int main(int argc, char *argv[]){
    // check whether the string comparison works
    /* define all the paras */
     mbrane.tot_energy = (double *)calloc(1, sizeof(double));
+    mbrane.len = 1.0;
     activity.activity = (double *)calloc(mbrane.N, sizeof(double));
     mbrane.tot_energy[0] = 0e0;
     init_activity(activity, mbrane.N);
@@ -61,7 +77,7 @@ int main(int argc, char *argv[]){
 
 
     // if(!mcpara.is_restart){
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/inp_pos.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/nbrs.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane, &spring);
@@ -69,17 +85,21 @@ int main(int argc, char *argv[]){
     // Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane);
 
 
+    for(iter=1; iter <= mcpara.tot_mc_iter; iter++){
     num_moves = monte_carlo_fluid(Pos, mesh,
                                       mbrane, mcpara, afm, activity,  spring);
+    check_absurd_neighbours(mesh, mbrane.N);
+
+    printf("%d %d \n", iter, num_moves );
+    }
 
     // /************************************/
     // // cout << "# Foppl von Karman (FvK): "
     //      // << YY*mbrane.radius*mbrane.radius/BB << endl;
     // //
 
-    fid = fopen(log_file.c_str(), "a");
+    /* fid = fopen(log_file.c_str(), "a"); */
 
-    // for(i=0; i < mcpara.tot_mc_iter; i++){
     //     Et[0] =  stretch_energy_total(Pos, mesh, lij_t0, mbrane);
     //     cout << "iter = " << i << "; Accepted Moves = " << (double) num_moves*100/mcpara.one_mc_iter << " %;"<<
     //             " totalener = "<< mbrane.tot_energy[0] << "; volume = " << vol_sph << endl;
@@ -97,9 +117,9 @@ int main(int argc, char *argv[]){
     //     num_moves = monte_carlo_fluid(Pos, mesh, mbrane, mcpara, afm, activity,  spring);
 
     // }
-    fclose(fid);
+    /* fclose(fid); */
     free(Pos);
     free(mesh.node_nbr_list);
-    mpi_err = MPI_Finalize();
+    /* mpi_err = MPI_Finalize(); */
     return 0;
 }

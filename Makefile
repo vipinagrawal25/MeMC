@@ -1,5 +1,6 @@
-HOST=su
-include hosts/$(HOST)
+# HOST=su
+# include hosts/$(HOST)
+CC = g++
 #
 #opt=-O3
 opt=-pg
@@ -7,7 +8,7 @@ opt=-pg
 # 	opt = -g3  -Wall -pedantic
 # endif
 
-link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes
+link = -g $(opt) -lm -std=c++17 -lhdf5 -Iincludes -Dflat
 # 
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
 sources += src/init.cpp  src/hdf5_io.cpp
@@ -16,24 +17,32 @@ sources += src/misc.cpp
 #
 object =  obj/forces_lj.o obj/init.o obj/forces_surf.o obj/Metropolis.o
 object += obj/hdf5_io.o 
-object += obj/cubic_solve.o obj/misc.o
+object += obj/cubic_solve.o obj/misc.o obj/vector.o
 #
 includes += includes/global.h includes/subroutine.h includes/Vector.h 
 bindir = ./bin
 #
 #
-all : start memc
+all : start memc flat
 	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
 	mv exe* $(bindir)/
 
-start: $(object) obj/start.o
-	echo $(CC) $(object) $(link)
-	@$(CC) $(object) obj/start.o $(link) -o exe_start
+obj/readnml.o: src/read_namelist.f90
+	gfortran -c src/read_namelist.f90 -o obj/readnml.o
 
-memc: $(object) obj/memc.o
-	echo $(CC) $(object) $(link)
-	@$(CC) $(object) obj/memc.o $(link) -o exe_memc
+start: $(object) obj/start.o obj/readnml.o
+	$(CC) $(object) obj/start.o obj/readnml.o $(link) -lgfortran -o exe_start
 
+memc: $(object) obj/memc.o obj/readnml.o
+	$(CC) $(object) obj/readnml.o obj/memc.o  $(link) -lgfortran -o exe_memc
+#
+#
+flat: $(object) obj/flat.o obj/readnml.o
+	$(CC) $(object) obj/readnml.o obj/flat.o  $(link) -lgfortran -o exe_flat
+#
+obj/flat.o: mains/flat.cpp $(includes)
+	@$(CC) -Jobj -c $< -o $@ $(link)
+#
 
 obj/memc.o: mains/memc.cpp $(includes)
 	@$(CC) -Jobj -c $< -o $@ $(link)
@@ -42,11 +51,11 @@ obj/memc.o: mains/memc.cpp $(includes)
 obj/start.o: mains/start.cpp $(includes)
 	$(CC) -Jobj -c $< -o $@ $(link)
 
-object : $(object)
+object : $(object) obj/readnml.o
 obj/%.o : src/%.cpp $(includes)
 	@mkdir -p $(@D)
 	$(info Compiling $<)
-	$(CC) -Iobj -c $< -o $@ $(link)
+	$(CC) -Iobj -c $< obj/readnml.o -o $@ $(link)
 #
 clean:
 	@rm -rf bin $(object)

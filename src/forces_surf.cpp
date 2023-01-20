@@ -245,13 +245,7 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
         xikp = pos[idx]- pos[kpdx];
         xjkp = pos[jdx]- pos[kpdx];
         //
-        // xij = Vec3d_add(pos[idx], pos[jdx], -1e0);
-        // xijp1 = Vec3d_add(pos[idx], pos[jdxp1], -1e0);
-        // xik = Vec3d_add(pos[idx], pos[kdx], -1e0);
-        // xjk = Vec3d_add(pos[jdx], pos[kdx], -1e0);
-        // xikp = Vec3d_add(pos[idx], pos[kpdx], -1e0);
-        // xjkp = Vec3d_add(pos[jdx], pos[kpdx], -1e0);
-        //
+       //
         lijsq = inner_product(xij,xij);
         liksq = inner_product(xik,xik);
         ljksq = inner_product(xjk,xjk);
@@ -302,7 +296,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 
    for (j = idx*mesh.nghst; j < idx*mesh.nghst + mesh.numnbr[idx]; j++){
        nbr = mesh.node_nbr_list[j];
-       num_nbr_j = mesh.numnbr[j];
+       num_nbr_j = mesh.numnbr[nbr];
        cm_idx_nbr = nbr*mesh.nghst;
        be += bending_energy_ipart(pos, 
               (int *) mesh.node_nbr_list + cm_idx_nbr,
@@ -329,7 +323,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 
      vol = 0e0;
      for(idx = 0; idx < para.N; idx++){
-//         /* idx = 2; */
+         /* idx = 2; */
          cm_idx = idx*mesh.nghst;
          num_nbr = mesh.numnbr[idx];
 

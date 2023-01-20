@@ -154,8 +154,8 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0,
         cm_idx = mesh.nghst * i;
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
-            dr = diff_pbc(Pos[i] , Pos[j], para->len);
-            /* dr = Pos[j] - Pos[i]; */
+            /* dr = diff_pbc(Pos[i] , Pos[j], para->len); */
+            dr = Pos[j] - Pos[i];
             lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             npairs++;
@@ -167,7 +167,9 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0,
     r0=para->av_bond_len;
     spring->constant=para->coef_bend/(r0*r0);
     if(para->is_fluid){
-        for(i = 0; i < mesh.nghst*para->N; i++) lij_t0[i] = para->av_bond_len;
+        for(i = 0; i < mesh.nghst*para->N; i++){
+            lij_t0[i] = para->av_bond_len;
+        }
     }
 }
 

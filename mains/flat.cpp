@@ -13,6 +13,34 @@ void check_absurd_neighbours(MESH mesh, int N){
 
         }
 }
+
+void debug_ener(Vec3d *pos, MESH mesh, 
+                double *lij_t0,  MBRANE_para mbrane, 
+                MCpara mcpara, AFM_para afm, 
+                ActivePara activity, SPRING_para spring){
+
+    int idx;
+    int cm_idx, num_nbr;
+    double E_b;
+
+    for(idx = 0; idx < mbrane.N; idx++){
+        cm_idx = mesh.nghst*idx;
+        num_nbr = mesh.numnbr[idx];
+
+
+        /* E_b = bending_energy_ipart_neighbour(pos, mesh, idx, mbrane); */
+      E_b = stretch_energy_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
+                 (double *) (lij_t0 + cm_idx), num_nbr,
+                 idx, mbrane);
+
+
+        /* E_b = bending_energy_ipart(pos, */ 
+        /*         (int *) (mesh.node_nbr_list + cm_idx), */
+        /*         num_nbr, idx, mbrane); */
+
+        printf(" curvature %d %lf \n",idx, E_b);
+    }
+}
 //
 int main(int argc, char *argv[]){
     pid_t pid = getpid();
@@ -29,6 +57,7 @@ int main(int argc, char *argv[]){
     Vec3d afm_force,spring_force[2];
     FILE *fid;
     double *lij_t0;
+    bool *is_attractive;
     double Pole_zcoord;
     string outfolder,syscmds, para_file, log_file, outfile, filename;
     int mpi_err,mpi_rank=0;
@@ -43,7 +72,7 @@ int main(int argc, char *argv[]){
     seed_v = 12343234;
     init_rng(seed_v);
     //
-    outfolder = ZeroPadNumber(mpi_rank)+"/";
+    outfolder = argv[1]; //Z"e"roPadNumber(mpi_rank)+"/";
     cout << "I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
     write_param(outfolder + "/para.out",mbrane,mcpara,spring);
@@ -65,6 +94,7 @@ int main(int argc, char *argv[]){
    /* define all the paras */
     mbrane.tot_energy = (double *)calloc(1, sizeof(double));
     mbrane.len = 1.0;
+    mbrane.is_fluid = true;
     activity.activity = (double *)calloc(mbrane.N, sizeof(double));
     mbrane.tot_energy[0] = 0e0;
     init_activity(activity, mbrane.N);
@@ -81,16 +111,29 @@ int main(int argc, char *argv[]){
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/nbrs.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane, &spring);
-
     // Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane);
+    
 
 
     for(iter=1; iter <= mcpara.tot_mc_iter; iter++){
-    num_moves = monte_carlo_fluid(Pos, mesh,
-                                      mbrane, mcpara, afm, activity,  spring);
-    check_absurd_neighbours(mesh, mbrane.N);
 
-    printf("%d %d \n", iter, num_moves );
+     num_moves = monte_carlo_3d(Pos, mesh, lij_t0, is_attractive,
+           mbrane, mcpara, afm, activity,  spring);
+          
+    printf("elastic part stats %d %d \n", iter, num_moves );
+     /* num_moves = monte_carlo_fluid(Pos, mesh, */
+     /*         mbrane, mcpara, afm, activity,  spring); */
+    /* printf("fluid stats %d %d \n", iter, num_moves ); */
+     if(i%mcpara.dump_skip == 0){
+         outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mcpara.dump_skip)+".h5";
+         // sprintf(outfile,"%s/snap_%04d.h5",outfolder,(int)(i/mcpara.dump_skip));
+         hdf5_io_write_pos((double*) Pos, 3*mbrane.N, outfile);
+         /* syscmds="cp "+outfile+" "+outfolder+"/restart.h5"; */
+         system(syscmds.c_str());
+     }
+ 
+    /* check_absurd_neighbours(mesh, mbrane.N); */
+
     }
 
     // /************************************/
@@ -103,18 +146,7 @@ int main(int argc, char *argv[]){
     //     Et[0] =  stretch_energy_total(Pos, mesh, lij_t0, mbrane);
     //     cout << "iter = " << i << "; Accepted Moves = " << (double) num_moves*100/mcpara.one_mc_iter << " %;"<<
     //             " totalener = "<< mbrane.tot_energy[0] << "; volume = " << vol_sph << endl;
-    //     if(i%mcpara.dump_skip == 0){
-    //         outfile=outfolder+"/snap_"+ZeroPadNumber(i/mcpara.dump_skip)+".h5";
-    //         // sprintf(outfile,"%s/snap_%04d.h5",outfolder,(int)(i/mcpara.dump_skip));
-    //         hdf5_io_write_pos((double*) Pos, 3*mbrane.N, outfile);
-    //         syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
-    //         system(syscmds.c_str());
-    //     }
-
-    //     // num_moves = monte_carlo_3d(Pos, mesh, lij_t0, is_attractive,
-    //             // mbrane, mcpara, afm, activity,  spring);
-    //             //
-    //     num_moves = monte_carlo_fluid(Pos, mesh, mbrane, mcpara, afm, activity,  spring);
+   //     num_moves = monte_carlo_fluid(Pos, mesh, mbrane, mcpara, afm, activity,  spring);
 
     // }
     /* fclose(fid); */

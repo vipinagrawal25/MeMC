@@ -318,16 +318,18 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
         // de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
         //     + (dvol/ini_vol)*(dvol/ini_vol);
         // de_vol = KAPPA*de_vol;
+
         de = (Efin - Eini); //+ de_vol + de_pressure;
         if (mcpara.algo == "mpolis"){
             yes=Metropolis(de, activity.activity[idx], mcpara);
         }else if(mcpara.algo == "glauber"){
             yes=Glauber(de, activity.activity[idx], mcpara);
         }
+
         if (yes){
             move = move + 1;
             mbrane.tot_energy[0] +=  de;
-            mbrane.volume[0] += dvol;
+            /* mbrane.volume[0] += dvol; */
         }else{
             pos[idx].x = x_o;
             pos[idx].y = y_o;
@@ -337,8 +339,7 @@ int monte_carlo_3d(Vec3d *pos, MESH mesh,
     return move;
 }
 
-int monte_carlo_surf2d(Vec2d *Pos, 
-        Nbh_list *neib, LJpara para, 
+int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJpara para, 
         MCpara mcpara, char *metric){
 
     /// @brief Monte-Carlo routine for the points on the surface of sphere or flat
@@ -350,6 +351,7 @@ int monte_carlo_surf2d(Vec2d *Pos,
     ///  @param metric Topology of the surface "cart" for flat plane "sph" for
     /// sphere
     /// @return number of accepted moves 
+    
     int i, move;
     double x_o, y_o, x_n, y_n;
     double de,  Eini, Efin;
@@ -519,11 +521,11 @@ int monte_carlo_fluid(Vec3d *pos, MESH mesh,
             /* bef_ij = diff_pbc(pos[idx_del1] , pos[idx_del2], mbrane.len); */
             /* aft_ij = diff_pbc(pos[idx_add1] , pos[idx_add2], mbrane.len); */
 
-            double de = (norm(bef_ij) - mbrane.av_bond_len)*(norm(bef_ij) - mbrane.av_bond_len) -
-                (norm(aft_ij) - mbrane.av_bond_len)*(norm(aft_ij) - mbrane.av_bond_len);
+            double de = (norm(aft_ij) - mbrane.av_bond_len)*(norm(aft_ij) - mbrane.av_bond_len) - 
+                (norm(bef_ij) - mbrane.av_bond_len)*(norm(bef_ij) - mbrane.av_bond_len); 
 
             // de = (Efin - Eini) + de_vol + de_pressure;
-            de = -1e4*de;
+            de = mbrane.YY*de;
             if (mcpara.algo == "mpolis"){
                 yes=Metropolis(de, 0.0e0, mcpara);
             }else if(mcpara.algo == "glauber"){

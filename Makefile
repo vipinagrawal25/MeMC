@@ -52,7 +52,7 @@ obj/start.o: mains/start.cpp $(includes)
 	$(CC) -Jobj -c $< -o $@ $(link)
 
 object : $(object) obj/readnml.o
-obj/%.o : src/%.cpp $(includes)
+obj/%.o : src/%.cpp $(includes) obj/readnml.o
 	@mkdir -p $(@D)
 	$(info Compiling $<)
 	$(CC) -Iobj -c $< obj/readnml.o -o $@ $(link)

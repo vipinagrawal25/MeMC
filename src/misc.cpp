@@ -179,20 +179,20 @@ void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn){
   *aminval=minval;
 }
 /*-----------------------------------------------*/
-void wHeader(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring){
-    string log_headers = "#iter acceptedmoves total_ener stretch_ener bend_ener stick_ener ";
-    if(afm.icompute!=0){log_headers+="afm_ener ";}
-    if (spring.icompute!=0){log_headers+="spring_energy ";}
-    if(fabs(mbrane.coef_vol_expansion)>1e-16){log_headers+="ener_volume ";}
-    if (fabs(mbrane.pressure)>1e-16){log_headers+="pressure_ener ";}
-    if (afm.icompute!=0){log_headers+="afm_fx, afm_fy afm_fz ";}
-    if (spring.icompute!=0){log_headers+="spr_north.z spr_south.z ";}
-    log_headers+="volume nPole_z sPole_z hrms";
-    fprintf(fid, "%s\n", log_headers.c_str());
-    fflush(fid);
-}
+/* void wHeader(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring){ */
+/*     string log_headers = "#iter acceptedmoves total_ener stretch_ener bend_ener stick_ener "; */
+/*     if(afm.icompute!=0){log_headers+="afm_ener ";} */
+/*     if (spring.icompute!=0){log_headers+="spring_energy ";} */
+/*     if(fabs(mbrane.coef_vol_expansion)>1e-16){log_headers+="ener_volume ";} */
+/*     if (fabs(mbrane.pressure)>1e-16){log_headers+="pressure_ener ";} */
+/*     if (afm.icompute!=0){log_headers+="afm_fx, afm_fy afm_fz ";} */
+/*     if (spring.icompute!=0){log_headers+="spr_north.z spr_south.z ";} */
+/*     log_headers+="volume nPole_z sPole_z hrms"; */
+/*     fprintf(fid, "%s\n", log_headers.c_str()); */
+/*     fflush(fid); */
+/* } */
 /*-----------------------------------------------*/
-double height_rms(Vec3d *Pos, MBRANE_para mbrane){
+double height_rms(Vec3d *Pos, MBRANE_p mbrane){
   double radius=mbrane.radius;
   double N=mbrane.N;
   double hrms=0;
@@ -204,18 +204,19 @@ double height_rms(Vec3d *Pos, MBRANE_para mbrane){
   return sqrt(hrms/N);
 }
 /*-----------------------------------------------*/
-void wDiag(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring, MESH mesh,
-            int i, int num_moves, double *Et,Vec3d *afm_force,
-            Vec3d *spring_force, double vol_sph, Vec3d *Pos){
-    fprintf(fid, " %d %d %g %g %g %g", i, num_moves, mbrane.tot_energy[0], Et[0], Et[1], Et[2]);
-    if(afm.icompute!=0){fprintf(fid, " %g", Et[3]);}
-    if (spring.icompute!=0){fprintf(fid, " %g", Et[5]);}
-    if(fabs(mbrane.coef_vol_expansion)>1e-16){fprintf(fid, " %g", Et[4]);}
-    if (fabs(mbrane.pressure)>1e-16){fprintf(fid, " %g", Et[6]);}
-    if (afm.icompute!=0){fprintf(fid, " %g %g %g", afm_force->x,afm_force->y,afm_force->z );}
-    if (spring.icompute!=0){fprintf(fid, " %g %g", spring_force[0].z,spring_force[1].z);}
-    fprintf(fid, " %g %g %g %g\n",vol_sph,Pos[mesh.nPole].z,Pos[mesh.sPole].z,
-      height_rms(Pos,mbrane));
-    fflush(fid);
-}
+
+/* void wDiag(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring, MESH mesh, */
+/*             int i, int num_moves, double *Et,Vec3d *afm_force, */
+/*             Vec3d *spring_force, double vol_sph, Vec3d *Pos){ */
+/*     fprintf(fid, " %d %d %g %g %g %g", i, num_moves, mbrane.tot_energy[0], Et[0], Et[1], Et[2]); */
+/*     if(afm.icompute!=0){fprintf(fid, " %g", Et[3]);} */
+/*     if (spring.icompute!=0){fprintf(fid, " %g", Et[5]);} */
+/*     if(fabs(mbrane.coef_vol_expansion)>1e-16){fprintf(fid, " %g", Et[4]);} */
+/*     if (fabs(mbrane.pressure)>1e-16){fprintf(fid, " %g", Et[6]);} */
+/*     if (afm.icompute!=0){fprintf(fid, " %g %g %g", afm_force->x,afm_force->y,afm_force->z );} */
+/*     if (spring.icompute!=0){fprintf(fid, " %g %g", spring_force[0].z,spring_force[1].z);} */
+/*     fprintf(fid, " %g %g %g %g\n",vol_sph,Pos[mesh.nPole].z,Pos[mesh.sPole].z, */
+/*       height_rms(Pos,mbrane)); */
+/*     fflush(fid); */
+/* } */
 /*-----------------------------------------------*/

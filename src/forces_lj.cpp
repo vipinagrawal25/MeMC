@@ -76,7 +76,7 @@ double cal_length(double x1 , double x2,
 
 }
 void make_nlist(Vec2d *Pos, Nbh_list *neib,
-        LJpara para, char *metric){
+        LJ_p para, char *metric){
 
 	 ///  @brief Makes a list of neighbouring particles for every particle  
   	 ///
@@ -133,7 +133,7 @@ bool len_check(Vec2d s1, Vec2d s2,
 }
 
 double pairlj_ipart_energy(Vec2d *Pos, int *n_list,
-        int ni, int i_p, LJpara para, char *metric){
+        int ni, int i_p, LJ_p para, char *metric){
      /// @brief Estimate the energy of ith particle
 	 ///  @param Pos array containing co-ordinates of all the particles
 	 ///  @param i_p index of ith particle;
@@ -172,7 +172,7 @@ double pairlj_ipart_energy(Vec2d *Pos, int *n_list,
 
 
 double pairlj_total_energy(Vec2d *Pos, Nbh_list *neib,
-        LJpara para, char *metric){
+        LJ_p para, char *metric){
    /// @brief Estimate the total energy of the system
 	 ///  @param Pos array containing co-ordinates of all the particles
 	 ///  @param neib array containing list of neibouring particles to each particle; 

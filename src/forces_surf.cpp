@@ -34,7 +34,7 @@ double cotangent(double a, double b, double c){
     return cot_theta;
 }
 
-Vec3d determine_xyz_parabola(Vec3d pos, AFM_para afm) {
+Vec3d determine_xyz_parabola(Vec3d pos, AFM_p afm) {
     ///
      ///  @param pos  position of a point in membrane
      ///  @param afm  parameters of AFM tip
@@ -91,9 +91,9 @@ Vec3d determine_xyz_parabola(Vec3d pos, AFM_para afm) {
     return pt_pbola;
 
 }
-double volume_ipart(Vec3d *pos, 
-        int *node_nbr, 
-        int num_nbr, int idx, MBRANE_para para){
+
+double volume_ipart(Vec3d *pos, int *node_nbr,
+        int num_nbr, int idx){
      /// @brief Estimate the volume substended by voronoi area of the ith particle
      ///  @param Pos array containing co-ordinates of all the particles
      ///  @param idx index of ith particle;
@@ -132,7 +132,7 @@ double volume_ipart(Vec3d *pos,
 
  double stretch_energy_ipart(Vec3d *pos,
          int *node_nbr, double *lij_t0,
-         int num_nbr, int idx, MBRANE_para para){
+         int num_nbr, int idx, MBRANE_p para){
 
     /// @brief Estimate the Stretching energy contribution when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
@@ -196,7 +196,7 @@ double voronoi_area(double cotJ, double cotK,
 }
 //
 double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
-                            int idx, MBRANE_para para){
+                            int idx, MBRANE_p para){
 
     /// @brief Estimate the Bending energy contribution when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
@@ -214,10 +214,6 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     // lap_bel:Laplace Beltrami operator for sphere is 2\kappa\nhat
     // nhat is outward normal.
     Vec3d lap_bel,lap_bel_t0,nhat;
-    // double curv_t0 = 2e0/para.radius;
-    // cot_times_rij.x = 0e0;
-    // cot_times_rij.y = 0e0;
-    // cot_times_rij.z = 0e0;
     //
     double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
     double area_ijk,area_ijkp;
@@ -235,8 +231,6 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
         kdx = node_nbr[(j+1+num_nbr)%num_nbr];
         /* kpdx = bond_nbr[j].i2; */
         kpdx = node_nbr[(j-1+num_nbr)%num_nbr];
-        /* printf("%05d %05d %05d %05d %05d\n", idx, kdx, kpdx, */
-                /* node_nbr[(j+1+num_nbr)%num_nbr], node_nbr[(j-1+num_nbr)%num_nbr]); */
         //
         xij = pos[idx]- pos[jdx];
         xijp1 = pos[idx]- pos[jdxp1];
@@ -278,7 +272,7 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
 }
 
 double bending_energy_ipart_neighbour(Vec3d *pos, 
-        MESH mesh, int idx, MBRANE_para para){
+        MESH_p mesh, int idx, MBRANE_p para){
 
     /// @brief Estimate the Bending energy contribution from the neighbours when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
@@ -307,8 +301,8 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
    return be;
 } 
 
- double volume_total(Vec3d *pos,
-         MESH mesh, MBRANE_para para){
+ double volume_total(Vec3d *pos, MESH_p mesh,
+         MBRANE_p para){
      /// @brief Estimate the total volume of the shell
      ///  @param Pos array containing co-ordinates of all the particles
      ///  @param mesh mesh related parameters -- connections and neighbours
@@ -329,14 +323,14 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 
        vol += volume_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
-                  num_nbr, idx, para);
+                  num_nbr, idx);
      }
      return vol/3e0;
 }
 
 
- double bending_energy_total(Vec3d *pos,
-         MESH mesh, MBRANE_para para){
+ double bending_energy_total(Vec3d *pos, MESH_p mesh, 
+         MBRANE_p para){
 
      /// @brief Estimate the total Bending energy
      ///  @param Pos array containing co-ordinates of all the particles
@@ -366,7 +360,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 
 
  double stretch_energy_total(Vec3d *pos,
-       MESH mesh, double *lij_t0, MBRANE_para para){
+       MESH_p mesh, double *lij_t0, MBRANE_p para){
 
     /// @brief Estimate the total Stretching energy  
     ///  @param Pos array containing co-ordinates of all the particles
@@ -451,7 +445,7 @@ double lj_bottom_surface(double zz,
 
 
 double lj_bottom_surf_total(Vec3d *pos, 
-        bool *is_attractive, MBRANE_para para){
+         MBRANE_p para, STICK_p st_p){
 
     /// @brief Estimate the total Sticking  
     ///  @param Pos array containing co-ordinates of all the particles
@@ -466,8 +460,8 @@ double lj_bottom_surf_total(Vec3d *pos,
     for(idx = 0; idx < para.N; idx++){
         /* idx = 2; */
 
-        lj_bote += lj_bottom_surface(pos[idx].z, is_attractive[idx],
-                para.pos_bot_wall, para.epsilon, para.sigma);
+        lj_bote += lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
+                st_p.pos_bot_wall, st_p.epsilon, st_p.sigma);
     }
     return lj_bote;
 }
@@ -491,7 +485,7 @@ void identify_attractive_part(Vec3d *pos,
     }
 }
 
-double lj_afm(Vec3d pos, AFM_para afm){
+double lj_afm(Vec3d pos, AFM_p afm){
 
     /// @brief Energy contribution from AFM tip to ith point in membrane 
     ///  @param Pos co-ordinates of the ith particle 
@@ -513,9 +507,9 @@ double lj_afm(Vec3d pos, AFM_para afm){
    return ener_afm;
 
 };
-double lj_afm_total(Vec3d *pos, 
-        Vec3d *afm_force, MBRANE_para para,
-        AFM_para afm){
+
+double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
+        MBRANE_p para, AFM_p afm){
 
     /// @brief Energy contribution from AFM tip to all the point in membrane 
     ///  @param Pos co-ordinates of the ith particle 
@@ -550,7 +544,7 @@ double lj_afm_total(Vec3d *pos,
     return lj_afm_e;
 }
 double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
-                               MESH mesh, SPRING_para spring){
+                               MESH_p mesh, SPRING_p spring){
     double kk = spring.constant;
     double nZeq = spring.nPole_eq_z;
     double sZeq = spring.sPole_eq_z;
@@ -561,8 +555,9 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
     return ener_spr;
 }
 //
-double vol_energy_change(MBRANE_para mbrane,double dvol){
-    double KAPPA = mbrane.coef_vol_expansion;
+//
+double vol_energy_change(MBRANE_p mbrane, VOL_p volp, double dvol){
+    double KAPPA = volp.coef_vol_expansion;
     double de_vol=0.0;
     double ini_vol = (4./3.)*pi*pow(mbrane.radius,3);
     if (fabs(KAPPA)>1e-16){
@@ -573,11 +568,11 @@ double vol_energy_change(MBRANE_para mbrane,double dvol){
     return de_vol;
 }
 //
-double PV_change(MBRANE_para mbrane, double dvol){ 
-    return mbrane.pressure*dvol;
+double PV_change(double pressure, double dvol){ 
+    return pressure*dvol;
 }
 //
-double spring_energy(Vec3d pos, int idx, MESH mesh, SPRING_para spring){
+double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
     if (spring.icompute==0) return 0;
     double ener_spr=0e0;
     double kk=spring.constant;

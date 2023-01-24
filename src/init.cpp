@@ -3,9 +3,9 @@
 std::mt19937 rng2;
 
 extern "C" void Membrane_listread(int *, double *, double *, double *, 
-        double *, double *, double *, bool *, char *);
+        double *, int *, char *);
 
-extern "C" void Ljbot_listread(double *, double *, double *, 
+extern "C" void Stick_listread(bool *, double *, double *, double *, 
         double *,  char *);
 
 extern "C" void  MC_listread(char *, double *, double *, bool *,
@@ -13,11 +13,13 @@ extern "C" void  MC_listread(char *, double *, double *, bool *,
 
 extern "C"  void  Activity_listread(char *, double *, double *, char *);
 
-extern "C"  void  afm_listread(double *, double *, double *, double *,
+extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
 
-extern "C"  void  spring_listread(int *, double *, double *, char *);
+extern "C"  void  Spring_listread(bool *, int *, double *, double *, char *);
 
+extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
+extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
 
 
 void init_system_random_pos(Vec2d *Pos,  double len, 
@@ -135,8 +137,11 @@ void init_system_random_pos(Vec2d *Pos,  double len,
 
 }
 
-void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0,
-         MBRANE_para *para, SPRING_para *spring){
+
+
+
+void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
+         MBRANE_p *para, SPRING_p *spring, bool is_fluid){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
    /// @param lij_t0 initial distance between points of membrane
@@ -166,17 +171,17 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0,
     para->av_bond_len = sum_lij/npairs;
     r0=para->av_bond_len;
     spring->constant=para->coef_bend/(r0*r0);
-    if(para->is_fluid){
+    if(is_fluid){
         for(i = 0; i < mesh.nghst*para->N; i++){
             lij_t0[i] = para->av_bond_len;
         }
     }
 }
 
-void init_read_parameters( MBRANE_para *mbrane, 
-        AFM_para *afm, MCpara *mcpara, ActivePara *activity,
-        SPRING_para *spring, string para_file){
-    /// @brief read parameters from para_file 
+void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_para, 
+        VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
+        SPRING_p *spring_para, string para_file){
+   /// @brief read parameters from para_file 
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
     ///  @param mbrane membrane related parameters
@@ -188,63 +193,123 @@ void init_read_parameters( MBRANE_para *mbrane,
     char which_act[char_len], tmp_fname[char_len];
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
+    Membrane_listread(&mbrane_para->N, &mbrane_para->coef_bend,
+            &mbrane_para->YY, &mbrane_para->sp_curv,  &mbrane_para->radius, 
+            &mbrane_para->bdry_type, tmp_fname);
 
-    Membrane_listread(&mbrane->N, &mbrane->coef_bend,
-            &mbrane->YY, &mbrane->coef_vol_expansion,
-            &mbrane->sp_curv,  &mbrane->pressure, &mbrane->radius,
-            &mbrane->is_fluid, tmp_fname);
-
-    sprintf(tmp_fname, "%s", para_file.c_str() );
-    Ljbot_listread(&mbrane->pos_bot_wall, &mbrane->sigma,
-            &mbrane->epsilon, &mbrane->theta,
+    bool do_stick;
+    double pos_bot_wall;  // position of the bottom attractive wall
+    double sigma, epsilon, theta; // sigma and epsilon for the bottom attractive wall
+ 
+    Stick_listread(&stick_para->do_stick, &stick_para->pos_bot_wall, 
+            &stick_para->sigma, &stick_para->epsilon, &stick_para->theta,
             tmp_fname);
 
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    MC_listread(temp_algo, &mc_para->dfac, &mc_para->kBT, &mc_para->is_restart,
+            &mc_para->tot_mc_iter, &mc_para->dump_skip, tmp_fname);
+    mc_para->algo=temp_algo;
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    spring_listread(&spring->icompute, &spring->nPole_eq_z, &spring->sPole_eq_z, tmp_fname);
+    Spring_listread(&spring_para->do_spring, &spring_para->icompute, &spring_para->nPole_eq_z,
+            &spring_para->sPole_eq_z, tmp_fname);
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    afm_listread(&afm->tip_rad, &afm->tip_pos_z, &afm->sigma, &afm->epsilon,
+    Afm_listread(&afm_para->do_afm, &afm_para->tip_rad, 
+            &afm_para->tip_pos_z, &afm_para->sigma, &afm_para->epsilon,
              tmp_fname);
 
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    MC_listread(temp_algo, &mcpara->dfac, &mcpara->kBT, &mcpara->is_restart,
-            &mcpara->tot_mc_iter, &mcpara->dump_skip, tmp_fname);
-
-    mcpara->algo=temp_algo;
+    Activity_listread(which_act, &act_para->minA, &act_para->maxA, tmp_fname);
+    act_para->act = which_act;
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    Activity_listread(which_act, &activity->minA, &activity->maxA, tmp_fname);
+    Fluid_listread(&fld_para->is_fluid, &fld_para->min_allowed_nbr,
+            &fld_para->fluidize_every, &fld_para->fac_len_vertices, tmp_fname);
 
-    activity->act = which_act;
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    Volume_listread(&vol_para->do_volume, &vol_para->is_pressurized,
+            &vol_para->coef_vol_expansion, &vol_para->pressure, tmp_fname);
 
-   /* printf("filename = %s %s\n", para_file.c_str(),  tmp_fname); */
-
-   mbrane->num_triangles = 2*mbrane->N - 4;
-   mbrane->num_nbr = 3*mbrane->num_triangles;
-   // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
+  // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
    // define the monte carlo parameters
-   mcpara->one_mc_iter = 2*mbrane->N;
-   mcpara->delta = sqrt(8*pi/(2*mbrane->N-4));
+   mc_para->one_mc_iter = 2*mbrane_para->N;
+   mc_para->delta = sqrt(8*pi/(2*mbrane_para->N-4));
 }
 //
-void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, SPRING_para spring){
+//
+void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para, 
+        VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
+        SPRING_p spring_para, string out_file){
+ 
     double FvK = mbrane.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
-    ofstream paramfile;
-    paramfile.open( fname );
-    paramfile << "# =========== Model Parameters ==========" << endl
-            << "# Foppl von Karman number: FvK = " << FvK << endl
-            << "# Elasto-thermal number: ET = " << mcpara.kBT/mbrane.coef_bend*sqrt(FvK) << endl
-            << "# average bond length: r0 = " << mbrane.av_bond_len << endl;
-    if (spring.icompute!=0){
-       paramfile << "# Spring constant: Ki = " << spring.constant << endl;    
-    }
-    paramfile.close();
+    ofstream out_;
+    out_.open( out_file );
+    out_<< "# =========== Model Parameters ==========" << endl
+            << " Foppl von Karman number: FvK = " << FvK << endl
+            << " Elasto-thermal number: ET = " << mc_para.kBT/mbrane.coef_bend*sqrt(FvK) << endl
+            << " average bond length: r0 = " << mbrane.av_bond_len << endl;
+
+    out_<< "# =========== Membrane Parameters ==========" << endl
+            << " coef bend = " << mbrane.coef_bend << endl
+            << " YY " << mbrane.YY << endl
+            << " sp_curv " << mbrane.sp_curv << endl
+            << " N " << mbrane.N << endl
+            << " av_bond_len " << mbrane.av_bond_len << endl
+            << " bdry_type " << mbrane.bdry_type << endl
+            << " radius " << mbrane.radius << endl;
+
+    out_<< "# =========== Monte Carlo Parameters ==========" << endl
+            << " algo = " << mc_para.algo << endl
+            << " dfac " << mc_para.dfac << endl
+            << " dump_skip " << mc_para.dump_skip << endl
+            << " kbt " << mc_para.kBT << endl
+            << " delta " << mc_para.delta << endl
+            << " is_restart " << mc_para.is_restart << endl
+            << " tot_mc_iter " << mc_para.tot_mc_iter << endl
+            << " one mc iter " << mc_para.one_mc_iter << endl;
+
+
+    out_<< "# =========== Activity Parameters ==========" << endl
+            << " which activity = " << act_para.act << endl
+            << " minA = " << act_para.minA << endl
+            << " maxA = " << act_para.maxA << endl;
+
+
+    out_<< "# =========== Fluid Parameters ==========" << endl
+            << " is fluid= " << fld_para.is_fluid << endl
+            << " min min_allowed_nbr = " << fld_para.min_allowed_nbr << endl
+            << " min min_allowed_nbr = " << fld_para.fluidize_every << endl
+            << " factor_len_vertices = " << fld_para.fac_len_vertices << endl;
+
+
+    out_<< "# =========== Volume Parameters ==========" << endl
+            << " do volume= " << vol_p.do_volume << endl
+            << " is pressurized = " << vol_p.is_pressurized << endl
+            << " coef_vol_expansion " << vol_p.coef_vol_expansion << endl
+            << " pressure  " << vol_p.pressure << endl;
+
+
+    out_<< "# =========== Sticking Parameters ==========" << endl
+            << " do stick " << stick_para.do_stick << endl
+            << " pos_bot_wall  " << stick_para.pos_bot_wall << endl
+            << " sigma " << stick_para.sigma << endl
+            << " epsilon " << stick_para.epsilon << endl
+            << " theta " << stick_para.theta << endl;
+
+    out_<< "# =========== Spring Parameters ==========" << endl
+            << " do spring " << spring_para.do_spring << endl
+            << " icompute  " << spring_para.icompute << endl
+            << " constant " << spring_para.constant << endl
+            << " nPole_eq_z " << spring_para.nPole_eq_z << endl
+            << " sPole_eq_z " << spring_para.sPole_eq_z << endl;
+
+    out_.close();
 }
 
 
-void init_activity(ActivePara activity, int N){
+void init_activity(ACTIVE_p activity, int N){
     int i;
     std::uniform_real_distribution<> rand_real(activity.minA, activity.maxA);
     if(activity.act == "random"){

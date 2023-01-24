@@ -36,35 +36,34 @@ subroutine convert_fstr_cstr(f_str, c_str)
 end subroutine
 
 
-subroutine Membrane_listread(N, coef_bend, YY, vol_exp, &
-        sp_curv, pressure, radius, isfluid, parafile) bind(c, name='Membrane_listread')
-    real(kind=c_double) :: coef_bend, YY, vol_exp
-    real(kind=c_double) :: sp_curv, pressure, radius
-    integer(kind=c_int) :: N
+subroutine Membrane_listread(N, coef_bend, YY,  &
+        sp_curv, radius, bdry_type, parafile) bind(c, name='Membrane_listread')
+    real(kind=c_double) :: coef_bend, YY
+    real(kind=c_double) :: sp_curv, radius
+    integer(kind=c_int) :: N, bdry_type
     character(kind=c_char, len=1), dimension(char_len) :: parafile
     character(len=char_len) :: f_fname
-    logical :: isfluid
 
-    namelist /Membrane/ N, coef_bend, YY, vol_exp, sp_curv, pressure, radius, isfluid
-
+    namelist /Membrane/ N, coef_bend, YY, sp_curv,  radius, bdry_type
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=Membrane)
     close(unit=100)
 end subroutine
 
-subroutine Ljbot_listread(pos_bot_wall, sigma, epsilon, &
-        theta,  parafile) bind(c, name='Ljbot_listread')
+subroutine Stick_listread(do_stick, pos_bot_wall, sigma, epsilon, &
+        theta,  parafile) bind(c, name='Stick_listread')
     real(kind=c_double) :: pos_bot_wall, sigma, theta, epsilon 
     character(kind=c_char, len=1), dimension(char_len) :: parafile
     character(len=char_len) :: f_fname
+    logical(kind=c_bool) :: do_stick;
 
 
-    namelist /Ljbot/ pos_bot_wall, sigma, epsilon, theta
+    namelist /Stick/ do_stick, pos_bot_wall, sigma, epsilon, theta
 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
-    read(unit=100,nml=Ljbot)
+    read(unit=100,nml=Stick)
     close(unit=100)
 end subroutine
 
@@ -108,13 +107,14 @@ subroutine Activity_listread(which_act, minA, maxA, &
 
 end subroutine
 
-subroutine afm_listread(tip_rad, tip_pos_z, sigma, epsilon, &
-             parafile) bind(c, name='afm_listread')
+subroutine Afm_listread(do_afm, tip_rad, tip_pos_z, sigma, epsilon, &
+             parafile) bind(c, name='Afm_listread')
          real(c_double) :: tip_rad, tip_pos_z, sigma, epsilon
     character(kind=c_char, len=1), dimension(char_len) :: parafile
     character(len=char_len) :: f_fname
+    logical(kind=c_bool) :: do_afm
 
-    namelist /afmpara/ tip_rad, tip_pos_z, sigma, epsilon 
+    namelist /afmpara/ do_afm, tip_rad, tip_pos_z, sigma, epsilon 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=afmpara)
@@ -123,15 +123,50 @@ subroutine afm_listread(tip_rad, tip_pos_z, sigma, epsilon, &
 end subroutine
 
 
- subroutine spring_listread(icompute, nPole_eq_z, sPole_eq_z, &
-         parafile) bind(c, name='spring_listread')
+subroutine Volume_listread(do_volume, is_pressurized, coef_vol_exp, pressure, &
+         parafile) bind(c, name='Volume_listread')
+
+     real(c_double) :: coef_vol_exp, pressure
+     logical(kind=c_bool) :: do_volume, is_pressurized 
+     character(kind=c_char, len=1), dimension(char_len) ::  parafile
+     character(len=char_len) :: f_fname
+
+     namelist /Volpara/ do_volume, is_pressurized, coef_vol_exp, pressure
+    call convert_cstr_fstr(parafile, f_fname)
+    open(unit=100,file=f_fname,status='old')
+    read(unit=100,nml=Volpara)
+    close(unit=100)
+end subroutine
+
+
+
+
+subroutine Fluid_listread(is_fluid,  min_allowed_nbr, fluidize_every, fac_len_vert, &
+         parafile) bind(c, name='Fluid_listread')
+
+     logical(kind=c_bool) :: is_fluid
+     integer(kind=c_int) :: min_allowed_nbr, fluidize_every
+     real(kind=c_double) :: fac_len_vert
+     character(kind=c_char, len=1), dimension(char_len) ::  parafile
+     character(len=char_len) :: f_fname
+
+    namelist /fluidpara/ is_fluid, min_allowed_nbr, fluidize_every, fac_len_vert
+    call convert_cstr_fstr(parafile, f_fname)
+    open(unit=100,file=f_fname,status='old')
+    read(unit=100,nml=fluidpara)
+    close(unit=100)
+end subroutine
+
+subroutine Spring_listread(do_spring, icompute, nPole_eq_z, sPole_eq_z, &
+         parafile) bind(c, name='Spring_listread')
 
        real(c_double) :: nPole_eq_z, sPole_eq_z
        integer(c_int) :: icompute
+       logical(kind=c_bool) :: do_spring
        character(kind=c_char, len=1), dimension(char_len) :: which_act, parafile
     character(len=char_len) :: f_fname
 
-    namelist /springpara/ icompute, nPole_eq_z, sPole_eq_z 
+    namelist /springpara/ do_spring, icompute, nPole_eq_z, sPole_eq_z 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=springpara)

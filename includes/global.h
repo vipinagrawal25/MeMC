@@ -39,13 +39,13 @@ typedef struct{
     double kBT;
     double delta; // increment of position
     bool is_restart;
- }MCpara;
+ }MC_p;
 
 typedef struct{
     string act;
     double minA, maxA;
     double *activity;
-}ActivePara;
+}ACTIVE_p;
 
 //
 typedef struct{
@@ -62,26 +62,42 @@ typedef struct{
     /// @param *tot_energy; total energy of the system
     /// @param *volume;  these are updated after each monte carlo 
     /// @param N;   // number of particles in mesh
-    /// @param num_triangles;  //number of triangles 
-    /// @param num_nbr; //  neighbours of all particles
+    ///
     double coef_bend;  //coefficient bending
     double YY;  //coefficient stretching
-    double coef_vol_expansion;   //coefficient of volume expansion
-    double pressure;
     double radius;  // radius of ball
-    double sigma, epsilon, theta; // sigma and epsilon for the bottom attractive wall
     double sp_curv; // spontaneous curvature of the membrane.
-    double pos_bot_wall;  // position of the bottom attractive wall
     double av_bond_len; // average length of the bond
     double *tot_energy;
     double *volume; // these are updated after each monte carlo 
     int N;   // number of particles in mesh
-    int num_triangles;  //number of triangles 
-    int num_nbr; //  neighbours of all particles
-    bool istick, is_fluid;
     double len;
-}MBRANE_para;
+    int bdry_type;
+}MBRANE_p;
 //
+
+typedef struct{
+    bool is_fluid;
+    int min_allowed_nbr;
+    int fluidize_every;
+    double fac_len_vertices;
+    // fac_len_vertices time the average length
+}FLUID_p;
+
+typedef struct{
+    bool do_volume;
+    bool is_pressurized;
+    double coef_vol_expansion;   //coefficient of volume expansion
+    double pressure;
+}VOL_p;
+
+typedef struct{
+    bool do_stick;
+    double pos_bot_wall;  // position of the bottom attractive wall
+    double sigma, epsilon, theta; // sigma and epsilon for the bottom attractive wall
+    bool *is_attractive;
+}STICK_p;
+
 
 //
 typedef struct{
@@ -92,7 +108,7 @@ typedef struct{
     int *numnbr;
     int *node_nbr_list;
     int nPole, sPole;
-}MESH;
+}MESH_p;
 //
 
 typedef struct{
@@ -101,11 +117,12 @@ typedef struct{
     /// @param tip_rad;  radius of the tip
     /// @param sigma, epsilon; 
     /// sigma epsilon of the LJ potential used to model AFM
+    bool do_afm;
     double tip_pos_z; // position of tip in z
     double tip_rad; // radius of the tip
     double sigma, epsilon;
     int icompute;
-}AFM_para;
+}AFM_p;
 //
 
 typedef struct{
@@ -120,7 +137,8 @@ typedef struct{
     double len;
     double r_cut;
     int bdry_condt;
-}LJpara;
+}LJ_p;
+
 //
 typedef struct{
     int cnt;
@@ -128,9 +146,11 @@ typedef struct{
 }Nbh_list;
 //
 typedef struct{
+    bool do_spring;
     int icompute;
     double constant;
     double nPole_eq_z;
     double sPole_eq_z;
-}SPRING_para;
+}SPRING_p;
+
 #endif

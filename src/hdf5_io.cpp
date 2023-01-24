@@ -1,4 +1,4 @@
-#include <hdf5.h>
+#include <hdf5/serial/hdf5.h>
 #include "global.h"
 #include "misc.h"
 #include <unistd.h>

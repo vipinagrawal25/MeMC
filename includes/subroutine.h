@@ -62,7 +62,7 @@ double lj_bottom_surface(double zz,
 double volume_total(Vec3d *pos, 
         MESH_p mesh, MBRANE_p para);
 double lj_bottom_surf_total(Vec3d *pos, 
-         bool *is_attractive, MBRANE_p para);
+         MBRANE_p para, STICK_p st_p);
 double volume_ipart(Vec3d *pos, int *node_nbr, 
         int num_nbr, int idx);
 double lj_afm(Vec3d , AFM_p);

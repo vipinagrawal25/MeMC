@@ -8,91 +8,6 @@
 #include <unistd.h>
 std::mt19937 rng;
 
-int get_nstart(int N, int bdrytype){
-    int nframe;
-    switch (bdrytype) {
-        case 0:
-            nframe = 2 * (int)sqrt(N);
-            break;
-        case 1:
-            nframe = 4 * (int)sqrt(N);
-            break;
-        default:
-            nframe = 0;
-    }
-    return nframe;
-
-}
-
-int print_sanity(int *nbr_del1, int *nbr_del2, int *nbr_add1, int *nbr_add2,
-                 int del1, int del2, int add1, int add2, char *fname) {
-  FILE *fid;
-  int k = 10;
-
-  fid = fopen(fname, "a");
-  /* fprintf(fid, "start\n"); */
-  fprintf(fid, "%06d\t%06d\t%06d\t%06d\t%06d\n", k, del1, del2, add1, add2);
-  for (int j = 0; j < 12; j++) {
-    fprintf(fid, "%06d\t%06d\t%06d\t%06d\t%06d\n", j, nbr_del1[j], nbr_del2[j],
-            nbr_add1[j], nbr_add2[j]);
-  }
-  fprintf(fid, "next line\n");
-  fflush(fid);
-  fclose(fid);
-  return 0;
-}
-
-int print_sanity(Vec3d *pos, int *nbr_del1, int *nbr_del2, int *nbr_add1,
-                 int *nbr_add2, int del1, int del2, int add1, int add2,
-                 char *ftag, int idx) {
-  FILE *fid;
-  char fname[128];
-  int k = 10;
-
-  sprintf(fname, "check_pos/%s_pos_%04d_.dat", ftag, idx);
-  fid = fopen(fname, "w");
-  /* fprintf(fid, "start\n"); */
-  fprintf(fid, "1 %g\t%g\n", pos[del1].x, pos[del1].y);
-  for (int j = 0; j < 12; j++) {
-    if (nbr_del1[j] != -1)
-      fprintf(fid, "1 %g\t%g\n", pos[nbr_del1[j]].x, pos[nbr_del1[j]].y);
-  }
-  fprintf(fid, "\n\n");
-
-  fprintf(fid, "2 %g\t%g\n", pos[del2].x, pos[del2].y);
-  for (int j = 0; j < 12; j++) {
-    if (nbr_del2[j] != -1)
-      fprintf(fid, "2 %g\t%g\n", pos[nbr_del2[j]].x, pos[nbr_del2[j]].y);
-  }
-  fprintf(fid, "\n\n");
-
-  fprintf(fid, "3 %g\t%g\n", pos[add1].x, pos[add1].y);
-  for (int j = 0; j < 12; j++) {
-    if (nbr_add1[j] != -1)
-      fprintf(fid, "3 %g\t%g\n", pos[nbr_add1[j]].x, pos[nbr_add1[j]].y);
-  }
-  fprintf(fid, "\n\n");
-
-  fprintf(fid, "4 %g\t%g\n", pos[add2].x, pos[add2].y);
-  for (int j = 0; j < 12; j++) {
-    if (nbr_add2[j] != -1)
-      fprintf(fid, "4 %g\t%g\n", pos[nbr_add2[j]].x, pos[nbr_add2[j]].y);
-  }
-  fprintf(fid, "\n\n");
-
-  fflush(fid);
-  fclose(fid);
-  return 0;
-}
-
-double determinant(Vec3d X1, Vec3d X2, Vec3d X3, double len) {
-  Vec3d A = diff_pbc(X1, X2, len);
-  Vec3d B = diff_pbc(X1, X3, len);
-
-  double det = (A.x * B.y - A.y * B.x);
-  return det;
-}
-
 void init_rng(uint32_t seed_val) {
 
   ///  @brief Generates random number
@@ -481,18 +396,12 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
       }
     }
 
-    det1 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del1], mbrane.len);
-    det2 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del2], mbrane.len);
+    /* det1 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del1], mbrane.len); */
+    /* det2 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del2], mbrane.len); */
     cm_idx_add1 = mesh.nghst * idx_add1;
     cm_idx_add2 = mesh.nghst * idx_add2;
 
-    /* print_sanity(mesh.node_nbr_list+cm_idx_del1,
-     * mesh.node_nbr_list+cm_idx_del2, */
-    /*         mesh.node_nbr_list+cm_idx_add1, mesh.node_nbr_list+cm_idx_add2,
-     */
-    /*         idx_del1, idx_del2, idx_add1, idx_add2, "check.dat"); */
-
-    if (det1 * det2 < 0.0) {
+        /* if (det1 * det2 < 0.0) { */
       aft_ij = pos[idx_add2] - pos[idx_add1];
       double dl = norm(aft_ij);
 
@@ -544,15 +453,9 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
         mesh.numnbr[idx_add1] = N_nbr_add1;
         mesh.numnbr[idx_add2] = N_nbr_add2;
 
-        /* print_sanity(pos, mesh.node_nbr_list+cm_idx_del1,
-         * mesh.node_nbr_list+cm_idx_del2, */
-        /*         mesh.node_nbr_list+cm_idx_add1,
-         * mesh.node_nbr_list+cm_idx_add2, */
-        /*         idx_del1, idx_del2, idx_add1, idx_add2, (char*)"aft", i); */
-
-        /* exit(0); */
+            /* exit(0); */
       }
-    }
+    /* } */
   }
   return move;
 }

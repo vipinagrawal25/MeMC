@@ -11,13 +11,12 @@ int main(int argc, char **argv){
      double Ener;
      Vec2d *Pos;
      Nbh_list *neib;
-     LJpara  para;
-     MCpara mcpara;
+     LJ_p  para;
+     MC_p  mcpara;
      FILE *fid;
      string outfolder,outfile,syscmds;
      char *metric;
      char log_file[128];
-     SPRING_para spring;
      //
      metric = (char *) malloc(128*sizeof(char));
      // outfolder = (char *) malloc(128*sizeof(char));
@@ -42,7 +41,7 @@ int main(int argc, char **argv){
     /* define all the paras */ 
      para.len = 2*pi;
      para.epsilon = 1;
-     para.bdry_condt = 1;
+     para.bdry_condt = 3;
      // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          para.sigma = para.len/sqrt((double)para.N);

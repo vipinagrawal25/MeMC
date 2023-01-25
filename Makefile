@@ -1,6 +1,6 @@
 # HOST=su
 # include hosts/$(HOST)
-CC = g++
+CC = mpic++
 #
 #opt=-O3
 opt=-pg
@@ -8,8 +8,7 @@ opt=-pg
 # 	opt = -g3  -Wall -pedantic
 # endif
 
-link = -g $(opt) -lm -std=c++17 -lhdf5 -Iincludes -Dflat
-# 
+link = -g $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
 sources += src/init.cpp  src/hdf5_io.cpp
 sources += src/cubic_solve.cpp
@@ -23,7 +22,7 @@ includes += includes/global.h includes/subroutine.h includes/Vector.h
 bindir = ./bin
 #
 #
-all : start memc flat
+all : start memc 
 	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
 	mv exe* $(bindir)/
 
@@ -35,13 +34,6 @@ start: $(object) obj/start.o obj/readnml.o
 
 memc: $(object) obj/memc.o obj/readnml.o
 	$(CC) $(object) obj/readnml.o obj/memc.o  $(link) -lgfortran -o exe_memc
-#
-#
-flat: $(object) obj/flat.o obj/readnml.o
-	$(CC) $(object) obj/readnml.o obj/flat.o  $(link) -lgfortran -o exe_flat
-#
-obj/flat.o: mains/flat.cpp $(includes)
-	@$(CC) -Jobj -c $< -o $@ $(link)
 #
 
 obj/memc.o: mains/memc.cpp $(includes)
@@ -58,7 +50,7 @@ obj/%.o : src/%.cpp $(includes) obj/readnml.o
 	$(CC) -Iobj -c $< obj/readnml.o -o $@ $(link)
 #
 clean:
-	@rm -rf bin $(object)
+	@rm -rf bin $(object) exe_*
 	@echo "all obj bin cleared"
 
 distclean:

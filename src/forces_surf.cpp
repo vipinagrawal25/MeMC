@@ -340,12 +340,13 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
      /// @return Total Bending energy
 
 
-     int idx;
+     int idx, st_idx;
      int num_nbr, cm_idx;
      double be;
 
      be = 0e0;
-     for(idx = 0; idx < para.N; idx++){
+     st_idx = get_nstart(para.N, para.bdry_type);
+     for(idx = st_idx; idx < para.N; idx++){
          /* idx = 2; */
 
          cm_idx = idx*mesh.nghst;
@@ -371,12 +372,13 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
     /// @return Total Stretching energy 
 
 
-    int idx;
+    int idx, st_idx;
     int num_nbr, cm_idx;
     double se;
 
+    st_idx = get_nstart(para.N, para.bdry_type);
     se = 0e0;
-    for(idx = 0; idx < para.N; idx++){
+    for(idx = st_idx; idx < para.N; idx++){
         /* idx = 2; */
         num_nbr = mesh.numnbr[idx];
         cm_idx = idx*mesh.nghst;

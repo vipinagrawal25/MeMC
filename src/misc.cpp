@@ -179,18 +179,6 @@ void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn){
   *aminval=minval;
 }
 /*-----------------------------------------------*/
-/* void wHeader(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring){ */
-/*     string log_headers = "#iter acceptedmoves total_ener stretch_ener bend_ener stick_ener "; */
-/*     if(afm.icompute!=0){log_headers+="afm_ener ";} */
-/*     if (spring.icompute!=0){log_headers+="spring_energy ";} */
-/*     if(fabs(mbrane.coef_vol_expansion)>1e-16){log_headers+="ener_volume ";} */
-/*     if (fabs(mbrane.pressure)>1e-16){log_headers+="pressure_ener ";} */
-/*     if (afm.icompute!=0){log_headers+="afm_fx, afm_fy afm_fz ";} */
-/*     if (spring.icompute!=0){log_headers+="spr_north.z spr_south.z ";} */
-/*     log_headers+="volume nPole_z sPole_z hrms"; */
-/*     fprintf(fid, "%s\n", log_headers.c_str()); */
-/*     fflush(fid); */
-/* } */
 /*-----------------------------------------------*/
 double height_rms(Vec3d *Pos, MBRANE_p mbrane){
   double radius=mbrane.radius;
@@ -204,6 +192,95 @@ double height_rms(Vec3d *Pos, MBRANE_p mbrane){
   return sqrt(hrms/N);
 }
 /*-----------------------------------------------*/
+
+int get_nstart(int N, int bdrytype){
+    static int nf1;
+    int nf2;
+    nf1 = (int) sqrt((double)N);
+    switch (bdrytype) {
+        case 0:
+            nf2 = 2 * nf1;
+            break;
+        case 1:
+            nf2 = 4 * nf1; 
+            break;
+        default:
+            nf2 = 0;
+    }
+    return nf2;;
+
+}
+// just in case I need it later;
+int print_sanity(int *nbr_del1, int *nbr_del2, int *nbr_add1, int *nbr_add2,
+                 int del1, int del2, int add1, int add2, char *fname) {
+  FILE *fid;
+  int k = 10;
+
+  fid = fopen(fname, "a");
+  /* fprintf(fid, "start\n"); */
+  fprintf(fid, "%06d\t%06d\t%06d\t%06d\t%06d\n", k, del1, del2, add1, add2);
+  for (int j = 0; j < 12; j++) {
+    fprintf(fid, "%06d\t%06d\t%06d\t%06d\t%06d\n", j, nbr_del1[j], nbr_del2[j],
+            nbr_add1[j], nbr_add2[j]);
+  }
+  fprintf(fid, "next line\n");
+  fflush(fid);
+  fclose(fid);
+  return 0;
+}
+
+int print_sanity(Vec3d *pos, int *nbr_del1, int *nbr_del2, int *nbr_add1,
+                 int *nbr_add2, int del1, int del2, int add1, int add2,
+                 char *ftag, int idx) {
+  FILE *fid;
+  char fname[128];
+  int k = 10;
+
+  sprintf(fname, "check_pos/%s_pos_%04d_.dat", ftag, idx);
+  fid = fopen(fname, "w");
+  /* fprintf(fid, "start\n"); */
+  fprintf(fid, "1 %g\t%g\n", pos[del1].x, pos[del1].y);
+  for (int j = 0; j < 12; j++) {
+    if (nbr_del1[j] != -1)
+      fprintf(fid, "1 %g\t%g\n", pos[nbr_del1[j]].x, pos[nbr_del1[j]].y);
+  }
+  fprintf(fid, "\n\n");
+
+  fprintf(fid, "2 %g\t%g\n", pos[del2].x, pos[del2].y);
+  for (int j = 0; j < 12; j++) {
+    if (nbr_del2[j] != -1)
+      fprintf(fid, "2 %g\t%g\n", pos[nbr_del2[j]].x, pos[nbr_del2[j]].y);
+  }
+  fprintf(fid, "\n\n");
+
+  fprintf(fid, "3 %g\t%g\n", pos[add1].x, pos[add1].y);
+  for (int j = 0; j < 12; j++) {
+    if (nbr_add1[j] != -1)
+      fprintf(fid, "3 %g\t%g\n", pos[nbr_add1[j]].x, pos[nbr_add1[j]].y);
+  }
+  fprintf(fid, "\n\n");
+
+  fprintf(fid, "4 %g\t%g\n", pos[add2].x, pos[add2].y);
+  for (int j = 0; j < 12; j++) {
+    if (nbr_add2[j] != -1)
+      fprintf(fid, "4 %g\t%g\n", pos[nbr_add2[j]].x, pos[nbr_add2[j]].y);
+  }
+  fprintf(fid, "\n\n");
+
+  fflush(fid);
+  fclose(fid);
+  return 0;
+}
+
+double determinant(Vec3d X1, Vec3d X2, Vec3d X3, double len) {
+  Vec3d A = diff_pbc(X1, X2, len);
+  Vec3d B = diff_pbc(X1, X3, len);
+
+  double det = (A.x * B.y - A.y * B.x);
+  return det;
+}
+
+
 
 /* void wDiag(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring, MESH mesh, */
 /*             int i, int num_moves, double *Et,Vec3d *afm_force, */

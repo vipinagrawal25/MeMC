@@ -30,8 +30,26 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
     return Pole_zcoord;
 }
 
+void diag_wHeader(MBRANE_p mbrane_para, STICK_p stick_para,
+        VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
+        SPRING_p spring_para, FILE *fid ){
+
+    string log_headers = "#iter acceptedmoves total_e stretch_e bend_e ";
+    if(stick_para.do_stick){log_headers+="stick_e ";}
+    if(afm_para.do_afm){log_headers+="afm_e ";}
+    if (spring_para.do_spring){log_headers+="spring_e ";}
+    if(vol_para.do_volume && !vol_para.is_pressurized) {log_headers+="vol_e ";}
+    if (vol_para.do_volume && vol_para.is_pressurized){log_headers+="pressure_e ";}
+    if (afm_para.do_afm){log_headers+="afm_fx, afm_fy afm_fz ";}
+    if (spring_para.do_spring){log_headers+="spr_north.z spr_south.z ";}
+    /* log_headers+="volume nPole_z sPole_z hrms"; */
+    log_headers+="volume ";
+    fprintf(fid, "%s\n", log_headers.c_str());
+    fflush(fid);
+}
+
 double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, 
-        MBRANE_p mbrane_para, MC_p mc_para, STICK_p stick_para,
+        MBRANE_p mbrane_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
         SPRING_p spring_para, FILE *fid ){
     double vol_sph;
@@ -51,21 +69,27 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
         Et[3] = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para);
         fprintf(fid, " %g", Et[3]);
     }
+    if(spring_para.do_spring){
+        Et[5] = spring_tot_energy_force(Pos, spring_force, mesh, spring_para);
+        fprintf(fid, " %g\n", Et[5]);
+    }
     if(vol_para.do_volume){
         vol_sph = volume_total(Pos, mesh, mbrane_para);
         double  ini_vol = (4./3.)*pi*pow(mbrane_para.radius,3);
-        Et[4] = vol_para.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
-        mbrane_para.volume[0] = vol_sph;
-        fprintf(fid, " %g", Et[4]);
+        if(!vol_para.is_pressurized){
+            Et[4] = vol_para.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
+            mbrane_para.volume[0] = vol_sph;
+            fprintf(fid, " %g", Et[4]);
+        }
         if(vol_para.is_pressurized){
             Et[6] = -vol_para.pressure*vol_sph;
             fprintf(fid, " %g", Et[6]);
         }
     }
-    if(spring_para.do_spring){
-        Et[5] = spring_tot_energy_force(Pos, spring_force, mesh, spring_para);
-        fprintf(fid, " %g\n", Et[5]);
-    }
+
+    if (afm_para.do_afm){fprintf(fid, " %g %g %g", afm_force.x, afm_force.y, afm_force.z);}
+    if (spring_para.do_spring){fprintf(fid, " %g %g", spring_force[0].z, spring_force[1].z);}
+    {fprintf(fid, " %g \n", vol_sph );}
     Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5]+ Et[6];
     fflush(fid);
 
@@ -76,7 +100,7 @@ int main(int argc, char *argv[]){
     pid_t pid = getpid();
     cout << "# ID for this process is: " << pid << endl;
     //
-    int i, iterations, num_moves, num_bond_change;
+    int iter, num_moves, num_bond_change;
     double Et[7], Ener_t;
     double vol_sph, e_t, s_t;
     Vec3d *Pos;
@@ -95,7 +119,6 @@ int main(int argc, char *argv[]){
     double Pole_zcoord;
     string outfolder,syscmds, para_file, log_file, outfile, filename;
     int mpi_err,mpi_rank=0;
-    int iter;
     uint32_t seed_v;
 
     //
@@ -153,19 +176,26 @@ int main(int argc, char *argv[]){
     //
     log_file=outfolder+"/mc_log";
     fid = fopen(log_file.c_str(), "a");
-    /* wHeader(fid,mbrane,afm,spring); */
-    Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  mc_para,  stick_para,
-         vol_para,  afm_para,  act_para, spring_para,  fid );
-    num_moves = 0;
-    for(i=0; i < mc_para.tot_mc_iter; i++){
 
-        if(i%mc_para.dump_skip == 0){
-            outfile=outfolder+"/snap_"+ZeroPadNumber(i/mc_para.dump_skip)+".h5";
+    if(!mc_para.is_restart)
+    diag_wHeader(mbrane_para,  stick_para,  vol_para,  afm_para,  act_para, 
+         spring_para, fid );
+
+
+    fprintf(fid , "%d %g", 0, 0.0 );
+    mbrane_para.tot_energy[0] = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
+         vol_para,  afm_para,  act_para, spring_para,  fid );
+    
+    num_moves = 0;
+    for(iter=0; iter < mc_para.tot_mc_iter; iter++){
+
+        if(iter%mc_para.dump_skip == 0){
+            outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mc_para.dump_skip)+".h5";
             hdf5_io_write_pos((double*) Pos, 3*mbrane_para.N, outfile);
             syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
             system(syscmds.c_str());
         }
-        if(i == 10*mc_para.dump_skip && !mc_para.is_restart && afm_para.do_afm){
+        if(iter == 10*mc_para.dump_skip && !mc_para.is_restart && afm_para.do_afm){
             afm_para.sigma = s_t;
             afm_para.epsilon = e_t;
             e_t = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para);
@@ -180,10 +210,10 @@ int main(int argc, char *argv[]){
             num_bond_change = monte_carlo_fluid(Pos, mesh, mbrane_para, mc_para, fld_para);
         }
 
-        fprintf(fid , "%d %d", i, num_moves );
-        Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  mc_para,  stick_para,
+        fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
+        Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
                 vol_para,  afm_para,  act_para, spring_para,  fid );
-        outfile_terminal << "iter = " << i << "; Accepted Moves = " 
+        cout << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;
 

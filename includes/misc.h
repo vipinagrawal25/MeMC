@@ -24,6 +24,7 @@ void downScale(double *yscaled, double *y, int factor, int nn );
 void zeros(double *yzero, int ndim);
 void max(int *amaxind, double *amaxval, Vec3d *pos, int ndim, char dirn = 'z');
 void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn='z');
+int get_nstart(int , int );
 /* void wHeader(FILE *fid, MBRANE_p mbrane, AFM_p afm, SPRING_p spring); */
 /* void wDiag(FILE *fid, MBRANE_p mbrane, AFM_p afm, SPRING_p spring, MESH mesh, */
 /*             int i, int num_moves, double *Et,Vec3d *afm_force, */

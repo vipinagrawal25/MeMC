@@ -2,13 +2,13 @@
 # include hosts/$(HOST)
 CC = mpic++
 #
-#opt=-O3
-opt=-pg
+opt=-O3
+# opt=-pg
 # ifeq ($(debug), y)
 # 	opt = -g3  -Wall -pedantic
 # endif
 
-link = -g $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
+link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
 sources += src/init.cpp  src/hdf5_io.cpp
 sources += src/cubic_solve.cpp

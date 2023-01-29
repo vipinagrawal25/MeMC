@@ -37,11 +37,11 @@ int main(int argc, char **argv){
      syscmds="mkdir "+outfolder;
     // sprintf(syscmds, "%s %s","mkdir ",outfolder);
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder");
-    init_rng(23077);
+    init_rng(23177);
     /* define all the paras */ 
      para.len = 2*pi;
      para.epsilon = 1;
-     para.bdry_condt = 3;
+     para.bdry_condt = 1;
      // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          para.sigma = para.len/sqrt((double)para.N);
@@ -50,7 +50,7 @@ int main(int argc, char **argv){
      }
 
      para.r_cut = 4*para.sigma;
-     mcpara.dfac  = 16;
+     mcpara.dfac  = 8;
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
      mcpara.dump_skip = 100;

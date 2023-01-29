@@ -39,6 +39,11 @@ void init_system_random_pos(Vec2d *Pos,  double len,
     int n_ghost;
     // remove it once debugged 
 
+    n_ghost = (int) sqrt(N);
+    dl = (len/n_ghost);
+
+    std::uniform_real_distribution<> rand_real(dl, len-dl);
+
     is_sph = false;
     is_cart = false;
     if(strcmp(metric, "sph") == 0){
@@ -62,8 +67,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
             case 0:
             // This is a channel ; read bdry_condt as 0 
             // n_ghost has to be even for logic to work;
-            n_ghost = 2*(int) sqrt(N);
-            dl = (2*len/n_ghost);
+            n_ghost = 2*n_ghost;
             for(int i=0; i<n_ghost/2; i++){
                     Pos[i].x = i*dl;
                     Pos[i].y = 0.0; 
@@ -74,17 +78,16 @@ void init_system_random_pos(Vec2d *Pos,  double len,
                 Pos[i].y = len; 
             }
             for(int i=n_ghost; i<N; i++){
-                Pos[i].x = drand48()*len;
-                Pos[i].y = drand48()*len;
+                Pos[i].x = rand_real(rng2);
+                Pos[i].y = rand_real(rng2);
             }
             break;
       case 1:
             // This is a frame ;
             // n_ghost has to be even for logic to work;
-            n_ghost = 4*(int) sqrt(N);
-            dl = (4*len/n_ghost);
+            n_ghost = 4*n_ghost;
             for(int i=0; i<n_ghost/4; i++){
-                Pos[i].x = i*dl;
+                Pos[i].x = (i+0.5)*dl;
                 Pos[i].y = 0.0; 
             }
             for(int i=n_ghost/4; i<n_ghost/2; i++){
@@ -98,22 +101,20 @@ void init_system_random_pos(Vec2d *Pos,  double len,
 
             for(int i=3*n_ghost/4; i<n_ghost; i++){
                 Pos[i].x = len;
-                Pos[i].y = (i - 3*n_ghost/4)*dl; 
-                }
+                Pos[i].y = (i +0.5 - 3*n_ghost/4)*dl; 
+            }
             for(int i=n_ghost; i<N; i++){
-                Pos[i].x = drand48()*len;
-                Pos[i].y = drand48()*len;
+                Pos[i].x = rand_real(rng2);
+                Pos[i].y = rand_real(rng2);
             }
 
             break;
        
             default:
                 for(int i=0; i<N; i++){
-                    Pos[i].x = drand48()*len;
-                    Pos[i].y = drand48()*len;
+                    Pos[i].x = rand_real(rng2);
+                    Pos[i].y = rand_real(rng2);
                 }
-                Pos[0].x = drand48()*len;
-                Pos[0].y = drand48()*len;
         }
     }
     if(is_sph){
@@ -279,8 +280,8 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para,
 
     out_<< "# =========== Fluid Parameters ==========" << endl
             << " is fluid= " << fld_para.is_fluid << endl
-            << " min min_allowed_nbr = " << fld_para.min_allowed_nbr << endl
-            << " min min_allowed_nbr = " << fld_para.fluidize_every << endl
+            << " min_allowed_nbr = " << fld_para.min_allowed_nbr << endl
+            << " fluid iter every " << fld_para.fluidize_every << endl
             << " factor_len_vertices = " << fld_para.fac_len_vertices << endl;
 
 

@@ -103,16 +103,11 @@ int main(int argc, char *argv[]){
     int iter, num_moves, num_bond_change;
     double Et[7], Ener_t;
     double vol_sph, e_t, s_t;
-    Vec3d *Pos;
-    MBRANE_p mbrane_para;
-    MC_p mc_para;
-    AFM_p  afm_para;
-    ACTIVE_p act_para;
-    MESH_p mesh;
-    VOL_p vol_para;
-    STICK_p stick_para;
-    SPRING_p spring_para;
-    FLUID_p fld_para;
+    Vec3d *Pos; MBRANE_p mbrane_para;
+    MC_p mc_para; AFM_p  afm_para;
+    ACTIVE_p act_para; MESH_p mesh;
+    VOL_p vol_para; STICK_p stick_para;
+    SPRING_p spring_para; FLUID_p fld_para;
     Vec3d afm_force,spring_force[2];
     FILE *fid;
     double *lij_t0;
@@ -153,7 +148,7 @@ int main(int argc, char *argv[]){
     Pos = (Vec3d *)calloc(mbrane_para.N, sizeof(Vec3d));
     mesh.numnbr = (int *)calloc(mbrane_para.N, sizeof(int));
     mesh.nghst = 12;
-    mbrane_para.len = 1.e0;
+    mbrane_para.len = 2.e0*pi;
     mesh.node_nbr_list = (int *)calloc(mesh.nghst*mbrane_para.N, sizeof(int));
     lij_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
     stick_para.is_attractive = (bool *)calloc(mbrane_para.N, sizeof(bool));
@@ -170,12 +165,11 @@ int main(int argc, char *argv[]){
                      mbrane_para,  mc_para,  stick_para,
                      vol_para,  afm_para,  act_para, 
                      spring_para,  fld_para,  outfolder);
-    /************************************/
-    // cout << "# Foppl von Karman (FvK): " 
-         // << YY*mbrane.radius*mbrane.radius/BB << endl;
     //
+    //
+    if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
     log_file=outfolder+"/mc_log";
-    fid = fopen(log_file.c_str(), "a");
+    fid = fopen(log_file.c_str(), "w");
 
     if(!mc_para.is_restart)
     diag_wHeader(mbrane_para,  stick_para,  vol_para,  afm_para,  act_para, 
@@ -183,15 +177,22 @@ int main(int argc, char *argv[]){
 
 
     fprintf(fid , "%d %g", 0, 0.0 );
-    mbrane_para.tot_energy[0] = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
+    Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
          vol_para,  afm_para,  act_para, spring_para,  fid );
-    
+    mbrane_para.tot_energy[0] = Ener_t;
+    filename = outfolder + "/para.out";
+    write_parameters(mbrane_para, mc_para, fld_para, vol_para,
+            stick_para, afm_para,  act_para, spring_para, filename);
+
+    printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){
 
         if(iter%mc_para.dump_skip == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mc_para.dump_skip)+".h5";
             hdf5_io_write_pos((double*) Pos, 3*mbrane_para.N, outfile);
+            hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list, 
+                    mbrane_para.N, mesh.nghst, outfile);
             syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
             system(syscmds.c_str());
         }
@@ -208,6 +209,7 @@ int main(int argc, char *argv[]){
 
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
             num_bond_change = monte_carlo_fluid(Pos, mesh, mbrane_para, mc_para, fld_para);
+            cout << "fluid stats " << num_bond_change << " bonds flipped" << endl;
         }
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );

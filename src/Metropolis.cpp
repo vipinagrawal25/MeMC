@@ -138,10 +138,11 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   double E_b, E_s, E_stick, E_afm, E_spr;
   int cm_idx, num_nbr;
 
-  E_b = 0;
-  E_s = 0;
-  E_stick = 0;
-  E_afm = 0;
+  E_b = 0.0;
+  E_s = 0.0;
+  E_stick = 0.0;
+  E_afm = 0.0;
+  E_spr = 0.0;
 
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];

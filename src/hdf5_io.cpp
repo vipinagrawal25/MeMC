@@ -1,4 +1,4 @@
-//#include <hdf5/serial/hdf5.h>
+/* #include <hdf5/serial/hdf5.h> */
 #include <hdf5.h>
 #include "global.h"
 #include "misc.h"
@@ -66,6 +66,54 @@ void hdf5_io_read_pos(double *Pos, string input_file){
       fprintf(stderr, "file close failed\n");
   }
 }
+
+void hdf5_io_write_mesh(int *cmlist,
+        int *node_nbr, int N, int ng, string output_file){
+
+    ///  @brief Read the mesh from the hdf5 file
+    ///  @param cmlist array containing the number of neighbours for each particle  
+    ///  @param node_nbr array containing the list of neighbours for each particle  
+    ///  @param input_file File name from which co-ordinate will be read
+    /// 
+
+    hid_t   file_id, dset1, dataset_id, space_id;  /* identifiers */
+    herr_t  status;
+    int size_mesh; 
+    hsize_t          dims; 
+
+    size_mesh = ng*N;
+
+    if(access(output_file.c_str(),F_OK)!=0){
+        file_id = H5Fcreate (output_file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    }else{
+        file_id = H5Fopen (output_file.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    }
+
+    /* Open an existing file. */
+
+    dims = N;
+    space_id = H5Screate_simple (1, &dims, NULL);
+    dset1 = H5Dcreate2(file_id, "/cumu_list", H5T_NATIVE_INT, space_id, H5P_DEFAULT,
+            H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite (dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+            cmlist);
+    status = H5Dclose (dset1);
+    status = H5Sclose (space_id);
+    dims = size_mesh;
+    space_id = H5Screate_simple (1, &dims, NULL);
+    dset1 = H5Dcreate2(file_id, "/node_nbr", H5T_NATIVE_INT, space_id, H5P_DEFAULT,
+            H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite (dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+            node_nbr);
+    status = H5Dclose (dset1);
+    status = H5Sclose (space_id);
+    status = H5Fclose(file_id);
+    if(status != 0){
+        fprintf(stderr, "file close failed\n");
+    }
+}
+
+
 
 
 void hdf5_io_read_mesh(int *cmlist,

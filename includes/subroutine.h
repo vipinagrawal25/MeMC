@@ -95,6 +95,8 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para,
 void hdf5_io_write_pos(double *Pos, int N, string input_file);
 void hdf5_io_read_pos(double *Pos, string input_file);
 void hdf5_io_read_mesh(int *cmlist, int *node_nbr, string input_file);
+void hdf5_io_write_mesh(int *cmlist,
+        int *node_nbr, int N, int ng, string output_file);
 void io_dump_config(double *Pos, int N, char *);
 void io_read_config(double *Pos, int N, char *);
 void io_dump_config_ascii(double *Pos, int N, char *);

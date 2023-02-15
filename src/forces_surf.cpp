@@ -530,24 +530,6 @@ double lj_bottom_surf_total(Vec3d *pos,
 }
 
 
-
-void identify_attractive_part(Vec3d *pos, 
-        bool *is_attractive, double theta_attr, int N){
-
-    /// @brief identify all the points which substends theta_attr with the centre 
-    ///  @param Pos array containing co-ordinates of all the particles
-    ///  @param is_attractive true for all the particles which sees bottom wall 
-    ///  @param theta_attr \Theta_0 see paper/paper.pdf 
-    /// N number of points making the membrane
-    ///
-    int i; 
-    double theta;
-    for(i= 0; i<N; i++){
-        theta = pi - acos(pos[i].z);
-        is_attractive[i] = theta < theta_attr;
-    }
-}
-
 double lj_afm(Vec3d pos, AFM_p afm){
 
     /// @brief Energy contribution from AFM tip to ith point in membrane 

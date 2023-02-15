@@ -320,6 +320,24 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
     out_.close();
 }
 
+void identify_attractive_part(Vec3d *pos, 
+        bool *is_attractive, double theta_attr, int N){
+
+    /// @brief identify all the points which substends theta_attr with the centre 
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param is_attractive true for all the particles which sees bottom wall 
+    ///  @param theta_attr \Theta_0 see paper/paper.pdf 
+    /// N number of points making the membrane
+    ///
+    int i; 
+    double theta;
+    for(i= 0; i<N; i++){
+        theta = pi - acos(pos[i].z);
+        is_attractive[i] = theta < theta_attr;
+    }
+}
+
+
 
 void init_activity(ACTIVE_p activity, int N){
     int i;

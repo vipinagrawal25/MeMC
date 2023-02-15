@@ -64,7 +64,6 @@ typedef struct{
     /// @param N;   // number of particles in mesh
     ///
     double coef_bend;  //coefficient bending
-    double YY;  //coefficient stretching
     double radius;  // radius of ball
     double sp_curv; // spontaneous curvature of the membrane.
     double av_bond_len; // average length of the bond
@@ -75,6 +74,12 @@ typedef struct{
     int bdry_type;
 }MBRANE_p;
 //
+//
+typedef struct{
+    bool is_tether;
+    double YY;
+    double sigma;
+}AREA_p;
 
 typedef struct{
     bool is_fluid;

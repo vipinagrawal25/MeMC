@@ -120,7 +120,7 @@ double rand_inc_theta(double th0, double dfac) {
 }
 
 double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
-                    int idx, MBRANE_p mbrane, STICK_p st_p, 
+                    int idx, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
                     VOL_p vol_p, AFM_p afm, SPRING_p spring) {
   /// @brief Estimate the contribution from all the energies when a particle is
   /// moved randomly
@@ -135,7 +135,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   /// @param AFM afm related parameter
   /// @return Change in Energy when idx particle is moved
 
-  double E_b, E_s, E_stick, E_afm, E_spr;
+  double E_b, E_s, E_stick, E_afm, E_spr, area_i;
   int cm_idx, num_nbr;
 
   E_b = 0.0;
@@ -152,8 +152,17 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 
   E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
 
-  E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-                             (lij_t0 + cm_idx), num_nbr, idx, mbrane);
+  if(area_p.is_tether){
+      E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+              (lij_t0 + cm_idx), num_nbr, idx, area_p);
+  }
+  else{
+      area_i = area_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
+              num_nbr, idx);
+      E_s = area_p.sigma*area_i/3.0e0;
+
+  }
+
   if(st_p.do_stick)
   E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
       st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
@@ -165,7 +174,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 }
 
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
-                   MBRANE_p mbrane, MC_p mcpara, STICK_p st_p,
+                   MBRANE_p mbrane, MC_p mcpara, AREA_p area_p,  STICK_p st_p,
                    VOL_p vol_p, AFM_p afm,
                    ACTIVE_p activity, SPRING_p spring) {
 
@@ -201,7 +210,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   for (i = 0; i < mcpara.one_mc_iter; i++) {
     int idx = rand_int(rng);
 
-    Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
+    Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
                         afm, spring);
     if(vol_p.do_volume) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
@@ -222,7 +231,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     pos[idx].y = y_n;
     pos[idx].z = z_n;
 
-    Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
+    Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
                         afm, spring);
 
     de = (Efin - Eini);

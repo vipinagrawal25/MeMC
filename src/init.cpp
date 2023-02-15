@@ -2,8 +2,11 @@
 #include "subroutine.h"
 std::mt19937 rng2;
 
-extern "C" void Membrane_listread(int *, double *, double *, double *, 
+extern "C" void Membrane_listread(int *, double *,  double *, 
         double *, int *, char *);
+
+extern "C" void Area_listread(bool *, double *, double *, char *);
+
 
 extern "C" void Stick_listread(bool *, double *, double *, double *, 
         double *,  char *);
@@ -179,7 +182,7 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
     }
 }
 
-void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_para, 
+void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_para, FLUID_p *fld_para, 
         VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
         SPRING_p *spring_para, string para_file){
    /// @brief read parameters from para_file 
@@ -195,7 +198,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_par
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
     Membrane_listread(&mbrane_para->N, &mbrane_para->coef_bend,
-            &mbrane_para->YY, &mbrane_para->sp_curv,  &mbrane_para->radius, 
+             &mbrane_para->sp_curv,  &mbrane_para->radius, 
             &mbrane_para->bdry_type, tmp_fname);
 
     bool do_stick;
@@ -206,22 +209,22 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_par
             &stick_para->sigma, &stick_para->epsilon, &stick_para->theta,
             tmp_fname);
 
-    sprintf(tmp_fname, "%s", para_file.c_str() );
+    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     MC_listread(temp_algo, &mc_para->dfac, &mc_para->kBT, &mc_para->is_restart,
             &mc_para->tot_mc_iter, &mc_para->dump_skip, tmp_fname);
     mc_para->algo=temp_algo;
 
-    sprintf(tmp_fname, "%s", para_file.c_str() );
+    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Spring_listread(&spring_para->do_spring, &spring_para->icompute, &spring_para->nPole_eq_z,
             &spring_para->sPole_eq_z, tmp_fname);
 
-    sprintf(tmp_fname, "%s", para_file.c_str() );
+    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Afm_listread(&afm_para->do_afm, &afm_para->tip_rad, 
             &afm_para->tip_pos_z, &afm_para->sigma, &afm_para->epsilon,
              tmp_fname);
 
 
-    sprintf(tmp_fname, "%s", para_file.c_str() );
+    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Activity_listread(which_act, &act_para->minA, &act_para->maxA, tmp_fname);
     act_para->act = which_act;
 
@@ -229,9 +232,13 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_par
     Fluid_listread(&fld_para->is_fluid, &fld_para->min_allowed_nbr,
             &fld_para->fluidize_every, &fld_para->fac_len_vertices, tmp_fname);
 
-    sprintf(tmp_fname, "%s", para_file.c_str() );
+    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Volume_listread(&vol_para->do_volume, &vol_para->is_pressurized,
             &vol_para->coef_vol_expansion, &vol_para->pressure, tmp_fname);
+
+    Area_listread(&area_para->is_tether, &area_para->YY,
+            &area_para->sigma, tmp_fname);
+
 
   // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
    // define the monte carlo parameters
@@ -240,11 +247,11 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_par
 }
 //
 //
-void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para, 
+void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p fld_para, 
         VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
         SPRING_p spring_para, string out_file){
  
-    double FvK = mbrane.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
+    double FvK = area_para.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
     ofstream out_;
     out_.open( out_file );
     out_<< "# =========== Model Parameters ==========" << endl
@@ -254,7 +261,6 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para,
 
     out_<< "# =========== Membrane Parameters ==========" << endl
             << " coef bend = " << mbrane.coef_bend << endl
-            << " YY " << mbrane.YY << endl
             << " sp_curv " << mbrane.sp_curv << endl
             << " N " << mbrane.N << endl
             << " av_bond_len " << mbrane.av_bond_len << endl
@@ -270,6 +276,11 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para,
             << " is_restart " << mc_para.is_restart << endl
             << " tot_mc_iter " << mc_para.tot_mc_iter << endl
             << " one mc iter " << mc_para.one_mc_iter << endl;
+
+    out_<< "# =========== Area Parameters ==========" << endl
+            << " is tether = " << area_para.is_tether << endl
+            << " YY " << area_para.YY << endl
+            << " sigma " << area_para.sigma << endl;
 
 
     out_<< "# =========== Activity Parameters ==========" << endl

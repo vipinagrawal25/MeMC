@@ -92,6 +92,38 @@ Vec3d determine_xyz_parabola(Vec3d pos, AFM_p afm) {
 
 }
 
+double area_ipart(Vec3d *pos, int *node_nbr,
+        int num_nbr, int idx){
+     /// @brief Estimate the area substended by the ith particle
+     ///  @param Pos array containing co-ordinates of all the particles
+     ///  @param idx index of ith particle;
+     ///  @param node_nbr nearest neigbours of idx; 
+     ///  @param num_nbr number of nearest neigbours of idx; 
+     ///  @param para  Membrane related parameters;
+     /// @return Volume substended by ith particle.
+
+    int i, j, k;
+    Vec3d  rk, ri, rj, rkp;
+    Vec3d rij, ip1, rik, rjkp;
+    Vec3d rjk, pt; 
+    double area1, area2;
+
+    area1 = 0e0;
+    ri = pos[idx];
+    for (i =0; i < num_nbr; i++){
+        j = node_nbr[i];
+        k=node_nbr[(i+1)%num_nbr];
+        ri = pos[idx]; rj = pos[j]; 
+        rk = pos[k];
+        rij  = ri - rj;
+        rjk  = ri - rk;
+        ip1 = cross_product(rjk, rij);
+        area1 = area1 + 0.5*norm(ip1);
+    }
+    return area1;
+}
+
+
 double volume_ipart(Vec3d *pos, int *node_nbr,
         int num_nbr, int idx){
      /// @brief Estimate the volume substended by voronoi area of the ith particle
@@ -132,7 +164,7 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
 
  double stretch_energy_ipart(Vec3d *pos,
          int *node_nbr, double *lij_t0,
-         int num_nbr, int idx, MBRANE_p para){
+         int num_nbr, int idx, AREA_p para){
 
     /// @brief Estimate the Stretching energy contribution when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
@@ -301,6 +333,35 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
    return be;
 } 
 
+
+ double area_total(Vec3d *pos, MESH_p mesh,
+         MBRANE_p para){
+     ///  @param Pos array containing co-ordinates of all the particles
+     ///  @param mesh mesh related parameters -- connections and neighbours
+     /// information;
+     ///  @param para  Membrane related parameters;
+     /// @return Total volume of the shell
+
+
+     int idx, st_idx;
+     int num_nbr, cm_idx;
+     double area;
+
+     st_idx = get_nstart(para.N, para.bdry_type);
+     area = 0e0;
+     for(idx = 0; idx < para.N; idx++){
+         /* idx = 2; */
+         cm_idx = idx*mesh.nghst;
+         num_nbr = mesh.numnbr[idx];
+
+       area += area_ipart(pos,
+                 (int *) (mesh.node_nbr_list + cm_idx),
+                  num_nbr, idx);
+     }
+     return area/3e0;
+}
+
+
  double volume_total(Vec3d *pos, MESH_p mesh,
          MBRANE_p para){
      /// @brief Estimate the total volume of the shell
@@ -361,7 +422,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 
 
  double stretch_energy_total(Vec3d *pos,
-       MESH_p mesh, double *lij_t0, MBRANE_p para){
+       MESH_p mesh, double *lij_t0, MBRANE_p para, AREA_p area_p){
 
     /// @brief Estimate the total Stretching energy  
     ///  @param Pos array containing co-ordinates of all the particles
@@ -386,7 +447,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
         se += stretch_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
                  (double *) (lij_t0 + cm_idx), num_nbr,
-                 idx, para);
+                 idx, area_p);
 
         /* printf( "stretch: %lf \n", se); */
     }

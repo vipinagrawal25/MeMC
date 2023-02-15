@@ -30,11 +30,12 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
     return Pole_zcoord;
 }
 
-void diag_wHeader(MBRANE_p mbrane_para, STICK_p stick_para,
+void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
         SPRING_p spring_para, FILE *fid ){
 
-    string log_headers = "#iter acceptedmoves total_e stretch_e bend_e ";
+    string log_headers = "#iter acceptedmoves total_e bend_e stretch_e";
+    /* if(area_para.is_stick){log_headers+="stick_e ";} */
     if(stick_para.do_stick){log_headers+="stick_e ";}
     if(afm_para.do_afm){log_headers+="afm_e ";}
     if (spring_para.do_spring){log_headers+="spring_e ";}
@@ -49,7 +50,7 @@ void diag_wHeader(MBRANE_p mbrane_para, STICK_p stick_para,
 }
 
 double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, 
-        MBRANE_p mbrane_para, STICK_p stick_para,
+        MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
         SPRING_p spring_para, FILE *fid ){
     double vol_sph;
@@ -58,8 +59,12 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
 
     /*-----------------------------------------------*/
     /*****  initialize energy values *****/
-    Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane_para);
-    Et[1] = bending_energy_total(Pos, mesh, mbrane_para);
+    Et[0] = bending_energy_total(Pos, mesh, mbrane_para);
+    if(area_para.is_tether){
+        Et[1] = stretch_energy_total(Pos, mesh, lij_t0, mbrane_para, area_para);
+    }else{
+        Et[1] = area_para.sigma*area_total(Pos, mesh,  mbrane_para);
+    }
     fprintf(fid, " %g %g %g", mbrane_para.tot_energy[0], Et[0], Et[1]);
     if(stick_para.do_stick){
         Et[2] = lj_bottom_surf_total(Pos, mbrane_para, stick_para);
@@ -108,10 +113,12 @@ int main(int argc, char *argv[]){
     ACTIVE_p act_para; MESH_p mesh;
     VOL_p vol_para; STICK_p stick_para;
     SPRING_p spring_para; FLUID_p fld_para;
+    AREA_p area_para;
     Vec3d afm_force,spring_force[2];
     FILE *fid;
     double *lij_t0;
     double Pole_zcoord;
+    double start_time, end_time;
     string outfolder,syscmds, para_file, log_file, outfile, filename;
     int mpi_err,mpi_rank=0;
     uint32_t seed_v;
@@ -130,7 +137,7 @@ int main(int argc, char *argv[]){
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     /*************************************************/
     // read the input file
-    init_read_parameters(&mbrane_para, &mc_para, &fld_para, &vol_para,
+    init_read_parameters(&mbrane_para, &mc_para, &area_para, &fld_para, &vol_para,
             &stick_para, &afm_para,  &act_para, &spring_para, filename);
 
     mc_para.one_mc_iter = 2*mbrane_para.N;
@@ -172,20 +179,24 @@ int main(int argc, char *argv[]){
     fid = fopen(log_file.c_str(), "w");
 
     if(!mc_para.is_restart)
-    diag_wHeader(mbrane_para,  stick_para,  vol_para,  afm_para,  act_para, 
+    diag_wHeader(mbrane_para, area_para,  stick_para,  vol_para,  afm_para,  act_para, 
          spring_para, fid );
 
 
+    /* fprintf(stderr, " The total area %g \n", area_total(Pos, mesh, mbrane_para)); */
+    /* exit(0); */
+
     fprintf(fid , "%d %g", 0, 0.0 );
-    Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
+    Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para,  stick_para,
          vol_para,  afm_para,  act_para, spring_para,  fid );
     mbrane_para.tot_energy[0] = Ener_t;
     filename = outfolder + "/para.out";
-    write_parameters(mbrane_para, mc_para, fld_para, vol_para,
+    write_parameters(mbrane_para, mc_para, area_para, fld_para, vol_para,
             stick_para, afm_para,  act_para, spring_para, filename);
 
     printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
+    start_time = MPI_Wtime();
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){
 
         if(iter%mc_para.dump_skip == 0){
@@ -204,7 +215,7 @@ int main(int argc, char *argv[]){
         }
 
         num_moves = monte_carlo_3d(Pos, mesh, lij_t0, 
-                mbrane_para, mc_para, stick_para, vol_para, 
+                mbrane_para, mc_para, area_para, stick_para, vol_para, 
                 afm_para, act_para,  spring_para);
 
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
@@ -213,12 +224,18 @@ int main(int argc, char *argv[]){
         }
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
-        Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
+        Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para, stick_para,
                 vol_para,  afm_para,  act_para, spring_para,  fid );
         cout << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;
 
+    }
+    end_time = MPI_Wtime();
+    if(mpi_rank == 0){
+        fprintf(stderr, "\n---------\n");
+        fprintf(stderr, "Time for %d montecarlo steps = %g min \n", mc_para.tot_mc_iter, (end_time-start_time)/60.0);
+        fprintf(stderr, "\n---------\n");
     }
 
     fclose(fid);

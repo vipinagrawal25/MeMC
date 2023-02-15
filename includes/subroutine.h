@@ -12,7 +12,7 @@ using namespace std;
 // metropolis.cpp
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, 
                 double *lij_t0, MBRANE_p mbrane,
-                MC_p mcpara, STICK_p ,  VOL_p , AFM_p afm, 
+                MC_p mcpara, AREA_p,  STICK_p ,  VOL_p , AFM_p afm, 
                 ACTIVE_p activity,  SPRING_p spring);
 
  double energy_mc_3d(Vec3d *pos, MESH_p mesh, 
@@ -49,12 +49,12 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, double theta_attr, int N);
 
- double stretch_energy_total(Vec3d *pos,
-         MESH_p mesh, double *lij_t0, MBRANE_p para);
+double stretch_energy_total(Vec3d *pos,
+         MESH_p mesh, double *lij_t0, MBRANE_p,  AREA_p );
 
- double stretch_energy_ipart(Vec3d *pos,
+double stretch_energy_ipart(Vec3d *pos,
          int *node_nbr, double *lij_t0, int num_nbr,
-                             int idx, MBRANE_p para);
+                             int idx, AREA_p para);
 
 double lj_bottom_surface(double zz,
         bool is_attractive, 
@@ -68,7 +68,10 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
 double lj_afm(Vec3d , AFM_p);
 double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         MBRANE_p para, AFM_p afm);
-
+double area_total(Vec3d *, MESH_p ,
+         MBRANE_p );
+double area_ipart(Vec3d *, int *, int , int);
+      
 
 //init.c
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
@@ -81,13 +84,13 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
          double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool );
 void init_read_config();
 void init_afm_tip(AFM_p );
-void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_para, 
+void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *, FLUID_p *fld_para, 
         VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
         SPRING_p *spring_para, string para_file);
  
 void init_activity(ACTIVE_p, int );
 int randint(int n);
-void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para, 
+void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p , FLUID_p fld_para, 
         VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
         SPRING_p spring_para, string out_file);
  

@@ -235,22 +235,19 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
                         afm, spring);
 
     de = (Efin - Eini);
-
     if(vol_p.do_volume){
-       vol_f = volume_ipart(pos,
-            (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-
+        vol_f = volume_ipart(pos,
+                (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
         dvol=0.5*(vol_f - vol_i);
-        de_vol = vol_energy_change(mbrane, vol_p, dvol);
+
+        if(!vol_p.is_pressurized){
+            de_vol = vol_energy_change(mbrane, vol_p, dvol);
+            de = (Efin - Eini);  + de_vol;
+        }
         if(vol_p.is_pressurized){
             de_pressure = PV_change(vol_p.pressure, dvol);
             de = (Efin - Eini);  + de_pressure;
         }
-        de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
-              + (dvol/ini_vol)*(dvol/ini_vol);
-
-        de_vol = KAPPA*de_vol;
-        de = (Efin - Eini);  + de_vol;
     }
 
     if (mcpara.algo == "mpolis") {

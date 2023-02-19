@@ -34,7 +34,7 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
         SPRING_p spring_para, FILE *fid ){
 
-    string log_headers = "#iter acceptedmoves total_e bend_e stretch_e";
+    string log_headers = "#iter acceptedmoves total_e bend_e stretch_e ";
     /* if(area_para.is_stick){log_headers+="stick_e ";} */
     if(stick_para.do_stick){log_headers+="stick_e ";}
     if(afm_para.do_afm){log_headers+="afm_e ";}
@@ -44,7 +44,7 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
     if (afm_para.do_afm){log_headers+="afm_fx, afm_fy afm_fz ";}
     if (spring_para.do_spring){log_headers+="spr_north.z spr_south.z ";}
     /* log_headers+="volume nPole_z sPole_z hrms"; */
-    log_headers+="volume ";
+    log_headers+=" volume ";
     fprintf(fid, "%s\n", log_headers.c_str());
     fflush(fid);
 }
@@ -81,9 +81,9 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     if(vol_para.do_volume){
         vol_sph = volume_total(Pos, mesh, mbrane_para);
         double  ini_vol = (4./3.)*pi*pow(mbrane_para.radius,3);
+        mbrane_para.volume[0] = vol_sph;
         if(!vol_para.is_pressurized){
             Et[4] = vol_para.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
-            mbrane_para.volume[0] = vol_sph;
             fprintf(fid, " %g", Et[4]);
         }
         if(vol_para.is_pressurized){
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]){
     write_parameters(mbrane_para, mc_para, area_para, fld_para, vol_para,
             stick_para, afm_para,  act_para, spring_para, filename);
 
-    printf("%lf \n", mbrane_para.tot_energy[0]);
+    //printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
     start_time = MPI_Wtime();
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){
@@ -228,7 +228,7 @@ int main(int argc, char *argv[]){
                 vol_para,  afm_para,  act_para, spring_para,  fid );
         cout << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
-            " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;
+            " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << mbrane_para.volume[0]<< endl;
 
     }
     end_time = MPI_Wtime();

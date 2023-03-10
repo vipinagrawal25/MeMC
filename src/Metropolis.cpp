@@ -208,67 +208,63 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   move = 0;
 
   for (i = 0; i < mcpara.one_mc_iter; i++) {
-    int idx = rand_int(rng);
+      int idx = rand_int(rng);
 
-    Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
-                        afm, spring);
-    if(vol_p.do_volume) vol_i = volume_ipart(pos,
-            (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+      Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
+              afm, spring);
+      if(vol_p.do_volume) vol_i = volume_ipart(pos,
+              (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
 
-    x_o = pos[idx].x;
-    y_o = pos[idx].y;
-    z_o = pos[idx].z;
+      x_o = pos[idx].x;
+      y_o = pos[idx].y;
+      z_o = pos[idx].z;
 
-    dxinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
-    dyinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
-    dzinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
+      dxinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
+      dyinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
+      dzinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
 
-    x_n = x_o + dxinc;
-    y_n = y_o + dyinc;
-    z_n = z_o + dzinc;
+      x_n = x_o + dxinc;
+      y_n = y_o + dyinc;
+      z_n = z_o + dzinc;
 
-    pos[idx].x = x_n;
-    pos[idx].y = y_n;
-    pos[idx].z = z_n;
+      pos[idx].x = x_n;
+      pos[idx].y = y_n;
+      pos[idx].z = z_n;
 
-    Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
-                        afm, spring);
+      Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
+              afm, spring);
 
-    de = (Efin - Eini);
+      de = (Efin - Eini);
+      if(vol_p.do_volume){
+          vol_f = volume_ipart(pos,
+                  (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+          dvol=0.5*(vol_f - vol_i);
 
-    if(vol_p.do_volume){
-       vol_f = volume_ipart(pos,
-            (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+          if(!vol_p.is_pressurized){
+              de_vol = vol_energy_change(mbrane, vol_p, dvol);
+              de = (Efin - Eini);  + de_vol;
+          }
+          if(vol_p.is_pressurized){
+              de_pressure = PV_change(vol_p.pressure, dvol);
+              de = (Efin - Eini)  + de_pressure;
+          }
+      }
+      if (mcpara.algo == "mpolis") {
+          yes = Metropolis(de, activity.activity[idx], mcpara);
+      } else if (mcpara.algo == "glauber") {
+          yes = Glauber(de, activity.activity[idx], mcpara);
+      }
 
-        dvol=0.5*(vol_f - vol_i);
-        de_vol = vol_energy_change(mbrane, vol_p, dvol);
-        if(vol_p.is_pressurized){
-            de_pressure = PV_change(vol_p.pressure, dvol);
-            de = (Efin - Eini)  + de_pressure;
-        }else{
-            de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
-                + (dvol/ini_vol)*(dvol/ini_vol);
-
-            de_vol = KAPPA*de_vol;
-            de = (Efin - Eini)  + de_vol;
-        }
-
-        if (mcpara.algo == "mpolis") {
-            yes = Metropolis(de, activity.activity[idx], mcpara);
-        } else if (mcpara.algo == "glauber") {
-            yes = Glauber(de, activity.activity[idx], mcpara);
-        }
-
-        if (yes) {
-            move = move + 1;
-            mbrane.tot_energy[0] += de;
-            if(vol_p.do_volume) mbrane.volume[0] += dvol; 
-        } else {
-            pos[idx].x = x_o;
-            pos[idx].y = y_o;
-            pos[idx].z = z_o;
-        }
-    }
+      if (yes) {
+          move = move + 1;
+          mbrane.tot_energy[0] += de;
+          if(vol_p.do_volume) mbrane.volume[0] += dvol; 
+      } else {
+          pos[idx].x = x_o;
+          pos[idx].y = y_o;
+          pos[idx].z = z_o;
+      }
+  }
   return move;
 }
 

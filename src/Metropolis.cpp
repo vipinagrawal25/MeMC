@@ -244,31 +244,31 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
         de_vol = vol_energy_change(mbrane, vol_p, dvol);
         if(vol_p.is_pressurized){
             de_pressure = PV_change(vol_p.pressure, dvol);
-            de = (Efin - Eini);  + de_pressure;
+            de = (Efin - Eini)  + de_pressure;
+        }else{
+            de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
+                + (dvol/ini_vol)*(dvol/ini_vol);
+
+            de_vol = KAPPA*de_vol;
+            de = (Efin - Eini)  + de_vol;
         }
-        de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
-              + (dvol/ini_vol)*(dvol/ini_vol);
 
-        de_vol = KAPPA*de_vol;
-        de = (Efin - Eini);  + de_vol;
-    }
+        if (mcpara.algo == "mpolis") {
+            yes = Metropolis(de, activity.activity[idx], mcpara);
+        } else if (mcpara.algo == "glauber") {
+            yes = Glauber(de, activity.activity[idx], mcpara);
+        }
 
-    if (mcpara.algo == "mpolis") {
-      yes = Metropolis(de, activity.activity[idx], mcpara);
-    } else if (mcpara.algo == "glauber") {
-      yes = Glauber(de, activity.activity[idx], mcpara);
+        if (yes) {
+            move = move + 1;
+            mbrane.tot_energy[0] += de;
+            if(vol_p.do_volume) mbrane.volume[0] += dvol; 
+        } else {
+            pos[idx].x = x_o;
+            pos[idx].y = y_o;
+            pos[idx].z = z_o;
+        }
     }
-
-    if (yes) {
-      move = move + 1;
-      mbrane.tot_energy[0] += de;
-      if(vol_p.do_volume) mbrane.volume[0] += dvol; 
-    } else {
-      pos[idx].x = x_o;
-      pos[idx].y = y_o;
-      pos[idx].z = z_o;
-    }
-  }
   return move;
 }
 

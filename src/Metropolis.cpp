@@ -136,6 +136,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   /// @return Change in Energy when idx particle is moved
 
   double E_b, E_s, E_stick, E_afm, E_spr, area_i;
+  Vec2d be_ar;
   int cm_idx, num_nbr;
 
   E_b = 0.0;
@@ -147,8 +148,9 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];
 
-  E_b = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
+  be_ar = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
                              idx, mbrane);
+  E_b = be_ar.x;
 
   E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
 

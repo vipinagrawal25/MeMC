@@ -183,8 +183,8 @@ int main(int argc, char *argv[]){
          spring_para, fid );
 
 
-    /* fprintf(stderr, " The total area %g \n", area_total(Pos, mesh, mbrane_para)); */
-    /* exit(0); */
+/*     fprintf(stderr, " The total area %g \n", area_total(Pos, mesh, mbrane_para)); */
+/*     exit(0); */
 
     fprintf(fid , "%d %g", 0, 0.0 );
     Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para,  stick_para,

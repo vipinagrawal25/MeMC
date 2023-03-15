@@ -227,7 +227,7 @@ double voronoi_area(double cotJ, double cotK,
     return sigma;
 }
 //
-double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
+Vec2d bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
                             int idx, MBRANE_p para){
 
     /// @brief Estimate the Bending energy contribution when ith particle position changes
@@ -246,6 +246,7 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     // lap_bel:Laplace Beltrami operator for sphere is 2\kappa\nhat
     // nhat is outward normal.
     Vec3d lap_bel,lap_bel_t0,nhat;
+    Vec2d be_ar;
     //
     double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
     double area_ijk,area_ijkp;
@@ -300,7 +301,8 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     lap_bel = cot_times_rij/sigma_i;
     lap_bel_t0 = nhat*curv_t0;
     bend_ener = 0.5*BB*sigma_i*normsq(lap_bel-lap_bel_t0);
-    return bend_ener;
+    be_ar.x = bend_ener; be_ar.y = sigma_i;
+    return be_ar;
 }
 
 double bending_energy_ipart_neighbour(Vec3d *pos, 
@@ -317,6 +319,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
    int num_nbr_j;
    int nbr, cm_idx_nbr;
    double be;
+   Vec2d be_ar;
 
    be = 0e0;
 
@@ -324,10 +327,10 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
        nbr = mesh.node_nbr_list[j];
        num_nbr_j = mesh.numnbr[nbr];
        cm_idx_nbr = nbr*mesh.nghst;
-       be += bending_energy_ipart(pos, 
+       be_ar = bending_energy_ipart(pos, 
               (int *) mesh.node_nbr_list + cm_idx_nbr,
                num_nbr_j, nbr, para);
-
+       be = be + be_ar.x;
    
    }
    return be;
@@ -346,6 +349,8 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
      int idx, st_idx;
      int num_nbr, cm_idx;
      double area;
+     Vec2d be_ar;
+
 
      st_idx = get_nstart(para.N, para.bdry_type);
      area = 0e0;
@@ -354,11 +359,13 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
          cm_idx = idx*mesh.nghst;
          num_nbr = mesh.numnbr[idx];
 
-       area += area_ipart(pos,
+         be_ar = bending_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
-                  num_nbr, idx);
+                  num_nbr, idx, para);
+         area += be_ar.y;
+
      }
-     return area/3e0;
+     return area;
 }
 
 
@@ -404,6 +411,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
      int idx, st_idx;
      int num_nbr, cm_idx;
      double be;
+     Vec2d be_ar;
 
      be = 0e0;
      st_idx = get_nstart(para.N, para.bdry_type);
@@ -413,9 +421,10 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
          cm_idx = idx*mesh.nghst;
          num_nbr = mesh.numnbr[idx];
 
-         be += bending_energy_ipart(pos,
+         be_ar = bending_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
                   num_nbr, idx, para);
+         be = be + be_ar.x;
      }
      return be;
 }

@@ -39,9 +39,8 @@ double pairlj_ipart_energy(Vec2d *Pos, int *n_list,
 double pairlj_total_energy(Vec2d *Pos, Nbh_list *neib,
         LJ_p para, char *metric);
 //forces_surf.c
-double vol_energy_change(MBRANE_p mbrane, VOL_p , double dvol);
 double bending_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para);
-double bending_energy_ipart(Vec3d *pos, int *node_nbr,  
+Vec2d bending_energy_ipart(Vec3d *pos, int *node_nbr,  
         int num_nbr, int idx, MBRANE_p para);
 double bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH_p mesh, int idx, MBRANE_p para);
@@ -75,7 +74,6 @@ double area_ipart(Vec3d *, int *, int , int);
 
 //init.c
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
-double PV_change(double ,double );
 double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring);
 double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
                                MESH_p mesh, SPRING_p spring);

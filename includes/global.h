@@ -69,6 +69,7 @@ typedef struct{
     double av_bond_len; // average length of the bond
     double *tot_energy;
     double *volume; // these are updated after each monte carlo 
+    double *area; // these are updated after each monte carlo 
     int N;   // number of particles in mesh
     double len;
     int bdry_type;
@@ -78,7 +79,7 @@ typedef struct{
 typedef struct{
     bool is_tether;
     double YY;
-    double sigma;
+    double Ka;
 }AREA_p;
 
 typedef struct{

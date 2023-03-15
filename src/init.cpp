@@ -237,7 +237,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
             &vol_para->coef_vol_expansion, &vol_para->pressure, tmp_fname);
 
     Area_listread(&area_para->is_tether, &area_para->YY,
-            &area_para->sigma, tmp_fname);
+            &area_para->Ka, tmp_fname);
 
 
   // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
@@ -280,7 +280,7 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
     out_<< "# =========== Area Parameters ==========" << endl
             << " is tether = " << area_para.is_tether << endl
             << " YY " << area_para.YY << endl
-            << " sigma " << area_para.sigma << endl;
+            << " sigma " << area_para.Ka << endl;
 
 
     out_<< "# =========== Activity Parameters ==========" << endl

@@ -120,7 +120,7 @@ double rand_inc_theta(double th0, double dfac) {
 }
 
 double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
-                    int idx, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
+                    int idx, double *area_i, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
                     VOL_p vol_p, AFM_p afm, SPRING_p spring) {
   /// @brief Estimate the contribution from all the energies when a particle is
   /// moved randomly
@@ -135,7 +135,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   /// @param AFM afm related parameter
   /// @return Change in Energy when idx particle is moved
 
-  double E_b, E_s, E_stick, E_afm, E_spr, area_i;
+  double E_b, E_s, E_stick, E_afm, E_spr;
   Vec2d be_ar;
   int cm_idx, num_nbr;
 
@@ -158,12 +158,9 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
               (lij_t0 + cm_idx), num_nbr, idx, area_p);
   }
-  else{
-      area_i = area_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
-              num_nbr, idx);
-      E_s = area_p.sigma*area_i/3.0e0;
 
-  }
+  *area_i = be_ar.y; 
+
 
   if(st_p.do_stick)
   E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
@@ -197,7 +194,9 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   double dxinc, dyinc, dzinc;
   double vol_i, vol_f;
   double dvol, de_vol, ini_vol, de_pressure;
-  double KAPPA;
+  double kappa;
+  double area_i, area_f, ini_ar;
+  double d_ar, de_area;
   bool yes;
 
   int nframe;
@@ -206,13 +205,15 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
   std::uniform_real_distribution<> rand_real(-1, 1);
   ini_vol = (4. / 3.) * pi * pow(mbrane.radius, 3);
-  KAPPA = vol_p.coef_vol_expansion;
+  /* if(mbrane.bdry_type == 0 || mbrane.bdry_type == 1 ) */
+  ini_ar = 4 * pi * mbrane.radius*mbrane.radius; 
+  kappa = vol_p.coef_vol_expansion;
   move = 0;
 
   for (i = 0; i < mcpara.one_mc_iter; i++) {
       int idx = rand_int(rng);
 
-      Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
+      Eini = energy_mc_3d(pos, mesh, lij_t0, idx, &area_i, mbrane, area_p, st_p, vol_p,
               afm, spring);
       if(vol_p.do_volume) vol_i = volume_ipart(pos,
               (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
@@ -233,22 +234,30 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       pos[idx].y = y_n;
       pos[idx].z = z_n;
 
-      Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
+      Efin = energy_mc_3d(pos, mesh, lij_t0, idx, &area_f, mbrane, area_p, st_p, vol_p,
               afm, spring);
 
       de = (Efin - Eini);
+      if(area_p.is_tether){
+          d_ar = area_f = area_i;
+         de_area = (2*d_ar/(ini_ar*ini_ar))*(*mbrane.area  - ini_ar)
+                  + (d_ar/ini_ar)*(d_ar/ini_ar);
+
+            de +=  area_p.Ka*de_area;
+      }
       if(vol_p.do_volume){
           vol_f = volume_ipart(pos,
                   (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
           dvol=0.5*(vol_f - vol_i);
 
           if(!vol_p.is_pressurized){
-              de_vol = vol_energy_change(mbrane, vol_p, dvol);
-              de = (Efin - Eini);  + de_vol;
+              de_vol = (2*dvol/(ini_vol*ini_vol))*(*mbrane.volume  - ini_vol)
+                  + (dvol/ini_vol)*(dvol/ini_vol);
+              de +=  kappa*de_vol;
           }
           if(vol_p.is_pressurized){
-              de_pressure = PV_change(vol_p.pressure, dvol);
-              de = (Efin - Eini)  + de_pressure;
+              de_pressure = vol_p.pressure*dvol;
+              de +=  de_pressure;
           }
       }
       if (mcpara.algo == "mpolis") {
@@ -259,8 +268,9 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 
       if (yes) {
           move = move + 1;
-          mbrane.tot_energy[0] += de;
-          if(vol_p.do_volume) mbrane.volume[0] += dvol; 
+          *mbrane.tot_energy += de;
+          if(vol_p.do_volume) *mbrane.volume += dvol; 
+          *mbrane.area += d_ar; 
       } else {
           pos[idx].x = x_o;
           pos[idx].y = y_o;
@@ -369,7 +379,7 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
   double det1, det2;
   Vec3d bef_ij, aft_ij;
 
-  double KAPPA;
+  double kappa;
   bool yes, logic;
 
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);

@@ -627,23 +627,7 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
     return ener_spr;
 }
 //
-//
-double vol_energy_change(MBRANE_p mbrane, VOL_p volp, double dvol){
-    double KAPPA = volp.coef_vol_expansion;
-    double de_vol=0.0;
-    double ini_vol = (4./3.)*pi*pow(mbrane.radius,3);
-    if (fabs(KAPPA)>1e-16){
-        de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
-            + (dvol/ini_vol)*(dvol/ini_vol);
-       de_vol = KAPPA*de_vol;
-    }
-    return de_vol;
-}
-//
-double PV_change(double pressure, double dvol){ 
-    return pressure*dvol;
-}
-//
+
 double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
     if (spring.icompute==0) return 0;
     double ener_spr=0e0;

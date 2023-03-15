@@ -37,13 +37,13 @@ subroutine convert_fstr_cstr(f_str, c_str)
 end subroutine
 
 
-subroutine Area_listread(is_tethered, YY, sigma, parafile) bind(c, name='Area_listread')
-    real(kind=c_double) :: YY, sigma
+subroutine Area_listread(is_tethered, YY, Ka, parafile) bind(c, name='Area_listread')
+    real(kind=c_double) :: YY, Ka
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     logical(c_bool) :: is_tethered
     character(len=char_len) :: f_fname
 
-    namelist /Areapara/ is_tethered, YY, sigma
+    namelist /Areapara/ is_tethered, YY, Ka
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=Areapara)

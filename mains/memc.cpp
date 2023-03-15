@@ -53,7 +53,7 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
         MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
         SPRING_p spring_para, FILE *fid ){
-    double vol_sph;
+    double vol_sph, ar_sph, ini_ar;
     double Ener_t;
     Vec3d afm_force,spring_force[2];
 
@@ -63,9 +63,12 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     if(area_para.is_tether){
         Et[1] = stretch_energy_total(Pos, mesh, lij_t0, mbrane_para, area_para);
     }else{
-        Et[1] = area_para.sigma*area_total(Pos, mesh,  mbrane_para);
+        ar_sph = area_total(Pos, mesh, mbrane_para);
+        ini_ar = (4.)*pi*pow(mbrane_para.radius,2);
+        *mbrane_para.area = ar_sph;
+        Et[1] = area_para.Ka*(ar_sph/ini_ar - 1e0)*(ar_sph/ini_ar - 1e0);
     }
-    fprintf(fid, " %g %g %g", mbrane_para.tot_energy[0], Et[0], Et[1]);
+    fprintf(fid, " %g %g %g", *mbrane_para.tot_energy, Et[0], Et[1]);
     if(stick_para.do_stick){
         Et[2] = lj_bottom_surf_total(Pos, mbrane_para, stick_para);
         fprintf(fid, " %g", Et[2]);
@@ -81,7 +84,7 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     if(vol_para.do_volume){
         vol_sph = volume_total(Pos, mesh, mbrane_para);
         double  ini_vol = (4./3.)*pi*pow(mbrane_para.radius,3);
-        mbrane_para.volume[0] = vol_sph;
+        *mbrane_para.volume = vol_sph;
         if(!vol_para.is_pressurized){
             Et[4] = vol_para.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
             fprintf(fid, " %g", Et[4]);
@@ -103,7 +106,6 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
 
 int main(int argc, char *argv[]){
     pid_t pid = getpid();
-    cout << "# ID for this process is: " << pid << endl;
     //
     int iter, num_moves, num_bond_change;
     double Et[7], Ener_t;
@@ -129,6 +131,9 @@ int main(int argc, char *argv[]){
     seed_v = (uint32_t) 7*3*11*(mpi_rank+1)*rand();
     init_rng(seed_v);
     //
+    //
+
+    cout << "# ID for this process is: " << pid << endl;
     outfolder = ZeroPadNumber(mpi_rank)+"/";
     cout << "I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
@@ -145,11 +150,11 @@ int main(int argc, char *argv[]){
 
    // check whether the string comparison works
    /* define all the paras */
-    mbrane_para.volume = (double *)calloc(1, sizeof(double)); 
-    mbrane_para.volume[0] = (4./3.)*pi*pow(mbrane_para.radius,3);
-    mbrane_para.tot_energy = (double *)calloc(1, sizeof(double));
+    cout << "I am in line 153 "<<  endl;
+    *mbrane_para.volume = (4./3.)*pi*pow(mbrane_para.radius,3);
+    cout << "I am in line 155 "<<  endl;
     act_para.activity = (double *)calloc(mbrane_para.N, sizeof(double));
-    mbrane_para.tot_energy[0] = 0e0;
+    *mbrane_para.tot_energy = 0e0;
     init_activity(act_para, mbrane_para.N);
     // allocate arrays
     Pos = (Vec3d *)calloc(mbrane_para.N, sizeof(Vec3d));

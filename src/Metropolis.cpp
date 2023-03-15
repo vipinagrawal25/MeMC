@@ -1,3 +1,4 @@
+#include "Vector.h"
 #include "global.h"
 #include "subroutine.h"
 #include <cmath>
@@ -121,7 +122,7 @@ double rand_inc_theta(double th0, double dfac) {
 
 double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
                     int idx, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
-                    VOL_p vol_p, AFM_p afm, SPRING_p spring) {
+                    VOL_p vol_p, AFM_p afm, SHEAR_p shear) {
   /// @brief Estimate the contribution from all the energies when a particle is
   /// moved randomly
   ///  @param Pos array containing co-ordinates of all the particles
@@ -137,6 +138,10 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 
   double E_b, E_s, E_stick, E_afm, E_spr, area_i;
   int cm_idx, num_nbr;
+  Vec2d be_ar;
+
+  int nframe;
+  nframe = get_nstart(mbrane.N, mbrane.bdry_type);
 
   E_b = 0.0;
   E_s = 0.0;
@@ -147,36 +152,105 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];
 
-  E_b = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
-                             idx, mbrane);
 
-  E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
+      be_ar = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
+              idx, mbrane);
+      E_b = be_ar.x;
 
-  if(area_p.is_tether){
-      E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-              (lij_t0 + cm_idx), num_nbr, idx, area_p);
-  }
-  else{
-      area_i = area_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
-              num_nbr, idx);
-      E_s = area_p.sigma*area_i/3.0e0;
+      E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
 
-  }
+      if(area_p.is_tether){
+          E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+                  (lij_t0 + cm_idx), num_nbr, idx, area_p);
+      }
+      else{
+          area_i = be_ar.y; // TODO Work on this part; 
+                            //area_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
+                            //num_nbr, idx);
+          E_s = area_p.sigma*area_i;
 
-  if(st_p.do_stick)
-  E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
-      st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
+      }
 
-    if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
+      if(st_p.do_stick)
+          E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
+                  st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
 
-    if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring);
+      if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
+
+      /* fprintf(stderr, "%d \n", idx); */
+     /* if(spring.do_spring) E_spr = frame_spring_energy(pos[idx], spring); */ 
+      /* if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring); */
   return E_b + E_s + E_stick + E_afm + E_spr;
 }
+
+int monte_carlo_shear(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,  double *lij_t0,
+        MBRANE_p mbrane,  ACTIVE_p activity,
+        MC_p mcpara, AREA_p area_p, SHEAR_p shear) {
+
+  /// @brief Monte-Carlo routine for the membrane
+  ///  @param Pos array containing co-ordinates of all the particles
+  ///  @param mesh mesh related parameters -- connections and neighbours
+  /// information
+  /// @param lij_t0 initial distance between points of membrane
+  /// @param is_attractive true if the zz sees the  bottom wall
+  ///  @param mbrane  Membrane related parameters;
+  /// @param mcpara Monte-Carlo related parameters
+  /// @param AFM afm related parameter
+  /// @return number of accepted moves
+  int i, move, cm_idx, num_nbr;
+  double x_o, y_o, z_o, x_n, y_n, z_n;
+  double de, Eini, Efin;
+  double dxinc;
+  bool yes;
+
+  int nframe = 0;
+  nframe = get_nstart(mbrane.N, mbrane.bdry_type);
+  std::uniform_int_distribution<uint32_t> rand_int(0, nframe);
+  std::uniform_real_distribution<> rand_real(-1, 1);
+
+  move = 0;
+
+  for (i = 0; i < 2*nframe; i++) {
+    int idx = rand_int(rng);
+    cm_idx = mesh.nghst * idx;
+    num_nbr = mesh.numnbr[idx];
+
+
+    Eini = frame_spring_energy(pos[idx], pos_t0[idx], shear); 
+    Eini += stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+                  (lij_t0 + cm_idx), num_nbr, idx, area_p);
+
+    x_o = pos[idx].x;
+    dxinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
+    x_n = x_o + dxinc;
+    pos[idx].x = x_n;
+     Efin = frame_spring_energy(pos[idx], pos_t0[idx], shear); 
+    Efin += stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+                  (lij_t0 + cm_idx), num_nbr, idx, area_p);
+
+    de = (Efin - Eini);
+    if (mcpara.algo == "mpolis") {
+      yes = Metropolis(de, activity.activity[idx], mcpara);
+    } else if (mcpara.algo == "glauber") {
+      yes = Glauber(de, activity.activity[idx], mcpara);
+    }
+    if (yes) {
+      move = move + 1;
+      mbrane.tot_energy[0] += de;
+    } else {
+      pos[idx].x = x_o;
+    }
+  }
+  return move;
+}
+
+
+
 
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
                    MBRANE_p mbrane, MC_p mcpara, AREA_p area_p,  STICK_p st_p,
                    VOL_p vol_p, AFM_p afm,
-                   ACTIVE_p activity, SPRING_p spring) {
+                   ACTIVE_p activity, SHEAR_p shear) {
 
   /// @brief Monte-Carlo routine for the membrane
   ///  @param Pos array containing co-ordinates of all the particles
@@ -198,8 +272,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   double KAPPA;
   bool yes;
 
-  int nframe;
-
+  int nframe = 0;
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
   std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
   std::uniform_real_distribution<> rand_real(-1, 1);
@@ -211,7 +284,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     int idx = rand_int(rng);
 
     Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
-                        afm, spring);
+                        afm, shear);
     if(vol_p.do_volume) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
 
@@ -232,25 +305,23 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     pos[idx].z = z_n;
 
     Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
-                        afm, spring);
+                        afm, shear);
 
     de = (Efin - Eini);
 
     if(vol_p.do_volume){
-       vol_f = volume_ipart(pos,
-            (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-
+        vol_f = volume_ipart(pos,
+                (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
         dvol=0.5*(vol_f - vol_i);
-        de_vol = vol_energy_change(mbrane, vol_p, dvol);
+
+        if(!vol_p.is_pressurized){
+            de_vol = vol_energy_change(mbrane, vol_p, dvol);
+            de = (Efin - Eini)  + de_vol;
+        }
         if(vol_p.is_pressurized){
             de_pressure = PV_change(vol_p.pressure, dvol);
-            de = (Efin - Eini);  + de_pressure;
+            de = (Efin - Eini)  + de_pressure;
         }
-        de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
-              + (dvol/ini_vol)*(dvol/ini_vol);
-
-        de_vol = KAPPA*de_vol;
-        de = (Efin - Eini);  + de_vol;
     }
 
     if (mcpara.algo == "mpolis") {
@@ -370,9 +441,9 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
   int N_nbr_add2, N_nbr_add1;
   double det1, det2;
   Vec3d bef_ij, aft_ij;
-
   double KAPPA;
   bool yes, logic;
+  bool do_move_pt;
 
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
 
@@ -406,66 +477,74 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
       }
     }
 
+    if(fl_para.is_semifluid){
+        do_move_pt = fl_para.solid_idx[idx_del1] + fl_para.solid_idx[idx_del2] + 
+                     fl_para.solid_idx[idx_add1] + fl_para.solid_idx[idx_add2] == 0;
+    }else{
+        do_move_pt = true;
+    }
     /* det1 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del1], mbrane.len); */
     /* det2 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del2], mbrane.len); */
-    cm_idx_add1 = mesh.nghst * idx_add1;
-    cm_idx_add2 = mesh.nghst * idx_add2;
+    if(do_move_pt){
+
+        cm_idx_add1 = mesh.nghst * idx_add1;
+        cm_idx_add2 = mesh.nghst * idx_add2;
 
         /* if (det1 * det2 < 0.0) { */
-      aft_ij = pos[idx_add2] - pos[idx_add1];
-      double dl = norm(aft_ij);
+        aft_ij = pos[idx_add2] - pos[idx_add1];
+        double dl = norm(aft_ij);
 
-      N_nbr_del1 = mesh.numnbr[idx_del1];
-      N_nbr_del2 = mesh.numnbr[idx_del2];
-      bool accept_flip;
+        N_nbr_del1 = mesh.numnbr[idx_del1];
+        N_nbr_del2 = mesh.numnbr[idx_del2];
+        bool accept_flip;
 
-      accept_flip = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len) && 
-                    N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
+        accept_flip = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len) && 
+            N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
 
-      if (accept_flip) {
-        move = move + 1;
-        /* print_sanity(pos, mesh.node_nbr_list+cm_idx_del1,
-         * mesh.node_nbr_list+cm_idx_del2, */
-        /*         mesh.node_nbr_list+cm_idx_add1,
-         * mesh.node_nbr_list+cm_idx_add2, */
-        /*         idx_del1, idx_del2, idx_add1, idx_add2, (char*)"bef", i); */
+        if (accept_flip) {
+            move = move + 1;
+            /* print_sanity(pos, mesh.node_nbr_list+cm_idx_del1,
+             * mesh.node_nbr_list+cm_idx_del2, */
+            /*         mesh.node_nbr_list+cm_idx_add1,
+             * mesh.node_nbr_list+cm_idx_add2, */
+            /*         idx_del1, idx_del2, idx_add1, idx_add2, (char*)"bef", i); */
 
-        memcpy(nbr_del_1, &mesh.node_nbr_list[cm_idx_del1],
-               sizeof(int) * mesh.nghst);
-        memcpy(nbr_del_2, &mesh.node_nbr_list[cm_idx_del2],
-               sizeof(int) * mesh.nghst);
-        memcpy(nbr_add_1, &mesh.node_nbr_list[cm_idx_add1],
-               sizeof(int) * mesh.nghst);
-        memcpy(nbr_add_2, &mesh.node_nbr_list[cm_idx_add2],
-               sizeof(int) * mesh.nghst);
+            memcpy(nbr_del_1, &mesh.node_nbr_list[cm_idx_del1],
+                    sizeof(int) * mesh.nghst);
+            memcpy(nbr_del_2, &mesh.node_nbr_list[cm_idx_del2],
+                    sizeof(int) * mesh.nghst);
+            memcpy(nbr_add_1, &mesh.node_nbr_list[cm_idx_add1],
+                    sizeof(int) * mesh.nghst);
+            memcpy(nbr_add_2, &mesh.node_nbr_list[cm_idx_add2],
+                    sizeof(int) * mesh.nghst);
 
-        // form the bond
-        N_nbr_add1 = add_nbr(nbr_add_1, mesh.numnbr[idx_add1], idx_add2,
-                             idx_del1, idx_del2);
-        N_nbr_add2 = add_nbr(nbr_add_2, mesh.numnbr[idx_add2], idx_add1,
-                             idx_del1, idx_del2);
+            // form the bond
+            N_nbr_add1 = add_nbr(nbr_add_1, mesh.numnbr[idx_add1], idx_add2,
+                    idx_del1, idx_del2);
+            N_nbr_add2 = add_nbr(nbr_add_2, mesh.numnbr[idx_add2], idx_add1,
+                    idx_del1, idx_del2);
 
-        // get divorced
-        N_nbr_del1 = del_nbr(nbr_del_1, mesh.numnbr[idx_del1], idx_del2);
-        N_nbr_del2 = del_nbr(nbr_del_2, mesh.numnbr[idx_del2], idx_del1);
+            // get divorced
+            N_nbr_del1 = del_nbr(nbr_del_1, mesh.numnbr[idx_del1], idx_del2);
+            N_nbr_del2 = del_nbr(nbr_del_2, mesh.numnbr[idx_del2], idx_del1);
 
-        memcpy(mesh.node_nbr_list + cm_idx_del1, &nbr_del_1,
-               sizeof(int) * mesh.nghst);
-        memcpy(mesh.node_nbr_list + cm_idx_del2, &nbr_del_2,
-               sizeof(int) * mesh.nghst);
-        mesh.numnbr[idx_del1] = N_nbr_del1;
-        mesh.numnbr[idx_del2] = N_nbr_del2;
+            memcpy(mesh.node_nbr_list + cm_idx_del1, &nbr_del_1,
+                    sizeof(int) * mesh.nghst);
+            memcpy(mesh.node_nbr_list + cm_idx_del2, &nbr_del_2,
+                    sizeof(int) * mesh.nghst);
+            mesh.numnbr[idx_del1] = N_nbr_del1;
+            mesh.numnbr[idx_del2] = N_nbr_del2;
 
-        memcpy(mesh.node_nbr_list + cm_idx_add1, &nbr_add_1,
-               sizeof(int) * mesh.nghst);
-        memcpy(mesh.node_nbr_list + cm_idx_add2, &nbr_add_2,
-               sizeof(int) * mesh.nghst);
-        mesh.numnbr[idx_add1] = N_nbr_add1;
-        mesh.numnbr[idx_add2] = N_nbr_add2;
+            memcpy(mesh.node_nbr_list + cm_idx_add1, &nbr_add_1,
+                    sizeof(int) * mesh.nghst);
+            memcpy(mesh.node_nbr_list + cm_idx_add2, &nbr_add_2,
+                    sizeof(int) * mesh.nghst);
+            mesh.numnbr[idx_add1] = N_nbr_add1;
+            mesh.numnbr[idx_add2] = N_nbr_add2;
 
             /* exit(0); */
-      }
-    /* } */
-  }
+        }
+    }
+    }
   return move;
 }

@@ -1,3 +1,4 @@
+#include "Vector.h"
 #include "global.h"
 #include "subroutine.h"
 std::mt19937 rng2;
@@ -19,9 +20,9 @@ extern "C"  void  Activity_listread(char *, double *, double *, char *);
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
 
-extern "C"  void  Spring_listread(bool *, int *, double *, double *, char *);
+extern "C"  void  Shear_listread(bool *,  double *, double *, char *);
 
-extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
+extern "C"  void  Fluid_listread(bool *, bool *, int * , int *, int *, double *, char *);
 extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
 
 
@@ -145,7 +146,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
 
 
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
-         MBRANE_p *para, SPRING_p *spring, bool is_fluid){
+         MBRANE_p *para, SHEAR_p *shear, bool is_fluid){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
    /// @param lij_t0 initial distance between points of membrane
@@ -174,7 +175,6 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
 
     para->av_bond_len = sum_lij/npairs;
     r0=para->av_bond_len;
-    spring->constant=para->coef_bend/(r0*r0);
     if(is_fluid){
         for(i = 0; i < mesh.nghst*para->N; i++){
             lij_t0[i] = para->av_bond_len;
@@ -184,7 +184,7 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
 
 void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_para, FLUID_p *fld_para, 
         VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
-        SPRING_p *spring_para, string para_file){
+        SHEAR_p *shear_para, string para_file){
    /// @brief read parameters from para_file 
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
@@ -215,8 +215,8 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
     mc_para->algo=temp_algo;
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
-    Spring_listread(&spring_para->do_spring, &spring_para->icompute, &spring_para->nPole_eq_z,
-            &spring_para->sPole_eq_z, tmp_fname);
+    Shear_listread(&shear_para->do_shear, 
+          &shear_para->slope,  &shear_para->constant, tmp_fname);
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Afm_listread(&afm_para->do_afm, &afm_para->tip_rad, 
@@ -229,8 +229,9 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
     act_para->act = which_act;
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    Fluid_listread(&fld_para->is_fluid, &fld_para->min_allowed_nbr,
-            &fld_para->fluidize_every, &fld_para->fac_len_vertices, tmp_fname);
+    Fluid_listread(&fld_para->is_fluid, &fld_para->is_semifluid, &fld_para->min_allowed_nbr,
+            &fld_para->fluidize_every, &fld_para->num_solid_points, 
+            &fld_para->fac_len_vertices, tmp_fname);
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Volume_listread(&vol_para->do_volume, &vol_para->is_pressurized,
@@ -249,7 +250,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
 //
 void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p fld_para, 
         VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
-        SPRING_p spring_para, string out_file){
+        SHEAR_p shear_para, string out_file){
  
     double FvK = area_para.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
     ofstream out_;
@@ -291,8 +292,10 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
 
     out_<< "# =========== Fluid Parameters ==========" << endl
             << " is fluid= " << fld_para.is_fluid << endl
+            << " is is_semifluid= " << fld_para.is_semifluid << endl
             << " min_allowed_nbr = " << fld_para.min_allowed_nbr << endl
             << " fluid iter every " << fld_para.fluidize_every << endl
+            << " num solid points " << fld_para.num_solid_points << endl
             << " factor_len_vertices = " << fld_para.fac_len_vertices << endl;
 
 
@@ -310,18 +313,16 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
             << " epsilon " << stick_para.epsilon << endl
             << " theta " << stick_para.theta << endl;
 
-    out_<< "# =========== Spring Parameters ==========" << endl
-            << " do spring " << spring_para.do_spring << endl
-            << " icompute  " << spring_para.icompute << endl
-            << " constant " << spring_para.constant << endl
-            << " nPole_eq_z " << spring_para.nPole_eq_z << endl
-            << " sPole_eq_z " << spring_para.sPole_eq_z << endl;
+    out_<< "# =========== Shear Parameters ==========" << endl
+            << " do shear " << shear_para.do_shear << endl
+            << " constant " << shear_para.constant << endl
+            << " slope " << shear_para.slope << endl;
 
     out_.close();
 }
 
-void identify_attractive_part(Vec3d *pos, 
-        bool *is_attractive, double theta_attr, int N){
+void init_stick_bottom(Vec3d *pos, MESH_p mesh, STICK_p stick, 
+        FLUID_p fld_para, MBRANE_p mbrane){
 
     /// @brief identify all the points which substends theta_attr with the centre 
     ///  @param Pos array containing co-ordinates of all the particles
@@ -329,15 +330,54 @@ void identify_attractive_part(Vec3d *pos,
     ///  @param theta_attr \Theta_0 see paper/paper.pdf 
     /// N number of points making the membrane
     ///
-    int i; 
+    // Okay need to think carefully to make this subroutine more general.
+
+    int i, idx, cm_idx, num_nbr; 
+    int j, idxn;
     double theta;
-    for(i= 0; i<N; i++){
-        theta = pi - acos(pos[i].z);
-        is_attractive[i] = theta < theta_attr;
+    int nframe;
+    nframe = get_nstart(mbrane.N, mbrane.bdry_type);
+
+    std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
+
+    for(i= 0; i<mbrane.N; i++)fld_para.solid_idx[i] = 0;
+
+    if(fld_para.is_semifluid){ 
+        for(i= 0; i<fld_para.num_solid_points; i++){
+            int idx = rand_int(rng2);
+            stick.is_attractive[idx] = true;
+            cm_idx = mesh.nghst * idx;
+            num_nbr = mesh.numnbr[idx];
+            fld_para.solid_idx[idx] = 1;
+            for(j= cm_idx; j<cm_idx+num_nbr; j++){
+                idxn = mesh.node_nbr_list[j];
+                fld_para.solid_idx[idxn] = 1;
+            }
+
+        }
+    }
+
+    if(stick.theta > 1e-12){
+        for(i= 0; i<mbrane.N; i++){
+            theta = pi - acos(pos[i].z);
+            if(stick.do_stick){ 
+                stick.is_attractive[i] = theta < stick.theta;
+            }else{
+                stick.is_attractive[i] = false;
+            }
+        }
     }
 }
 
-
+void shear_positions(Vec3d *Pos, int N, SHEAR_p shear ){
+    int i, j;
+    double kk = shear.constant;
+    double shift_y = shear.slope;
+    double ener_spr, xmin;
+    for(i=0; i<N; i++){
+        Pos[i].x = Pos[i].x + shift_y*(Pos[i].y - 3.14159); // TODO length hard coded remove it
+    }
+}
 
 void init_activity(ACTIVE_p activity, int N){
     int i;

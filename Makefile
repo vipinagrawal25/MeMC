@@ -4,9 +4,9 @@ CC = mpic++
 #
 opt=-O3
 # opt=-pg
-# ifeq ($(debug), y)
-# 	opt = -g3  -Wall -pedantic
-# endif
+ifeq ($(debug), y)
+	opt = -g3  -Wall -pedantic
+endif
 
 link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
@@ -27,7 +27,7 @@ all : start memc
 	mv exe* $(bindir)/
 
 obj/readnml.o: src/read_namelist.f90
-	gfortran -c src/read_namelist.f90 -o obj/readnml.o
+	gfortran -c -Iobj -Jobj src/read_namelist.f90 -o obj/readnml.o
 
 start: $(object) obj/start.o obj/readnml.o
 	$(CC) $(object) obj/start.o obj/readnml.o $(link) -lgfortran -o exe_start

@@ -157,36 +157,34 @@ end subroutine
 
 
 
-subroutine Fluid_listread(is_fluid,  min_allowed_nbr, fluidize_every, fac_len_vert, &
+subroutine Fluid_listread(is_fluid, is_semifluid,  min_allowed_nbr, fluidize_every, num_solidpoints, fac_len_vert, &
          parafile) bind(c, name='Fluid_listread')
 
-     logical(kind=c_bool) :: is_fluid
-     integer(kind=c_int) :: min_allowed_nbr, fluidize_every
+     logical(kind=c_bool) :: is_fluid, is_semifluid
+     integer(kind=c_int) :: min_allowed_nbr, fluidize_every, num_solidpoints
      real(kind=c_double) :: fac_len_vert
      character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
      character(len=char_len) :: f_fname
 
-    namelist /fluidpara/ is_fluid, min_allowed_nbr, fluidize_every, fac_len_vert
+    namelist /fluidpara/ is_fluid, is_semifluid,  min_allowed_nbr, fluidize_every, num_solidpoints, fac_len_vert
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=fluidpara)
     close(unit=100)
 end subroutine
 
-subroutine Spring_listread(do_spring, icompute, nPole_eq_z, sPole_eq_z, &
-         parafile) bind(c, name='Spring_listread')
+subroutine Shear_listread(do_shear, slope, constant, & 
+        parafile) bind(c, name='Shear_listread')
 
-       real(c_double) :: nPole_eq_z, sPole_eq_z
-       integer(c_int) :: icompute
-       logical(kind=c_bool) :: do_spring
-       character(kind=c_char, len=1), dimension(char_len) :: which_act
-       character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
+    real(c_double) :: slope, constant
+    logical(kind=c_bool) :: do_shear
+    character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
     character(len=char_len) :: f_fname
 
-    namelist /springpara/ do_spring, icompute, nPole_eq_z, sPole_eq_z 
+    namelist /shearpara/ do_shear, slope, constant
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
-    read(unit=100,nml=springpara)
+    read(unit=100,nml=shearpara)
     close(unit=100)
 
      end subroutine

@@ -83,9 +83,12 @@ typedef struct{
 
 typedef struct{
     bool is_fluid;
+    bool is_semifluid;
     int min_allowed_nbr;
     int fluidize_every;
     double fac_len_vertices;
+    int num_solid_points;
+    int *solid_idx;
     // fac_len_vertices time the average length
 }FLUID_p;
 
@@ -151,11 +154,9 @@ typedef struct{
 }Nbh_list;
 //
 typedef struct{
-    bool do_spring;
-    int icompute;
+    bool do_shear;
     double constant;
-    double nPole_eq_z;
-    double sPole_eq_z;
-}SPRING_p;
+    double slope;
+}SHEAR_p;
 
 #endif

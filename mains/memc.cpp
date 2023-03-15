@@ -1,30 +1,45 @@
-#include "../includes/global.h"
-#include "../includes/subroutine.h"
+#include "Vector.h"
+#include "global.h"
+#include "subroutine.h"
+#include <cstring>
 //
+
+void debug_io_write_pos(Vec3d *Pos, int N, string outfile){
+    FILE *fid; 
+
+    int nframe;
+    fid = fopen(outfile.c_str(), "w");
+
+    nframe = get_nstart(N, 1);
+    for(int i = 0; i<nframe; i++) {
+        fprintf(fid, "%g %g\n",Pos[i].x, Pos[i].y);
+    }
+
+    fclose(fid);
+}
+
 double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0, 
                     MBRANE_p mbrane_para, MC_p mc_para, STICK_p stick_para,
                     VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
-                    SPRING_p spring_para, FLUID_p fld_para, string outfolder){
+                    SHEAR_p shear_para, FLUID_p fld_para, string outfolder){
     double Pole_zcoord;
     if(!mc_para.is_restart){
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
-        if(stick_para.do_stick)
-            identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
+        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
+        init_stick_bottom(Pos, mesh , stick_para , fld_para , mbrane_para );
+        hdf5_io_dump_stickidx(fld_para.solid_idx, mbrane_para.N, outfolder+ "/stick_pos.h5");
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
     }else{
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
-        if(stick_para.do_stick)
-            identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
+        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
-        identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
+        init_stick_bottom(Pos, mesh , stick_para , fld_para , mbrane_para );
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/restart.h5");
     }
     return Pole_zcoord;
@@ -32,17 +47,16 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
 
 void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
-        SPRING_p spring_para, FILE *fid ){
+        SHEAR_p shear_para, FILE *fid ){
 
     string log_headers = "#iter acceptedmoves total_e bend_e stretch_e";
     /* if(area_para.is_stick){log_headers+="stick_e ";} */
     if(stick_para.do_stick){log_headers+="stick_e ";}
     if(afm_para.do_afm){log_headers+="afm_e ";}
-    if (spring_para.do_spring){log_headers+="spring_e ";}
+    if (shear_para.do_shear){log_headers+="spring_e ";}
     if(vol_para.do_volume && !vol_para.is_pressurized) {log_headers+="vol_e ";}
     if (vol_para.do_volume && vol_para.is_pressurized){log_headers+="pressure_e ";}
     if (afm_para.do_afm){log_headers+="afm_fx, afm_fy afm_fz ";}
-    if (spring_para.do_spring){log_headers+="spr_north.z spr_south.z ";}
     /* log_headers+="volume nPole_z sPole_z hrms"; */
     log_headers+="volume ";
     fprintf(fid, "%s\n", log_headers.c_str());
@@ -52,7 +66,7 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
 double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, 
         MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
-        SPRING_p spring_para, FILE *fid ){
+        SHEAR_p shear_para, FILE *fid ){
     double vol_sph;
     double Ener_t;
     Vec3d afm_force,spring_force[2];
@@ -74,9 +88,9 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
         Et[3] = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para);
         fprintf(fid, " %g", Et[3]);
     }
-    if(spring_para.do_spring){
-        Et[5] = spring_tot_energy_force(Pos, spring_force, mesh, spring_para);
-        fprintf(fid, " %g\n", Et[5]);
+    if(shear_para.do_shear){
+        Et[5] = spring_tot_frame_ener(Pos, mbrane_para , shear_para);
+        fprintf(fid, " %g  ", Et[5]);
     }
     if(vol_para.do_volume){
         vol_sph = volume_total(Pos, mesh, mbrane_para);
@@ -93,7 +107,6 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     }
 
     if (afm_para.do_afm){fprintf(fid, " %g %g %g", afm_force.x, afm_force.y, afm_force.z);}
-    if (spring_para.do_spring){fprintf(fid, " %g %g", spring_force[0].z, spring_force[1].z);}
     {fprintf(fid, " %g \n", vol_sph );}
     Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5]+ Et[6];
     fflush(fid);
@@ -109,10 +122,11 @@ int main(int argc, char *argv[]){
     double Et[7], Ener_t;
     double vol_sph, e_t, s_t;
     Vec3d *Pos; MBRANE_p mbrane_para;
+    Vec3d *Pos_t0; 
     MC_p mc_para; AFM_p  afm_para;
     ACTIVE_p act_para; MESH_p mesh;
     VOL_p vol_para; STICK_p stick_para;
-    SPRING_p spring_para; FLUID_p fld_para;
+    SHEAR_p shear_para; FLUID_p fld_para;
     AREA_p area_para;
     Vec3d afm_force,spring_force[2];
     FILE *fid;
@@ -121,7 +135,7 @@ int main(int argc, char *argv[]){
     double start_time, end_time;
     string outfolder,syscmds, para_file, log_file, outfile, filename;
     int mpi_err,mpi_rank=0;
-    uint32_t seed_v;
+    uint32_t seed_v, num_shear_moves;
 
     //
     mpi_err = MPI_Init(0x0, 0x0);
@@ -138,7 +152,7 @@ int main(int argc, char *argv[]){
     /*************************************************/
     // read the input file
     init_read_parameters(&mbrane_para, &mc_para, &area_para, &fld_para, &vol_para,
-            &stick_para, &afm_para,  &act_para, &spring_para, filename);
+            &stick_para, &afm_para,  &act_para, &shear_para, filename);
 
     mc_para.one_mc_iter = 2*mbrane_para.N;
 
@@ -153,12 +167,14 @@ int main(int argc, char *argv[]){
     init_activity(act_para, mbrane_para.N);
     // allocate arrays
     Pos = (Vec3d *)calloc(mbrane_para.N, sizeof(Vec3d));
+    Pos_t0 = (Vec3d *)calloc(mbrane_para.N, sizeof(Vec3d));
     mesh.numnbr = (int *)calloc(mbrane_para.N, sizeof(int));
     mesh.nghst = 12;
     mbrane_para.len = 2.e0*pi;
     mesh.node_nbr_list = (int *)calloc(mesh.nghst*mbrane_para.N, sizeof(int));
     lij_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
     stick_para.is_attractive = (bool *)calloc(mbrane_para.N, sizeof(bool));
+    fld_para.solid_idx = (int *)calloc(mbrane_para.N, sizeof(int));
 
     //
     if(!mc_para.is_restart && afm_para.do_afm){
@@ -171,7 +187,10 @@ int main(int argc, char *argv[]){
     Pole_zcoord = start_simulation(Pos, mesh, lij_t0, 
                      mbrane_para,  mc_para,  stick_para,
                      vol_para,  afm_para,  act_para, 
-                     spring_para,  fld_para,  outfolder);
+                     shear_para,  fld_para,  outfolder);
+    memcpy((double*) Pos_t0, (double *) Pos,  3*mbrane_para.N);
+
+    shear_positions(Pos, mbrane_para.N, shear_para);
     //
     //
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
@@ -180,7 +199,7 @@ int main(int argc, char *argv[]){
 
     if(!mc_para.is_restart)
     diag_wHeader(mbrane_para, area_para,  stick_para,  vol_para,  afm_para,  act_para, 
-         spring_para, fid );
+         shear_para, fid );
 
 
     /* fprintf(stderr, " The total area %g \n", area_total(Pos, mesh, mbrane_para)); */
@@ -188,13 +207,13 @@ int main(int argc, char *argv[]){
 
     fprintf(fid , "%d %g", 0, 0.0 );
     Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para,  stick_para,
-         vol_para,  afm_para,  act_para, spring_para,  fid );
+         vol_para,  afm_para,  act_para, shear_para,  fid );
     mbrane_para.tot_energy[0] = Ener_t;
     filename = outfolder + "/para.out";
     write_parameters(mbrane_para, mc_para, area_para, fld_para, vol_para,
-            stick_para, afm_para,  act_para, spring_para, filename);
+            stick_para, afm_para,  act_para, shear_para, filename);
 
-    printf("%lf \n", mbrane_para.tot_energy[0]);
+    /* printf("%lf \n", mbrane_para.tot_energy[0]); */
     num_moves = 0;
     start_time = MPI_Wtime();
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){
@@ -216,7 +235,13 @@ int main(int argc, char *argv[]){
 
         num_moves = monte_carlo_3d(Pos, mesh, lij_t0, 
                 mbrane_para, mc_para, area_para, stick_para, vol_para, 
-                afm_para, act_para,  spring_para);
+                afm_para, act_para,  shear_para);
+
+        /* if(iter%fld_para.fluidize_every==0){ */
+        /*     num_shear_moves = monte_carlo_shear(Pos, Pos_t0, mesh, lij_t0,  mbrane_para, act_para, */ 
+        /*             mc_para, area_para, shear_para); */
+
+        /* } */
 
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
             num_bond_change = monte_carlo_fluid(Pos, mesh, mbrane_para, mc_para, fld_para);
@@ -225,7 +250,7 @@ int main(int argc, char *argv[]){
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
         Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para, stick_para,
-                vol_para,  afm_para,  act_para, spring_para,  fid );
+                vol_para,  afm_para,  act_para, shear_para,  fid );
         cout << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;

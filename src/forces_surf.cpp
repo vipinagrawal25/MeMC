@@ -1,3 +1,4 @@
+#include "Vector.h"
 #include "global.h"
 #include "subroutine.h"
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
@@ -227,7 +228,8 @@ double voronoi_area(double cotJ, double cotK,
     return sigma;
 }
 //
-double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
+//Would like this routine to return the area and Energy
+Vec2d bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
                             int idx, MBRANE_p para){
 
     /// @brief Estimate the Bending energy contribution when ith particle position changes
@@ -246,6 +248,8 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     // lap_bel:Laplace Beltrami operator for sphere is 2\kappa\nhat
     // nhat is outward normal.
     Vec3d lap_bel,lap_bel_t0,nhat;
+    Vec2d bend_ener_area;
+    double vor_area;
     //
     double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
     double area_ijk,area_ijkp;
@@ -292,15 +296,17 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
         sigma_i=sigma_i+voronoi_area(cot_jdx_k,cot_kdx,liksq,lijsq,area_ijk);
         sigma_i=sigma_i+voronoi_area(cot_jdx_kp,cot_kpdx,likpsq,lijsq,area_ijkp);
         //
-        nhat_local=cross_product(xijp1,xij);
-        nhat=Vec3d_add(nhat,nhat_local,1e0/norm(nhat_local));
+        nhat_local = cross_product(xijp1,xij);
+        nhat = Vec3d_add(nhat,nhat_local,1e0/norm(nhat_local));
     }
     nhat = nhat/norm(nhat);
     sigma_i = 0.5*sigma_i;  // as everything is counted twice.
     lap_bel = cot_times_rij/sigma_i;
     lap_bel_t0 = nhat*curv_t0;
     bend_ener = 0.5*BB*sigma_i*normsq(lap_bel-lap_bel_t0);
-    return bend_ener;
+    bend_ener_area.x = bend_ener;
+    bend_ener_area.y = sigma_i;
+    return bend_ener_area;
 }
 
 double bending_energy_ipart_neighbour(Vec3d *pos, 
@@ -317,6 +323,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
    int num_nbr_j;
    int nbr, cm_idx_nbr;
    double be;
+   Vec2d  tmp_be_ar;
 
    be = 0e0;
 
@@ -324,9 +331,10 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
        nbr = mesh.node_nbr_list[j];
        num_nbr_j = mesh.numnbr[nbr];
        cm_idx_nbr = nbr*mesh.nghst;
-       be += bending_energy_ipart(pos, 
+       tmp_be_ar = bending_energy_ipart(pos, 
               (int *) mesh.node_nbr_list + cm_idx_nbr,
                num_nbr_j, nbr, para);
+       be += tmp_be_ar.x;
 
    
    }
@@ -404,6 +412,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
      int idx, st_idx;
      int num_nbr, cm_idx;
      double be;
+     Vec2d be_ar;
 
      be = 0e0;
      st_idx = get_nstart(para.N, para.bdry_type);
@@ -413,9 +422,10 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
          cm_idx = idx*mesh.nghst;
          num_nbr = mesh.numnbr[idx];
 
-         be += bending_energy_ipart(pos,
+         be_ar = bending_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
                   num_nbr, idx, para);
+         be += be_ar.x;
      }
      return be;
 }
@@ -588,6 +598,23 @@ double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
     *afm_force  = f_t;
     return lj_afm_e;
 }
+
+double spring_tot_frame_ener(Vec3d *pos, MBRANE_p mbrane,
+        SHEAR_p shear){
+
+    double kk = shear.constant;
+    double shift_y = shear.slope;
+    double ener_spr, xmin;
+    int st_idx = get_nstart(mbrane.N, mbrane.bdry_type);
+    int i;
+    ener_spr = 0e0;
+    for(i=0; i<st_idx; i++){
+        double xmin = pos[i].x + shift_y*pos[i].y;
+        ener_spr += -kk*pow((pos[i].x - xmin),2)/2;
+    }
+    return ener_spr;
+}
+/*
 double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
                                MESH_p mesh, SPRING_p spring){
     double kk = spring.constant;
@@ -599,6 +626,7 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
     spring_force[1].z = kk*(sZeq-Pos[mesh.sPole].z);
     return ener_spr;
 }
+*/
 //
 //
 double vol_energy_change(MBRANE_p mbrane, VOL_p volp, double dvol){
@@ -616,7 +644,7 @@ double vol_energy_change(MBRANE_p mbrane, VOL_p volp, double dvol){
 double PV_change(double pressure, double dvol){ 
     return pressure*dvol;
 }
-//
+/*
 double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
     if (spring.icompute==0) return 0;
     double ener_spr=0e0;
@@ -631,4 +659,17 @@ double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
     }
     return ener_spr;
 }
+*/
+//
+double frame_spring_energy(Vec3d pos, Vec3d pos_t0, SHEAR_p shear){
+    double ener_spr=0e0;
+    double kk=shear.constant;
+    double shift_y = shear.slope;
+
+    double xmin = pos_t0.x + shift_y*(pos_t0.y - 3.14159); 
+    ener_spr = kk*pow((pos.x - xmin),2)/2;
+
+    return ener_spr;
+}
+//
 //

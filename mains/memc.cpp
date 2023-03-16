@@ -150,10 +150,11 @@ int main(int argc, char *argv[]){
 
    // check whether the string comparison works
    /* define all the paras */
-    cout << "I am in line 153 "<<  endl;
+    mbrane_para.volume =  (double*)malloc(sizeof(double));
     *mbrane_para.volume = (4./3.)*pi*pow(mbrane_para.radius,3);
-    cout << "I am in line 155 "<<  endl;
     act_para.activity = (double *)calloc(mbrane_para.N, sizeof(double));
+    mbrane_para.tot_energy =  (double*)malloc(sizeof(double));
+    mbrane_para.area =  (double*)malloc(sizeof(double));
     *mbrane_para.tot_energy = 0e0;
     init_activity(act_para, mbrane_para.N);
     // allocate arrays

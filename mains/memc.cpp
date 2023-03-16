@@ -44,7 +44,7 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
     if (afm_para.do_afm){log_headers+="afm_fx, afm_fy afm_fz ";}
     if (spring_para.do_spring){log_headers+="spr_north.z spr_south.z ";}
     /* log_headers+="volume nPole_z sPole_z hrms"; */
-    log_headers+=" volume ";
+    log_headers+=" volume  area";
     fprintf(fid, "%s\n", log_headers.c_str());
     fflush(fid);
 }
@@ -59,13 +59,17 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
 
     /*-----------------------------------------------*/
     /*****  initialize energy values *****/
+
+   Et[0] = 0e0;    Et[1] = 0e0;     Et[2] = 0e0; Et[3] = 0e0; 
+   Et[4] = 0e0;    Et[5] = 0e0;     Et[6] = 0e0; 
+
     Et[0] = bending_energy_total(Pos, mesh, mbrane_para);
+    ar_sph = area_total(Pos, mesh, mbrane_para);
+    /* *mbrane_para.area = ar_sph; */
     if(area_para.is_tether){
         Et[1] = stretch_energy_total(Pos, mesh, lij_t0, mbrane_para, area_para);
     }else{
-        ar_sph = area_total(Pos, mesh, mbrane_para);
         ini_ar = (4.)*pi*pow(mbrane_para.radius,2);
-        *mbrane_para.area = ar_sph;
         Et[1] = area_para.Ka*(ar_sph/ini_ar - 1e0)*(ar_sph/ini_ar - 1e0);
     }
     fprintf(fid, " %g %g %g", *mbrane_para.tot_energy, Et[0], Et[1]);
@@ -81,23 +85,23 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
         Et[5] = spring_tot_energy_force(Pos, spring_force, mesh, spring_para);
         fprintf(fid, " %g\n", Et[5]);
     }
+    vol_sph = volume_total(Pos, mesh, mbrane_para);
+    *mbrane_para.volume = vol_sph;
     if(vol_para.do_volume){
-        vol_sph = volume_total(Pos, mesh, mbrane_para);
         double  ini_vol = (4./3.)*pi*pow(mbrane_para.radius,3);
-        *mbrane_para.volume = vol_sph;
         if(!vol_para.is_pressurized){
             Et[4] = vol_para.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
             fprintf(fid, " %g", Et[4]);
         }
         if(vol_para.is_pressurized){
-            Et[6] = -vol_para.pressure*vol_sph;
+            Et[6] = vol_para.pressure*vol_sph;
             fprintf(fid, " %g", Et[6]);
         }
     }
 
     if (afm_para.do_afm){fprintf(fid, " %g %g %g", afm_force.x, afm_force.y, afm_force.z);}
     if (spring_para.do_spring){fprintf(fid, " %g %g", spring_force[0].z, spring_force[1].z);}
-    {fprintf(fid, " %g \n", vol_sph );}
+    {fprintf(fid, " %g  %g\n", vol_sph, ar_sph );}
     Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5]+ Et[6];
     fflush(fid);
 
@@ -195,11 +199,13 @@ int main(int argc, char *argv[]){
     fprintf(fid , "%d %g", 0, 0.0 );
     Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para,  stick_para,
          vol_para,  afm_para,  act_para, spring_para,  fid );
-    mbrane_para.tot_energy[0] = Ener_t;
+    *mbrane_para.tot_energy = Ener_t;
     filename = outfolder + "/para.out";
     write_parameters(mbrane_para, mc_para, area_para, fld_para, vol_para,
             stick_para, afm_para,  act_para, spring_para, filename);
 
+    double ar_sph = area_total(Pos, mesh, mbrane_para);
+    *mbrane_para.area = ar_sph;
     //printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
     start_time = MPI_Wtime();
@@ -232,9 +238,13 @@ int main(int argc, char *argv[]){
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
         Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para, stick_para,
                 vol_para,  afm_para,  act_para, spring_para,  fid );
-        cout << "iter = " << iter << "; Accepted Moves = " 
-            << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
-            " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << mbrane_para.volume[0]<< endl;
+        /* cout << "iter = " << iter << "; Accepted Moves = " */ 
+        /*     << (double) num_moves*100/mc_para.one_mc_iter << " %;"<< */  
+        /*     " totalener = "<< *mbrane_para.tot_energy */ 
+        /*     << "; volume = " << *mbrane_para.volume << */ 
+        /*     "; area = " << *mbrane_para.area << endl; */
+        printf("%d %g %g %g %g\n", iter, ((float)num_moves/(float)mc_para.one_mc_iter), 
+                    *mbrane_para.tot_energy, *mbrane_para.volume, *mbrane_para.area);
 
     }
     end_time = MPI_Wtime();

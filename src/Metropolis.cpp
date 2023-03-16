@@ -226,6 +226,14 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       dyinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
       dzinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
 
+      if(!area_p.is_tether){
+          double rand_random_ = rand_real(rng);
+          double magr_ = norm(pos[idx]);
+          dxinc = (mcpara.delta / mcpara.dfac) * rand_random_*pos[idx].x/magr_;
+          dyinc = (mcpara.delta / mcpara.dfac) * rand_random_*pos[idx].y/magr_;
+          dzinc = (mcpara.delta / mcpara.dfac) * rand_random_*pos[idx].z/magr_;
+      }
+
       x_n = x_o + dxinc;
       y_n = y_o + dyinc;
       z_n = z_o + dzinc;
@@ -238,8 +246,8 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
               afm, spring);
 
       de = (Efin - Eini);
-      if(area_p.is_tether){
-          d_ar = area_f = area_i;
+      if(!area_p.is_tether){
+          d_ar = area_f - area_i;
          de_area = (2*d_ar/(ini_ar*ini_ar))*(*mbrane.area  - ini_ar)
                   + (d_ar/ini_ar)*(d_ar/ini_ar);
 

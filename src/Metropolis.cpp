@@ -120,7 +120,7 @@ double rand_inc_theta(double th0, double dfac) {
   return dth;
 }
 
-double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
+double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0, 
                     int idx, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
                     VOL_p vol_p, AFM_p afm, SHEAR_p shear) {
   /// @brief Estimate the contribution from all the energies when a particle is
@@ -171,9 +171,8 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 
       }
 
-      if(st_p.do_stick)
-          E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
-                  st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
+      if(st_p.do_stick && st_p.is_attractive[idx])
+          E_stick = stick_bottom_surface(pos[idx], pos_t0[idx], st_p); 
 
       if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
 
@@ -247,7 +246,7 @@ int monte_carlo_shear(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,  double *lij_t0,
 
 
 
-int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
+int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0, 
                    MBRANE_p mbrane, MC_p mcpara, AREA_p area_p,  STICK_p st_p,
                    VOL_p vol_p, AFM_p afm,
                    ACTIVE_p activity, SHEAR_p shear) {
@@ -283,7 +282,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   for (i = 0; i < mcpara.one_mc_iter; i++) {
     int idx = rand_int(rng);
 
-    Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
+    Eini = energy_mc_3d(pos, pos_t0, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
                         afm, shear);
     if(vol_p.do_volume) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
@@ -304,7 +303,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     pos[idx].y = y_n;
     pos[idx].z = z_n;
 
-    Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
+    Efin = energy_mc_3d(pos, pos_t0, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
                         afm, shear);
 
     de = (Efin - Eini);

@@ -10,12 +10,12 @@
 using namespace std;
 //*************************************************//
 // metropolis.cpp
-int monte_carlo_3d(Vec3d *pos, MESH_p mesh, 
+int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, 
                 double *lij_t0, MBRANE_p mbrane,
                 MC_p mcpara, AREA_p,  STICK_p ,  VOL_p , AFM_p afm, 
                 ACTIVE_p activity,  SHEAR_p shear);
 
- double energy_mc_3d(Vec3d *pos, MESH_p mesh, 
+ double energy_mc_3d(Vec3d *pos, Vec3d *, MESH_p mesh, 
          double *lij_t0, int idx, MBRANE_p , STICK_p ,
          VOL_p , AFM_p , SHEAR_p );
 int monte_carlo_surf2d(Vec2d *Pos, 
@@ -56,12 +56,12 @@ double stretch_energy_ipart(Vec3d *pos,
          int *node_nbr, double *lij_t0, int num_nbr,
                              int idx, AREA_p para);
 
-double lj_bottom_surface(double zz,
-        bool is_attractive, 
+double stick_bottom_surface(Vec3d, Vec3d, STICK_p); 
+double lj_bottom_surface(double zz, bool is_attractive, 
         double sur_pos, double eps, double sigma);
 double volume_total(Vec3d *pos, 
         MESH_p mesh, MBRANE_p para);
-double lj_bottom_surf_total(Vec3d *pos, 
+double lj_bottom_surf_total(Vec3d *pos, Vec3d *, 
          MBRANE_p para, STICK_p st_p);
 double volume_ipart(Vec3d *pos, int *node_nbr, 
         int num_nbr, int idx);

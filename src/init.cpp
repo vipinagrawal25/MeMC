@@ -9,7 +9,7 @@ extern "C" void Membrane_listread(int *, double *,  double *,
 extern "C" void Area_listread(bool *, double *, double *, char *);
 
 
-extern "C" void Stick_listread(bool *, double *, double *, double *, 
+extern "C" void Stick_listread(bool *, bool* , double *, double *, double *, 
         double *,  char *);
 
 extern "C" void  MC_listread(char *, double *, double *, bool *,
@@ -205,7 +205,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
     double pos_bot_wall;  // position of the bottom attractive wall
     double sigma, epsilon, theta; // sigma and epsilon for the bottom attractive wall
  
-    Stick_listread(&stick_para->do_stick, &stick_para->pos_bot_wall, 
+    Stick_listread(&stick_para->do_stick, &stick_para->is_pot_harmonic, &stick_para->pos_bot_wall, 
             &stick_para->sigma, &stick_para->epsilon, &stick_para->theta,
             tmp_fname);
 
@@ -308,6 +308,7 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
 
     out_<< "# =========== Sticking Parameters ==========" << endl
             << " do stick " << stick_para.do_stick << endl
+            << " with harmonic potential " << stick_para.is_pot_harmonic << endl
             << " pos_bot_wall  " << stick_para.pos_bot_wall << endl
             << " sigma " << stick_para.sigma << endl
             << " epsilon " << stick_para.epsilon << endl
@@ -340,7 +341,10 @@ void init_stick_bottom(Vec3d *pos, MESH_p mesh, STICK_p stick,
 
     std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
 
-    for(i= 0; i<mbrane.N; i++)fld_para.solid_idx[i] = 0;
+    for(i= 0; i<mbrane.N; i++){
+        fld_para.solid_idx[i] = 0;
+        stick.is_attractive[i] = false;
+    }
 
     if(fld_para.is_semifluid){ 
         for(i= 0; i<fld_para.num_solid_points; i++){

@@ -66,15 +66,15 @@ subroutine Membrane_listread(N, coef_bend,   &
     close(unit=100)
 end subroutine
 
-subroutine Stick_listread(do_stick, pos_bot_wall, sigma, epsilon, &
+subroutine Stick_listread(do_stick, is_pot_harmonic, pos_bot_wall, sigma, epsilon, &
         theta,  parafile) bind(c, name='Stick_listread')
     real(kind=c_double) :: pos_bot_wall, sigma, theta, epsilon 
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
-    logical(kind=c_bool) :: do_stick;
+    logical(kind=c_bool) :: do_stick, is_pot_harmonic;
 
 
-    namelist /Stick/ do_stick, pos_bot_wall, sigma, epsilon, theta
+    namelist /Stick/ do_stick, is_pot_harmonic, pos_bot_wall, sigma, epsilon, theta
 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
@@ -157,8 +157,9 @@ end subroutine
 
 
 
-subroutine Fluid_listread(is_fluid, is_semifluid,  min_allowed_nbr, fluidize_every, num_solidpoints, fac_len_vert, &
-         parafile) bind(c, name='Fluid_listread')
+subroutine Fluid_listread(is_fluid, is_semifluid,  min_allowed_nbr, &
+        fluidize_every, num_solidpoints, fac_len_vert, &
+        parafile) bind(c, name='Fluid_listread')
 
      logical(kind=c_bool) :: is_fluid, is_semifluid
      integer(kind=c_int) :: min_allowed_nbr, fluidize_every, num_solidpoints

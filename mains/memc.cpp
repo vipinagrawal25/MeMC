@@ -49,7 +49,7 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
         SHEAR_p shear_para, FILE *fid ){
 
-    string log_headers = "#iter acceptedmoves total_e bend_e stretch_e";
+    string log_headers = "#iter acceptedmoves total_e bend_e stretch_e ";
     /* if(area_para.is_stick){log_headers+="stick_e ";} */
     if(stick_para.do_stick){log_headers+="stick_e ";}
     if(afm_para.do_afm){log_headers+="afm_e ";}
@@ -63,7 +63,7 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
     fflush(fid);
 }
 
-double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, 
+double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0, 
         MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
         SHEAR_p shear_para, FILE *fid ){
@@ -81,7 +81,7 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     }
     fprintf(fid, " %g %g %g", mbrane_para.tot_energy[0], Et[0], Et[1]);
     if(stick_para.do_stick){
-        Et[2] = lj_bottom_surf_total(Pos, mbrane_para, stick_para);
+        Et[2] = lj_bottom_surf_total(Pos, Pos_t0, mbrane_para, stick_para);
         fprintf(fid, " %g", Et[2]);
     }
     if(afm_para.do_afm){
@@ -137,13 +137,14 @@ int main(int argc, char *argv[]){
     int mpi_err,mpi_rank=0;
     uint32_t seed_v, num_shear_moves;
 
+
     //
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     seed_v = (uint32_t) 7*3*11*(mpi_rank+1)*rand();
     init_rng(seed_v);
     //
-    outfolder = ZeroPadNumber(mpi_rank)+"/";
+    outfolder = ZeroPadNumber(mpi_rank + atoi(argv[1]))+"/";
     cout << "I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
 
@@ -159,11 +160,11 @@ int main(int argc, char *argv[]){
 
    // check whether the string comparison works
    /* define all the paras */
-    mbrane_para.volume = (double *)calloc(1, sizeof(double)); 
-    mbrane_para.volume[0] = (4./3.)*pi*pow(mbrane_para.radius,3);
-    mbrane_para.tot_energy = (double *)calloc(1, sizeof(double));
+    mbrane_para.volume = (double *)calloc(1, sizeof(double));
+    *mbrane_para.volume = (4./3.)*pi*pow(mbrane_para.radius,3);
     act_para.activity = (double *)calloc(mbrane_para.N, sizeof(double));
-    mbrane_para.tot_energy[0] = 0e0;
+    mbrane_para.tot_energy = (double *)calloc(1, sizeof(double));
+    *mbrane_para.tot_energy = 0e0;
     init_activity(act_para, mbrane_para.N);
     // allocate arrays
     Pos = (Vec3d *)calloc(mbrane_para.N, sizeof(Vec3d));
@@ -188,9 +189,10 @@ int main(int argc, char *argv[]){
                      mbrane_para,  mc_para,  stick_para,
                      vol_para,  afm_para,  act_para, 
                      shear_para,  fld_para,  outfolder);
-    memcpy((double*) Pos_t0, (double *) Pos,  3*mbrane_para.N);
 
-    shear_positions(Pos, mbrane_para.N, shear_para);
+    memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
+
+    /* shear_positions(Pos, mbrane_para.N, shear_para); */
     //
     //
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
@@ -206,7 +208,7 @@ int main(int argc, char *argv[]){
     /* exit(0); */
 
     fprintf(fid , "%d %g", 0, 0.0 );
-    Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para,  stick_para,
+    Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0,  mbrane_para, area_para,  stick_para,
          vol_para,  afm_para,  act_para, shear_para,  fid );
     mbrane_para.tot_energy[0] = Ener_t;
     filename = outfolder + "/para.out";
@@ -216,6 +218,7 @@ int main(int argc, char *argv[]){
     /* printf("%lf \n", mbrane_para.tot_energy[0]); */
     num_moves = 0;
     start_time = MPI_Wtime();
+
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){
 
         if(iter%mc_para.dump_skip == 0){
@@ -233,7 +236,7 @@ int main(int argc, char *argv[]){
             mbrane_para.tot_energy[0] += e_t;
         }
 
-        num_moves = monte_carlo_3d(Pos, mesh, lij_t0, 
+        num_moves = monte_carlo_3d(Pos, Pos_t0, mesh, lij_t0, 
                 mbrane_para, mc_para, area_para, stick_para, vol_para, 
                 afm_para, act_para,  shear_para);
 
@@ -245,15 +248,19 @@ int main(int argc, char *argv[]){
 
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
             num_bond_change = monte_carlo_fluid(Pos, mesh, mbrane_para, mc_para, fld_para);
+        if(mpi_rank == 0)
             cout << "fluid stats " << num_bond_change << " bonds flipped" << endl;
         }
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
-        Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para, stick_para,
+        Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0,  mbrane_para, area_para, stick_para,
                 vol_para,  afm_para,  act_para, shear_para,  fid );
+
+    if(mpi_rank == 0){
         cout << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;
+    }
 
     }
     end_time = MPI_Wtime();
@@ -271,3 +278,10 @@ int main(int argc, char *argv[]){
     outfile_terminal.close();
     return 0;
 }
+
+
+/*     for(iter=0; iter<mbrane_para.N; iter++){ */
+/*         printf("%d \n", stick_para.is_attractive[iter]); */
+/*     } */
+
+/*     exit(0); */

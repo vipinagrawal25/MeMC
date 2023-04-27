@@ -101,6 +101,7 @@ typedef struct{
 
 typedef struct{
     bool do_stick;
+    bool is_pot_harmonic;
     double pos_bot_wall;  // position of the bottom attractive wall
     double sigma, epsilon, theta; // sigma and epsilon for the bottom attractive wall
     bool *is_attractive;

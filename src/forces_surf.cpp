@@ -491,6 +491,21 @@ double lj_attr(double sqdr, double eps){
     return 4*eps*(r6*(r6-1));
 }
 
+double stick_bottom_surface(Vec3d pt, Vec3d pt_t0, STICK_p st_p){
+
+    double inv_sqdz, ds;
+
+        ds = norm(pt_t0 - pt);
+        inv_sqdz = (st_p.sigma*st_p.sigma)/(ds*ds);
+        if(st_p.is_pot_harmonic){
+            return  st_p.sigma*ds*ds;
+        }else{
+            return  lj_attr(inv_sqdz, st_p.epsilon);
+        }
+}
+
+
+
 double lj_bottom_surface(double zz, 
         bool is_attractive, 
         double sur_pos, double eps, double sigma){
@@ -502,7 +517,7 @@ double lj_bottom_surface(double zz,
     /// @param sur_pos position of the bottom wall 
     /// @param is_attractive true if the zz sees the  bottom wall 
     /// @return Energy evaluated using Lennard-Jones potential.
-    ///  @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
+    /// @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
 
 
     double inv_sqdz, ds;
@@ -517,7 +532,7 @@ double lj_bottom_surface(double zz,
 }
 
 
-double lj_bottom_surf_total(Vec3d *pos, 
+double lj_bottom_surf_total(Vec3d *pos, Vec3d *pos_t0,
          MBRANE_p para, STICK_p st_p){
 
     /// @brief Estimate the total Sticking  
@@ -533,8 +548,11 @@ double lj_bottom_surf_total(Vec3d *pos,
     for(idx = 0; idx < para.N; idx++){
         /* idx = 2; */
 
-        lj_bote += lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
-                st_p.pos_bot_wall, st_p.epsilon, st_p.sigma);
+        if(st_p.is_attractive[idx])
+            lj_bote += stick_bottom_surface(pos[idx], pos_t0[idx], st_p);
+
+            /* lj_bote += lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx], */
+                    /* st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); */
     }
     return lj_bote;
 }

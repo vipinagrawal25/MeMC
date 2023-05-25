@@ -114,7 +114,7 @@ void hdf5_io_write_mesh(int *cmlist,
 void hdf5_io_dump_stickidx(int *stick, int N, string input_file);
 void io_dump_config(double *Pos, int N, char *);
 void io_read_config(double *Pos, int N, char *);
-void io_dump_config_ascii(double *Pos, int N, char *);
+void io_dump_config_ascii(double *Pos, int N, string);
 //cubic_solve
 int cubic_solve(double, double, double, double, double *);
 #endif

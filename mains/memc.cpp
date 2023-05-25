@@ -4,6 +4,23 @@
 #include <cstring>
 //
 
+
+int frame_shear(Vec3d *pos, Vec3d *pos_t0, double shear_slope,
+        MBRANE_p mbrane, SHEAR_p shear) {
+
+    int nframe = 0;
+    int i;
+    nframe = get_nstart(mbrane.N, mbrane.bdry_type);
+
+  for (i = 0; i < nframe; i++) {
+    pos[i].x =  pos_t0[i].x + shear_slope*(pos_t0[i].y - 3.14159); 
+  }
+
+return 0;
+
+}
+//
+
 void debug_io_write_pos(Vec3d *Pos, int N, string outfile){
     FILE *fid; 
 
@@ -192,7 +209,7 @@ int main(int argc, char *argv[]){
 
     memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
 
-    /* shear_positions(Pos, mbrane_para.N, shear_para); */
+    shear_positions(Pos, mbrane_para.N, shear_para);
     //
     //
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
@@ -218,6 +235,7 @@ int main(int argc, char *argv[]){
     /* printf("%lf \n", mbrane_para.tot_energy[0]); */
     num_moves = 0;
     start_time = MPI_Wtime();
+    double shear_slope = 0.0;
 
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){
 
@@ -228,6 +246,8 @@ int main(int argc, char *argv[]){
                     mbrane_para.N, mesh.nghst, outfile);
             syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
             system(syscmds.c_str());
+            outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mc_para.dump_skip)+".dat";
+            io_dump_config_ascii((double*) Pos, 3*mbrane_para.N, outfile.c_str());
         }
         if(iter == 10*mc_para.dump_skip && !mc_para.is_restart && afm_para.do_afm){
             afm_para.sigma = s_t;
@@ -240,11 +260,17 @@ int main(int argc, char *argv[]){
                 mbrane_para, mc_para, area_para, stick_para, vol_para, 
                 afm_para, act_para,  shear_para);
 
-        /* if(iter%fld_para.fluidize_every==0){ */
-        /*     num_shear_moves = monte_carlo_shear(Pos, Pos_t0, mesh, lij_t0,  mbrane_para, act_para, */ 
-        /*             mc_para, area_para, shear_para); */
+/*         if(iter%10==0){ */
+/*             /1* num_shear_moves = monte_carlo_shear(Pos, Pos_t0, mesh, lij_t0,  mbrane_para, act_para, *1/ */ 
+/*                     /1* mc_para, area_para, shear_para); *1/ */
 
-        /* } */
+
+/*             frame_shear(Pos, Pos_t0, shear_slope, mbrane_para,  shear_para); */
+
+/*             if(shear_slope < shear_para.slope)shear_slope = shear_slope + */ 
+/*                 shear_para.slope/shear_para.shear_every; */
+
+/*         } */
 
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
             num_bond_change = monte_carlo_fluid(Pos, mesh, mbrane_para, mc_para, fld_para);

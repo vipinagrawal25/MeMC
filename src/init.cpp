@@ -20,7 +20,7 @@ extern "C"  void  Activity_listread(char *, double *, double *, char *);
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
 
-extern "C"  void  Shear_listread(bool *,  double *, double *, char *);
+extern "C"  void  Shear_listread(bool *,  int *, double *, double *, char *);
 
 extern "C"  void  Fluid_listread(bool *, bool *, int * , int *, int *, double *, char *);
 extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
@@ -215,7 +215,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
     mc_para->algo=temp_algo;
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
-    Shear_listread(&shear_para->do_shear, 
+    Shear_listread(&shear_para->do_shear, &shear_para->shear_every, 
           &shear_para->slope,  &shear_para->constant, tmp_fname);
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
@@ -316,6 +316,7 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
 
     out_<< "# =========== Shear Parameters ==========" << endl
             << " do shear " << shear_para.do_shear << endl
+            << " shear_every " << shear_para.shear_every << endl
             << " constant " << shear_para.constant << endl
             << " slope " << shear_para.slope << endl;
 

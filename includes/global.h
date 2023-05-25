@@ -158,6 +158,7 @@ typedef struct{
     bool do_shear;
     double constant;
     double slope;
+    int shear_every;
 }SHEAR_p;
 
 #endif

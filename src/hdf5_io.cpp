@@ -205,17 +205,17 @@ void hdf5_io_dump_stickidx(int *stick, int N, string input_file){
 //     fclose(fid);
 // }
 
-// void io_dump_config_ascii(double *Pos, 
-//         int N, char *file ){
+void io_dump_config_ascii(double *Pos, 
+        int N, string file ){
 
-//     /// @brief dump position to the file in ascii; 
-//     /// 
+    /// @brief dump position to the file in ascii; 
+    /// 
 
-//     FILE *fid;
-//     int i;
-//     fid = fopen(file, "wb");
-//     for(i=0;i<N;i=i+2){
-//         fprintf(fid,"%g %g\n", Pos[i], Pos[i+1]);
-//     }
-//     fclose(fid);
-// }
+    FILE *fid;
+    int i;
+    fid = fopen(file.c_str(), "wb");
+    for(i=0;i<N;i=i+3){
+        fprintf(fid,"%g %g %g\n", Pos[i], Pos[i+1], Pos[i+3]);
+    }
+    fclose(fid);
+}

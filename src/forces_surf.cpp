@@ -679,6 +679,7 @@ double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
 }
 */
 //
+
 double frame_spring_energy(Vec3d pos, Vec3d pos_t0, SHEAR_p shear){
     double ener_spr=0e0;
     double kk=shear.constant;
@@ -689,5 +690,4 @@ double frame_spring_energy(Vec3d pos, Vec3d pos_t0, SHEAR_p shear){
 
     return ener_spr;
 }
-//
-//
+

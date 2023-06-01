@@ -4,8 +4,6 @@ import quaternion
 import os, sys
 from scipy.spatial import ConvexHull
 import h5py
-    
-
 def read_data(filename):
     pos = h5py.File(filename)["pos"][()]
     pos = np.asarray(pos)
@@ -165,6 +163,3 @@ else:
              "./conf/dmemc_conf.h5")
 
 # write_file(pts_cart, cmlist, node_nbr)
-
-
-

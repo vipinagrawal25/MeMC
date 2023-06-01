@@ -31,22 +31,21 @@ int main(int argc, char *argv[]){
     init_rng(seed_v);
     //
     outfolder = ZeroPadNumber(mpi_rank)+"/";
-    cout << "I am in folder "+ outfolder << endl;
+    // cout << "I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
-    write_param(outfolder + "/para.out",mbrane,mcpara,spring);
-        // ---------- open outfile_terminal ------------------- //
+    // ---------- open outfile_terminal ------------------- //
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     /*************************************************/
     // read the input file
-    init_read_parameters(&mbrane, &afm, &mcpara, &activity, 
-                        &spring, filename);
-   /* define all the paras */ 
+    init_read_parameters(&mbrane, &afm, &mcpara, &activity, &spring, filename);
+    /* define all the paras */ 
     mbrane.volume = (double *)calloc(1, sizeof(double)); 
     mbrane.volume[0] = (4./3.)*pi*pow(mbrane.radius,3);
     mbrane.tot_energy = (double *)calloc(1, sizeof(double));
     activity.activity = (double *)calloc(mbrane.N, sizeof(double));
     mbrane.tot_energy[0] = 0e0;
     init_activity(activity, mbrane.N);
+    write_param(outfolder + "/para.out",mbrane,mcpara,spring);
     // allocate arrays
     Pos = (Vec3d *)calloc(mbrane.N, sizeof(Vec3d));
     mesh.cmlist = (int *)calloc(mbrane.N+1, sizeof(int));
@@ -62,23 +61,33 @@ int main(int argc, char *argv[]){
     }
     //
     if(!mcpara.is_restart){
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/dmemc_pos.h5");
         hdf5_io_read_mesh((int *) mesh.cmlist,
-                (int *) mesh.node_nbr_list, outfolder+"/input.h5");
+                (int *) mesh.node_nbr_list, outfolder+"/dmemc_conf.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane, &spring);
         identify_attractive_part(Pos, is_attractive, mbrane.theta, mbrane.N);
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane.N);
     }else{
-        hdf5_io_read_pos( (double *)Pos,   outfolder+"/input.h5");
+        hdf5_io_read_pos( (double *)Pos, outfolder+"/dmemc_pos.h5");
         hdf5_io_read_mesh((int *) mesh.cmlist,
-                (int *) mesh.node_nbr_list,  outfolder+"/input.h5");
+                (int *) mesh.node_nbr_list,  outfolder+"/dmemc_conf.h5");
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane.N);
         init_eval_lij_t0(Pos, mesh, lij_t0, &mbrane, &spring);
         identify_attractive_part(Pos, is_attractive, mbrane.theta, mbrane.N);
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/restart.h5");
     }
+    // int j,k;
+    // int num_nbr, cm_idx;
+    // for(i = 0; i < mbrane.N; i++){
+    //     num_nbr = mesh.cmlist[i + 1] - mesh.cmlist[i];
+    //     cm_idx = mesh.cmlist[i];
+    //     for(k = cm_idx; k < cm_idx + num_nbr; k++) {
+    //         cout << lij_t0[k] << "\t";
+    //     }
+    // }
+    // cout << endl;
     /*****  initialize energy values *****/
     Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane);
     Et[1] = bending_energy_total(Pos, mesh, mbrane);
@@ -92,6 +101,7 @@ int main(int argc, char *argv[]){
     Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5]+ Et[6];
     mbrane.tot_energy[0] = Ener_t;
     mbrane.volume[0] = vol_sph;
+    // cout << Et[0] << "\t" << Et[1] << "\t" << vol_sph  << "\t" << Ener_t << endl;
     /************************************/
     log_file=outfolder+"/mc_log";
     fid = fopen(log_file.c_str(), "a");

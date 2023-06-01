@@ -4,26 +4,21 @@ double cal_length(double x1 , double x2,
         double y1, double y2, double len, char
         *metric){
 
-	 ///  @brief Calculate the length between points x1,y1 and x2,y2 
-  	 ///
-	 ///  @param metric Topology of the surface "cart" for flat plane "sph" for
-     /// sphere
-	 ///  @param x1  Coordinate x1 if metric is cart; Theta_1 if metric is sphere;
-	 ///  @param x2  Coordinate x2 if metric is cart; Theta_2 if metric is sphere;
-	 ///  @param y1  Coordinate y1 if metric is cart; Phi_1 if metric is sphere;
-	 ///  @param y2  Coordinate y2 if metric is cart; Phi_2 if metric is sphere;
-	 ///  @param len length of the domain;
-     
-	 ///  @return   (x2-x1)^2 + (y2-y1)^2 if metric is cart;
-     ///   (sin(x2)cos(y2) - sin(x1)*cos(y1))^2 +  
-     ///   (sin(x2)sin(y2) - sin(x1)*sin(y1))^2 +  
-     ///   (cos(x2) - cos(x1))^2  if metric is sphere
-	 /// 
-
+    ///  @brief Calculate the length between points x1,y1 and x2,y2 
+    ///  @param metric Topology of the surface "cart" for flat plane "sph" for
+    ///   sphere.
+    ///  @param x1  Coordinate x1 if metric is cart; Theta_1 if metric is sphere;
+    ///  @param x2  Coordinate x2 if metric is cart; Theta_2 if metric is sphere;
+    ///  @param y1  Coordinate y1 if metric is cart; Phi_1 if metric is sphere;
+    ///  @param y2  Coordinate y2 if metric is cart; Phi_2 if metric is sphere;
+    ///  @param len length of the domain;
+    ///  @return   (x2-x1)^2 + (y2-y1)^2 if metric is cart;
+    ///   (sin(x2)cos(y2) - sin(x1)*cos(y1))^2 +  
+    ///   (sin(x2)sin(y2) - sin(x1)*sin(y1))^2 +  
+    ///   (cos(x2) - cos(x1))^2  if metric is sphere
     bool is_sph, is_cart;
     double dx, dy, dz, ds;
     double spx1, spx2, spy1, spy2, spz1, spz2;
-
     is_sph = false;
     is_cart = false;
     if(strcmp(metric, "sph") == 0){

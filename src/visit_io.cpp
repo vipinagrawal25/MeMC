@@ -38,16 +38,29 @@ void visit_vtk_io(double *points,
 }
 void visit_vtk_io(double *points, 
         int Np, string filename){
+    '''
+        Dumps data into .vtk file
+    '''
     char first_headers[] = "# vtk DataFile Version 2.0 \n grid, mydata\n ASCII \n DATASET POLYDATA \n";
     int i;
-    ofstream fid(filename,ofstream::out);
-    fid << first_headers;
+    ifstream fid(filename,ofstream::out);
+    fid >> first_headers;
     fid << "POINTS\t" << Np << "\t" << "float" << endl;
     for(i = 0; i< 3*Np; i=i+3){
         fid << points[i] << "\t" << points[i+1] << "\t" << points[i+2] << endl;
     }
     fid.close();
 }
+void visit_vtk_read(double *points, int Np, string filename){
+    ''' 
+        Function to read data from .vtk files.
+    '''
+    ifstream myfile;
+    myfile.open(fname);
+    double ch;
+    while(myfile>>ch)
+}
+
 void visit_vtk_io_point_data(bool *data, 
         int Np, string filename, 
         string dataname){

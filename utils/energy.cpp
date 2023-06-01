@@ -18,7 +18,6 @@ int main(int argc, char const *argv[]){
 	MBRANE_para mbrane;
 	int num_nbr, cm_idx, idx;
 	double be,se;
-	//
 	init_mbrane(&mbrane);
 	// allocate arrays
     Pos = (Vec3d *)calloc(mbrane.N, sizeof(Vec3d));
@@ -37,8 +36,8 @@ int main(int argc, char const *argv[]){
 	//
 	while(FileExists(fname)){
 		if (extension==".vtk"){
-			visit_vtk_io((double*) Pos, mbrane.N, fname);
-            print((double*)Pos, 3*mbrane.N);
+			visit_vtk_read((double*) Pos, mbrane.N, fname);
+            // print((double*)Pos, 3*mbrane.N);
 		}else if(extension==".h5"){
 			hdf5_io_read_pos((double*) Pos, fname);
 		}
@@ -60,7 +59,6 @@ int main(int argc, char const *argv[]){
         fnum=fnum+1;
         fname=folder+"/"+prefix+ZeroPadNumber(fnum)+extension;
         cout << fname << endl;
-        exit(1);
     }
     bend_fid.close();
     stretch_fid.close();
@@ -93,10 +91,10 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh, double *lij_t0, int N){
 }
 void init_mbrane(MBRANE_para *mbrane){
 	mbrane->N=5120;
-	mbrane->coef_bend=8.5;
-	mbrane->YY = 4616*mbrane->coef_bend;       // Young's modulus
+	mbrane->coef_bend=4096;
+	mbrane->YY=4616*mbrane->coef_bend;       // Young's modulus
 	//
-    mbrane->coef_vol_expansion=1e6;
+    mbrane->coef_vol_expansion=0;
     mbrane->sp_curv = 2;
     mbrane->pressure = 0;
     mbrane->radius = 1;

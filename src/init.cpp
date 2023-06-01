@@ -1,18 +1,14 @@
 #include "global.h"
 #include "subroutine.h"
 std::mt19937 rng2;
-
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
-
     /// @brief Initializes the points on surface of sphere or flat plane
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param metric Topology of the surface "cart" for flat plane "sph" for
     /// sphere
     ///  @param len length of the domain;
     ///  @param N number of points;
-
     bool is_sph, is_cart;
-
     is_sph = false;
     is_cart = false;
     if(strcmp(metric, "sph") == 0){
@@ -21,16 +17,12 @@ void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
     if(strcmp(metric, "cart") == 0){
         is_cart = true;
     }
-
     if(!is_cart && !is_sph){
         fprintf(stderr, "Unknown metric, input should be: \n");
         fprintf(stderr, "a) cart for a 2d cartesian monte carlo \n");
         fprintf(stderr, "b) sph  for a monte carlo on the surface of a sphere\n");
         exit(0);
     }
-
-
-
     if(is_cart){
         for(int i=0; i<N; i++){
             Pos[i].x = drand48()*len;
@@ -39,7 +31,6 @@ void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
         Pos[0].x = drand48()*len;
         Pos[0].y = drand48()*len;
     }
-
     if(is_sph){
         Pos[0].x = 0;
         Pos[0].y = 0;
@@ -54,8 +45,7 @@ void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric){
 
     }
 }
-
-void init_eval_lij_t0(Vec3d *Pos, MESH mesh, 
+void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
         double *lij_t0, MBRANE_para *para, SPRING_para *spring){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
@@ -68,15 +58,14 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
     int num_nbr, cm_idx;
     double sum_lij=0;
     double r0;
+    Vec3d rij;
     for(i = 0; i < para->N; i++){
         num_nbr = mesh.cmlist[i + 1] - mesh.cmlist[i];
         cm_idx = mesh.cmlist[i];
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
-            dr.x = Pos[i].x - Pos[j].x;
-            dr.y = Pos[i].y - Pos[j].y;
-            dr.z = Pos[i].z - Pos[j].z;
-            lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
+            rij = Vec3d_add(Pos[i], Pos[j], -1e0);
+            lij_t0[k]=sqrt(inner_product(rij, rij));
             sum_lij+=lij_t0[k];
         }
     }
@@ -84,7 +73,6 @@ void init_eval_lij_t0(Vec3d *Pos, MESH mesh,
     r0=para->av_bond_len;
     spring->constant=para->coef_bend/(r0*r0);
 }
-
 void init_read_parameters( MBRANE_para *mbrane, 
         AFM_para *afm, MCpara *mcpara, ActivePara *activity,
         SPRING_para *spring, string para_file){
@@ -113,7 +101,7 @@ void init_read_parameters( MBRANE_para *mbrane,
         /* fprintf(stderr, "%s\n", buff); */
         mbrane->N = t_n;
         mbrane->coef_bend = td1;
-        mbrane->YY = td2;       // Young's modulus        
+        mbrane->YY = td2;       // Young's modulus
         mbrane->coef_vol_expansion = td3;
         mbrane->sp_curv = td4;
         mbrane->pressure = td5;
@@ -155,7 +143,7 @@ void init_read_parameters( MBRANE_para *mbrane,
        activity->maxA = td2;
         /* fprintf(stderr, "%s\n", buff); */
        if( fgets(buff,255,(FILE*)f2) != NULL);  
-       if( fgets(buff,255,(FILE*)f2) != NULL);   
+       if( fgets(buff,255,(FILE*)f2) != NULL); 
        if( fgets(buff,255,(FILE*)f2) != NULL){   
            sscanf(buff,"%s %lf %lf", which_act, &td1, &td2);
        }
@@ -197,12 +185,12 @@ void write_param(string fname, MBRANE_para mbrane, MCpara mcpara, SPRING_para sp
     paramfile.open( fname );
     paramfile << "# =========== Model Parameters ==========" << endl
             << "# Foppl von Karman number: FvK = " << FvK << endl
-            << "# Elasto-thermal number: ET = " << mcpara.kBT/mbrane.coef_bend*sqrt(FvK) << endl
-            << "# average bond length: r0 = " << mbrane.av_bond_len << endl;
+            << "# Elasto-thermal number: ET = " << mcpara.kBT/mbrane.coef_bend*sqrt(FvK) << endl;
     if (spring.icompute!=0){
        paramfile << "# Spring constant: Ki = " << spring.constant << endl;    
     }
     paramfile.close();
+    cout << FvK << endl;
 }
 //
 void init_activity(ActivePara activity, int N){

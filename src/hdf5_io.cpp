@@ -47,6 +47,7 @@ void hdf5_io_read_pos(double *Pos, string input_file){
     herr_t  status;
 
     if(access(input_file.c_str(),F_OK)!=0){
+        cout << input_file.c_str() << endl;
         fprintf(stderr, "The configuration file does not exit\n");
         exit(1);
     }

@@ -22,8 +22,8 @@ int main(int argc, char **argv){
      // outfolder = (char *) malloc(128*sizeof(char));
      // outfile = (char *) malloc(128*sizeof(char));
      if(argc!=5){
-         fprintf(stderr, "\n\n Requires argument <Number of points> <metric type> <output folder> 
-                <total mc iter>\n\n");
+         fprintf(stderr, "\n\n Requires argument <Number of points> <metric type> <output folder>\
+            <total mc iter>\n\n");
          exit(0);
      }else{
          para.N=atoi(argv[1]);
@@ -50,7 +50,7 @@ int main(int argc, char **argv){
      }
 
      para.r_cut = 4*para.sigma;
-     mcpara.dfac  = 8;
+     mcpara.dfac  = 16  ;
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
      mcpara.dump_skip = 100;

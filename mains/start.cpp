@@ -22,7 +22,8 @@ int main(int argc, char **argv){
      // outfolder = (char *) malloc(128*sizeof(char));
      // outfile = (char *) malloc(128*sizeof(char));
      if(argc!=5){
-         fprintf(stderr, "\n\n Requires argument <Number of points> <output folder>\n\n");
+         fprintf(stderr, "\n\n Requires argument <Number of points> <metric type> <output folder> 
+                <total mc iter>\n\n");
          exit(0);
      }else{
          para.N=atoi(argv[1]);
@@ -31,7 +32,6 @@ int main(int argc, char **argv){
          mcpara.tot_mc_iter = atoi(argv[4]);
          fprintf(stderr, "Monte Carlo of %d particles on %s grid..\n",
                  para.N, metric);
-         
      }
      //
      syscmds="mkdir "+outfolder;
@@ -41,7 +41,7 @@ int main(int argc, char **argv){
     /* define all the paras */ 
      para.len = 2*pi;
      para.epsilon = 1;
-     para.bdry_condt = 1;
+     para.bdry_condt = 3;
      // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          para.sigma = para.len/sqrt((double)para.N);
@@ -64,7 +64,6 @@ int main(int argc, char **argv){
              para.sigma, para.epsilon);
 
      make_nlist(Pos, neib,  para, metric);
-
 
     Ener = pairlj_total_energy(Pos, neib,  para, metric);
 

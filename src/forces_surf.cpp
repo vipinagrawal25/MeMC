@@ -194,7 +194,19 @@ double voronoi_area(double cotJ, double cotK,
    }
     return sigma;
 }
-//
+/*-------------------------------------------------*/
+void init_spcurv(double *curv_t0, MBRANE_p para){
+    for(int i = 0; i < para.N; ++i){
+       curv_t0[i]=para.sp_curv; 
+    }
+    curv_t0[0]=0;
+}
+/*-------------------------------------------------*/
+double init_spcurv(int idx, MBRANE_p para){
+    if (idx==0){return 0;}
+    else{return para.sp_curv;}
+}
+/*-------------------------------------------------*/
 double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
                             int idx, MBRANE_p para){
 
@@ -210,7 +222,9 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     double bend_ener,sigma_i;
     Vec3d cot_times_rij;
     double BB=para.coef_bend;
-    double curv_t0 = para.sp_curv;
+    double curv_t0=init_spcurv(idx,para);
+    // double curv_t0[para.N];
+    // init_spcurv(curv_t0,para);
     // lap_bel:Laplace Beltrami operator for sphere is 2\kappa\nhat
     // nhat is outward normal.
     Vec3d lap_bel,lap_bel_t0,nhat;

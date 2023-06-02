@@ -7,18 +7,18 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
                     SPRING_p spring_para, FLUID_p fld_para, string outfolder){
     double Pole_zcoord;
     if(!mc_para.is_restart){
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/dmemc_pos.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
-                (int *) mesh.node_nbr_list, outfolder+"/input.h5");
+                (int *) mesh.node_nbr_list, outfolder+"/dmemc_conf.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
         if(stick_para.do_stick)
             identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
     }else{
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/dmemc_pos.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
-                (int *) mesh.node_nbr_list, outfolder+"/input.h5");
+                (int *) mesh.node_nbr_list, outfolder+"/dmemc_conf.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
         if(stick_para.do_stick)
             identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
@@ -115,7 +115,6 @@ int main(int argc, char *argv[]){
     string outfolder,syscmds, para_file, log_file, outfile, filename;
     int mpi_err,mpi_rank=0;
     uint32_t seed_v;
-
     //
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -125,17 +124,13 @@ int main(int argc, char *argv[]){
     outfolder = ZeroPadNumber(mpi_rank)+"/";
     cout << "I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
-
     // ---------- open outfile_terminal ------------------- //
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     /*************************************************/
     // read the input file
     init_read_parameters(&mbrane_para, &mc_para, &fld_para, &vol_para,
             &stick_para, &afm_para,  &act_para, &spring_para, filename);
-
     mc_para.one_mc_iter = 2*mbrane_para.N;
-
-
    // check whether the string comparison works
    /* define all the paras */
     mbrane_para.volume = (double *)calloc(1, sizeof(double)); 
@@ -152,7 +147,6 @@ int main(int argc, char *argv[]){
     mesh.node_nbr_list = (int *)calloc(mesh.nghst*mbrane_para.N, sizeof(int));
     lij_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
     stick_para.is_attractive = (bool *)calloc(mbrane_para.N, sizeof(bool));
-
     //
     if(!mc_para.is_restart && afm_para.do_afm){
         s_t = afm_para.sigma; 
@@ -183,7 +177,6 @@ int main(int argc, char *argv[]){
     filename = outfolder + "/para.out";
     write_parameters(mbrane_para, mc_para, fld_para, vol_para,
             stick_para, afm_para,  act_para, spring_para, filename);
-
     printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){

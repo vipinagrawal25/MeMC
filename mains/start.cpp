@@ -41,7 +41,7 @@ int main(int argc, char **argv){
     /* define all the paras */ 
      para.len = 2*pi;
      para.epsilon = 1;
-     para.bdry_condt = 3;
+     para.bdry_condt = 1;
      // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          para.sigma = para.len/sqrt((double)para.N);

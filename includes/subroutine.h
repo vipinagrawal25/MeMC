@@ -112,6 +112,7 @@ void hdf5_io_read_mesh(int *cmlist, int *node_nbr, string input_file);
 void hdf5_io_write_mesh(int *cmlist,
         int *node_nbr, int N, int ng, string output_file);
 void hdf5_io_dump_stickidx(int *stick, int N, string input_file);
+void hdf5_io_dump_stick_bool(bool *stick, int N, string input_file);
 void io_dump_config(double *Pos, int N, char *);
 void io_read_config(double *Pos, int N, char *);
 void io_dump_config_ascii(double *Pos, int N, string);

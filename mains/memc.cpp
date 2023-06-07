@@ -5,6 +5,91 @@
 //
 
 
+ double bending_energy_total_dump(Vec3d *pos, MESH_p mesh, 
+         MBRANE_p para, string outfile){
+
+     /// @brief Estimate the total Bending energy
+     ///  @param Pos array containing co-ordinates of all the particles
+     ///  @param mesh mesh related parameters -- connections and neighbours
+     /// information;
+     ///  @param para  Membrane related parameters;
+     /// @return Total Bending energy
+
+
+     int idx, st_idx;
+     int num_nbr, cm_idx;
+     double be;
+     Vec2d be_ar;
+     FILE *fid;
+
+     fid = fopen(outfile.c_str(), "wb");
+     be = 0e0;
+     st_idx = get_nstart(para.N, para.bdry_type);
+
+     for(idx = 0; idx < st_idx; idx++)fprintf(fid, "%g\n", 0.0e0);
+
+     for(idx = st_idx; idx < para.N; idx++){
+         /* idx = 2; */
+
+         cm_idx = idx*mesh.nghst;
+         num_nbr = mesh.numnbr[idx];
+
+         be_ar = bending_energy_ipart(pos,
+                 (int *) (mesh.node_nbr_list + cm_idx),
+                  num_nbr, idx, para);
+         be += be_ar.x;
+         fprintf(fid, "%g\n", be_ar.x);
+     }
+     fclose(fid);
+     return be;
+}
+
+
+ double stretch_energy_total_dump(Vec3d *pos,
+       MESH_p mesh, double *lij_t0, MBRANE_p para, AREA_p area_p,
+       string outfile){
+
+    /// @brief Estimate the total Stretching energy  
+    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param mesh mesh related parameters -- connections and neighbours
+    /// information; 
+    /// @param lij_t0 initial distance between points of membrane
+    ///  @param para  Membrane related parameters;
+    /// @return Total Stretching energy 
+
+
+    int idx, st_idx;
+    int num_nbr, cm_idx;
+    double se, se_tmp;
+    FILE *fid;
+
+    fid = fopen(outfile.c_str(), "wb");
+
+    st_idx = get_nstart(para.N, para.bdry_type);
+    se = 0e0;
+
+    for(idx = 0; idx < st_idx; idx++)fprintf(fid, "%g\n", 0.0e0);
+    for(idx = st_idx; idx < para.N; idx++){
+        /* idx = 2; */
+        num_nbr = mesh.numnbr[idx];
+        cm_idx = idx*mesh.nghst;
+
+        se_tmp = stretch_energy_ipart(pos,
+                 (int *) (mesh.node_nbr_list + cm_idx),
+                 (double *) (lij_t0 + cm_idx), num_nbr,
+                 idx, area_p);
+        se += se_tmp;
+
+         fprintf(fid, "%g\n", se_tmp);
+        /* printf( "stretch: %lf \n", se); */
+    }
+    fclose(fid);
+    return se*0.5e0;
+ }
+
+
+
+
 int frame_shear(Vec3d *pos, Vec3d *pos_t0, double shear_slope,
         MBRANE_p mbrane, SHEAR_p shear) {
 
@@ -14,6 +99,23 @@ int frame_shear(Vec3d *pos, Vec3d *pos_t0, double shear_slope,
 
   for (i = 0; i < nframe; i++) {
     pos[i].x =  pos_t0[i].x + shear_slope*(pos_t0[i].y - 3.14159); 
+  }
+
+return 0;
+
+}
+
+int vol_expansion(Vec3d *pos, int N, SHEAR_p shear) {
+
+    int nframe = 0;
+    int i;
+    double delta;
+
+    delta = 2*pi/32;
+
+  for (i = 0; i < N; i++) {
+    pos[i].x =  pos[i].x + shear.slope*(pos[i].x - 3.14159); 
+    pos[i].y =  pos[i].y + shear.slope*(pos[i].y - 3.14159); 
   }
 
 return 0;
@@ -47,6 +149,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
         init_stick_bottom(Pos, mesh , stick_para , fld_para , mbrane_para );
         hdf5_io_dump_stickidx(fld_para.solid_idx, mbrane_para.N, outfolder+ "/stick_pos.h5");
+        hdf5_io_dump_stick_bool(stick_para.is_attractive, mbrane_para.N, outfolder+ "/stick_pos.h5");
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
     }else{
@@ -210,6 +313,7 @@ int main(int argc, char *argv[]){
     memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
 
     shear_positions(Pos, mbrane_para.N, shear_para);
+    /* vol_expansion(Pos, mbrane_para.N, shear_para); */
     //
     //
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
@@ -247,7 +351,7 @@ int main(int argc, char *argv[]){
             syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
             system(syscmds.c_str());
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mc_para.dump_skip)+".dat";
-            io_dump_config_ascii((double*) Pos, 3*mbrane_para.N, outfile.c_str());
+           io_dump_config_ascii((double*) Pos, 3*mbrane_para.N, outfile.c_str());
         }
         if(iter == 10*mc_para.dump_skip && !mc_para.is_restart && afm_para.do_afm){
             afm_para.sigma = s_t;

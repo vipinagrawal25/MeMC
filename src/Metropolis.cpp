@@ -281,6 +281,8 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
 
   for (i = 0; i < mcpara.one_mc_iter; i++) {
     int idx = rand_int(rng);
+    cm_idx = mesh.nghst * idx;
+    num_nbr = mesh.numnbr[idx];
 
     Eini = energy_mc_3d(pos, pos_t0, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
                         afm, shear);

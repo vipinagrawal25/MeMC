@@ -190,6 +190,30 @@ void hdf5_io_dump_stickidx(int *stick, int N, string input_file){
   }
 }
 
+void hdf5_io_dump_stick_bool(bool *stick, int N, string input_file){
+
+
+    hid_t   file_id, dset1, space_id;  /* identifiers */
+    herr_t  status;
+    hsize_t          dims; 
+
+  /* Open an existing file. */
+    dims = N;
+    file_id = H5Fcreate (input_file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    space_id = H5Screate_simple (1, &dims, NULL);
+    dset1 = H5Dcreate2(file_id, "/solid_center", H5T_NATIVE_HBOOL, space_id, H5P_DEFAULT,
+                H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite (dset1, H5T_NATIVE_HBOOL, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                stick);
+    status = H5Dclose (dset1);
+    status = H5Sclose (space_id);
+    status = H5Fclose (file_id);
+  if(status != 0){
+      fprintf(stderr, "file close failed\n");
+  }
+}
+
 
 
 // void io_dump_config(double *Pos, 

@@ -175,10 +175,10 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
 
     para->av_bond_len = sum_lij/npairs;
     r0=para->av_bond_len;
-    if(is_fluid){
+    /* if(is_fluid){ */
         for(i = 0; i < mesh.nghst*para->N; i++){
             lij_t0[i] = para->av_bond_len;
-        }
+        /* } */
     }
 }
 

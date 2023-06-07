@@ -197,51 +197,46 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   ini_vol = (4. / 3.) * pi * pow(mbrane.radius, 3);
   KAPPA = vol_p.coef_vol_expansion;
   move = 0;
-
   for (i = 0; i < mcpara.one_mc_iter; i++) {
     int idx = rand_int(rng);
-
+    cm_idx = idx*mesh.nghst;
+    num_nbr = mesh.numnbr[idx];
     Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
                         afm, spring);
     if(vol_p.do_volume) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-
+    //  
     x_o = pos[idx].x;
     y_o = pos[idx].y;
     z_o = pos[idx].z;
-
+    //
     dxinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
     dyinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
     dzinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
-
+    //
     x_n = x_o + dxinc;
     y_n = y_o + dyinc;
     z_n = z_o + dzinc;
-
+    //
     pos[idx].x = x_n;
     pos[idx].y = y_n;
     pos[idx].z = z_n;
-
+    //
     Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
                         afm, spring);
-
     de = (Efin - Eini);
-
     if(vol_p.do_volume){
-       vol_f = volume_ipart(pos,
+      vol_f = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-
+      if (!vol_p.is_pressurized){
         dvol=0.5*(vol_f - vol_i);
         de_vol = vol_energy_change(mbrane, vol_p, dvol);
-        if(vol_p.is_pressurized){
-            de_pressure = PV_change(vol_p.pressure, dvol);
-            de = (Efin - Eini);  + de_pressure;
-        }
-        de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
-              + (dvol/ini_vol)*(dvol/ini_vol);
-
-        de_vol = KAPPA*de_vol;
         de = (Efin - Eini);  + de_vol;
+      }else{
+        de_pressure = PV_change(vol_p.pressure, dvol);
+            de = (Efin - Eini);  + de_pressure;
+      }
+
     }
 
     if (mcpara.algo == "mpolis") {
@@ -249,7 +244,6 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     } else if (mcpara.algo == "glauber") {
       yes = Glauber(de, activity.activity[idx], mcpara);
     }
-
     if (yes) {
       move = move + 1;
       mbrane.tot_energy[0] += de;

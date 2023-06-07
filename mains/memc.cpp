@@ -7,18 +7,18 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
                     SPRING_p spring_para, FLUID_p fld_para, string outfolder){
     double Pole_zcoord;
     if(!mc_para.is_restart){
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/dmemc_pos.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
-                (int *) mesh.node_nbr_list, outfolder+"/dmemc_conf.h5");
+                (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
         if(stick_para.do_stick)
             identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
     }else{
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/dmemc_pos.h5");
+        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
-                (int *) mesh.node_nbr_list, outfolder+"/dmemc_conf.h5");
+                (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
         if(stick_para.do_stick)
             identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
@@ -75,10 +75,10 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     }
     if(vol_para.do_volume){
         vol_sph = volume_total(Pos, mesh, mbrane_para);
+        mbrane_para.volume[0] = vol_sph;
         double  ini_vol = (4./3.)*pi*pow(mbrane_para.radius,3);
         if(!vol_para.is_pressurized){
-            Et[4] = vol_para.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
-            mbrane_para.volume[0] = vol_sph;
+            Et[4] = vol_para.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);   
             fprintf(fid, " %g", Et[4]);
         }
         if(vol_para.is_pressurized){
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]){
     filename = outfolder + "/para.out";
     write_parameters(mbrane_para, mc_para, fld_para, vol_para,
             stick_para, afm_para,  act_para, spring_para, filename);
-    printf("%lf \n", mbrane_para.tot_energy[0]);
+    // printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){
 
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]){
                 vol_para,  afm_para,  act_para, spring_para,  fid );
         cout << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
-            " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;
+            " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << mbrane_para.volume[0] << endl;
 
     }
 

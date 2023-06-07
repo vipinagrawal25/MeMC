@@ -192,7 +192,6 @@ double height_rms(Vec3d *Pos, MBRANE_p mbrane){
   return sqrt(hrms/N);
 }
 /*-----------------------------------------------*/
-
 int get_nstart(int N, int bdrytype){
     static int nf1;
     int nf2;
@@ -208,8 +207,8 @@ int get_nstart(int N, int bdrytype){
             nf2 = 0;
     }
     return nf2;;
-
 }
+/*-----------------------------------------------*/
 // just in case I need it later;
 int print_sanity(int *nbr_del1, int *nbr_del2, int *nbr_add1, int *nbr_add2,
                  int del1, int del2, int add1, int add2, char *fname) {

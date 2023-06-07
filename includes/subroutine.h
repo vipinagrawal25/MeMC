@@ -49,19 +49,20 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, double theta_attr, int N);
 
- double stretch_energy_total(Vec3d *pos,
+double stretch_energy_total(Vec3d *pos,
          MESH_p mesh, double *lij_t0, MBRANE_p para);
 
- double stretch_energy_ipart(Vec3d *pos,
+double stretch_energy_ipart(Vec3d *pos,
          int *node_nbr, double *lij_t0, int num_nbr,
                              int idx, MBRANE_p para);
-
+double voronoi_area(double cotJ, double cotK, 
+        double jsq, double ksq, double area);
 double lj_bottom_surface(double zz,
         bool is_attractive, 
         double sur_pos, double eps, double sigma);
 double volume_total(Vec3d *pos, 
         MESH_p mesh, MBRANE_p para);
-double lj_bottom_surf_total(Vec3d *pos, 
+double lj_bottom_surf_total(Vec3d *pos,
          MBRANE_p para, STICK_p st_p);
 double volume_ipart(Vec3d *pos, int *node_nbr, 
         int num_nbr, int idx);

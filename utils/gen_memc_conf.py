@@ -4,14 +4,14 @@ import quaternion
 import os, sys
 from scipy.spatial import ConvexHull
 import h5py
-    
-
+import meshzoo    
+#***********************************************************#
 def read_data(filename):
     pos = h5py.File(filename)["pos"][()]
     pos = np.asarray(pos)
     Np = int(len(pos)/2)
     pts_sph = pos.reshape(Np,2)
-    pts_cart = np.asarray([[np.sin(theta)*np.cos(phi), 
+    pts_cart = np.asarray([[np.sin(theta)*np.cos(phi),
         np.sin(theta)*np.sin(phi), 
         np.cos(theta)] for theta, phi in pts_sph]
         ) 
@@ -22,7 +22,6 @@ def triangulate(rr):
     triangles = hull.simplices
     return triangles
 ##-----------------------------------------------------------------------#
-
 def sort_simplices(cells):
     lsimples = len(cells)
     nsimplices = np.asarray([], dtype=np.int32)
@@ -98,8 +97,6 @@ def quater2vec(qq,precision=1e-16):
                # Can not convert to vector.")
         exit(1)
     return np.array([qq.x,qq.y,qq.z])
-
-
 #----------------------------------------------------------------------------#
 def sort_nbrs(R, Np, cmlst, node_nbr):
     zhat = np.array([0.,0.,1.])
@@ -146,8 +143,9 @@ def write_file(pts_cart, cmlist, node_nbr):
     file.write(node_nbr)
     file.close()
 
-
 inf = sys.argv[1]
+if inf=='meshzoo':
+    pts_cart,triangles = 
 Np, pts_sph, pts_cart = read_data(inf)
 triangles = triangulate(pts_cart)
 sort_tri = sort_simplices(triangles)
@@ -163,8 +161,4 @@ else:
     write_hdf5(pts_cart, cmlist, node_nbr,
              triangles, "./conf/dmemc_pos.h5", 
              "./conf/dmemc_conf.h5")
-
 # write_file(pts_cart, cmlist, node_nbr)
-
-
-

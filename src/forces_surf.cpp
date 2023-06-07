@@ -101,15 +101,13 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
      ///  @param num_nbr number of nearest neigbours of idx; 
      ///  @param para  Membrane related parameters;
      /// @return Volume substended by ith particle.
-
-
     int i, j, k;
     double volume1;
     Vec3d area1, area2, rk, ri, rj, rkp;
     Vec3d rij, rijk, rik, rjkp;
     Vec3d rijkp;
     Vec3d rjk, pt; 
-
+    //
     volume1 = 0e0;
     ri = pos[idx];
     for (i =0; i < num_nbr; i++){
@@ -142,8 +140,6 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
     ///  @param num_nbr number of nearest neigbours of idx; 
     ///  @param para  Membrane related parameters;
     /// @return Stretching Energy contribution when ith particle is displaced 
-
-
     //
     double HH;
     double idx_ener;
@@ -199,11 +195,11 @@ void init_spcurv(double *curv_t0, MBRANE_p para){
     for(int i = 0; i < para.N; ++i){
        curv_t0[i]=para.sp_curv; 
     }
-    curv_t0[0]=0;
+    curv_t0[0]=2.0;
 }
 /*-------------------------------------------------*/
 double init_spcurv(int idx, MBRANE_p para){
-    if (idx==0){return 0;}
+    if (idx==0){return 4.0;}
     else{return para.sp_curv;}
 }
 /*-------------------------------------------------*/
@@ -218,15 +214,10 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     ///  @param para  Membrane related parameters;
     /// @todo try openMP Pragmas;
     /// @return Bending Energy contribution when ith particle is displaced 
-
     double bend_ener,sigma_i;
     Vec3d cot_times_rij;
     double BB=para.coef_bend;
     double curv_t0=init_spcurv(idx,para);
-    // double curv_t0[para.N];
-    // init_spcurv(curv_t0,para);
-    // lap_bel:Laplace Beltrami operator for sphere is 2\kappa\nhat
-    // nhat is outward normal.
     Vec3d lap_bel,lap_bel_t0,nhat;
     //
     double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
@@ -253,7 +244,6 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
         xikp = pos[idx]- pos[kpdx];
         xjkp = pos[jdx]- pos[kpdx];
         //
-       //
         lijsq = inner_product(xij,xij);
         liksq = inner_product(xik,xik);
         ljksq = inner_product(xjk,xjk);
@@ -284,7 +274,7 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     bend_ener = 0.5*BB*sigma_i*normsq(lap_bel-lap_bel_t0);
     return bend_ener;
 }
-
+//
 double bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH_p mesh, int idx, MBRANE_p para){
 

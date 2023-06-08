@@ -57,9 +57,18 @@ void print(float *arr, int start, int skip, int end){
 /*-----------------------------------------------*/
 void print(double *arr, int nn){
   for (int in = 0; in < nn; ++in){
-      cout << arr[in] << "\t";
+      cout << arr[in] << "\n";
   }
   cout << endl;
+}
+/*-----------------------------------------------*/
+void print(double *arr, int nn, string fname){
+  ofstream outfile;
+  outfile.open(fname);
+  for (int in = 0; in < nn; ++in){
+      outfile << arr[in] << "\n";
+  }
+  outfile.close();
 }
 /*-----------------------------------------------*/
 void print(int *arr, int nn){

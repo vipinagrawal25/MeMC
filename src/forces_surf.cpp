@@ -188,20 +188,8 @@ double voronoi_area(double cotJ, double cotK,
     return sigma;
 }
 /*-------------------------------------------------*/
-// void init_spcurv(double *curv_t0, MBRANE_p para){
-//     for(int i = 0; i < para.N; ++i){
-//        curv_t0[i]=para.sp_curv; 
-//     }
-//     curv_t0[0]=2.0;
-// }
-/*-------------------------------------------------*/
-double init_spcurv(int idx, MBRANE_p para){
-    if (idx==0){return 4.0;}
-    else{return 2.0;}
-}
-/*-------------------------------------------------*/
 double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
-                            int idx, MBRANE_p para){
+                            int idx, MBRANE_p para, SPCURV_p spcurv_para){
     /// @brief Estimate the Bending energy contribution when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param idx index of ith particle;
@@ -209,11 +197,11 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     ///  @param num_nbr number of nearest neigbours of idx; 
     ///  @param para  Membrane related parameters;
     /// @todo try openMP Pragmas;
-    /// @return Bending Energy contribution when ith particle is displaced 
+    /// @return Bending Energy contribution when ith particle is displaced.
     double bend_ener,sigma_i;
     Vec3d cot_times_rij;
     double BB=para.coef_bend;
-    double curv_t0=init_spcurv(idx,para);
+    double curv_t0 = spcurv_para.spcurv[idx];
     Vec3d lap_bel,lap_bel_t0,nhat;
     //
     double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx;
@@ -272,8 +260,7 @@ double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
 }
 //
 double bending_energy_ipart_neighbour(Vec3d *pos, 
-        MESH_p mesh, int idx, MBRANE_p para){
-
+        MESH_p mesh, int idx, MBRANE_p para, SPCURV_p spcurv_para){
     /// @brief Estimate the Bending energy contribution from the neighbours when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param mesh mesh related parameters -- connections and neighbours
@@ -284,18 +271,15 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
    int num_nbr_j;
    int nbr, cm_idx_nbr;
    double be;
-
    be = 0e0;
-
+   //
    for (j = idx*mesh.nghst; j < idx*mesh.nghst + mesh.numnbr[idx]; j++){
        nbr = mesh.node_nbr_list[j];
        num_nbr_j = mesh.numnbr[nbr];
        cm_idx_nbr = nbr*mesh.nghst;
        be += bending_energy_ipart(pos, 
               (int *) mesh.node_nbr_list + cm_idx_nbr,
-               num_nbr_j, nbr, para);
-
-   
+               num_nbr_j, nbr, para, spcurv_para);
    }
    return be;
 } 
@@ -329,36 +313,31 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
 
 
  double bending_energy_total(Vec3d *pos, MESH_p mesh, 
-         MBRANE_p para){
-
+         MBRANE_p para, SPCURV_p spcurv_para){
      /// @brief Estimate the total Bending energy
      ///  @param Pos array containing co-ordinates of all the particles
      ///  @param mesh mesh related parameters -- connections and neighbours
      /// information;
      ///  @param para  Membrane related parameters;
      /// @return Total Bending energy
-
-
      int idx, st_idx;
      int num_nbr, cm_idx;
      double be;
-
      be = 0e0;
+     //
      st_idx = get_nstart(para.N, para.bdry_type);
      for(idx = st_idx; idx < para.N; idx++){
          /* idx = 2; */
-
          cm_idx = idx*mesh.nghst;
          num_nbr = mesh.numnbr[idx];
 
          be += bending_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
-                  num_nbr, idx, para);
+                  num_nbr, idx, para, spcurv_para);
      }
      return be;
 }
-
-
+/*-------------------------------------------------------------------------------------*/
  double stretch_energy_total(Vec3d *pos,
        MESH_p mesh, double *lij_t0, MBRANE_p para){
 
@@ -466,12 +445,9 @@ double lj_bottom_surf_total(Vec3d *pos,
     }
     return lj_bote;
 }
-
-
-
-void identify_attractive_part(Vec3d *pos, 
+/*--------------------------------------------------------------------------------*/
+void identify_attractive_part(Vec3d *pos,
         bool *is_attractive, double theta_attr, int N){
-
     /// @brief identify all the points which substends theta_attr with the centre 
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param is_attractive true for all the particles which sees bottom wall 
@@ -485,7 +461,7 @@ void identify_attractive_part(Vec3d *pos,
         is_attractive[i] = theta < theta_attr;
     }
 }
-
+/*--------------------------------------------------------------------------------*/
 double lj_afm(Vec3d pos, AFM_p afm){
 
     /// @brief Energy contribution from AFM tip to ith point in membrane 

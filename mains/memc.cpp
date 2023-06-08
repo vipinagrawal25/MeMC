@@ -51,7 +51,7 @@ void diag_wHeader(MBRANE_p mbrane_para, STICK_p stick_para,
 double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, 
         MBRANE_p mbrane_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
-        SPRING_p spring_para, FILE *fid ){
+        SPRING_p spring_para, SPCURV_p spcurv_para, FILE *fid ){
     double vol_sph;
     double Ener_t;
     Vec3d afm_force,spring_force[2];
@@ -59,7 +59,7 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     /*-----------------------------------------------*/
     /*****  initialize energy values *****/
     Et[0] = stretch_energy_total(Pos, mesh, lij_t0, mbrane_para);
-    Et[1] = bending_energy_total(Pos, mesh, mbrane_para);
+    Et[1] = bending_energy_total(Pos, mesh, mbrane_para, spcurv_para);
     fprintf(fid, " %g %g %g", mbrane_para.tot_energy[0], Et[0], Et[1]);
     if(stick_para.do_stick){
         Et[2] = lj_bottom_surf_total(Pos, mbrane_para, stick_para);
@@ -138,7 +138,6 @@ int main(int argc, char *argv[]){
     act_para.activity = (double *)calloc(mbrane_para.N, sizeof(double));
     spcurv_para.spcurv = (double *)calloc(mbrane_para.N, sizeof(double));
     mbrane_para.tot_energy[0] = 0e0;
-    init_activity(act_para, mbrane_para.N);
     // allocate arrays
     Pos = (Vec3d *)calloc(mbrane_para.N, sizeof(Vec3d));
     mesh.numnbr = (int *)calloc(mbrane_para.N, sizeof(int));
@@ -154,12 +153,17 @@ int main(int argc, char *argv[]){
         e_t = afm_para.epsilon;
         afm_para.epsilon = 0.0;
     }
-
+    //
     Pole_zcoord = start_simulation(Pos, mesh, lij_t0, 
                      mbrane_para,  mc_para,  stick_para,
                      vol_para,  afm_para,  act_para, 
                      spring_para,  fld_para,  outfolder);
     //
+    init_activity(act_para, mbrane_para.N);
+    init_spcurv(spcurv_para, Pos, mbrane_para.N);
+    // Write spontaneous curvature in a file //
+    // ---- Only for diagnostic purpose ---- //
+    print(spcurv_para.spcurv,mbrane_para.N,outfolder+"/spcurv.txt");
     //
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
     log_file=outfolder+"/mc_log";
@@ -169,10 +173,10 @@ int main(int argc, char *argv[]){
          spring_para, fid );
     fprintf(fid , "%d %g", 0, 0.0 );
     Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
-         vol_para,  afm_para,  act_para, spring_para,  fid );
+         vol_para,  afm_para,  act_para, spring_para,  spcurv_para, fid );
     mbrane_para.tot_energy[0] = Ener_t;
     filename = outfolder + "/para.out";
-    write_parameters(mbrane_para, mc_para, fld_para, vol_para,
+    write_parameters(mbrane_para, spcurv_para, mc_para, fld_para, vol_para,
             stick_para, afm_para,  act_para, spring_para, filename);
     // printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
@@ -194,16 +198,16 @@ int main(int argc, char *argv[]){
         //
         num_moves = monte_carlo_3d(Pos, mesh, lij_t0, 
                 mbrane_para, mc_para, stick_para, vol_para, 
-                afm_para, act_para,  spring_para);
+                afm_para, act_para,  spring_para, spcurv_para);
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
             num_bond_change = monte_carlo_fluid(Pos, mesh, mbrane_para, mc_para, fld_para);
-            cout << "fluid stats " << num_bond_change << " bonds flipped" << endl;
+            outfile_terminal << "fluid stats " << num_bond_change << " bonds flipped" << endl;
         }
         //
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
         Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
-                vol_para,  afm_para,  act_para, spring_para,  fid );
-        cout << "iter = " << iter << "; Accepted Moves = " 
+                vol_para,  afm_para,  act_para, spring_para, spcurv_para, fid );
+        outfile_terminal << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< Ener_t << "; volume = " << mbrane_para.volume[0] << endl;
     }

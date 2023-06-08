@@ -5,7 +5,7 @@ std::mt19937 rng2;
 extern "C" void Membrane_listread(int *, double *, double *, 
         double *, int *, char *);
 
-extern "C" void Spcurv_listread(char *, double *, double *, double *, char *);
+extern "C" void Spcurv_listread(char*, double *, double *, double *, char *);
 
 extern "C" void Stick_listread(bool *, double *, double *, double *, 
         double *,  char *);
@@ -137,7 +137,6 @@ void init_system_random_pos(Vec2d *Pos,  double len,
     /*     Pos[i].x = drand48()*len; */
     /*     Pos[i].y = drand48()*len; */
     /* } */
-
 }
 /*--------------------------------------------------------------------------------*/
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
@@ -177,7 +176,7 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
     }
 }
 //
-void init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
+bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
         FLUID_p *fld_para, VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
         SPRING_p *spring_para, string para_file){
    /// @brief read parameters from para_file 
@@ -197,6 +196,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
             &mbrane_para->YY, &mbrane_para->radius,
             &mbrane_para->bdry_type, tmp_fname);
 
+    // sprintf(tmp_fname, "%s", para_file.c_str() );
     sprintf(tmp_fname, "%s", para_file.c_str() );
     Spcurv_listread(spcurv_which, &spcurv_para->minC, &spcurv_para->maxC,
             &spcurv_para->theta, tmp_fname);
@@ -225,6 +225,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     Activity_listread(which_act, &act_para->minA, &act_para->maxA, tmp_fname);
     act_para->act = which_act;
 
+    // sprintf(tmp_fname, "%s", para_file.c_str() );
     sprintf(tmp_fname, "%s", para_file.c_str() );
     Fluid_listread(&fld_para->is_fluid, &fld_para->min_allowed_nbr,
             &fld_para->fluidize_every, &fld_para->fac_len_vertices, tmp_fname);
@@ -233,14 +234,16 @@ void init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     Volume_listread(&vol_para->do_volume, &vol_para->is_pressurized,
             &vol_para->coef_vol_expansion, &vol_para->pressure, tmp_fname);
 
-  // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
-   // define the monte carlo parameters
-   mc_para->one_mc_iter = 2*mbrane_para->N;
-   mc_para->delta = sqrt(8*pi/(2*mbrane_para->N-4));
+    // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
+    // define the monte carlo parameters
+    mc_para->one_mc_iter = 2*mbrane_para->N;
+    mc_para->delta = sqrt(8*pi/(2*mbrane_para->N-4));
+    // string filename = "00000/para.out";
+    return true;
 }
 //
-void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para, 
-        VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
+void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
+        FLUID_p fld_para, VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
         SPRING_p spring_para, string out_file){
  
     double FvK = mbrane.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
@@ -259,6 +262,12 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para,
             << " av_bond_len " << mbrane.av_bond_len << endl
             << " bdry_type " << mbrane.bdry_type << endl
             << " radius " << mbrane.radius << endl;
+
+    out_<< "# =========== Spontaneous Curvature Parameters ==========" << endl
+            << " which Curvature = " << spcurv_para.which_spcurv << endl
+            << " minC = " << spcurv_para.minC << endl
+            << " maxC = " << spcurv_para.maxC << endl
+            << " theta =" << spcurv_para.theta << endl;
 
     out_<< "# =========== Monte Carlo Parameters ==========" << endl
             << " algo = " << mc_para.algo << endl
@@ -307,8 +316,7 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para,
 
     out_.close();
 }
-
-
+/*--------------------------------------------------------------------------*/
 void init_activity(ACTIVE_p activity, int N){
     int i;
     std::uniform_real_distribution<> rand_real(activity.minA, activity.maxA);
@@ -319,3 +327,20 @@ void init_activity(ACTIVE_p activity, int N){
         for(i=0;i<N;i++) activity.activity[i] = activity.maxA;
     }  
 }
+/*--------------------------------------------------------------------------*/
+void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N){
+    int i;
+    double theta;
+    if(spcurv.which_spcurv=="delta"){
+        spcurv.spcurv[0]=spcurv.maxC;
+        for (int i = 1; i < N; ++i){spcurv.spcurv[i]=spcurv.minC;}
+    }
+    if(spcurv.which_spcurv=="constant"){
+        for(i= 0; i<N; i++){
+            theta = pi - acos(pos[i].z);
+            if (theta<spcurv.theta){spcurv.spcurv[i]=spcurv.maxC;}
+            else{spcurv.spcurv[i]=spcurv.minC;}
+        }
+    }
+}
+/*****************************************************************************/

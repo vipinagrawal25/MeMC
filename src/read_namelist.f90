@@ -94,11 +94,11 @@ subroutine Spcurv_listread(which_spcurv, minC, maxC, theta, &
     character(len=char_len) :: f_fname
     character(len=char_len) :: spcurv_which
 
-    namelist /Spcurvpara/ spcurv_which, minC, maxC, theta
+    namelist /spcurvpara/ spcurv_which, minC, maxC, theta
     
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
-    read(unit=100,nml=Spcurvpara)
+    read(unit=100,nml=spcurvpara)
     close(unit=100)
     call convert_fstr_cstr(spcurv_which, which_spcurv)
 end subroutine
@@ -112,9 +112,7 @@ subroutine Activity_listread(which_act, minA, maxA, &
     character(len=char_len) :: f_fname
     character(len=char_len) :: act_which
 
-
-    namelist /Actpara/ act_which, maxA, minA 
-
+    namelist /Actpara/ act_which, maxA, minA
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=Actpara)
@@ -156,7 +154,7 @@ end subroutine
 
 
 subroutine Fluid_listread(is_fluid,  min_allowed_nbr, fluidize_every, fac_len_vert, &
-         parafile) bind(c, name='Fluid_listread')
+    parafile) bind(c, name='Fluid_listread')
 
      logical(kind=c_bool) :: is_fluid
      integer(kind=c_int) :: min_allowed_nbr, fluidize_every

@@ -13,19 +13,15 @@ using namespace std;
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, 
                 double *lij_t0, MBRANE_p mbrane,
                 MC_p mcpara, STICK_p ,  VOL_p , AFM_p afm, 
-                ACTIVE_p activity,  SPRING_p spring);
-
- double energy_mc_3d(Vec3d *pos, MESH_p mesh, 
+                ACTIVE_p activity,  SPRING_p spring, SPCURV_p spcurv);
+double energy_mc_3d(Vec3d *pos, MESH_p mesh, 
          double *lij_t0, int idx, MBRANE_p , STICK_p ,
-         VOL_p , AFM_p , SPRING_p );
+         VOL_p , AFM_p , SPRING_p , SPCURV_p );
 int monte_carlo_surf2d(Vec2d *Pos, 
         Nbh_list *neib, LJ_p para, 
         MC_p mcpara, char *metric);
-
 int monte_carlo_fluid(Vec3d *, MESH_p , MBRANE_p , MC_p, FLUID_p );
-
 void init_rng(uint32_t seed_val);
-
 //*************************************************//
 //forces_lj.c
 void make_nlist(Vec2d *Pos, Nbh_list *neib,
@@ -40,18 +36,15 @@ double pairlj_total_energy(Vec2d *Pos, Nbh_list *neib,
         LJ_p para, char *metric);
 //forces_surf.c
 double vol_energy_change(MBRANE_p mbrane, VOL_p , double dvol);
-double bending_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para);
+double bending_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para, SPCURV_p spcurv_para);
 double bending_energy_ipart(Vec3d *pos, int *node_nbr,  
-        int num_nbr, int idx, MBRANE_p para);
+        int num_nbr, int idx, MBRANE_p para, SPCURV_p spcurv_para);
 double bending_energy_ipart_neighbour(Vec3d *pos, 
-        MESH_p mesh, int idx, MBRANE_p para);
-
+        MESH_p mesh, int idx, MBRANE_p para, SPCURV_p spcurv_para);
 void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, double theta_attr, int N);
-
 double stretch_energy_total(Vec3d *pos,
          MESH_p mesh, double *lij_t0, MBRANE_p para);
-
 double stretch_energy_ipart(Vec3d *pos,
          int *node_nbr, double *lij_t0, int num_nbr,
                              int idx, MBRANE_p para);
@@ -69,27 +62,26 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
 double lj_afm(Vec3d , AFM_p);
 double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         MBRANE_p para, AFM_p afm);
-
-
 //init.c
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
 double PV_change(double ,double );
 double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring);
 double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
                                MESH_p mesh, SPRING_p spring);
+void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N);
 //initialise.c
  void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
          double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool );
 void init_read_config();
 void init_afm_tip(AFM_p );
-void init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
+bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
         FLUID_p *fld_para, VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
         SPRING_p *spring_para, string para_file);
 void init_activity(ACTIVE_p, int );
 int randint(int n);
-void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para, 
-        VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
-        SPRING_p spring_para, string out_file);
+void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
+        FLUID_p fld_para, VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  
+        ACTIVE_p act_para, SPRING_p spring_para, string out_file);
  
 //hdf5_io
 void hdf5_io_write_pos(double *Pos, int N, string input_file);

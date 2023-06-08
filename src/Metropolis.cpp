@@ -121,7 +121,8 @@ double rand_inc_theta(double th0, double dfac) {
 
 double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
                     int idx, MBRANE_p mbrane, STICK_p st_p, 
-                    VOL_p vol_p, AFM_p afm, SPRING_p spring) {
+                    VOL_p vol_p, AFM_p afm, SPRING_p spring,
+                    SPCURV_p spcurv) {
   /// @brief Estimate the contribution from all the energies when a particle is
   /// moved randomly
   ///  @param Pos array containing co-ordinates of all the particles
@@ -148,9 +149,9 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   num_nbr = mesh.numnbr[idx];
 
   E_b = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
-                             idx, mbrane);
+                             idx, mbrane, spcurv);
 
-  E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
+  E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane, spcurv);
 
   E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
                              (lij_t0 + cm_idx), num_nbr, idx, mbrane);
@@ -167,8 +168,8 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
                    MBRANE_p mbrane, MC_p mcpara, STICK_p st_p,
                    VOL_p vol_p, AFM_p afm,
-                   ACTIVE_p activity, SPRING_p spring) {
-
+                   ACTIVE_p activity, SPRING_p spring,
+                   SPCURV_p spcurv) {
   /// @brief Monte-Carlo routine for the membrane
   ///  @param Pos array containing co-ordinates of all the particles
   ///  @param mesh mesh related parameters -- connections and neighbours
@@ -201,7 +202,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     cm_idx = idx*mesh.nghst;
     num_nbr = mesh.numnbr[idx];
     Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
-                        afm, spring);
+                        afm, spring, spcurv);
     if(vol_p.do_volume) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
     //
@@ -222,7 +223,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     pos[idx].z = z_n;
     //
     Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
-                        afm, spring);
+                        afm, spring, spcurv);
     de = (Efin - Eini);
     if(vol_p.do_volume){
       vol_f = volume_ipart(pos,

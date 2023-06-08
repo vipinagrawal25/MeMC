@@ -82,10 +82,9 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
          double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool );
 void init_read_config();
 void init_afm_tip(AFM_p );
-void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_para, 
-        VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
+void init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
+        FLUID_p *fld_para, VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
         SPRING_p *spring_para, string para_file);
- 
 void init_activity(ACTIVE_p, int );
 int randint(int n);
 void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para, 

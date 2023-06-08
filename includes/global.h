@@ -20,7 +20,6 @@ using namespace std;
 #define R_del 0.05
 #define char_len 64
 //not included the celid and particle id which i shall do in the cell linked list part
-
 ///  @brief Discriptions of the structure classes 
 typedef struct{
     /// @brief MCpara Structure
@@ -39,14 +38,13 @@ typedef struct{
     double kBT;
     double delta; // increment of position
     bool is_restart;
- }MC_p;
+}MC_p;
 
 typedef struct{
     string act;
     double minA, maxA;
     double *activity;
 }ACTIVE_p;
-
 //
 typedef struct{
     /// @brief Membrane Structure
@@ -66,7 +64,7 @@ typedef struct{
     double coef_bend;  //coefficient bending
     double YY;  //coefficient stretching
     double radius;  // radius of ball
-    double sp_curv; // spontaneous curvature of the membrane.
+    // double sp_curv; // spontaneous curvature of the membrane.
     double av_bond_len; // average length of the bond
     double *tot_energy;
     double *volume; // these are updated after each monte carlo 
@@ -75,7 +73,12 @@ typedef struct{
     int bdry_type;
 }MBRANE_p;
 //
-
+typedef struct{
+    string which_spcurv;
+    double minC, maxC, theta;
+    double *spcurv;
+}SPCURV_p;
+//
 typedef struct{
     bool is_fluid;
     int min_allowed_nbr;
@@ -97,8 +100,6 @@ typedef struct{
     double sigma, epsilon, theta; // sigma and epsilon for the bottom attractive wall
     bool *is_attractive;
 }STICK_p;
-
-
 //
 typedef struct{
     /// @brief Mesh Structure

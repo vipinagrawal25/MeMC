@@ -131,7 +131,6 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
  double stretch_energy_ipart(Vec3d *pos,
          int *node_nbr, double *lij_t0,
          int num_nbr, int idx, MBRANE_p para){
-
     /// @brief Estimate the Stretching energy contribution when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param idx index of ith particle;
@@ -175,8 +174,6 @@ double voronoi_area(double cotJ, double cotK,
     ///  @param area area of the triangle 
     /// @return  Given two cotangent angles, it returns either the area due to perpendicular bisector,
 /// or the barycenter.
-
-
     double sigma;
     if (cotJ>0 && cotK>0){
         if (cotJ*cotK<1){
@@ -191,21 +188,20 @@ double voronoi_area(double cotJ, double cotK,
     return sigma;
 }
 /*-------------------------------------------------*/
-void init_spcurv(double *curv_t0, MBRANE_p para){
-    for(int i = 0; i < para.N; ++i){
-       curv_t0[i]=para.sp_curv; 
-    }
-    curv_t0[0]=2.0;
-}
+// void init_spcurv(double *curv_t0, MBRANE_p para){
+//     for(int i = 0; i < para.N; ++i){
+//        curv_t0[i]=para.sp_curv; 
+//     }
+//     curv_t0[0]=2.0;
+// }
 /*-------------------------------------------------*/
 double init_spcurv(int idx, MBRANE_p para){
     if (idx==0){return 4.0;}
-    else{return para.sp_curv;}
+    else{return 2.0;}
 }
 /*-------------------------------------------------*/
 double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
                             int idx, MBRANE_p para){
-
     /// @brief Estimate the Bending energy contribution when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param idx index of ith particle;
@@ -284,7 +280,6 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
     /// information; 
     ///  @param para  Membrane related parameters;
     /// @return Bending Energy contribution from the neighbours of ith particle 
-
    int j;
    int num_nbr_j;
    int nbr, cm_idx_nbr;

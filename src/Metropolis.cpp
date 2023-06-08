@@ -188,9 +188,8 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   double dvol, de_vol, ini_vol, de_pressure;
   double KAPPA;
   bool yes;
-
   int nframe;
-
+  //
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
   std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
   std::uniform_real_distribution<> rand_real(-1, 1);
@@ -205,7 +204,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
                         afm, spring);
     if(vol_p.do_volume) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-    //  
+    //
     x_o = pos[idx].x;
     y_o = pos[idx].y;
     z_o = pos[idx].z;
@@ -231,19 +230,18 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       if (!vol_p.is_pressurized){
         dvol=0.5*(vol_f - vol_i);
         de_vol = vol_energy_change(mbrane, vol_p, dvol);
-        de = (Efin - Eini);  + de_vol;
+        de = (Efin - Eini)  + de_vol;
       }else{
         de_pressure = PV_change(vol_p.pressure, dvol);
             de = (Efin - Eini);  + de_pressure;
       }
-
     }
-
     if (mcpara.algo == "mpolis") {
       yes = Metropolis(de, activity.activity[idx], mcpara);
     } else if (mcpara.algo == "glauber") {
       yes = Glauber(de, activity.activity[idx], mcpara);
     }
+    //
     if (yes) {
       move = move + 1;
       mbrane.tot_energy[0] += de;

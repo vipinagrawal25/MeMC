@@ -2,8 +2,10 @@
 #include "subroutine.h"
 std::mt19937 rng2;
 
-extern "C" void Membrane_listread(int *, double *, double *, double *, 
+extern "C" void Membrane_listread(int *, double *, double *, 
         double *, int *, char *);
+
+extern "C" void Spcurv_listread(char *, double *, double *, double *, char *);
 
 extern "C" void Stick_listread(bool *, double *, double *, double *, 
         double *,  char *);
@@ -137,10 +139,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
     /* } */
 
 }
-
-
-
-
+/*--------------------------------------------------------------------------------*/
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
          MBRANE_p *para, SPRING_p *spring, bool is_fluid){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
@@ -168,7 +167,6 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
             /* printf("%g %g %g %g %g \n", Pos[i].x, Pos[j].x, Pos[i].y, Pos[j].y, lij_t0[k]); */
         }
     }
-
     para->av_bond_len = sum_lij/npairs;
     r0=para->av_bond_len;
     spring->constant=para->coef_bend/(r0*r0);
@@ -178,9 +176,9 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
         }
     }
 }
-
-void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_para, 
-        VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
+//
+void init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
+        FLUID_p *fld_para, VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
         SPRING_p *spring_para, string para_file){
    /// @brief read parameters from para_file 
     ///  @param mesh mesh related parameters -- connections and neighbours
@@ -192,21 +190,24 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_par
     //
     char temp_algo[char_len];
     char which_act[char_len], tmp_fname[char_len];
-
+    char spcurv_which[char_len];
+    //
     sprintf(tmp_fname, "%s", para_file.c_str() );
     Membrane_listread(&mbrane_para->N, &mbrane_para->coef_bend,
-            &mbrane_para->YY, &mbrane_para->sp_curv,  &mbrane_para->radius, 
+            &mbrane_para->YY, &mbrane_para->radius,
             &mbrane_para->bdry_type, tmp_fname);
 
-    bool do_stick;
-    double pos_bot_wall;  // position of the bottom attractive wall
-    double sigma, epsilon, theta; // sigma and epsilon for the bottom attractive wall
- 
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    Spcurv_listread(spcurv_which, &spcurv_para->minC, &spcurv_para->maxC,
+            &spcurv_para->theta, tmp_fname);
+    spcurv_para->which_spcurv=spcurv_which;
+
+    sprintf(tmp_fname, "%s", para_file.c_str() );
     Stick_listread(&stick_para->do_stick, &stick_para->pos_bot_wall, 
             &stick_para->sigma, &stick_para->epsilon, &stick_para->theta,
             tmp_fname);
 
-    sprintf(tmp_fname, "%s", para_file.c_str() );
+    sprintf(tmp_fname, "%s", para_file.c_str());
     MC_listread(temp_algo, &mc_para->dfac, &mc_para->kBT, &mc_para->is_restart,
             &mc_para->tot_mc_iter, &mc_para->dump_skip, tmp_fname);
     mc_para->algo=temp_algo;
@@ -219,7 +220,6 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_par
     Afm_listread(&afm_para->do_afm, &afm_para->tip_rad, 
             &afm_para->tip_pos_z, &afm_para->sigma, &afm_para->epsilon,
              tmp_fname);
-
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
     Activity_listread(which_act, &act_para->minA, &act_para->maxA, tmp_fname);
@@ -239,7 +239,6 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, FLUID_p *fld_par
    mc_para->delta = sqrt(8*pi/(2*mbrane_para->N-4));
 }
 //
-//
 void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para, 
         VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
         SPRING_p spring_para, string out_file){
@@ -255,7 +254,7 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, FLUID_p fld_para,
     out_<< "# =========== Membrane Parameters ==========" << endl
             << " coef bend = " << mbrane.coef_bend << endl
             << " YY " << mbrane.YY << endl
-            << " sp_curv " << mbrane.sp_curv << endl
+            // << " sp_curv " << mbrane.sp_curv << endl
             << " N " << mbrane.N << endl
             << " av_bond_len " << mbrane.av_bond_len << endl
             << " bdry_type " << mbrane.bdry_type << endl

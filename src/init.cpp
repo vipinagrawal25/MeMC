@@ -335,9 +335,11 @@ void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N){
         spcurv.spcurv[0]=spcurv.maxC;
         for (int i = 1; i < N; ++i){spcurv.spcurv[i]=spcurv.minC;}
     }
+    int temp=0;
     if(spcurv.which_spcurv=="constant"){
         for(i= 0; i<N; i++){
             theta = pi - acos(pos[i].z);
+            temp+= (theta<spcurv.theta);
             if (theta<spcurv.theta){spcurv.spcurv[i]=spcurv.maxC;}
             else{spcurv.spcurv[i]=spcurv.minC;}
         }

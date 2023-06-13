@@ -282,7 +282,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
                num_nbr_j, nbr, para, spcurv_para);
    }
    return be;
-} 
+}
 
  double volume_total(Vec3d *pos, MESH_p mesh,
          MBRANE_p para){

@@ -13,7 +13,7 @@ void init_rng(uint32_t seed_val) {
   ///  @brief Generates random number
   rng.seed(seed_val);
 }
-
+//
 int del_nbr(int *nbrs, int numnbr, int idx) {
   // delet int idx between i1 and i2 in the nbrs list
   int new_numnbr, delete_here;
@@ -164,7 +164,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring);
   return E_b + E_s + E_stick + E_afm + E_spr;
 }
-
+//
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
                    MBRANE_p mbrane, MC_p mcpara, STICK_p st_p,
                    VOL_p vol_p, AFM_p afm,
@@ -203,7 +203,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     num_nbr = mesh.numnbr[idx];
     Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
                         afm, spring, spcurv);
-    if(vol_p.do_volume) vol_i = volume_ipart(pos,
+    if(vol_p.do_volume || vol_p.is_pressurized) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
     //
     x_o = pos[idx].x;
@@ -231,11 +231,18 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       if (!vol_p.is_pressurized){
         dvol=0.5*(vol_f - vol_i);
         de_vol = vol_energy_change(mbrane, vol_p, dvol);
-        de = (Efin - Eini)  + de_vol;
-      }else{
-        de_pressure = PV_change(vol_p.pressure, dvol);
-            de = (Efin - Eini);  + de_pressure;
+        // cout << de << "\t";
+        de = (Efin - Eini) + de_vol;
+        // cout << de << endl;
       }
+    }
+    if(vol_p.is_pressurized){
+       vol_f = volume_ipart(pos,
+            (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+        dvol=0.5*(vol_f - vol_i);
+        de_pressure = PV_change(vol_p.pressure, dvol);
+        // cout << de_pressure << endl;
+        de = (Efin - Eini) + de_pressure;
     }
     if (mcpara.algo == "mpolis") {
       yes = Metropolis(de, activity.activity[idx], mcpara);
@@ -255,10 +262,9 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   }
   return move;
 }
-
+//
 int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
                        char *metric) {
-
   /// @brief Monte-Carlo routine for the points on the surface of sphere or flat
   /// plane
   ///  @param Pos array containing co-ordinates of all the particles
@@ -268,7 +274,6 @@ int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
   ///  @param metric Topology of the surface "cart" for flat plane "sph" for
   /// sphere
   /// @return number of accepted moves
-
   int i, move;
   double x_o, y_o, x_n, y_n;
   double de, Eini, Efin;

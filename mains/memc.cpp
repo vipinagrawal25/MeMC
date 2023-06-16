@@ -37,30 +37,37 @@ return 0;
 }
 //
 
-double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0, 
+double start_simulation(Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0, 
                     MBRANE_p mbrane_para, MC_p mc_para, STICK_p stick_para,
                     VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
                     SHEAR_p shear_para, FLUID_p fld_para, string outfolder){
     double Pole_zcoord;
     if(!mc_para.is_restart){
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
+        hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
+        memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
+        shear_positions(Pos, mbrane_para.N, shear_para);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
         init_stick_bottom(Pos, mesh , stick_para , fld_para , mbrane_para );
-        hdf5_io_dump_stickidx(fld_para.solid_idx, mbrane_para.N, outfolder+ "/solid_pos_id.h5");
-        hdf5_io_dump_stick_bool(stick_para.is_attractive, mbrane_para.N, outfolder+ "/stick_pos_id.h5");
+        hdf5_io_dump_int(fld_para.solid_idx, mbrane_para.N, outfolder+ "/solid_pos_id.h5", "solid_id");
+        hdf5_io_dump_bool(stick_para.is_attractive, mbrane_para.N, outfolder+ "/stick_pos_id.h5", "stick_id");
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
     }else{
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
+        hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
+        memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
-        max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
-        min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
-        init_stick_bottom(Pos, mesh , stick_para , fld_para , mbrane_para );
-        hdf5_io_read_pos( (double *)Pos,  outfolder+"/restart.h5");
+        hdf5_io_read_int(fld_para.solid_idx,  outfolder+ "/solid_pos_id.h5", "solid_id");
+        hdf5_io_read_bool(stick_para.is_attractive, outfolder+ "/stick_pos_id.h5", "stick_id");
+        hdf5_io_read_double( (double *)Pos,  outfolder+"/restart.h5", "pos");
+        hdf5_io_read_mesh((int *) mesh.numnbr,
+                (int *) mesh.node_nbr_list, outfolder+"/restart.h5");
+        /* for (int k =0; k<12*mbrane_para.N; k++) */
+            /* printf("%lf %g %d \n", Pos[512].z, lij_t0[20], mesh.node_nbr_list[k]); */
+        /* exit(0); */
     }
     return Pole_zcoord;
 }
@@ -109,7 +116,8 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
         fprintf(fid, " %g", Et[3]);
     }
     if(shear_para.do_shear){
-        Et[5] = spring_tot_frame_ener(Pos, mbrane_para , shear_para);
+        /* Et[5] = spring_tot_frame_ener(Pos, mbrane_para , shear_para); */
+        Et[5] = 0.0; 
         fprintf(fid, " %g  ", Et[5]);
     }
     if(vol_para.do_volume){
@@ -128,7 +136,7 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
 
     if (afm_para.do_afm){fprintf(fid, " %g %g %g", afm_force.x, afm_force.y, afm_force.z);}
     {fprintf(fid, " %g \n", vol_sph );}
-    Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5]+ Et[6];
+    Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5] + Et[6];
     fflush(fid);
 
     return Ener_t;
@@ -205,20 +213,18 @@ int main(int argc, char *argv[]){
         afm_para.epsilon = 0.0;
     }
 
-    Pole_zcoord = start_simulation(Pos, mesh, lij_t0, 
+    Pole_zcoord = start_simulation(Pos, Pos_t0, mesh, lij_t0, 
                      mbrane_para,  mc_para,  stick_para,
                      vol_para,  afm_para,  act_para, 
                      shear_para,  fld_para,  outfolder);
 
-    memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
 
-    shear_positions(Pos, mbrane_para.N, shear_para);
     /* vol_expansion(Pos, mbrane_para.N, shear_para); */
     //
     //
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
     log_file=outfolder+"/mc_log";
-    fid = fopen(log_file.c_str(), "w");
+    fid = fopen(log_file.c_str(), "a");
 
     if(!mc_para.is_restart)
     diag_wHeader(mbrane_para, area_para,  stick_para,  vol_para,  afm_para,  act_para, 
@@ -245,20 +251,18 @@ int main(int argc, char *argv[]){
 
         if(iter%mc_para.dump_skip == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mc_para.dump_skip)+".h5";
-            hdf5_io_write_pos((double*) Pos, 3*mbrane_para.N, outfile);
+            hdf5_io_write_double((double*) Pos, 3*mbrane_para.N, outfile, "pos");
             hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list, 
                     mbrane_para.N, mesh.nghst, outfile);
             syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
             system(syscmds.c_str());
-            outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mc_para.dump_skip)+".dat";
-           io_dump_config_ascii((double*) Pos, 3*mbrane_para.N, outfile.c_str());
         }
-        if(iter == 10*mc_para.dump_skip && !mc_para.is_restart && afm_para.do_afm){
-            afm_para.sigma = s_t;
-            afm_para.epsilon = e_t;
-            e_t = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para);
-            mbrane_para.tot_energy[0] += e_t;
-        }
+        /* if(iter == 10*mc_para.dump_skip && !mc_para.is_restart && afm_para.do_afm){ */
+        /*     afm_para.sigma = s_t; */
+        /*     afm_para.epsilon = e_t; */
+        /*     e_t = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para); */
+        /*     mbrane_para.tot_energy[0] += e_t; */
+        /* } */
 
         num_moves = monte_carlo_3d(Pos, Pos_t0, mesh, lij_t0, 
                 mbrane_para, mc_para, area_para, stick_para, vol_para, 

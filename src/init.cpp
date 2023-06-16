@@ -172,7 +172,6 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
             /* printf("%g %g %g %g %g \n", Pos[i].x, Pos[j].x, Pos[i].y, Pos[j].y, lij_t0[k]); */
         }
     }
-
     para->av_bond_len = sum_lij/npairs;
     r0=para->av_bond_len;
     /* if(is_fluid){ */
@@ -393,4 +392,46 @@ void init_activity(ACTIVE_p activity, int N){
     if(activity.act == "constant"){
         for(i=0;i<N;i++) activity.activity[i] = activity.maxA;
     }  
+}
+
+void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick, 
+        FLUID_p fld_para, MBRANE_p mbrane, string outfolder){
+
+    int i, idx, cm_idx, num_nbr; 
+    int j, idxn;
+    double theta;
+    int nframe, mpi_err;
+    int tNs = 2048;
+    int *index_solid;
+
+    index_solid =  (int *)calloc(1, sizeof(tNs));
+    hdf5_io_read_int(index_solid,  outfolder+ "/solid_index.h5", "solid_idx");
+
+    if(fld_para.is_semifluid){ 
+        if(fld_para.num_solid_points > tNs) 
+            printf("need more solid fractions\n");
+            MPI_Abort(MPI_COMM_WORLD, mpi_err);
+    }
+    for(i= 0; i<mbrane.N; i++){
+        fld_para.solid_idx[i] = 0;
+        stick.is_attractive[i] = false;
+    }
+
+    if(fld_para.is_semifluid){ 
+        for(i= 0; i<fld_para.num_solid_points; i++){
+            idx = index_solid[i];
+            stick.is_attractive[idx] = true;
+            cm_idx = mesh.nghst * idx;
+            num_nbr = mesh.numnbr[idx];
+            fld_para.solid_idx[idx] = 1;
+            for(j= cm_idx; j<cm_idx+num_nbr; j++){
+                idxn = mesh.node_nbr_list[j];
+                fld_para.solid_idx[idxn] = 1;
+            }
+
+        }
+    }
+
+
+    free(index_solid);
 }

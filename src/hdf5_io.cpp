@@ -1,5 +1,5 @@
-#include <hdf5/serial/hdf5.h>
-/* #include <hdf5.h> */
+/* #include <hdf5/serial/hdf5.h> */
+#include <hdf5.h>
 #include "global.h"
 #include "misc.h"
 #include <unistd.h>
@@ -9,7 +9,8 @@
  */
 
  
-void hdf5_io_write_pos(double *Pos, int N, string input_file){
+void hdf5_io_write_double(double *Pos, int N, 
+        string input_file, string dset_name){
 
 	 ///  @brief hdf5 io for  the position 
 	 ///  @param Pos array containing co-ordinates of all the particles
@@ -27,7 +28,7 @@ void hdf5_io_write_pos(double *Pos, int N, string input_file){
     file_id = H5Fcreate (input_file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     space_id = H5Screate_simple (1, &dims, NULL);
-    dset1 = H5Dcreate2(file_id, "/pos", H5T_NATIVE_DOUBLE, space_id, H5P_DEFAULT,
+    dset1 = H5Dcreate2(file_id, dset_name.c_str(), H5T_NATIVE_DOUBLE, space_id, H5P_DEFAULT,
                 H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite (dset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 Pos);
@@ -39,7 +40,8 @@ void hdf5_io_write_pos(double *Pos, int N, string input_file){
   }
 }
 
-void hdf5_io_read_pos(double *Pos, string input_file){
+void hdf5_io_read_double(double *Pos, string input_file, 
+        string dset_name){
 
     ///  @brief Read from the hdf5 file
     ///  @param Pos array containing co-ordinates of all the particles
@@ -56,7 +58,7 @@ void hdf5_io_read_pos(double *Pos, string input_file){
     }
   /* Open an existing file. */
   file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-  dataset_id = H5Dopen(file_id, "pos", H5P_DEFAULT);
+  dataset_id = H5Dopen(file_id, dset_name.c_str(), H5P_DEFAULT);
   status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, 
           H5S_ALL, H5S_ALL, H5P_DEFAULT,Pos);
   status = H5Dclose(dataset_id);
@@ -166,7 +168,28 @@ void io_read_config(double *Pos,
     fclose(fid);
 }
 
-void hdf5_io_dump_stickidx(int *stick, int N, string input_file){
+void hdf5_io_read_int(int *stick, string input_file, string dset_name){
+
+
+    hid_t   file_id, dataset_id, space_id;  /* identifiers */
+    herr_t  status;
+    hsize_t          dims; 
+
+    /* Open an existing file. */
+    file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT); 
+
+    dataset_id = H5Dopen(file_id, dset_name.c_str(), H5P_DEFAULT);
+    status = H5Dread(dataset_id, H5T_NATIVE_INT, 
+            H5S_ALL, H5S_ALL, H5P_DEFAULT, stick);
+    status = H5Dclose(dataset_id);
+    status = H5Fclose(file_id);
+    if(status != 0){
+        fprintf(stderr, "file close failed\n");
+    }
+
+}
+
+void hdf5_io_dump_int(int *stick, int N, string input_file, string dset_name){
 
 
     hid_t   file_id, dset1, space_id;  /* identifiers */
@@ -178,7 +201,7 @@ void hdf5_io_dump_stickidx(int *stick, int N, string input_file){
     file_id = H5Fcreate (input_file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     space_id = H5Screate_simple (1, &dims, NULL);
-    dset1 = H5Dcreate2(file_id, "/idstick", H5T_NATIVE_INT, space_id, H5P_DEFAULT,
+    dset1 = H5Dcreate2(file_id, dset_name.c_str(), H5T_NATIVE_INT, space_id, H5P_DEFAULT,
                 H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite (dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 stick);
@@ -190,7 +213,8 @@ void hdf5_io_dump_stickidx(int *stick, int N, string input_file){
   }
 }
 
-void hdf5_io_dump_stick_bool(bool *stick, int N, string input_file){
+void hdf5_io_dump_bool(bool *stick, int N, 
+        string input_file, string dset_name){
 
 
     hid_t   file_id, dset1, space_id;  /* identifiers */
@@ -202,7 +226,7 @@ void hdf5_io_dump_stick_bool(bool *stick, int N, string input_file){
     file_id = H5Fcreate (input_file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     space_id = H5Screate_simple (1, &dims, NULL);
-    dset1 = H5Dcreate2(file_id, "/solid_center", H5T_NATIVE_HBOOL, space_id, H5P_DEFAULT,
+    dset1 = H5Dcreate2(file_id, dset_name.c_str(), H5T_NATIVE_HBOOL, space_id, H5P_DEFAULT,
                 H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite (dset1, H5T_NATIVE_HBOOL, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 stick);
@@ -214,20 +238,26 @@ void hdf5_io_dump_stick_bool(bool *stick, int N, string input_file){
   }
 }
 
+void hdf5_io_read_bool(bool *stick, 
+        string input_file, string dset_name){
 
 
-// void io_dump_config(double *Pos, 
-//         int N, char *file ){
-//     FILE *fid;
+    hid_t   file_id, dataset_id, space_id;  /* identifiers */
+    herr_t  status;
 
-//     ///  @brief dump position to the file; 
-//     /// @note The dump is in binary
-//     /// 
+    /* Open an existing file. */
+    file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT); 
 
-//     fid = fopen(file, "wb");
-//     fwrite(Pos, N*sizeof(double), 1, fid);
-//     fclose(fid);
-// }
+    dataset_id = H5Dopen(file_id, dset_name.c_str(), H5P_DEFAULT);
+    status = H5Dread(dataset_id, H5T_NATIVE_HBOOL, 
+            H5S_ALL, H5S_ALL, H5P_DEFAULT, stick);
+    status = H5Dclose(dataset_id);
+    status = H5Fclose(file_id);
+    if(status != 0){
+        fprintf(stderr, "file close failed\n");
+    }
+
+}
 
 void io_dump_config_ascii(double *Pos, 
         int N, string file ){

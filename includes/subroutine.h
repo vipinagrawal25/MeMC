@@ -92,7 +92,8 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
          double *lij_t0, MBRANE_p *para, SHEAR_p *shear, bool );
 void init_stick_bottom(Vec3d *, MESH_p , STICK_p , 
         FLUID_p , MBRANE_p );
-
+void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick, 
+        FLUID_p fld_para, MBRANE_p mbrane, string outfolder);
 void init_read_config();
 void init_afm_tip(AFM_p );
 void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *, FLUID_p *fld_para, 
@@ -106,13 +107,16 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p , FLUID_p fld_para,
         SHEAR_p shear_para, string out_file);
  
 //hdf5_io
-void hdf5_io_write_pos(double *Pos, int N, string input_file);
-void hdf5_io_read_pos(double *Pos, string input_file);
+void hdf5_io_write_double(double *Pos, int N, string input_file, string);
+void hdf5_io_read_double(double *Pos, string input_file, string);
 void hdf5_io_read_mesh(int *cmlist, int *node_nbr, string input_file);
 void hdf5_io_write_mesh(int *cmlist,
         int *node_nbr, int N, int ng, string output_file);
-void hdf5_io_dump_stickidx(int *stick, int N, string input_file);
-void hdf5_io_dump_stick_bool(bool *stick, int N, string input_file);
+void hdf5_io_dump_int(int *stick, int N, string input_file, string);
+void hdf5_io_dump_bool(bool *stick, int N, string input_file, string);
+void hdf5_io_read_int(int *stick,  string input_file, string);
+void hdf5_io_read_bool(bool *stick,  string input_file, string);
+
 void io_dump_config(double *Pos, int N, char *);
 void io_read_config(double *Pos, int N, char *);
 void io_dump_config_ascii(double *Pos, int N, string);

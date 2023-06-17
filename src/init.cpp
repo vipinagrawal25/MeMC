@@ -404,14 +404,15 @@ void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick,
     int tNs = 2048;
     int *index_solid;
 
-    index_solid =  (int *)calloc(1, sizeof(tNs));
+    index_solid =  (int *)calloc(tNs, sizeof(int));
+    printf("I am here \n");
     hdf5_io_read_int(index_solid,  outfolder+ "/solid_index.h5", "solid_idx");
 
-    if(fld_para.is_semifluid){ 
-        if(fld_para.num_solid_points > tNs) 
-            printf("need more solid fractions\n");
-            MPI_Abort(MPI_COMM_WORLD, mpi_err);
-    }
+/*     if(fld_para.is_semifluid){ */ 
+/*         if(fld_para.num_solid_points > tNs) */ 
+/*             printf("need more solid fractions\n"); */
+/*             MPI_Abort(MPI_COMM_WORLD, mpi_err); */
+/*     } */
     for(i= 0; i<mbrane.N; i++){
         fld_para.solid_idx[i] = 0;
         stick.is_attractive[i] = false;

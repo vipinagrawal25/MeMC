@@ -127,8 +127,8 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
     volume1 = volume1/3e0;
     return volume1;
 }
-
- double stretch_energy_ipart(Vec3d *pos,
+//
+double stretch_energy_ipart(Vec3d *pos,
          int *node_nbr, double *lij_t0,
          int num_nbr, int idx, MBRANE_p para){
     /// @brief Estimate the Stretching energy contribution when ith particle position changes
@@ -292,27 +292,21 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
      /// information;
      ///  @param para  Membrane related parameters;
      /// @return Total volume of the shell
-
-
      int idx;
      int num_nbr, cm_idx;
      double vol;
-
      vol = 0e0;
      for(idx = 0; idx < para.N; idx++){
          /* idx = 2; */
-         cm_idx = idx*mesh.nghst;
-         num_nbr = mesh.numnbr[idx];
-
-       vol += volume_ipart(pos,
+        cm_idx = idx*mesh.nghst;
+        num_nbr = mesh.numnbr[idx];
+        vol += volume_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
                   num_nbr, idx);
      }
      return vol/3e0;
 }
-
-
- double bending_energy_total(Vec3d *pos, MESH_p mesh, 
+double bending_energy_total(Vec3d *pos, MESH_p mesh, 
          MBRANE_p para, SPCURV_p spcurv_para){
      /// @brief Estimate the total Bending energy
      ///  @param Pos array containing co-ordinates of all the particles
@@ -487,7 +481,6 @@ double lj_afm(Vec3d pos, AFM_p afm){
 
 double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         MBRANE_p para, AFM_p afm){
-
     /// @brief Energy contribution from AFM tip to all the point in membrane 
     ///  @param Pos co-ordinates of the ith particle 
     ///  @param para Membrane related parameters
@@ -540,12 +533,12 @@ double vol_energy_change(MBRANE_p mbrane, VOL_p volp, double dvol){
     if (fabs(KAPPA)>1e-16){
         de_vol = (2*dvol/(ini_vol*ini_vol))*(mbrane.volume[0]  - ini_vol)
             + (dvol/ini_vol)*(dvol/ini_vol);
-       de_vol = KAPPA*de_vol;
+        de_vol = KAPPA*de_vol;
     }
     return de_vol;
 }
 //
-double PV_change(double pressure, double dvol){ 
+double PV_change(double pressure, double dvol){
     return pressure*dvol;
 }
 //

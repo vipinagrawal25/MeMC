@@ -30,16 +30,6 @@ T absolute(T value){
     return value*(-1);
   }
 }
-/*----------------------------------------------*/
-void __attribute__((weak)) check_param(){
-  cout << "I believe all your model parameters are physical. Otherwise, define function: "
-          "void check_param() in model.cpp file" << endl;
-}
-// -----------------------------------------------
-void __attribute__((weak)) write_param(string fname){
-  cout << "I can not find any implementation to write model parameters." 
-          "Hence I will not write anything." << endl;
-}
 /*-----------------------------------------------*/
 void print(double *arr, int start, int skip, int end){
   for (int in = 0; in < int(end/skip); ++in){

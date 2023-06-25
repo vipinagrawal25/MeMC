@@ -228,22 +228,21 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     if(vol_p.do_volume){
       vol_f = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-      if (!vol_p.is_pressurized){
-        dvol=0.5*(vol_f - vol_i);
-        de_vol = vol_energy_change(mbrane, vol_p, dvol);
-        // cout << de << "\t";
-        de = (Efin - Eini) + de_vol;
+      dvol = (vol_f - vol_i);
+      de_vol = vol_energy_change(mbrane, vol_p, dvol);
+      // cout << de << "\t";
+      de = (Efin - Eini) + de_vol;
         // cout << de << endl;
-      }
     }
     if(vol_p.is_pressurized){
        vol_f = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-        dvol=0.5*(vol_f - vol_i);
+        dvol=(vol_f - vol_i);
         de_pressure = PV_change(vol_p.pressure, dvol);
         // cout << de_pressure << endl;
         de = (Efin - Eini) + de_pressure;
     }
+    // yes = Metropolis(de, 0.0, mcpara);
     if (mcpara.algo == "mpolis") {
       yes = Metropolis(de, activity.activity[idx], mcpara);
     } else if (mcpara.algo == "glauber") {
@@ -253,7 +252,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     if (yes) {
       move = move + 1;
       mbrane.tot_energy[0] += de;
-      if(vol_p.do_volume) mbrane.volume[0] += dvol; 
+      if(vol_p.do_volume || vol_p.is_pressurized) mbrane.volume[0] += dvol;
     } else {
       pos[idx].x = x_o;
       pos[idx].y = y_o;

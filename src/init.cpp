@@ -325,7 +325,7 @@ void init_activity(ACTIVE_p activity, int N){
     }
     if(activity.act == "constant"){
         for(i=0;i<N;i++) activity.activity[i] = activity.maxA;
-    }  
+    }
 }
 /*--------------------------------------------------------------------------*/
 void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N){

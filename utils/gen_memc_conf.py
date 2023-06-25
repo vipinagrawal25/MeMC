@@ -4,7 +4,7 @@ import quaternion
 import os, sys
 from scipy.spatial import ConvexHull
 import h5py
-import meshzoo    
+# import meshzoo
 #***********************************************************#
 def read_data(filename):
     pos = h5py.File(filename)["pos"][()]
@@ -68,7 +68,6 @@ def sort_2Dpoints_theta(x,y):
     xysort = np.asarray(sorted(xyth, key=lambda x: (x[2])))
     return xysort[:,3].astype(int),np.array([xysort[:,0],xysort[:,1]])
 ##-----------------------------------------------------------------------------#
-
 def polar(xyz):
     x=xyz[0]
     y=xyz[1]
@@ -76,8 +75,6 @@ def polar(xyz):
     XsqPlusYsq = x**2 + y**2
     return np.arctan2(np.sqrt(XsqPlusYsq),z)
 ##----------------------------------------------------------------------------#
-
-  
 def rotate(vector,nhat,theta):
     '''rotate a vector about nhat by angle theta'''
     cos_thby2=np.cos(theta/2)
@@ -144,8 +141,8 @@ def write_file(pts_cart, cmlist, node_nbr):
     file.close()
 
 inf = sys.argv[1]
-if inf=='meshzoo':
-    pts_cart,triangles = 
+# if inf=='meshzoo':
+#     pts_cart,triangles = 
 Np, pts_sph, pts_cart = read_data(inf)
 triangles = triangulate(pts_cart)
 sort_tri = sort_simplices(triangles)

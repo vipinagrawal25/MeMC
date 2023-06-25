@@ -127,9 +127,10 @@ int main(int argc, char *argv[]){
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     seed_v = (uint32_t) 7*3*11*(mpi_rank+1)*rand();
     init_rng(seed_v);
+    clock_t timer;
     //
-    // outfolder = ZeroPadNumber(mpi_rank)+"/";
-    outfolder = argv[1];
+    outfolder = ZeroPadNumber(mpi_rank)+"/";
+    // outfolder = argv[1];
     cout << "I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
     // ---------- open outfile_terminal ------------------- //
@@ -215,14 +216,16 @@ int main(int argc, char *argv[]){
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
         Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
                 vol_para,  afm_para,  act_para, spring_para, spcurv_para, fid );
-        cout << "iter = " << iter << "; Accepted Moves = "
+        outfile_terminal << "iter = " << iter << "; Accepted Moves = "
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< Ener_t << "; volume = " << mbrane_para.volume[0] << endl;
     }
+    outfile_terminal << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" << endl;
     fclose(fid);
     free(Pos);
     free(lij_t0);
     free(mesh.node_nbr_list);
+    MPI_Barrier(MPI_COMM_WORLD);
     mpi_err = MPI_Finalize();
     outfile_terminal.close();
     return 0;

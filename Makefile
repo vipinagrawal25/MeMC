@@ -1,12 +1,12 @@
-# HOST=su
-# include hosts/$(HOST)
-CC = mpic++
+HOST=su
+include hosts/$(HOST)
+# CC = mpic++
 #
 opt=-O3
 # opt=-pg
-# ifeq ($(debug), y)
-# 	opt = -g3  -Wall -pedantic
-# endif
+ifeq ($(debug), y)
+	opt = -g3  -Wall -Wpedantic
+endif
 
 link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
@@ -33,7 +33,7 @@ start: $(object) obj/start.o obj/readnml.o
 	$(CC) $(object) obj/start.o obj/readnml.o $(link) -lgfortran -o exe_start
 
 memc: $(object) obj/memc.o obj/readnml.o
-	$(CC) $(object) obj/readnml.o obj/memc.o  $(link) -lgfortran -o exe_memc
+	$(CC) $(object) obj/memc.o obj/readnml.o  $(link) -lgfortran -o exe_memc
 #
 
 obj/memc.o: mains/memc.cpp $(includes)
@@ -43,11 +43,11 @@ obj/memc.o: mains/memc.cpp $(includes)
 obj/start.o: mains/start.cpp $(includes)
 	$(CC) -Jobj -c $< -o $@ $(link)
 
-object : $(object) obj/readnml.o
-obj/%.o : src/%.cpp $(includes) obj/readnml.o
+object : $(object)
+obj/%.o : src/%.cpp $(includes)
 	@mkdir -p $(@D)
 	$(info Compiling $<)
-	$(CC) -Iobj -c $< obj/readnml.o -o $@ $(link)
+	$(CC) -Iobj -c $< -o $@ $(link)
 #
 clean:
 	@rm -rf bin $(object) exe_*
@@ -58,3 +58,12 @@ distclean:
 	@echo "all data cleared"
 	@rm -rf $(dir $(wildcard */mc_log))
 	@echo "Deleted all the output data"
+
+curv: $(object) obj/curv.o
+	echo $(CC) $(object) $(link)
+	@$(CC) $(object) obj/readnml.o obj/curv.o $(link) -lgfortran -o exe_curv
+	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
+	mv exe_curv $(bindir)
+
+obj/curv.o: utils/getcurv.cpp $(includes)
+	@$(CC) -Jobj -c $< -o $@ $(link)

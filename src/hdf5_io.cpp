@@ -65,7 +65,6 @@ void hdf5_io_read_pos(double *Pos, string input_file){
 
 void hdf5_io_write_mesh(int *cmlist,
         int *node_nbr, int N, int ng, string output_file){
-
     ///  @brief Read the mesh from the hdf5 file
     ///  @param cmlist array containing the number of neighbours for each particle  
     ///  @param node_nbr array containing the list of neighbours for each particle  
@@ -117,17 +116,14 @@ void hdf5_io_read_mesh(int *cmlist,
     ///  @param node_nbr array containing the list of neighbours for each particle  
     ///  @param input_file File name from which co-ordinate will be read
     /// 
-
     hid_t   file_id, dataset_id;  /* identifiers */
     herr_t  status;
     if(access(input_file.c_str(),F_OK)!=0){
         fprintf(stderr, "The configuration file does not exit\n");
         exit(1);
     }
-
   /* Open an existing file. */
   file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT); 
-
   dataset_id = H5Dopen(file_id, "cumu_list", H5P_DEFAULT);
   status = H5Dread(dataset_id, H5T_NATIVE_INT, 
           H5S_ALL, H5S_ALL, H5P_DEFAULT, cmlist);
@@ -142,6 +138,7 @@ void hdf5_io_read_mesh(int *cmlist,
   if(status != 0){
       fprintf(stderr, "file close failed\n");
   }
+
 }
 
 void io_read_config(double *Pos, 

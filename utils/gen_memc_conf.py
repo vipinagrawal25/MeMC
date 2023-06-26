@@ -16,7 +16,6 @@ def read_data(filename):
         np.cos(theta)] for theta, phi in pts_sph]
         ) 
     return Np, pts_sph, pts_cart
-
 def triangulate(rr):
     hull = ConvexHull(rr)
     triangles = hull.simplices
@@ -45,7 +44,6 @@ def neighbours(Np, simpl):
     cumlst=np.zeros(Np+1,dtype=int)
     for i in range(0, Np):
        lst[i]=len(r1[r1==i])/2
-
     cumlst[1:] = np.cumsum(lst)
     node_neighbour = np.zeros(cumlst[-1],dtype=int)
     for i in range(0, cumlst[-1], 1):

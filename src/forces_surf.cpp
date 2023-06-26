@@ -87,9 +87,7 @@ Vec3d determine_xyz_parabola(Vec3d pos, AFM_p afm) {
     pt_pbola.y = (y0/x0)*roots[0];
     pt_pbola.z  = (a0*pt_pbola.x)*(a0*pt_pbola.x) + 
         (a0*pt_pbola.y)*(a0*pt_pbola.y) + c0;
-
     return pt_pbola;
-
 }
 
 double volume_ipart(Vec3d *pos, int *node_nbr,
@@ -173,7 +171,7 @@ double voronoi_area(double cotJ, double cotK,
     /// @param ksq square of the length of bond i-j  
     ///  @param area area of the triangle 
     /// @return  Given two cotangent angles, it returns either the area due to perpendicular bisector,
-/// or the barycenter.
+    /// or the barycenter.
     double sigma;
     if (cotJ>0 && cotK>0){
         if (cotJ*cotK<1){
@@ -297,7 +295,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
      double vol;
      vol = 0e0;
      for(idx = 0; idx < para.N; idx++){
-         /* idx = 2; */
+        /* idx = 2; */
         cm_idx = idx*mesh.nghst;
         num_nbr = mesh.numnbr[idx];
         vol += volume_ipart(pos,
@@ -342,19 +340,15 @@ double bending_energy_total(Vec3d *pos, MESH_p mesh,
     /// @param lij_t0 initial distance between points of membrane
     ///  @param para  Membrane related parameters;
     /// @return Total Stretching energy 
-
-
     int idx, st_idx;
     int num_nbr, cm_idx;
     double se;
-
     st_idx = get_nstart(para.N, para.bdry_type);
     se = 0e0;
     for(idx = st_idx; idx < para.N; idx++){
         /* idx = 2; */
         num_nbr = mesh.numnbr[idx];
         cm_idx = idx*mesh.nghst;
-
         se += stretch_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
                  (double *) (lij_t0 + cm_idx), num_nbr,

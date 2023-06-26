@@ -170,6 +170,7 @@ void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_par
     // int Nt = 2*mbrane_para.N-4;
     int num_nbr,cm_idx, jdx, jdxp1;
     Vec3d xij, xijp1;
+    double area_tot=0;
     for(int idx = 0; idx < mbrane_para.N; idx++){
         /* idx = 2; */
         num_nbr = mesh.numnbr[idx];
@@ -181,12 +182,13 @@ void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_par
                 xij = pos[idx]- pos[jdx];
                 xijp1 = pos[idx]- pos[jdxp1];
                 area_para.area_t0[k] = 0.5*norm(cross_product(xij,xijp1));
+                area_tot+=area_para.area_t0[k];
             }else{
                 area_para.area_t0[k] = -1;
             }
         }
     }
-    print(area_para.area_t0,mesh.nghst*mbrane_para.N);
+    // print(area_para.area_t0,mesh.nghst*mbrane_para.N);
 }
 /*--------------------------------------------------------------------------*/
 bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 

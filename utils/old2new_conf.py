@@ -33,7 +33,7 @@ def read_hdf5(posfile, file):
 def new_way_nbrs(cmlist, node_nbr, nghst=12):
  new_nbr = np.zeros(nghst*Np, dtype=int)
  new_nbr[:] = -1
- print(new_nbr)
+ # print(new_nbr)
  for ip in range(0, Np):
      nbrs = node_nbr[cmlist[ip]:cmlist[ip+1]]
      num_nbr = -(cmlist[ip]-cmlist[ip+1])

@@ -69,6 +69,7 @@ double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring);
 double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
                                MESH_p mesh, SPRING_p spring);
 void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N);
+void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_para);
 //initialise.c
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
          double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool);
@@ -80,7 +81,7 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
 void init_activity(ACTIVE_p, int );
 int randint(int n);
 void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
-        FLUID_p fld_para, VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  
+        FLUID_p fld_para, VOL_p vol_p, AREA_p area_p, STICK_p stick_para, AFM_p afm_para,  
         ACTIVE_p act_para, SPRING_p spring_para, string out_file);
 //hdf5_io
 void hdf5_io_write_pos(double *Pos, int N, string input_file);

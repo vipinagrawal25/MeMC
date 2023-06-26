@@ -3,15 +3,16 @@
 //
 double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
                     MBRANE_p mbrane_para, MC_p mc_para, STICK_p stick_para,
-                    VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
-                    SPRING_p spring_para, FLUID_p fld_para, SPCURV_p spcurv_para, 
-                    string outfolder){
+                    VOL_p vol_para, AREA_p area_para, AFM_p afm_para, 
+                    ACTIVE_p act_para, SPRING_p spring_para, FLUID_p fld_para, 
+                    SPCURV_p spcurv_para, string outfolder){
     double Pole_zcoord;
     if(!mc_para.is_restart){
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
+        init_area_t0(Pos,mesh,mbrane_para,area_para);
         init_spcurv(spcurv_para, Pos, mbrane_para.N);
         if(stick_para.do_stick)
             identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
@@ -22,6 +23,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
+        init_area_t0(Pos,mesh,mbrane_para,area_para);
         init_spcurv(spcurv_para, Pos, mbrane_para.N);
         if(stick_para.do_stick)
             identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
@@ -52,7 +54,6 @@ void diag_wHeader(MBRANE_p mbrane_para, STICK_p stick_para,
     fprintf(fid, "%s\n", log_headers.c_str());
     fflush(fid);
 }
-
 double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, 
         MBRANE_p mbrane_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
@@ -155,6 +156,7 @@ int main(int argc, char *argv[]){
     mbrane_para.len = 2.e0*pi;
     mesh.node_nbr_list = (int *)calloc(mesh.nghst*mbrane_para.N, sizeof(int));
     lij_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
+    area_para.area_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
     stick_para.is_attractive = (bool *)calloc(mbrane_para.N, sizeof(bool));
     //
     if(!mc_para.is_restart && afm_para.do_afm){
@@ -166,7 +168,7 @@ int main(int argc, char *argv[]){
     //
     Pole_zcoord = start_simulation(Pos, mesh, lij_t0, 
                      mbrane_para,  mc_para,  stick_para,
-                     vol_para,  afm_para,  act_para, 
+                     vol_para, area_para,  afm_para,  act_para, 
                      spring_para,  fld_para,  spcurv_para, outfolder);
     //
     // exit(1);
@@ -186,7 +188,7 @@ int main(int argc, char *argv[]){
     mbrane_para.tot_energy[0] = Ener_t;
     filename = outfolder + "/para.out";
     write_parameters(mbrane_para, spcurv_para, mc_para, fld_para, vol_para,
-            stick_para, afm_para,  act_para, spring_para, filename);
+            area_para, stick_para, afm_para,  act_para, spring_para, filename);
     // printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
     for(iter=0; iter < mc_para.tot_mc_iter; iter++){

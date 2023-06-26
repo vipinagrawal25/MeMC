@@ -96,7 +96,8 @@ typedef struct{
 //
 typedef struct{
     bool do_area;
-    double coef_area_expansion;   //coefficient of volume expansion
+    double coef_area_expansion;   //coefficient of area expansion
+    double *area_t0;    //  area of each triangle at t=0
 }AREA_p;
 //
 typedef struct{

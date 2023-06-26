@@ -29,7 +29,6 @@ void init_system_random_pos(Vec2d *Pos,  double len,
 
     bool is_sph, is_cart;
     double dl;
-
     // this should be calculated or passed parameters
     int n_ghost;
     // remove it once debugged 
@@ -54,9 +53,6 @@ void init_system_random_pos(Vec2d *Pos,  double len,
         fprintf(stderr, "b) sph  for a monte carlo on the surface of a sphere\n");
         exit(0);
     }
-
-
-     
     if(is_cart){
         switch (bdry_condt) {
             case 0:
@@ -138,8 +134,8 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
     ///  @param Pos array containing co-ordinates of all the particles
    /// @param lij_t0 initial distance between points of membrane
     ///  @param mesh mesh related parameters -- connections and neighbours
-    /// information; 
-    ///  @param para membrane related parameters 
+    /// information;
+    ///  @param para membrane related parameters
     Vec3d dr;
     int i,j,k;
     int num_nbr, cm_idx, npairs;
@@ -168,7 +164,31 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
         }
     }
 }
-//
+/*--------------------------------------------------------------------------*/
+void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_para){
+    /// @brief Compute area for each triangle
+    // int Nt = 2*mbrane_para.N-4;
+    int num_nbr,cm_idx, jdx, jdxp1;
+    Vec3d xij, xijp1;
+    for(int idx = 0; idx < mbrane_para.N; idx++){
+        /* idx = 2; */
+        num_nbr = mesh.numnbr[idx];
+        cm_idx = mesh.nghst*idx;
+        for (int k = cm_idx; k < cm_idx+mesh.nghst; ++k){
+            if (k<cm_idx+num_nbr){
+                jdx = mesh.node_nbr_list[k];
+                jdxp1=mesh.node_nbr_list[(k+1-cm_idx)%num_nbr+cm_idx];
+                xij = pos[idx]- pos[jdx];
+                xijp1 = pos[idx]- pos[jdxp1];
+                area_para.area_t0[k] = 0.5*norm(cross_product(xij,xijp1));
+            }else{
+                area_para.area_t0[k] = -1;
+            }
+        }
+    }
+    print(area_para.area_t0,mesh.nghst*mbrane_para.N);
+}
+/*--------------------------------------------------------------------------*/
 bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
         FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para, STICK_p *stick_para, 
         AFM_p *afm_para,  ACTIVE_p *act_para, SPRING_p *spring_para, string para_file){
@@ -237,8 +257,8 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
 }
 //
 void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
-        FLUID_p fld_para, VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
-        SPRING_p spring_para, string out_file){
+        FLUID_p fld_para, VOL_p vol_p, AREA_p area_p, STICK_p stick_para, AFM_p afm_para, 
+        ACTIVE_p act_para, SPRING_p spring_para, string out_file){
  
     double FvK = mbrane.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
     ofstream out_;
@@ -278,13 +298,11 @@ void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para,
             << " minA = " << act_para.minA << endl
             << " maxA = " << act_para.maxA << endl;
 
-
     out_<< "# =========== Fluid Parameters ==========" << endl
             << " is fluid= " << fld_para.is_fluid << endl
             << " min_allowed_nbr = " << fld_para.min_allowed_nbr << endl
             << " fluid iter every " << fld_para.fluidize_every << endl
             << " factor_len_vertices = " << fld_para.fac_len_vertices << endl;
-
 
     out_<< "# =========== Volume Parameters ==========" << endl
             << " do volume= " << vol_p.do_volume << endl
@@ -292,6 +310,9 @@ void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para,
             << " coef_vol_expansion " << vol_p.coef_vol_expansion << endl
             << " pressure  " << vol_p.pressure << endl;
 
+    out_<< "# =========== Area Parameters ==========" << endl
+            << " do area = " << area_p.do_area << endl
+            << " coef_area_expansion = " << area_p.coef_area_expansion << endl;
 
     out_<< "# =========== Sticking Parameters ==========" << endl
             << " do stick " << stick_para.do_stick << endl

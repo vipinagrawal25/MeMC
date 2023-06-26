@@ -39,7 +39,7 @@ typedef struct{
     double delta; // increment of position
     bool is_restart;
 }MC_p;
-
+//
 typedef struct{
     string act;
     double minA, maxA;
@@ -86,14 +86,19 @@ typedef struct{
     double fac_len_vertices;
     // fac_len_vertices time the average length
 }FLUID_p;
-
+//
 typedef struct{
     bool do_volume;
     bool is_pressurized;
     double coef_vol_expansion;   //coefficient of volume expansion
     double pressure;
 }VOL_p;
-
+//
+typedef struct{
+    bool do_area;
+    double coef_area_expansion;   //coefficient of volume expansion
+}AREA_p;
+//
 typedef struct{
     bool do_stick;
     double pos_bot_wall;  // position of the bottom attractive wall
@@ -111,7 +116,6 @@ typedef struct{
     int nPole, sPole;
 }MESH_p;
 //
-
 typedef struct{
     /// @brief Afm structure
     /// @param tip_pos_z;  position of tip in z
@@ -125,7 +129,6 @@ typedef struct{
     int icompute;
 }AFM_p;
 //
-
 typedef struct{
   /// @brief LJ parameters for initial montecarlo in start.cpp
     /// @param N; number of particles 
@@ -139,7 +142,6 @@ typedef struct{
     double r_cut;
     int bdry_condt;
 }LJ_p;
-
 //
 typedef struct{
     int cnt;
@@ -153,5 +155,5 @@ typedef struct{
     double nPole_eq_z;
     double sPole_eq_z;
 }SPRING_p;
-
+//
 #endif

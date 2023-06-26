@@ -152,6 +152,20 @@ subroutine Volume_listread(do_volume, is_pressurized, coef_vol_exp, pressure, &
     close(unit=100)
 end subroutine
 
+subroutine Area_listread(do_area, coef_area_exp, &
+         parafile) bind(c, name='Area_listread')
+
+     real(c_double) :: coef_area_exp
+     logical(kind=c_bool) :: do_area
+     character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
+     character(len=char_len) :: f_fname
+
+     namelist /Areapara/ do_area, coef_area_exp
+    call convert_cstr_fstr(parafile, f_fname)
+    open(unit=100,file=f_fname,status='old')
+    read(unit=100,nml=Areapara)
+    close(unit=100)
+end subroutine
 
 subroutine Fluid_listread(is_fluid,  min_allowed_nbr, fluidize_every, fac_len_vert, &
     parafile) bind(c, name='Fluid_listread')

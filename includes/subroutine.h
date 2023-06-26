@@ -70,25 +70,24 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
                                MESH_p mesh, SPRING_p spring);
 void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N);
 //initialise.c
- void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
-         double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool );
+void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
+         double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool);
 void init_read_config();
 void init_afm_tip(AFM_p );
 bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
-        FLUID_p *fld_para, VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
-        SPRING_p *spring_para, string para_file);
+        FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para, STICK_p *stick_para, 
+        AFM_p *afm_para, ACTIVE_p *act_para, SPRING_p *spring_para, string para_file);
 void init_activity(ACTIVE_p, int );
 int randint(int n);
 void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
         FLUID_p fld_para, VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  
         ACTIVE_p act_para, SPRING_p spring_para, string out_file);
- 
 //hdf5_io
 void hdf5_io_write_pos(double *Pos, int N, string input_file);
 void hdf5_io_read_pos(double *Pos, string input_file);
 void hdf5_io_read_mesh(int *cmlist, int *node_nbr, string input_file);
-void hdf5_io_write_mesh(int *cmlist,
-        int *node_nbr, int N, int ng, string output_file);
+void hdf5_io_write_mesh(int *cmlist, 
+    int *node_nbr, int N, int ng, string output_file);
 void io_dump_config(double *Pos, int N, char *);
 void io_read_config(double *Pos, int N, char *);
 void io_dump_config_ascii(double *Pos, int N, char *);

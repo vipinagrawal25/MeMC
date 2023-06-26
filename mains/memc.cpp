@@ -112,7 +112,7 @@ int main(int argc, char *argv[]){
     Vec3d *Pos; MBRANE_p mbrane_para;
     MC_p mc_para; AFM_p  afm_para;
     ACTIVE_p act_para; MESH_p mesh;
-    VOL_p vol_para; STICK_p stick_para;
+    VOL_p vol_para; STICK_p stick_para; AREA_p area_para;
     SPRING_p spring_para; FLUID_p fld_para;
     SPCURV_p spcurv_para;
     Vec3d afm_force,spring_force[2];
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]){
     /*************************************************/
     // read the input file
     init_read_parameters(&mbrane_para, &spcurv_para, &mc_para, &fld_para, 
-        &vol_para, &stick_para, &afm_para,  &act_para, &spring_para, 
+        &vol_para, &area_para, &stick_para, &afm_para,  &act_para, &spring_para, 
         filename);
    // check whether the string comparison works
    /* define all the paras */

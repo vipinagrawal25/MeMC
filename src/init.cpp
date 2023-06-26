@@ -4,25 +4,18 @@ std::mt19937 rng2;
 
 extern "C" void Membrane_listread(int *, double *, double *, 
         double *, int *, char *);
-
 extern "C" void Spcurv_listread(char*, double *, double *, double *, char *);
-
 extern "C" void Stick_listread(bool *, double *, double *, double *, 
         double *,  char *);
-
 extern "C" void  MC_listread(char *, double *, double *, bool *,
            int *, int *, char *);
-
 extern "C"  void  Activity_listread(char *, double *, double *, char *);
-
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
-
 extern "C"  void  Spring_listread(bool *, int *, double *, double *, char *);
-
 extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
 extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
-
+extern "C" void   Area_listread(bool *, double *, char *); 
 
 void init_system_random_pos(Vec2d *Pos,  double len, 
         int N, char *metric, int bdry_condt ){
@@ -177,15 +170,14 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
 }
 //
 bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
-        FLUID_p *fld_para, VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
-        SPRING_p *spring_para, string para_file){
-   /// @brief read parameters from para_file 
+        FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para, STICK_p *stick_para, 
+        AFM_p *afm_para,  ACTIVE_p *act_para, SPRING_p *spring_para, string para_file){
+   /// @brief read parameters from para_file
     ///  @param mesh mesh related parameters -- connections and neighbours
     /// information; 
     ///  @param mbrane membrane related parameters
     ///  @param afm AFM related parameters
     ///  @param mcpara monte-carlo related parameters
-    //
     //
     char temp_algo[char_len];
     char which_act[char_len], tmp_fname[char_len];
@@ -234,6 +226,8 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     Volume_listread(&vol_para->do_volume, &vol_para->is_pressurized,
             &vol_para->coef_vol_expansion, &vol_para->pressure, tmp_fname);
 
+    sprintf(tmp_fname, "%s", para_file.c_str());
+    Area_listread(&area_para->do_area, &area_para->coef_area_expansion, tmp_fname);
     // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
     // define the monte carlo parameters
     mc_para->one_mc_iter = 2*mbrane_para->N;
@@ -278,7 +272,6 @@ void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para,
             << " is_restart " << mc_para.is_restart << endl
             << " tot_mc_iter " << mc_para.tot_mc_iter << endl
             << " one mc iter " << mc_para.one_mc_iter << endl;
-
 
     out_<< "# =========== Activity Parameters ==========" << endl
             << " which activity = " << act_para.act << endl

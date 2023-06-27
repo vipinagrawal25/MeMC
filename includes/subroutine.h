@@ -12,7 +12,7 @@ using namespace std;
 // metropolis.cpp
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, 
                 double *lij_t0, MBRANE_p mbrane,
-                MC_p mcpara, STICK_p ,  VOL_p , AFM_p afm, 
+                MC_p mcpara, STICK_p ,  VOL_p , AREA_p, AFM_p afm, 
                 ACTIVE_p activity,  SPRING_p spring, SPCURV_p spcurv);
 double energy_mc_3d(Vec3d *pos, MESH_p mesh, 
          double *lij_t0, int idx, MBRANE_p , STICK_p ,
@@ -62,6 +62,8 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
 double lj_afm(Vec3d , AFM_p);
 double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         MBRANE_p para, AFM_p afm);
+double area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0, int num_nbr,
+                        int idx, double coef_area_expansion);
 //init.c
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
 double PV_change(double ,double );
@@ -70,6 +72,7 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
                                MESH_p mesh, SPRING_p spring);
 void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N);
 void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_para);
+double area_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para, AREA_p area_para);
 //initialise.c
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
          double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool);

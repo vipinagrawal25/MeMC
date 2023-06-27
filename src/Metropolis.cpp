@@ -121,7 +121,7 @@ double rand_inc_theta(double th0, double dfac) {
 
 double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
                     int idx, MBRANE_p mbrane, STICK_p st_p, 
-                    VOL_p vol_p, AFM_p afm, SPRING_p spring,
+                    VOL_p vol_p, AREA_p area_para, AFM_p afm, SPRING_p spring,
                     SPCURV_p spcurv) {
   /// @brief Estimate the contribution from all the energies when a particle is
   /// moved randomly
@@ -135,26 +135,24 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   /// @param mcpara Monte-Carlo related parameters
   /// @param AFM afm related parameter
   /// @return Change in Energy when idx particle is moved
-
-  double E_b, E_s, E_stick, E_afm, E_spr;
+  double E_b, E_s, E_stick, E_afm, E_spr, E_area;
   int cm_idx, num_nbr;
-
   E_b = 0.0;
   E_s = 0.0;
   E_stick = 0.0;
   E_afm = 0.0;
   E_spr = 0.0;
-
+  E_area = 0.0;
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];
-
   E_b = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
                              idx, mbrane, spcurv);
-
   E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane, spcurv);
-
   E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
                              (lij_t0 + cm_idx), num_nbr, idx, mbrane);
+  E_area = area_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+                            (double *) (area_para.area_t0 + cm_idx),
+                            num_nbr, idx, area_para.coef_area_expansion);
   if(st_p.do_stick)
   E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
       st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
@@ -162,12 +160,12 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
 
     if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring);
-  return E_b + E_s + E_stick + E_afm + E_spr;
+  return E_b + E_s + E_stick + E_afm + E_spr + E_area;
 }
 //
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
                    MBRANE_p mbrane, MC_p mcpara, STICK_p st_p,
-                   VOL_p vol_p, AFM_p afm,
+                   VOL_p vol_p, AREA_p area_p, AFM_p afm,
                    ACTIVE_p activity, SPRING_p spring,
                    SPCURV_p spcurv) {
   /// @brief Monte-Carlo routine for the membrane
@@ -201,7 +199,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     int idx = rand_int(rng);
     cm_idx = idx*mesh.nghst;
     num_nbr = mesh.numnbr[idx];
-    Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
+    Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p, area_p,
                         afm, spring, spcurv);
     if(vol_p.do_volume || vol_p.is_pressurized) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
@@ -222,7 +220,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     pos[idx].y = y_n;
     pos[idx].z = z_n;
     //
-    Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
+    Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p, area_p,
                         afm, spring, spcurv);
     de = (Efin - Eini);
     if(vol_p.do_volume){

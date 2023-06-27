@@ -304,6 +304,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
      }
      return vol/3e0;
 }
+/*-------------------------------------------------------------------------------------*/
 double bending_energy_total(Vec3d *pos, MESH_p mesh, 
          MBRANE_p para, SPCURV_p spcurv_para){
      /// @brief Estimate the total Bending energy
@@ -358,34 +359,62 @@ double bending_energy_total(Vec3d *pos, MESH_p mesh,
     }
     return se*0.5e0;
  }
-
-
+/*-------------------------------------------------------------------------------------*/
+double area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0, int num_nbr,
+                        int idx, double coef_area_expansion){
+    int jdx, jdxp1;
+    Vec3d xij, xijp1;
+    double area_energy_idx=0;
+    double area_diff=0;
+    for (int k = 0; k < num_nbr; ++k){
+        jdx = node_nbr[k];
+        jdxp1 = node_nbr[(k+1)%num_nbr];
+        xij = pos[idx]- pos[jdx];
+        xijp1 = pos[idx]- pos[jdxp1];
+        area_diff = 0.5*norm(cross_product(xij,xijp1));
+        area_diff=1-area_diff/area_t0[k];
+        area_energy_idx += area_diff*area_diff;
+    }
+    return coef_area_expansion/2*(area_energy_idx);
+}
+/*-------------------------------------------------------------------------------------*/
+double area_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para, AREA_p area_para){
+    int idx, st_idx;
+    int num_nbr, cm_idx;
+    double ae;
+    st_idx = get_nstart(para.N, para.bdry_type);
+    ae = 0e0;
+    for(idx = st_idx; idx < para.N; idx++){
+        num_nbr = mesh.numnbr[idx];
+        cm_idx = idx*mesh.nghst;
+        ae += area_energy_ipart(pos,
+                (int *)(mesh.node_nbr_list + cm_idx),
+                (double *) (area_para.area_t0 + cm_idx),
+                num_nbr, idx, area_para.coef_area_expansion);
+    }
+    return ae/3e0;
+}
+/*-------------------------------------------------------------------------------------*/
 double lj_rep(double sqdr, double eps){
-
     /// @param sqdr square of the distance between two points
     /// @param eps coefficient of the potential 
     /// @return repulsive part of the Lennard-Jones potential.
     ///  @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
-
-
     double r6;
     r6 = sqdr*sqdr*sqdr;
     return eps*(r6*(r6));
 }
-
+/*-------------------------------------------------------------------------------------*/
 double lj_attr(double sqdr, double eps){
-
     /// @param sqdr square of the distance between two points
     /// @param eps coefficient of the potential 
     /// @return Energy evaluated using Lennard-Jones potential.
     ///  @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
-
-
     double r6;
     r6 = sqdr*sqdr*sqdr;
     return 4*eps*(r6*(r6-1));
 }
-
+/*-------------------------------------------------------------------------------------*/
 double lj_bottom_surface(double zz, 
         bool is_attractive, 
         double sur_pos, double eps, double sigma){

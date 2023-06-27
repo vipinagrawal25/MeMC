@@ -12,7 +12,7 @@ extern "C" void  MC_listread(char *, double *, double *, bool *,
 extern "C"  void  Activity_listread(char *, double *, double *, char *);
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
-extern "C"  void  Spring_listread(bool *, int *, double *, double *, char *);
+extern "C"  void  Spring_listread(bool *, double *, double *, char *);
 extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
 extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
 extern "C" void   Area_listread(bool *, double *, char *); 
@@ -176,19 +176,34 @@ void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_par
         /* idx = 2; */
         num_nbr = mesh.numnbr[idx];
         cm_idx = mesh.nghst*idx;
-        for (int k = cm_idx; k < cm_idx+mesh.nghst; ++k){
-            if (k<cm_idx+num_nbr){
-                jdx = mesh.node_nbr_list[k];
-                jdxp1=mesh.node_nbr_list[(k+1-cm_idx)%num_nbr+cm_idx];
-                xij = pos[idx]- pos[jdx];
-                xijp1 = pos[idx]- pos[jdxp1];
-                area_para.area_t0[k] = 0.5*norm(cross_product(xij,xijp1));
-                area_tot+=area_para.area_t0[k];
-            }else{
-                area_para.area_t0[k] = -1;
-            }
+        area_ipart(pos, 
+                   (double *) (area_para.area_t0 + cm_idx),
+                  (int *) (mesh.node_nbr_list + cm_idx), 
+                  num_nbr, idx);
+        for (int k = cm_idx+num_nbr; k < cm_idx+mesh.nghst; ++k){
+            area_para.area_t0[k] = -1;
         }
     }
+    print(area_para.area_t0,mesh.nghst*mbrane_para.N);
+}
+/*--------------------------------------------------------------------------*/
+bool check_param(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
+        FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para, STICK_p *stick_para, 
+        AFM_p *afm_para,  ACTIVE_p *act_para, SPRING_p *spring_para){
+    ///@brief This function checks all the parameters and warns the user 
+    /// in case of unphysical parameters.
+    bool status=true;
+    
+    if (!(mc_para->algo=="mpolis")||!(mc_para->algo=="glauber")){
+        cout<< "I do not understand your choice of mc algo." << endl
+        << "setting it to mpolis" << endl;
+    }
+    if (vol_para->do_volume==true && vol_para->is_pressurized==true){
+        cout<< "The shell can not be pressured while conserving the volume." << endl
+        << "Set one of do_volume or is_pressurized equal to zero" << endl;
+        status=false;
+    }
+    return status;
 }
 /*--------------------------------------------------------------------------*/
 bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
@@ -227,7 +242,7 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     mc_para->algo=temp_algo;
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    Spring_listread(&spring_para->do_spring, &spring_para->icompute, &spring_para->nPole_eq_z,
+    Spring_listread(&spring_para->do_spring, &spring_para->nPole_eq_z,
             &spring_para->sPole_eq_z, tmp_fname);
 
     sprintf(tmp_fname, "%s", para_file.c_str() );
@@ -255,9 +270,10 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     mc_para->one_mc_iter = 2*mbrane_para->N;
     mc_para->delta = sqrt(8*pi/(2*mbrane_para->N-4));
     // string filename = "00000/para.out";
-    return true;
+    return check_param(mbrane_para, spcurv_para, mc_para, fld_para, 
+        vol_para, area_para, stick_para, afm_para,  act_para, spring_para);
 }
-//
+/*--------------------------------------------------------------------------*/
 void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
         FLUID_p fld_para, VOL_p vol_p, AREA_p area_p, STICK_p stick_para, AFM_p afm_para, 
         ACTIVE_p act_para, SPRING_p spring_para, string out_file){
@@ -325,7 +341,7 @@ void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para,
 
     out_<< "# =========== Spring Parameters ==========" << endl
             << " do spring " << spring_para.do_spring << endl
-            << " icompute  " << spring_para.icompute << endl
+            // << " icompute  " << spring_para.icompute << endl
             << " constant " << spring_para.constant << endl
             << " nPole_eq_z " << spring_para.nPole_eq_z << endl
             << " sPole_eq_z " << spring_para.sPole_eq_z << endl;

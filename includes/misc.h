@@ -10,7 +10,6 @@ template<typename T>  // This type of function definition can take any variable 
 T absolute(T value);       // Quite interesting, isn't it ?
 double SqEr(double Arr1[], double Arr2[],int ndim);
 bool FileExists(const std::string &s);
-void check_param() ;
 void write_param(string fname);
 void print(double*, int);
 void print(int*, int);

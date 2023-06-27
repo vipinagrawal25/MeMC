@@ -64,6 +64,7 @@ double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         MBRANE_p para, AFM_p afm);
 double area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0, int num_nbr,
                         int idx, double coef_area_expansion);
+void area_ipart(Vec3d *pos, double *area, int *node_nbr, int num_nbr, int idx);
 //init.c
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
 double PV_change(double ,double );

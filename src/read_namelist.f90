@@ -183,7 +183,7 @@ subroutine Fluid_listread(is_fluid,  min_allowed_nbr, fluidize_every, fac_len_ve
     close(unit=100)
 end subroutine
 
-subroutine Spring_listread(do_spring, icompute, nPole_eq_z, sPole_eq_z, &
+subroutine Spring_listread(do_spring, nPole_eq_z, sPole_eq_z, &
          parafile) bind(c, name='Spring_listread')
 
        real(c_double) :: nPole_eq_z, sPole_eq_z
@@ -192,7 +192,7 @@ subroutine Spring_listread(do_spring, icompute, nPole_eq_z, sPole_eq_z, &
        character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
 
-    namelist /springpara/ do_spring, icompute, nPole_eq_z, sPole_eq_z 
+    namelist /springpara/ do_spring, nPole_eq_z, sPole_eq_z 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=springpara)

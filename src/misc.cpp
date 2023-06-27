@@ -178,7 +178,6 @@ void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn){
   *aminval=minval;
 }
 /*-----------------------------------------------*/
-/*-----------------------------------------------*/
 double height_rms(Vec3d *Pos, MBRANE_p mbrane){
   double radius=mbrane.radius;
   double N=mbrane.N;

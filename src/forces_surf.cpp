@@ -118,8 +118,8 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
         rijk.x = rijk.x/3e0; rijk.y = rijk.y/3e0; rijk.z = rijk.z/3e0;
         rij  = Vec3d_add(ri, rj, -1e0);
         rjk  = Vec3d_add(ri , rk, -1e0);
-        area1 = cross_product(rjk, rij);
-        double ip1 = 0.5*inner_product(area1,rijk);
+        area1 = cross_product(rjk, rij)*0.5;
+        double ip1 = inner_product(area1,rijk);
         volume1 = volume1 + abs(ip1);
     }
     volume1 = volume1/3e0;
@@ -157,7 +157,6 @@ double stretch_energy_ipart(Vec3d *pos,
     //
     return 0.5*idx_ener*HH;
 }
-
 //
 //Q. Given two cotangent angles, it returns either the area due to perpendicular bisector,
 // or the barycenter.
@@ -281,8 +280,7 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
    }
    return be;
 }
-
- double volume_total(Vec3d *pos, MESH_p mesh,
+double volume_total(Vec3d *pos, MESH_p mesh,
          MBRANE_p para){
      /// @brief Estimate the total volume of the shell
      ///  @param Pos array containing co-ordinates of all the particles
@@ -354,14 +352,13 @@ double bending_energy_total(Vec3d *pos, MESH_p mesh,
                  (int *) (mesh.node_nbr_list + cm_idx),
                  (double *) (lij_t0 + cm_idx), num_nbr,
                  idx, para);
-
-        /* printf( "stretch: %lf \n", se); */
     }
     return se*0.5e0;
  }
 /*-------------------------------------------------------------------------------------*/
-double area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0, int num_nbr,
-                        int idx, double coef_area_expansion){
+void area_ipart(Vec3d *pos, double *area, int *node_nbr, int num_nbr, int idx){
+    ///@brief This function computes the
+    ///area of all the triangles near the vertices.
     int jdx, jdxp1;
     Vec3d xij, xijp1;
     double area_energy_idx=0;
@@ -371,9 +368,19 @@ double area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0, int num_nbr
         jdxp1 = node_nbr[(k+1)%num_nbr];
         xij = pos[idx]- pos[jdx];
         xijp1 = pos[idx]- pos[jdxp1];
-        area_diff = 0.5*norm(cross_product(xij,xijp1));
-        area_diff=1-area_diff/area_t0[k];
-        area_energy_idx += area_diff*area_diff;
+        area[k] = 0.5*norm(cross_product(xij,xijp1));
+    }
+}
+/*-------------------------------------------------------------------------------------*/
+double area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0, int num_nbr,
+                        int idx, double coef_area_expansion){
+    int jdx, jdxp1;
+    Vec3d xij, xijp1;
+    double area_energy_idx=0;
+    double area[num_nbr];
+    area_ipart(pos, area, node_nbr, num_nbr, idx);
+    for (int k = 0; k < num_nbr; ++k){
+        area_energy_idx += (1 - area[k]/area_t0[k])*(1 - area[k]/area_t0[k]);
     }
     return coef_area_expansion/2*(area_energy_idx);
 }
@@ -418,7 +425,6 @@ double lj_attr(double sqdr, double eps){
 double lj_bottom_surface(double zz, 
         bool is_attractive, 
         double sur_pos, double eps, double sigma){
-
     /// @brief Sticking of the bottom surface using LJ potential 
     /// @param zz z-coordinate of a point in shell
     /// @param eps coefficient of the potential 
@@ -427,10 +433,7 @@ double lj_bottom_surface(double zz,
     /// @param is_attractive true if the zz sees the  bottom wall 
     /// @return Energy evaluated using Lennard-Jones potential.
     ///  @details see https://en.wikipedia.org/wiki/Lennard-Jones_potential
-
-
     double inv_sqdz, ds;
-
     if(is_attractive){
         ds = sur_pos - zz;
         inv_sqdz = (sigma*sigma)/(ds*ds);
@@ -439,24 +442,19 @@ double lj_bottom_surface(double zz,
         return 0e0;
     }
 }
-
-
+/*-------------------------------------------------------------------------------------*/
 double lj_bottom_surf_total(Vec3d *pos, 
          MBRANE_p para, STICK_p st_p){
-
     /// @brief Estimate the total Sticking  
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param is_attractive true for all the particles which sees bottom wall 
     ///  @param para  Membrane related parameters;
     /// @return Total Energy contribution from Sticking to bottom surface
-
     int idx;
     double lj_bote;
-
     lj_bote = 0e0;
     for(idx = 0; idx < para.N; idx++){
         /* idx = 2; */
-
         lj_bote += lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
                 st_p.pos_bot_wall, st_p.epsilon, st_p.sigma);
     }
@@ -480,7 +478,6 @@ void identify_attractive_part(Vec3d *pos,
 }
 /*--------------------------------------------------------------------------------*/
 double lj_afm(Vec3d pos, AFM_p afm){
-
     /// @brief Energy contribution from AFM tip to ith point in membrane 
     ///  @param Pos co-ordinates of the ith particle 
     ///  @param afm afm related parameters
@@ -490,18 +487,17 @@ double lj_afm(Vec3d pos, AFM_p afm){
     double ds_sig_inv;
     Vec3d dr, pt_pbola;
     ener_afm = 0e0;
-    
+    //
     pt_pbola = determine_xyz_parabola(pos, afm);
     if(fabs(afm.tip_pos_z - pt_pbola.z) < 4*afm.sigma) {
-        dr = Vec3d_add(pt_pbola, pos, -1); 
+        dr = Vec3d_add(pt_pbola, pos, -1);
         ds = (inner_product(dr,dr));
         ds_sig_inv = (afm.sigma*afm.sigma)/ds;
         ener_afm = lj_rep(ds_sig_inv, afm.epsilon);
     }
    return ener_afm;
-
 };
-
+//
 double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         MBRANE_p para, AFM_p afm){
     /// @brief Energy contribution from AFM tip to all the point in membrane 
@@ -516,11 +512,9 @@ double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
     double lj_afm_e;
     double lj_afm_t;
     Vec3d f_t, pt_pbola, dr;
-
     lj_afm_e = 0e0;
     f_t.x = 0; f_t.y = 0; f_t.z = 0;
     for(idx = 0; idx < para.N; idx++){
-
         lj_afm_t = lj_afm(pos[idx], afm);
         pt_pbola = determine_xyz_parabola(pos[idx], afm);
         dr = Vec3d_add(pt_pbola, pos[idx], -1); 
@@ -528,14 +522,13 @@ double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         f_t.x += 12*lj_afm_t*dr.x/ds;
         f_t.y += 12*lj_afm_t*dr.y/ds;
         f_t.z += 12*lj_afm_t*dr.z/ds;
-
-        lj_afm_e  += lj_afm_t; 
-
+        lj_afm_e  += lj_afm_t;
         /* lj_afm_e  = determine_xyz_parabola(pos[idx], afm); */
     }
     *afm_force  = f_t;
     return lj_afm_e;
 }
+//
 double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
                                MESH_p mesh, SPRING_p spring){
     double kk = spring.constant;
@@ -566,7 +559,7 @@ double PV_change(double pressure, double dvol){
 }
 //
 double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
-    if (spring.icompute==0) return 0;
+    // if (spring.icompute==0) return 0;
     double ener_spr=0e0;
     double kk=spring.constant;
     double nZeq = spring.nPole_eq_z;

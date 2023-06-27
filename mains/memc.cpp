@@ -50,8 +50,8 @@ void diag_wHeader(MBRANE_p mbrane_para, STICK_p stick_para,
     if (afm_para.do_afm){log_headers+="afm_fx, afm_fy afm_fz ";}
     if (spring_para.do_spring){log_headers+="spr_north.z spr_south.z ";}
     /* log_headers+="volume nPole_z sPole_z hrms"; */
+    log_headers+="total_e ";
     log_headers+="volume ";
-    log_headers+="total_e";
     fprintf(fid, "%s\n", log_headers.c_str());
     fflush(fid);
 }
@@ -101,9 +101,9 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     }
     if (afm_para.do_afm){fprintf(fid, " %g %g %g", afm_force.x, afm_force.y, afm_force.z);}
     if (spring_para.do_spring){fprintf(fid, " %g %g", spring_force[0].z, spring_force[1].z);}
-    {fprintf(fid, " %g", vol_sph );}
     Ener_t = Et[0]+ Et[1]+ Et[2]+ Et[3]+ Et[4]+ Et[5]+ Et[6]+ Et[7];
     fprintf(fid, " %g\n", Ener_t);
+    fprintf(fid, " %g", vol_sph );
     fflush(fid);
     return Ener_t;
 }

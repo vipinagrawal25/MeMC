@@ -151,7 +151,6 @@ typedef struct{
 //
 typedef struct{
     bool do_spring;
-    int icompute;
     double constant;
     double nPole_eq_z;
     double sPole_eq_z;

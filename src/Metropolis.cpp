@@ -156,9 +156,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   if(st_p.do_stick)
   E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
       st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
-
     if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
-
     if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring);
   return E_b + E_s + E_stick + E_afm + E_spr + E_area;
 }
@@ -228,9 +226,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
       dvol = (vol_f - vol_i);
       de_vol = vol_energy_change(mbrane, vol_p, dvol);
-      // cout << de << "\t";
       de = (Efin - Eini) + de_vol;
-        // cout << de << endl;
     }
     if(vol_p.is_pressurized){
        vol_f = volume_ipart(pos,
@@ -250,8 +246,12 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
     if (yes) {
       move = move + 1;
       mbrane.tot_energy[0] += de;
-      if(vol_p.do_volume || vol_p.is_pressurized) mbrane.volume[0] += dvol;
-    } else {
+      if(vol_p.do_volume || vol_p.is_pressurized){
+        // Following line is very important to compute vol_energy_change
+        // Do not repeat the same mistake of removing it.
+        mbrane.volume[0] += dvol;
+      } 
+    }else {
       pos[idx].x = x_o;
       pos[idx].y = y_o;
       pos[idx].z = z_o;

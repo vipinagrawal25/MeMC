@@ -184,7 +184,7 @@ void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_par
             area_para.area_t0[k] = -1;
         }
     }
-    print(area_para.area_t0,mesh.nghst*mbrane_para.N);
+    // print(area_para.area_t0,mesh.nghst*mbrane_para.N);
 }
 /*--------------------------------------------------------------------------*/
 bool check_param(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
@@ -193,7 +193,9 @@ bool check_param(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
     ///@brief This function checks all the parameters and warns the user 
     /// in case of unphysical parameters.
     bool status=true;
-    
+    if (fabs(vol_para->coef_vol_expansion)<1e-8){vol_para->do_volume=false;}
+    if (fabs(vol_para->pressure)<1e-8){vol_para->is_pressurized=false;}
+    if (fabs(area_para->coef_area_expansion)<1e-8){area_para->do_area=false;}
     if (!(mc_para->algo=="mpolis")||!(mc_para->algo=="glauber")){
         cout<< "I do not understand your choice of mc algo." << endl
         << "setting it to mpolis" << endl;

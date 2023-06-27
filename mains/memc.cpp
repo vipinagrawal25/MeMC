@@ -143,9 +143,10 @@ int main(int argc, char *argv[]){
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     /*************************************************/
     // read the input file
-    init_read_parameters(&mbrane_para, &spcurv_para, &mc_para, &fld_para, 
+    bool status=init_read_parameters(&mbrane_para, &spcurv_para, &mc_para, &fld_para, 
         &vol_para, &area_para, &stick_para, &afm_para,  &act_para, &spring_para, 
         filename);
+    if (!status){cout<<"EXITING"<<endl;exit(1);}
    // check whether the string comparison works
    /* define all the paras */
     mbrane_para.volume = (double *)calloc(1, sizeof(double)); 

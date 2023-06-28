@@ -150,9 +150,10 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane, spcurv);
   E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
                              (lij_t0 + cm_idx), num_nbr, idx, mbrane);
-  E_area = area_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+  if (area_para.do_area){
+    E_area = area_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
                             (double *) (area_para.area_t0 + cm_idx),
-                            num_nbr, idx, area_para.coef_area_expansion);
+                            num_nbr, idx, area_para.coef_area_expansion);}
   if(st_p.do_stick)
   E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
       st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 

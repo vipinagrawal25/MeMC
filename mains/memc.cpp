@@ -282,19 +282,19 @@ int main(int argc, char *argv[]){
 
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
             num_bond_change = monte_carlo_fluid(Pos, mesh, mbrane_para, mc_para, fld_para);
-        if(mpi_rank == 0)
-            cout << "fluid stats " << num_bond_change << " bonds flipped" << endl;
+        /* if(mpi_rank == 0) */
+            outfile_terminal << "fluid stats " << num_bond_change << " bonds flipped" << endl;
         }
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
         Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0,  mbrane_para, area_para, stick_para,
                 vol_para,  afm_para,  act_para, shear_para,  fid );
 
-    if(mpi_rank == 0){
-        cout << "iter = " << iter << "; Accepted Moves = " 
+    /* if(mpi_rank == 0){ */
+        outfile_terminal << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;
-    }
+    /* } */
 
     }
     end_time = MPI_Wtime();

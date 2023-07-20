@@ -267,7 +267,8 @@ int main(int argc, char *argv[]){
 
         if(iter%10==0){
             eners = total_bend_stretch(Pos, mesh, lij_t0, mask_ids, mbrane_para, area_para); 
-            fprintf(fp2 , "%d %g %g", iter, eners.x, eners.y);
+            fprintf(fp2, "%d %g %g\n", iter, eners.x, eners.y);
+            fflush(fp2);
         }
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );

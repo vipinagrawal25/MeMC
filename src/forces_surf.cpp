@@ -714,6 +714,9 @@ Vec2d total_bend_stretch(Vec3d *pos, MESH_p mesh,
     Vec2d be_ar, be_se;
     /* out_.open( filename ); */
  
+    /* for(idx = 0; idx < para.N; idx++) */
+    /* printf("%g %g \n", pos[idx].x, pos[idx].y ); */
+
     st_idx = get_nstart(para.N, para.bdry_type);
     se = 0e0; be = 0e0; cnt = 0;
     for(idx = st_idx; idx < para.N; idx++){
@@ -722,6 +725,7 @@ Vec2d total_bend_stretch(Vec3d *pos, MESH_p mesh,
         num_nbr = mesh.numnbr[idx];
         cm_idx = idx*mesh.nghst;
 
+        /* printf("%g %g \n", pos[idx].x, pos[idx].y ); */
         se += stretch_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
                  (double *) (lij_t0 + cm_idx), num_nbr,

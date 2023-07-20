@@ -504,7 +504,7 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
 
         flip_condt1 = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len);
         flip_condt2 =  N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
-        flip_condt3 =  N_nbr_add1 < 10 && N_nbr_add2 < 10;
+        flip_condt3 =  N_nbr_add1 < 9 && N_nbr_add2 < 9;
 
         accept_flip = flip_condt1 && flip_condt2 && flip_condt3;
 

@@ -45,6 +45,10 @@ Vec2d bending_energy_ipart(Vec3d *pos, int *node_nbr,
         int num_nbr, int idx, MBRANE_p para);
 double bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH_p mesh, int idx, MBRANE_p para);
+void mask_frame(bool *, MESH_p , MBRANE_p );
+Vec2d total_bend_stretch(Vec3d *, MESH_p , 
+         double *, bool *, MBRANE_p , AREA_p );
+
 
 void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, double theta_attr, int N);

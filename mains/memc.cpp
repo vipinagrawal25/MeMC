@@ -31,10 +31,9 @@ int vol_expansion(Vec3d *pos, int N, SHEAR_p shear) {
     pos[i].x =  pos[i].x + shear.slope*(pos[i].x - 3.14159); 
     pos[i].y =  pos[i].y + shear.slope*(pos[i].y - 3.14159); 
   }
-
 return 0;
-
 }
+
 //
 
 double start_simulation(Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0, 
@@ -151,17 +150,19 @@ int main(int argc, char *argv[]){
     double vol_sph, e_t, s_t;
     Vec3d *Pos; MBRANE_p mbrane_para;
     Vec3d *Pos_t0; 
+    bool *mask_ids;
     MC_p mc_para; AFM_p  afm_para;
     ACTIVE_p act_para; MESH_p mesh;
     VOL_p vol_para; STICK_p stick_para;
     SHEAR_p shear_para; FLUID_p fld_para;
     AREA_p area_para;
     Vec3d afm_force,spring_force[2];
-    FILE *fid;
+    Vec2d eners;
+    FILE *fid, *fp2;
     double *lij_t0;
     double Pole_zcoord;
     double start_time, end_time;
-    string outfolder,syscmds, para_file, log_file, outfile, filename;
+    string outfolder,syscmds, ener_file, log_file, outfile, filename;
     int mpi_err,mpi_rank=0;
     uint32_t seed_v, num_shear_moves;
 
@@ -169,7 +170,7 @@ int main(int argc, char *argv[]){
     //
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    seed_v = (uint32_t) 7*3*11*(mpi_rank+1)*rand();
+    seed_v = (uint32_t) (mpi_rank+1)*(time(0)/65534);
     init_rng(seed_v);
     //
     outfolder = ZeroPadNumber(mpi_rank + atoi(argv[1]))+"/";
@@ -204,27 +205,25 @@ int main(int argc, char *argv[]){
     lij_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
     stick_para.is_attractive = (bool *)calloc(mbrane_para.N, sizeof(bool));
     fld_para.solid_idx = (int *)calloc(mbrane_para.N, sizeof(int));
+    mask_ids = (bool *)calloc(mbrane_para.N, sizeof(bool));
 
     //
-    if(!mc_para.is_restart && afm_para.do_afm){
-        s_t = afm_para.sigma; 
-        afm_para.sigma = 0.00;
-        e_t = afm_para.epsilon;
-        afm_para.epsilon = 0.0;
-    }
-
     Pole_zcoord = start_simulation(Pos, Pos_t0, mesh, lij_t0, 
-                     mbrane_para,  mc_para,  stick_para,
-                     vol_para,  afm_para,  act_para, 
-                     shear_para,  fld_para,  outfolder);
+            mbrane_para,  mc_para,  stick_para,
+            vol_para,  afm_para,  act_para, 
+            shear_para,  fld_para,  outfolder);
 
 
     /* vol_expansion(Pos, mbrane_para.N, shear_para); */
     //
     //
+
+    mask_frame(mask_ids, mesh, mbrane_para);
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
     log_file=outfolder+"/mc_log";
+    ener_file=outfolder+"/ener_log";
     fid = fopen(log_file.c_str(), "a");
+    fp2 = fopen(ener_file.c_str(), "a");
 
     if(!mc_para.is_restart)
     diag_wHeader(mbrane_para, area_para,  stick_para,  vol_para,  afm_para,  act_para, 
@@ -257,46 +256,30 @@ int main(int argc, char *argv[]){
             syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
             system(syscmds.c_str());
         }
-        /* if(iter == 10*mc_para.dump_skip && !mc_para.is_restart && afm_para.do_afm){ */
-        /*     afm_para.sigma = s_t; */
-        /*     afm_para.epsilon = e_t; */
-        /*     e_t = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para); */
-        /*     mbrane_para.tot_energy[0] += e_t; */
-        /* } */
-
-        num_moves = monte_carlo_3d(Pos, Pos_t0, mesh, lij_t0, 
+            num_moves = monte_carlo_3d(Pos, Pos_t0, mesh, lij_t0, 
                 mbrane_para, mc_para, area_para, stick_para, vol_para, 
                 afm_para, act_para,  shear_para);
 
-/*         if(iter%10==0){ */
-/*             /1* num_shear_moves = monte_carlo_shear(Pos, Pos_t0, mesh, lij_t0,  mbrane_para, act_para, *1/ */ 
-/*                     /1* mc_para, area_para, shear_para); *1/ */
-
-
-/*             frame_shear(Pos, Pos_t0, shear_slope, mbrane_para,  shear_para); */
-
-/*             if(shear_slope < shear_para.slope)shear_slope = shear_slope + */ 
-/*                 shear_para.slope/shear_para.shear_every; */
-
-/*         } */
-
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
             num_bond_change = monte_carlo_fluid(Pos, mesh, mbrane_para, mc_para, fld_para);
-        /* if(mpi_rank == 0) */
             outfile_terminal << "fluid stats " << num_bond_change << " bonds flipped" << endl;
+        }
+
+        if(iter%10==0){
+            eners = total_bend_stretch(Pos, mesh, lij_t0, mask_ids, mbrane_para, area_para); 
+            fprintf(fp2 , "%d %g %g", iter, iter, eners.x, eners.y);
         }
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
         Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0,  mbrane_para, area_para, stick_para,
                 vol_para,  afm_para,  act_para, shear_para,  fid );
 
-    /* if(mpi_rank == 0){ */
         outfile_terminal << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;
-    /* } */
 
     }
+
     end_time = MPI_Wtime();
     if(mpi_rank == 0){
         fprintf(stderr, "\n---------\n");
@@ -305,6 +288,7 @@ int main(int argc, char *argv[]){
     }
 
     fclose(fid);
+    fclose(fp2);
     free(Pos);
     free(lij_t0);
     free(mesh.node_nbr_list);

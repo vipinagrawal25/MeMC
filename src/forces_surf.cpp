@@ -679,7 +679,6 @@ double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
 }
 */
 //
-
 double frame_spring_energy(Vec3d pos, Vec3d pos_t0, SHEAR_p shear){
     double ener_spr=0e0;
     double kk=shear.constant;
@@ -690,4 +689,54 @@ double frame_spring_energy(Vec3d pos, Vec3d pos_t0, SHEAR_p shear){
 
     return ener_spr;
 }
+void mask_frame(bool *mask_ids, MESH_p mesh, MBRANE_p para){
+    int idx, st_idx;
+    int nbr;
+    st_idx = get_nstart(para.N, para.bdry_type);
+
+    for (idx = 0; idx < para.N; idx++)mask_ids[idx] = false;
+
+    for (idx = 0; idx < 12*st_idx; idx++){
+        nbr = mesh.node_nbr_list[idx];
+        if(nbr >= 0 ){
+            mask_ids[nbr] = true;
+        }
+
+    }
+}
+
+Vec2d total_bend_stretch(Vec3d *pos, MESH_p mesh, 
+         double *lij_t0, bool *mask_ids, MBRANE_p para, AREA_p area_p){
+
+    int idx, st_idx;
+    int num_nbr, cm_idx;
+    double se, be, cnt;
+    Vec2d be_ar, be_se;
+    /* out_.open( filename ); */
+ 
+    st_idx = get_nstart(para.N, para.bdry_type);
+    se = 0e0; be = 0e0; cnt = 0;
+    for(idx = st_idx; idx < para.N; idx++){
+        /* idx = 2; */
+        if (!mask_ids[idx]){
+        num_nbr = mesh.numnbr[idx];
+        cm_idx = idx*mesh.nghst;
+
+        se += stretch_energy_ipart(pos,
+                 (int *) (mesh.node_nbr_list + cm_idx),
+                 (double *) (lij_t0 + cm_idx), num_nbr,
+                 idx, area_p);
+        
+         be_ar = bending_energy_ipart(pos,
+                 (int *) (mesh.node_nbr_list + cm_idx),
+                  num_nbr, idx, para);
+         be += be_ar.x;
+         cnt += 1;
+        }
+        /* out_<< 0.5*se << endl; */
+    }
+    be_se.x = be/cnt; be_se.y = se/cnt;
+    return be_se;
+}
+
 

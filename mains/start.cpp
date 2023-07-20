@@ -75,7 +75,7 @@ int main(int argc, char **argv){
         if(i%mcpara.dump_skip == 0){
           outfile=outfolder+"/snap_"+ZeroPadNumber(i/mcpara.dump_skip)+".h5";
             // sprintf(outfile, "%s%s%04d%s",outfolder,"/snap_",(int)(i/mcpara.dump_skip),".h5");
-            hdf5_io_write_pos((double *) Pos, 2*para.N, outfile);
+            hdf5_io_write_double((double *) Pos, 2*para.N, outfile, "pos");
         }
         fprintf(fid, " %d %d %g\n", i, num_moves, Ener);
         fflush(fid);

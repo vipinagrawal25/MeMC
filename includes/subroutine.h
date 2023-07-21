@@ -50,6 +50,8 @@ Vec2d total_bend_stretch(Vec3d *, MESH_p ,
          double *, bool *, MBRANE_p , AREA_p );
 
 
+double scale_shear(Vec3d ,  SHEAR_p );
+double scale_shear_total(Vec3d *, MBRANE_p , SHEAR_p );
 void identify_attractive_part(Vec3d *pos, 
         bool *is_attractive, double theta_attr, int N);
 

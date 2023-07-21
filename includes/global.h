@@ -156,7 +156,9 @@ typedef struct{
 //
 typedef struct{
     bool do_shear;
+    bool do_scale_shear;
     double constant;
+    double scale;
     double slope;
     int shear_every;
 }SHEAR_p;

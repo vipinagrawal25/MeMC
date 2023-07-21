@@ -20,7 +20,7 @@ extern "C"  void  Activity_listread(char *, double *, double *, char *);
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
 
-extern "C"  void  Shear_listread(bool *,  int *, double *, double *, char *);
+extern "C"  void  Shear_listread(bool *, bool *, int *, double *, double *, double *, char *);
 
 extern "C"  void  Fluid_listread(bool *, bool *, int * , int *, int *, double *, char *);
 extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
@@ -214,8 +214,8 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
     mc_para->algo=temp_algo;
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
-    Shear_listread(&shear_para->do_shear, &shear_para->shear_every, 
-          &shear_para->slope,  &shear_para->constant, tmp_fname);
+    Shear_listread(&shear_para->do_shear, &shear_para->do_scale_shear, &shear_para->shear_every, 
+          &shear_para->slope,  &shear_para->scale, &shear_para->constant, tmp_fname);
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Afm_listread(&afm_para->do_afm, &afm_para->tip_rad, 

@@ -136,7 +136,7 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
   /// @param AFM afm related parameter
   /// @return Change in Energy when idx particle is moved
 
-  double E_b, E_s, E_stick, E_afm, E_spr, area_i;
+  double E_b, E_s, E_stick, E_afm, E_shr, area_i;
   int cm_idx, num_nbr;
   Vec2d be_ar;
 
@@ -147,7 +147,7 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
   E_s = 0.0;
   E_stick = 0.0;
   E_afm = 0.0;
-  E_spr = 0.0;
+  E_shr = 0.0;
 
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];
@@ -175,11 +175,10 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
           E_stick = stick_bottom_surface(pos[idx], pos_t0[idx], st_p); 
 
       if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
-
+      if(shear.do_scale_shear) E_shr = scale_shear(pos[idx], shear); 
       /* fprintf(stderr, "%d \n", idx); */
-     /* if(spring.do_spring) E_spr = frame_spring_energy(pos[idx], spring); */ 
       /* if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring); */
-  return E_b + E_s + E_stick + E_afm + E_spr;
+  return E_b + E_s + E_stick + E_afm + E_shr;
 }
 
 int monte_carlo_shear(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,  double *lij_t0,

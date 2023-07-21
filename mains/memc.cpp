@@ -44,7 +44,10 @@ double start_simulation(Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0,
     if(!mc_para.is_restart){
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
         memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
-        shear_positions(Pos, mbrane_para.N, shear_para);
+        if(shear_para.do_shear){
+            /* vol_expansion(Pos, mbrane_para.N, shear_para); */
+            shear_positions(Pos, mbrane_para.N, shear_para);
+        }
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
@@ -114,8 +117,8 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
         Et[3] = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para);
         fprintf(fid, " %g", Et[3]);
     }
-    if(shear_para.do_shear){
-        /* Et[5] = spring_tot_frame_ener(Pos, mbrane_para , shear_para); */
+    if(shear_para.do_scale_shear){
+        Et[5] = scale_shear_total(Pos, mbrane_para , shear_para);
         Et[5] = 0.0; 
         fprintf(fid, " %g  ", Et[5]);
     }
@@ -214,7 +217,6 @@ int main(int argc, char *argv[]){
             shear_para,  fld_para,  outfolder);
 
 
-    /* vol_expansion(Pos, mbrane_para.N, shear_para); */
     //
     //
 

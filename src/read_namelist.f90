@@ -174,16 +174,16 @@ subroutine Fluid_listread(is_fluid, is_semifluid,  min_allowed_nbr, &
     close(unit=100)
 end subroutine
 
-subroutine Shear_listread(do_shear, shear_every, slope, constant, & 
+subroutine Shear_listread(do_shear, do_scale_shear, shear_every, slope, scale, constant, & 
         parafile) bind(c, name='Shear_listread')
 
-    real(c_double) :: slope, constant
-    logical(kind=c_bool) :: do_shear
+    real(c_double) :: slope, constant, scale
+    logical(kind=c_bool) :: do_shear, do_scale_shear
     integer(kind=c_int) :: shear_every
     character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
     character(len=char_len) :: f_fname
 
-    namelist /shearpara/ do_shear, shear_every, slope, constant
+    namelist /shearpara/ do_shear, do_scale_shear, shear_every, slope, scale, constant
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=shearpara)

@@ -662,6 +662,31 @@ double vol_energy_change(MBRANE_p mbrane, VOL_p volp, double dvol){
 double PV_change(double pressure, double dvol){ 
     return pressure*dvol;
 }
+
+double scale_shear(Vec3d pos,  SHEAR_p shear){
+    double ener_sh;
+    double phix, phiy; 
+    phix = shear.scale*pos.x;
+    phiy = pos.y;
+    ener_sh = shear.slope*pos.x*sin(phix)*sin(phiy); 
+
+    return ener_sh;
+}
+
+double scale_shear_total(Vec3d *pos, MBRANE_p para, SHEAR_p shear){
+    double ener_sh;
+    int idx, st_idx;
+
+    st_idx = get_nstart(para.N, para.bdry_type);
+
+    ener_sh = 0e0;
+    for (idx = st_idx; idx < para.N; idx++){
+        ener_sh += scale_shear(pos[idx], shear);
+    }
+
+    return ener_sh;
+}
+
 /*
 double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
     if (spring.icompute==0) return 0;
@@ -678,6 +703,8 @@ double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
     return ener_spr;
 }
 */
+
+
 //
 double frame_spring_energy(Vec3d pos, Vec3d pos_t0, SHEAR_p shear){
     double ener_spr=0e0;

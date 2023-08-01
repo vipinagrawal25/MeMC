@@ -666,9 +666,9 @@ double PV_change(double pressure, double dvol){
 double scale_shear(Vec3d pos,  SHEAR_p shear){
     double ener_sh;
     double phix, phiy; 
-    phix = shear.scale*pos.x;
-    phiy = pos.y;
-    ener_sh = shear.slope*pos.x*sin(phix)*sin(phiy); 
+    phix = shear.scale*(pos.x-pi);
+    phiy = (pos.y-pi);
+    ener_sh = shear.slope*(pos.x - pi)*sin(phix)*sin(phiy); 
 
     return ener_sh;
 }

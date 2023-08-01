@@ -50,7 +50,7 @@ double start_simulation(Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0,
         }
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
+        init_eval_lij_t0(Pos_t0, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
         init_stick_bottom(Pos, mesh , stick_para , fld_para , mbrane_para );
         hdf5_io_dump_int(fld_para.solid_idx, mbrane_para.N, outfolder+ "/solid_pos_id.h5", "solid_id");
         hdf5_io_dump_bool(stick_para.is_attractive, mbrane_para.N, outfolder+ "/stick_pos_id.h5", "stick_id");
@@ -119,7 +119,6 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
     }
     if(shear_para.do_scale_shear){
         Et[5] = scale_shear_total(Pos, mbrane_para , shear_para);
-        Et[5] = 0.0; 
         fprintf(fid, " %g  ", Et[5]);
     }
     if(vol_para.do_volume){
@@ -215,7 +214,6 @@ int main(int argc, char *argv[]){
             mbrane_para,  mc_para,  stick_para,
             vol_para,  afm_para,  act_para, 
             shear_para,  fld_para,  outfolder);
-
 
     //
     //

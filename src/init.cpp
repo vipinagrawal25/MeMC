@@ -5,6 +5,7 @@ std::mt19937 rng2;
 extern "C" void Membrane_listread(int *, double *, double *, 
         double *, int *, char *);
 extern "C" void Spcurv_listread(char*, double *, double *, double *, char *);
+extern "C" void Lij_listread(double *, double *, char *);
 extern "C" void Stick_listread(bool *, double *, double *, double *, 
         double *,  char *);
 extern "C" void  MC_listread(char *, double *, double *, bool *,
@@ -128,7 +129,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
     /* } */
 }
 /*--------------------------------------------------------------------------------*/
-void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
+void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, LIJ_p *lij,
          MBRANE_p *para, SPRING_p *spring, bool is_fluid){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
@@ -140,27 +141,32 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
     int i,j,k;
     int num_nbr, cm_idx, npairs;
     double sum_lij=0;
-    double r0;
+    double r0, theta, temp=0;
     npairs = 0;
     for(i = 0; i < para->N; i++){
         num_nbr = mesh.numnbr[i];
         cm_idx = mesh.nghst * i;
+        theta = pi-acos(Pos[i].z);
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
             /* dr = diff_pbc(Pos[i] , Pos[j], para->len); */
             dr = Pos[j] - Pos[i];
-            lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
+            lij->lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
+            if (theta<lij->theta){
+                lij->lij_t0[k]=(lij->lij_t0[k])*(1+lij->change/100);
+                temp++;
+            }
             sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             npairs++;
-            /* printf("%g %g %g %g %g \n", Pos[i].x, Pos[j].x, Pos[i].y, Pos[j].y, lij_t0[k]); */
         }
     }
+    cout << temp << endl;
     para->av_bond_len = sum_lij/npairs;
     r0=para->av_bond_len;
     spring->constant=para->coef_bend/(r0*r0);
     if(is_fluid){
         for(i = 0; i < mesh.nghst*para->N; i++){
-            lij_t0[i] = para->av_bond_len;
+            lij->lij_t0[i] = para->av_bond_len;
         }
     }
 }
@@ -176,9 +182,9 @@ void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_par
         /* idx = 2; */
         num_nbr = mesh.numnbr[idx];
         cm_idx = mesh.nghst*idx;
-        area_ipart(pos, 
+        area_ipart(pos,
                    (double *) (area_para.area_t0 + cm_idx),
-                  (int *) (mesh.node_nbr_list + cm_idx), 
+                  (int *) (mesh.node_nbr_list + cm_idx),
                   num_nbr, idx);
         for (int k = cm_idx+num_nbr; k < cm_idx+mesh.nghst; ++k){
             area_para.area_t0[k] = -1;
@@ -196,10 +202,11 @@ bool check_param(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
     if (fabs(vol_para->coef_vol_expansion)<1e-8){vol_para->do_volume=false;}
     if (fabs(vol_para->pressure)<1e-8){vol_para->is_pressurized=false;}
     if (fabs(area_para->coef_area_expansion)<1e-8){area_para->do_area=false;}
-    if (!(mc_para->algo=="mpolis")||!(mc_para->algo=="glauber")){
-        cout<< "I do not understand your choice of mc algo." << endl
-        << "setting it to mpolis" << endl;
-    }
+    // if (!(mc_para->algo=="mpolis")||!(mc_para->algo=="glauber")){
+    //     cout<< "I do not understand your choice of mc algo." << endl
+    //     << "setting it to mpolis" << endl;
+    //     mc_para->algo="mpolis";
+    // }
     if (vol_para->do_volume==true && vol_para->is_pressurized==true){
         cout<< "The shell can not be pressured while conserving the volume." << endl
         << "Set one of do_volume or is_pressurized equal to zero" << endl;
@@ -208,7 +215,8 @@ bool check_param(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
     return status;
 }
 /*--------------------------------------------------------------------------*/
-bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
+bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, 
+        LIJ_p *lij_para, MC_p *mc_para,
         FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para, STICK_p *stick_para, 
         AFM_p *afm_para,  ACTIVE_p *act_para, SPRING_p *spring_para, string para_file){
    /// @brief read parameters from para_file
@@ -226,13 +234,16 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     Membrane_listread(&mbrane_para->N, &mbrane_para->coef_bend,
             &mbrane_para->YY, &mbrane_para->radius,
             &mbrane_para->bdry_type, tmp_fname);
-
-    // sprintf(tmp_fname, "%s", para_file.c_str() );
-    sprintf(tmp_fname, "%s", para_file.c_str() );
+    //
+    sprintf(tmp_fname, "%s", para_file.c_str());
     Spcurv_listread(spcurv_which, &spcurv_para->minC, &spcurv_para->maxC,
             &spcurv_para->theta, tmp_fname);
     spcurv_para->which_spcurv=spcurv_which;
-
+    //
+    sprintf(tmp_fname, "%s", para_file.c_str());
+    Lij_listread(&lij_para->change, &lij_para->theta, tmp_fname);
+    cout << lij_para->change << endl;
+    //
     sprintf(tmp_fname, "%s", para_file.c_str() );
     Stick_listread(&stick_para->do_stick, &stick_para->pos_bot_wall, 
             &stick_para->sigma, &stick_para->epsilon, &stick_para->theta,
@@ -242,7 +253,7 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     MC_listread(temp_algo, &mc_para->dfac, &mc_para->kBT, &mc_para->is_restart,
             &mc_para->tot_mc_iter, &mc_para->dump_skip, tmp_fname);
     mc_para->algo=temp_algo;
-
+    //
     sprintf(tmp_fname, "%s", para_file.c_str() );
     Spring_listread(&spring_para->do_spring, &spring_para->nPole_eq_z,
             &spring_para->sPole_eq_z, tmp_fname);
@@ -279,7 +290,6 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
 void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
         FLUID_p fld_para, VOL_p vol_p, AREA_p area_p, STICK_p stick_para, AFM_p afm_para, 
         ACTIVE_p act_para, SPRING_p spring_para, string out_file){
- 
     double FvK = mbrane.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
     ofstream out_;
     out_.open( out_file );
@@ -347,7 +357,6 @@ void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para,
             << " constant " << spring_para.constant << endl
             << " nPole_eq_z " << spring_para.nPole_eq_z << endl
             << " sPole_eq_z " << spring_para.sPole_eq_z << endl;
-
     out_.close();
 }
 /*--------------------------------------------------------------------------*/
@@ -373,7 +382,7 @@ void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N){
     if(spcurv.which_spcurv=="constant"){
         for(i= 0; i<N; i++){
             theta = pi - acos(pos[i].z);
-            temp+= (theta<spcurv.theta);
+            // temp+= (theta<spcurv.theta);
             if (theta<spcurv.theta){spcurv.spcurv[i]=spcurv.maxC;}
             else{spcurv.spcurv[i]=spcurv.minC;}
         }

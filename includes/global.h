@@ -80,6 +80,11 @@ typedef struct{
 }SPCURV_p;
 //
 typedef struct{
+    double change, theta;
+    double *lij_t0;
+}LIJ_p;
+//
+typedef struct{
     bool is_fluid;
     int min_allowed_nbr;
     int fluidize_every;

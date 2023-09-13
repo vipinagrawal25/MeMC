@@ -35,8 +35,8 @@ subroutine convert_fstr_cstr(f_str, c_str)
 
 end subroutine
 
-
-subroutine Membrane_listread(N, coef_bend, YY, radius, bdry_type, parafile) bind(c, name='Membrane_listread')
+subroutine Membrane_listread(N, coef_bend, YY, radius, bdry_type, parafile) &
+    bind(c, name='Membrane_listread')
     real(kind=c_double) :: coef_bend, YY
     real(kind=c_double) :: radius
     integer(kind=c_int) :: N, bdry_type
@@ -103,6 +103,18 @@ subroutine Spcurv_listread(which_spcurv, minC, maxC, theta, &
     call convert_fstr_cstr(spcurv_which, which_spcurv)
 end subroutine
 
+subroutine Lij_listread(change, theta, parafile) bind(c, name='Lij_listread')
+    real(kind=c_double) :: change, theta
+    character(len=char_len) :: f_fname
+    character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
+
+    namelist /lijpara/ change, theta
+    
+    call convert_cstr_fstr(parafile, f_fname)
+    open(unit=100,file=f_fname,status='old')
+    read(unit=100,nml=lijpara)
+    close(unit=100)
+end subroutine
 
 subroutine Activity_listread(which_act, minA, maxA, &
     parafile) bind(c, name='Activity_listread')
@@ -135,7 +147,6 @@ subroutine Afm_listread(do_afm, tip_rad, tip_pos_z, sigma, epsilon, &
     close(unit=100)
 
 end subroutine
-
 
 subroutine Volume_listread(do_volume, is_pressurized, coef_vol_exp, pressure, &
          parafile) bind(c, name='Volume_listread')

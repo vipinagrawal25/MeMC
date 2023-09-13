@@ -1,7 +1,7 @@
 #include "../includes/global.h"
 #include "../includes/subroutine.h"
 //
-double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
+double start_simulation(Vec3d *Pos, MESH_p mesh, LIJ_p lij_para,
                     MBRANE_p mbrane_para, MC_p mc_para, STICK_p stick_para,
                     VOL_p vol_para, AREA_p area_para, AFM_p afm_para, 
                     ACTIVE_p act_para, SPRING_p spring_para, FLUID_p fld_para, 
@@ -11,7 +11,8 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
+        init_eval_lij_t0(Pos, mesh, &lij_para,  &mbrane_para, &spring_para, 
+                        fld_para.is_fluid);
         if(area_para.do_area)init_area_t0(Pos,mesh,mbrane_para,area_para);
         init_spcurv(spcurv_para, Pos, mbrane_para.N);
         if(stick_para.do_stick)
@@ -22,7 +23,8 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, double *lij_t0,
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &spring_para, fld_para.is_fluid);
+        init_eval_lij_t0(Pos, mesh, &lij_para,  &mbrane_para, &spring_para,
+            fld_para.is_fluid);
         if(area_para.do_area)init_area_t0(Pos,mesh,mbrane_para,area_para);
         init_spcurv(spcurv_para, Pos, mbrane_para.N);
         if(stick_para.do_stick)
@@ -55,7 +57,7 @@ void diag_wHeader(MBRANE_p mbrane_para, STICK_p stick_para,
     fprintf(fid, "%s\n", log_headers.c_str());
     fflush(fid);
 }
-double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, 
+double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
         MBRANE_p mbrane_para, STICK_p stick_para,
         VOL_p vol_para, AREA_p area_para, AFM_p afm_para, ACTIVE_p act_para,
         SPRING_p spring_para, SPCURV_p spcurv_para, FILE *fid ){
@@ -120,10 +122,10 @@ int main(int argc, char *argv[]){
     ACTIVE_p act_para; MESH_p mesh;
     VOL_p vol_para; STICK_p stick_para; AREA_p area_para;
     SPRING_p spring_para; FLUID_p fld_para;
-    SPCURV_p spcurv_para;
+    SPCURV_p spcurv_para; LIJ_p lij_para;
     Vec3d afm_force,spring_force[2];
     FILE *fid;
-    double *lij_t0;
+    // double *lij_t0;
     double Pole_zcoord;
     string outfolder,syscmds, para_file, log_file, outfile, filename;
     int mpi_err,mpi_rank=0;
@@ -143,8 +145,8 @@ int main(int argc, char *argv[]){
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     /*************************************************/
     // read the input file
-    bool status=init_read_parameters(&mbrane_para, &spcurv_para, &mc_para, &fld_para, 
-        &vol_para, &area_para, &stick_para, &afm_para,  &act_para, &spring_para, 
+    bool status=init_read_parameters(&mbrane_para, &spcurv_para, &lij_para, &mc_para, 
+        &fld_para, &vol_para, &area_para, &stick_para, &afm_para,  &act_para, &spring_para, 
         filename);
     if (!status){cout<<"EXITING"<<endl;exit(1);}
    // check whether the string comparison works
@@ -161,7 +163,7 @@ int main(int argc, char *argv[]){
     mesh.nghst = 12;
     mbrane_para.len = 2.e0*pi;
     mesh.node_nbr_list = (int *)calloc(mesh.nghst*mbrane_para.N, sizeof(int));
-    lij_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
+    lij_para.lij_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
     area_para.area_t0 = (double *)calloc(mesh.nghst*mbrane_para.N, sizeof(double));
     stick_para.is_attractive = (bool *)calloc(mbrane_para.N, sizeof(bool));
     //
@@ -172,7 +174,7 @@ int main(int argc, char *argv[]){
         afm_para.epsilon = 0.0;
     }
     //
-    Pole_zcoord = start_simulation(Pos, mesh, lij_t0, 
+    Pole_zcoord = start_simulation(Pos, mesh, lij_para, 
                      mbrane_para,  mc_para,  stick_para,
                      vol_para, area_para,  afm_para,  act_para, 
                      spring_para,  fld_para,  spcurv_para, outfolder);
@@ -182,14 +184,14 @@ int main(int argc, char *argv[]){
     // ---- Only for diagnostic purpose ---- //
     print(spcurv_para.spcurv,mbrane_para.N,outfolder+"/spcurv.txt");
     //
-    if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
+    if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_para.lij_t0[0];
     log_file=outfolder+"/mc_log";
     fid = fopen(log_file.c_str(), "w");
     if(!mc_para.is_restart)
     diag_wHeader(mbrane_para,  stick_para,  vol_para, area_para,  afm_para,  act_para, 
          spring_para, fid );
     fprintf(fid , "%d %g", 0, 0.0 );
-    Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
+    Ener_t = diag_energies(Et, Pos,  mesh, lij_para.lij_t0,  mbrane_para,  stick_para,
          vol_para, area_para, afm_para,  act_para, spring_para,  spcurv_para, fid );
     mbrane_para.tot_energy[0] = Ener_t;
     filename = outfolder + "/para.out";
@@ -212,7 +214,7 @@ int main(int argc, char *argv[]){
             mbrane_para.tot_energy[0] += e_t;
         }
         //
-        num_moves = monte_carlo_3d(Pos, mesh, lij_t0,
+        num_moves = monte_carlo_3d(Pos, mesh, lij_para.lij_t0,
                 mbrane_para, mc_para, stick_para, vol_para, area_para,
                 afm_para, act_para,  spring_para, spcurv_para);
         if(fld_para.is_fluid && iter%fld_para.fluidize_every==0){
@@ -221,7 +223,7 @@ int main(int argc, char *argv[]){
         }
         //
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
-        Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para,  stick_para,
+        Ener_t = diag_energies(Et, Pos,  mesh, lij_para.lij_t0,  mbrane_para,  stick_para,
                 vol_para, area_para, afm_para,  act_para, spring_para, spcurv_para, fid);
         outfile_terminal << "iter = " << iter << "; Accepted Moves = "
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
@@ -230,7 +232,7 @@ int main(int argc, char *argv[]){
     outfile_terminal << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" << endl;
     fclose(fid);
     free(Pos);
-    free(lij_t0);
+    free(lij_para.lij_t0);
     free(mesh.node_nbr_list);
     MPI_Barrier(MPI_COMM_WORLD);
     mpi_err = MPI_Finalize();

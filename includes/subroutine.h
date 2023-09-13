@@ -76,11 +76,12 @@ void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_par
 double area_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para, AREA_p area_para);
 //initialise.c
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
-         double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool);
+         LIJ_p *lij_para, MBRANE_p *para, SPRING_p *spring, bool);
 void init_read_config();
 void init_afm_tip(AFM_p );
-bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
-        FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para, STICK_p *stick_para, 
+bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, 
+        LIJ_p *lij_para, MC_p *mc_para, FLUID_p *fld_para, VOL_p *vol_para,
+        AREA_p *area_para, STICK_p *stick_para, 
         AFM_p *afm_para, ACTIVE_p *act_para, SPRING_p *spring_para, string para_file);
 void init_activity(ACTIVE_p, int );
 int randint(int n);

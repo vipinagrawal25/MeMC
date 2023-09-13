@@ -1,0 +1,75 @@
+&membrane
+    n = 5120
+    coef_bend = 32
+    yy = 147712.00
+    radius = 1.0
+    bdry_type = 3
+/
+
+&spcurvpara
+    spcurv_which = 'delta'
+    minc = 2.0
+    maxc = 2.0
+    theta = 0
+/
+
+&lijpara
+    change=-2
+    theta=0.086
+/
+
+&stick
+    do_stick = .false.
+    pos_bot_wall = -1.01
+    sigma = 0.67
+    epsilon = 2.0
+    theta = 1.31
+/
+
+&mcpara
+    mcalgo = 'mpolis'
+    dfac = 32.0
+    kbt = 1.0
+    is_restart = .false.
+    tot_mc_iter = 1200001
+    dump_skip = 50000
+/
+
+&actpara
+    act_which = 'notsure'
+    maxa = 0.0
+    mina = 0.0
+/
+
+&volpara
+    do_volume = .false.
+    is_pressurized = .true.
+    coef_vol_exp = 0
+    pressure = 15653.64
+/
+
+&areapara
+    do_area = .false.
+    coef_area_exp = 0
+/
+
+&fluidpara
+    is_fluid = .false.
+    min_allowed_nbr = 4
+    fac_len_vert = 1.8
+    fluidize_every = 1
+/
+
+&afmpara
+    do_afm = .false.
+    tip_rad = 1.0
+    tip_pos_z = 0.2
+    sigma = 0.1
+    epsilon = 4.0
+/
+
+&springpara
+    do_spring = .false.
+    npole_eq_z = 1
+    spole_eq_z = -1
+/

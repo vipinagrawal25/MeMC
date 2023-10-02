@@ -93,7 +93,13 @@ typedef struct{
     double coef_vol_expansion;   //coefficient of volume expansion
     double pressure;
 }VOL_p;
-
+//
+typedef struct{
+    bool do_area;
+    double coef_area_expansion;   //coefficient of area expansion
+    double *area_t0;    //  area of each triangle at t=0
+}AREA_p;
+//
 typedef struct{
     bool do_stick;
     double pos_bot_wall;  // position of the bottom attractive wall

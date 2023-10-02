@@ -22,7 +22,7 @@ extern "C"  void  Spring_listread(bool *, int *, double *, double *, char *);
 
 extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
 extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
-
+extern "C" void   Area_listread(bool *, double *, char *); 
 
 void init_system_random_pos(Vec2d *Pos,  double len, 
         int N, char *metric, int bdry_condt ){
@@ -175,9 +175,53 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
         }
     }
 }
-//
+/*--------------------------------------------------------------------------*/
+void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_para){
+    /// @brief Compute area for each triangle
+    // int Nt = 2*mbrane_para.N-4;
+    int num_nbr,cm_idx, jdx, jdxp1;
+    Vec3d xij, xijp1;
+    double area_tot=0;
+    int st_idx = get_nstart(mbrane_para.N, mbrane_para.bdry_type);
+    for(int idx = st_idx; idx < mbrane_para.N; idx++){
+        /* idx = 2; */
+        num_nbr = mesh.numnbr[idx];
+        cm_idx = mesh.nghst*idx;
+        area_ipart(pos, (double *) (area_para.area_t0 + cm_idx),
+                  (int *) (mesh.node_nbr_list + cm_idx),
+                  num_nbr, idx);
+        for (int k = cm_idx+num_nbr; k < cm_idx+mesh.nghst; ++k){
+            area_para.area_t0[k] = -1;
+        }
+    }
+    // print(area_para.area_t0,mesh.nghst*mbrane_para.N);
+}
+/*--------------------------------------------------------------------------*/
+bool check_param(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
+        FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para, STICK_p *stick_para, 
+        AFM_p *afm_para,  ACTIVE_p *act_para, SPRING_p *spring_para){
+    ///@brief This function checks all the parameters and warns the user 
+    /// in case of unphysical parameters.
+    bool status=true;
+    if (fabs(vol_para->coef_vol_expansion)<1e-8){vol_para->do_volume=false;}
+    if (fabs(vol_para->pressure)<1e-8){vol_para->is_pressurized=false;}
+    if (fabs(area_para->coef_area_expansion)<1e-8){area_para->do_area=false;}
+    // if (!(mc_para->algo=="mpolis")||!(mc_para->algo=="glauber")){
+    //     cout<< "I do not understand your choice of mc algo." << endl
+    //     << "setting it to mpolis" << endl;
+    //     mc_para->algo="mpolis";
+    // }
+    if (vol_para->do_volume==true && vol_para->is_pressurized==true){
+        cout<< "The shell can not be pressured while conserving the volume." << endl
+        << "Set one of do_volume or is_pressurized equal to zero" << endl;
+        status=false;
+    }
+    return status;
+}
+/*--------------------------------------------------------------------------*/
 bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para, 
-        FLUID_p *fld_para, VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
+        FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para,
+        STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
         SPRING_p *spring_para, string para_file){
    /// @brief read parameters from para_file 
     ///  @param mesh mesh related parameters -- connections and neighbours
@@ -234,6 +278,8 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     Volume_listread(&vol_para->do_volume, &vol_para->is_pressurized,
             &vol_para->coef_vol_expansion, &vol_para->pressure, tmp_fname);
 
+    sprintf(tmp_fname, "%s", para_file.c_str());
+    Area_listread(&area_para->do_area, &area_para->coef_area_expansion, tmp_fname);
     // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
     // define the monte carlo parameters
     mc_para->one_mc_iter = 2*mbrane_para->N;
@@ -242,9 +288,9 @@ bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc
     return true;
 }
 //
-void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
-        FLUID_p fld_para, VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  ACTIVE_p act_para, 
-        SPRING_p spring_para, string out_file){
+void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para,
+        FLUID_p fld_para, VOL_p vol_p, AREA_p area_p, STICK_p stick_para, AFM_p afm_para,  
+        ACTIVE_p act_para, SPRING_p spring_para, string out_file){
  
     double FvK = mbrane.YY*mbrane.radius*mbrane.radius/mbrane.coef_bend;
     ofstream out_;
@@ -292,13 +338,15 @@ void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para,
             << " fluid iter every " << fld_para.fluidize_every << endl
             << " factor_len_vertices = " << fld_para.fac_len_vertices << endl;
 
-
     out_<< "# =========== Volume Parameters ==========" << endl
             << " do volume= " << vol_p.do_volume << endl
             << " is pressurized = " << vol_p.is_pressurized << endl
             << " coef_vol_expansion " << vol_p.coef_vol_expansion << endl
             << " pressure  " << vol_p.pressure << endl;
 
+    out_<< "# =========== Area Parameters ==========" << endl
+            << " do area = " << area_p.do_area << endl
+            << " coef_area_expansion = " << area_p.coef_area_expansion << endl;
 
     out_<< "# =========== Sticking Parameters ==========" << endl
             << " do stick " << stick_para.do_stick << endl

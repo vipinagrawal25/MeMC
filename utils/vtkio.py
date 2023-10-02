@@ -65,4 +65,3 @@ def cells_cells_scalar(infile,
             for p in scalar:
                 f.write("%16.8f\n" %(p))
 #
-

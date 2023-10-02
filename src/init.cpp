@@ -129,7 +129,33 @@ void init_system_random_pos(Vec2d *Pos,  double len,
     /* } */
 }
 /*--------------------------------------------------------------------------------*/
-void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, LIJ_p *lij,
+void init_change_lij_t0(Vec3d *Pos, MESH_p mesh, LIJ_p lij,
+         MBRANE_p *para, bool is_fluid){
+    int i,k;
+    int num_nbr, cm_idx;
+    double theta;
+    if(is_fluid){
+        for(i = 0; i < mesh.nghst*para->N; i++){
+            lij.lij_t0[i] = para->av_bond_len;
+        }
+    }
+    if(abs(lij.change)>1e-16 || lij.theta>1e-16){
+        for(i = 0; i < para->N; i++){
+            num_nbr = mesh.numnbr[i];
+            cm_idx = mesh.nghst * i;
+            theta = pi-acos(Pos[i].z);
+            for(k = cm_idx; k < cm_idx + num_nbr; k++) {
+                if (theta<lij.theta){
+                    lij.lij_t0[k]=(para->av_bond_len)*(1+lij.change/100);
+                    cout << lij.lij_t0[k] << endl;
+                }
+            }
+        }
+    }
+    exit(1);
+}
+/*--------------------------------------------------------------------------------*/
+void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, LIJ_p lij,
          MBRANE_p *para, SPRING_p *spring, bool is_fluid){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
@@ -146,29 +172,20 @@ void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, LIJ_p *lij,
     for(i = 0; i < para->N; i++){
         num_nbr = mesh.numnbr[i];
         cm_idx = mesh.nghst * i;
-        theta = pi-acos(Pos[i].z);
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
-            /* dr = diff_pbc(Pos[i] , Pos[j], para->len); */
             dr = Pos[j] - Pos[i];
-            lij->lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
-            if (theta<lij->theta){
-                lij->lij_t0[k]=(lij->lij_t0[k])*(1+lij->change/100);
-                temp++;
-            }
+            lij.lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             npairs++;
+            cout << lij.lij_t0[k] << endl;
         }
     }
-    cout << temp << endl;
     para->av_bond_len = sum_lij/npairs;
     r0=para->av_bond_len;
     spring->constant=para->coef_bend/(r0*r0);
-    if(is_fluid){
-        for(i = 0; i < mesh.nghst*para->N; i++){
-            lij->lij_t0[i] = para->av_bond_len;
-        }
-    }
+    cout << endl;
+    init_change_lij_t0(Pos, mesh, lij, para, is_fluid);
 }
 /*--------------------------------------------------------------------------*/
 void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_para){

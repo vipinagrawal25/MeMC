@@ -11,7 +11,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, LIJ_p lij_para,
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos, mesh, &lij_para,  &mbrane_para, &spring_para, 
+        init_eval_lij_t0(Pos, mesh, lij_para,  &mbrane_para, &spring_para, 
                         fld_para.is_fluid);
         if(area_para.do_area)init_area_t0(Pos,mesh,mbrane_para,area_para);
         init_spcurv(spcurv_para, Pos, mbrane_para.N);
@@ -23,7 +23,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, LIJ_p lij_para,
         hdf5_io_read_pos( (double *)Pos,  outfolder+"/input.h5");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos, mesh, &lij_para,  &mbrane_para, &spring_para,
+        init_eval_lij_t0(Pos, mesh, lij_para,  &mbrane_para, &spring_para,
             fld_para.is_fluid);
         if(area_para.do_area)init_area_t0(Pos,mesh,mbrane_para,area_para);
         init_spcurv(spcurv_para, Pos, mbrane_para.N);

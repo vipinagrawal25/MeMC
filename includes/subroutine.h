@@ -76,7 +76,7 @@ void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_par
 double area_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para, AREA_p area_para);
 //initialise.c
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
-         LIJ_p *lij_para, MBRANE_p *para, SPRING_p *spring, bool);
+         LIJ_p lij_para, MBRANE_p *para, SPRING_p *spring, bool);
 void init_read_config();
 void init_afm_tip(AFM_p );
 bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, 

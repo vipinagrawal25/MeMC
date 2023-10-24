@@ -39,10 +39,11 @@ double pairlj_ipart_energy(Vec2d *Pos, int *n_list,
 double pairlj_total_energy(Vec2d *Pos, Nbh_list *neib,
         LJ_p para, char *metric);
 //forces_surf.c
+double vol_energy_change(MBRANE_p mbrane, VOL_p , double dvol);
 double bending_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para);
 Vec2d bending_energy_ipart(Vec3d *pos, int *node_nbr,  
         int num_nbr, int idx, MBRANE_p para);
-double bending_energy_ipart_neighbour(Vec3d *pos, 
+Vec2d bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH_p mesh, int idx, MBRANE_p para);
 
 void identify_attractive_part(Vec3d *pos, 

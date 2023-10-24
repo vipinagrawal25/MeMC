@@ -104,7 +104,6 @@ typedef struct{
     bool *is_attractive;
 }STICK_p;
 
-
 //
 typedef struct{
     /// @brief Mesh Structure
@@ -132,7 +131,7 @@ typedef struct{
 //
 
 typedef struct{
-  /// @brief LJ parameters for initial montecarlo in start.cpp
+    /// @brief LJ parameters for initial montecarlo in start.cpp
     /// @param N; number of particles 
     /// @param sigma, epsilon; sigma epsilon of the LJ potential used to model AFM
     /// @param len length of the box
@@ -153,7 +152,6 @@ typedef struct{
 //
 typedef struct{
     bool do_spring;
-    int icompute;
     double constant;
     double nPole_eq_z;
     double sPole_eq_z;

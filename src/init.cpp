@@ -19,7 +19,7 @@ extern "C"  void  Activity_listread(char *, double *, double *, char *);
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
 
-extern "C"  void  Spring_listread(bool *, int *, double *, double *, char *);
+extern "C"  void  Spring_listread(bool *, double *, double *, double *, char *);
 
 extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
 extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
@@ -215,8 +215,8 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
     mc_para->algo=temp_algo;
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
-    Spring_listread(&spring_para->do_spring, &spring_para->icompute, &spring_para->nPole_eq_z,
-            &spring_para->sPole_eq_z, tmp_fname);
+    Spring_listread(&spring_para->do_spring, &spring_para->constant,
+            &spring_para->nPole_eq_z, &spring_para->sPole_eq_z, tmp_fname);
 
     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Afm_listread(&afm_para->do_afm, &afm_para->tip_rad, 
@@ -312,7 +312,6 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
 
     out_<< "# =========== Spring Parameters ==========" << endl
             << " do spring " << spring_para.do_spring << endl
-            << " icompute  " << spring_para.icompute << endl
             << " constant " << spring_para.constant << endl
             << " nPole_eq_z " << spring_para.nPole_eq_z << endl
             << " sPole_eq_z " << spring_para.sPole_eq_z << endl;

@@ -136,6 +136,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   /// @return Change in Energy when idx particle is moved
 
   double E_b, E_s, E_stick, E_afm, E_spr;
+  double area_idx;
   Vec2d be_ar;
   int cm_idx, num_nbr;
 
@@ -151,16 +152,22 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   be_ar = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
                              idx, mbrane);
   E_b = be_ar.x;
+  /* area_idx = be_ar.y; */
 
-  E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
+  be_ar = bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
+
+  E_b += be_ar.x;
 
   if(area_p.is_tether){
       E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
               (lij_t0 + cm_idx), num_nbr, idx, area_p);
   }
 
-  *area_i = be_ar.y; 
+  /* *area_i = area_idx + be_ar.y; */ 
 
+  area_idx = area_ipart(pos,  (int *) (mesh.node_nbr_list + cm_idx),
+                 num_nbr, idx);
+   *area_i = area_idx;
 
   if(st_p.do_stick)
   E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
@@ -212,7 +219,8 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 
   for (i = 0; i < mcpara.one_mc_iter; i++) {
       int idx = rand_int(rng);
-
+      cm_idx = mesh.nghst * idx;
+      num_nbr = mesh.numnbr[idx];
       Eini = energy_mc_3d(pos, mesh, lij_t0, idx, &area_i, mbrane, area_p, st_p, vol_p,
               afm, spring);
       if(vol_p.do_volume) vol_i = volume_ipart(pos,
@@ -248,7 +256,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       de = (Efin - Eini);
       if(!area_p.is_tether){
           d_ar = area_f - area_i;
-         de_area = (2*d_ar/(ini_ar*ini_ar))*(*mbrane.area  - ini_ar)
+         de_area = (2*d_ar/(ini_ar*ini_ar))*(mbrane.area[0]  - ini_ar)
                   + (d_ar/ini_ar)*(d_ar/ini_ar);
 
             de +=  area_p.Ka*de_area;
@@ -256,7 +264,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       if(vol_p.do_volume){
           vol_f = volume_ipart(pos,
                   (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-          dvol=0.5*(vol_f - vol_i);
+          dvol=(vol_f - vol_i);
 
           if(!vol_p.is_pressurized){
               de_vol = (2*dvol/(ini_vol*ini_vol))*(*mbrane.volume  - ini_vol)
@@ -265,9 +273,11 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
           }
           if(vol_p.is_pressurized){
               de_pressure = vol_p.pressure*dvol;
+              /* de_pressure = vol_p.pressure*dvol*(*mbrane.volume/ini_vol); */
               de +=  de_pressure;
           }
       }
+     /* yes = Metropolis(de, 0.0, mcpara); */
       if (mcpara.algo == "mpolis") {
           yes = Metropolis(de, activity.activity[idx], mcpara);
       } else if (mcpara.algo == "glauber") {
@@ -433,10 +443,15 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
 
       N_nbr_del1 = mesh.numnbr[idx_del1];
       N_nbr_del2 = mesh.numnbr[idx_del2];
+
+      bool flip_condt1, flip_condt2, flip_condt3;
       bool accept_flip;
 
-      accept_flip = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len) && 
-                    N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
+      flip_condt1 = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len);
+      flip_condt2 =  N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
+      flip_condt3 =  N_nbr_add1 < 9 && N_nbr_add2 < 9;
+
+      accept_flip = flip_condt1 && flip_condt2 && flip_condt3;
 
       if (accept_flip) {
         move = move + 1;

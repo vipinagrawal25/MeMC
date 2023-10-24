@@ -305,7 +305,7 @@ Vec2d bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     return be_ar;
 }
 
-double bending_energy_ipart_neighbour(Vec3d *pos, 
+Vec2d bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH_p mesh, int idx, MBRANE_p para){
 
     /// @brief Estimate the Bending energy contribution from the neighbours when ith particle position changes
@@ -319,7 +319,8 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
    int num_nbr_j;
    int nbr, cm_idx_nbr;
    double be;
-   Vec2d be_ar;
+   Vec2d be_ar, be_artot;
+   
 
    be = 0e0;
 
@@ -330,10 +331,11 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
        be_ar = bending_energy_ipart(pos, 
               (int *) mesh.node_nbr_list + cm_idx_nbr,
                num_nbr_j, nbr, para);
-       be = be + be_ar.x;
+       be_artot.x +=  be_ar.x;
+       be_artot.y +=  be_ar.y;
    
    }
-   return be;
+   return be_artot;
 } 
 
 
@@ -359,13 +361,15 @@ double bending_energy_ipart_neighbour(Vec3d *pos,
          cm_idx = idx*mesh.nghst;
          num_nbr = mesh.numnbr[idx];
 
-         be_ar = bending_energy_ipart(pos,
+         /* be_ar = bending_energy_ipart(pos, */
+         /*         (int *) (mesh.node_nbr_list + cm_idx), */
+         /*          num_nbr, idx, para); */
+         /* area += be_ar.y; */
+         area += area_ipart(pos,  
                  (int *) (mesh.node_nbr_list + cm_idx),
-                  num_nbr, idx, para);
-         area += be_ar.y;
-
+                 num_nbr, idx);
      }
-     return area;
+     return area/3;
 }
 
 
@@ -629,7 +633,7 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
 //
 
 double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
-    if (spring.icompute==0) return 0;
+    if (!spring.do_spring) return 0;
     double ener_spr=0e0;
     double kk=spring.constant;
     double nZeq = spring.nPole_eq_z;

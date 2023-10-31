@@ -56,7 +56,7 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
     fflush(fid);
 }
 
-double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, 
+double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, double *KK,
         MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
         SPRING_p spring_para, FILE *fid ){
@@ -74,7 +74,7 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0,
     ar_sph = area_total(Pos, mesh, mbrane_para);
     /* *mbrane_para.area = ar_sph; */
     if(area_para.is_tether){
-        Et[1] = stretch_energy_total(Pos, mesh, lij_t0, mbrane_para, area_para);
+        Et[1] = stretch_energy_total(Pos, mesh, lij_t0, KK, mbrane_para, area_para);
     }else{
         ini_ar = (4.)*pi*pow(mbrane_para.radius,2);
         Et[1] = area_para.Ka*(ar_sph/ini_ar - 1e0)*(ar_sph/ini_ar - 1e0);
@@ -140,19 +140,23 @@ int main(int argc, char *argv[]){
     //
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    seed_v = 12345; //(uint32_t) 7*3*11*(mpi_rank+1)*rand();
+    /* seed_v = 12345; //(uint32_t) 7*3*11*(mpi_rank+1)*rand(); */
+    seed_v = (uint32_t) (time(0));
     init_rng(seed_v);
+    init_rng2(seed_v);
     //
     //
 
     cout << "# ID for this process is: " << pid << endl;
     outfolder = ZeroPadNumber(mpi_rank+atoi(argv[1]))+"/";
-    cout << "I am in folder "+ outfolder << endl;
+    cout << "# I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
 
     // ---------- open outfile_terminal ------------------- //
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
+    outfile_terminal << "The seed is  " << seed_v << endl; 
     /*************************************************/
+
     // read the input file
     init_read_parameters(&mbrane_para, &mc_para, &area_para, &fld_para, &vol_para,
             &stick_para, &afm_para,  &act_para, &spring_para, filename);
@@ -193,6 +197,7 @@ int main(int argc, char *argv[]){
                      spring_para,  fld_para,  outfolder);
    mesh.nPole = poleidx[0];
    mesh.sPole = poleidx[1];
+   init_KK_0(KK_, area_para, mesh, mbrane_para.N);
     //
     //
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
@@ -206,7 +211,7 @@ int main(int argc, char *argv[]){
 
 
     fprintf(fid , "%d %g", 0, 0.0 );
-    Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para,  stick_para,
+    Ener_t = diag_energies(Et, Pos,  mesh, lij_t0, KK_,  mbrane_para, area_para,  stick_para,
          vol_para,  afm_para,  act_para, spring_para,  fid );
     *mbrane_para.tot_energy = Ener_t;
     filename = outfolder + "/para.out";
@@ -237,7 +242,7 @@ int main(int argc, char *argv[]){
             mbrane_para.tot_energy[0] += e_t;
         }
 
-        num_moves = monte_carlo_3d(Pos, mesh, lij_t0, 
+        num_moves = monte_carlo_3d(Pos, mesh, lij_t0, KK_,
                 mbrane_para, mc_para, area_para, stick_para, vol_para, 
                 afm_para, act_para,  spring_para);
 
@@ -247,7 +252,7 @@ int main(int argc, char *argv[]){
         }
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
-        Ener_t = diag_energies(Et, Pos,  mesh, lij_t0,  mbrane_para, area_para, stick_para,
+        Ener_t = diag_energies(Et, Pos,  mesh, lij_t0, KK_,  mbrane_para, area_para, stick_para,
                 vol_para,  afm_para,  act_para, spring_para,  fid );
 
         outfile_terminal << "iter = " << iter << "; Accepted Moves = " 

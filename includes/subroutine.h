@@ -11,15 +11,15 @@ using namespace std;
 //*************************************************//
 // metropolis.cpp
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, 
-                double *lij_t0, MBRANE_p mbrane,
+                double *lij_t0, double *KK, MBRANE_p mbrane,
                 MC_p mcpara, AREA_p,  STICK_p ,  VOL_p , AFM_p afm, 
                 ACTIVE_p activity,  SPRING_p spring);
 
- double energy_mc_3d(Vec3d *pos, MESH_p mesh, 
-         double *lij_t0, int idx, MBRANE_p , STICK_p ,
-         VOL_p , AFM_p , SPRING_p );
-int monte_carlo_surf2d(Vec2d *Pos, 
-        Nbh_list *neib, LJ_p para, 
+ /* double energy_mc_3d(Vec3d *pos, MESH_p mesh, */ 
+         /* double *lij_t0, int idx, MBRANE_p , STICK_p , */
+         /* VOL_p , AFM_p , SPRING_p ); */
+
+int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, 
         MC_p mcpara, char *metric);
 
 int monte_carlo_fluid(Vec3d *, MESH_p , MBRANE_p , MC_p, FLUID_p );
@@ -50,10 +50,10 @@ void identify_attractive_part(Vec3d *pos,
         bool *is_attractive, double theta_attr, int N);
 
 double stretch_energy_total(Vec3d *pos,
-         MESH_p mesh, double *lij_t0, MBRANE_p,  AREA_p );
+         MESH_p mesh, double *lij_t0, double *,  MBRANE_p,  AREA_p );
 
 double stretch_energy_ipart(Vec3d *pos,
-         int *node_nbr, double *lij_t0, int num_nbr,
+         int *node_nbr, double *lij_t0, double *, int num_nbr,
                              int idx, AREA_p para);
 
 double lj_bottom_surface(double zz,
@@ -74,10 +74,13 @@ double area_ipart(Vec3d *, int *, int , int);
       
 
 //init.c
+void init_rng2(uint32_t seed_val);
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
 double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring);
 double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, 
                                MESH_p mesh, SPRING_p spring);
+
+void init_KK_0(double *, AREA_p , MESH_p , int );
 //initialise.c
  void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
          double *lij_t0, MBRANE_p *para, SPRING_p *spring, bool );

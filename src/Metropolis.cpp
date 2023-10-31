@@ -119,7 +119,7 @@ double rand_inc_theta(double th0, double dfac) {
   return dth;
 }
 
-double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
+double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
                     int idx, double *area_i, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
                     VOL_p vol_p, AFM_p afm, SPRING_p spring) {
   /// @brief Estimate the contribution from all the energies when a particle is
@@ -160,7 +160,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 
   if(area_p.is_tether){
       E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-              (lij_t0 + cm_idx), num_nbr, idx, area_p);
+              (lij_t0 + cm_idx), (KK + cm_idx), num_nbr, idx, area_p);
   }
 
   /* *area_i = area_idx + be_ar.y; */ 
@@ -179,7 +179,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
   return E_b + E_s + E_stick + E_afm + E_spr;
 }
 
-int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
+int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
                    MBRANE_p mbrane, MC_p mcpara, AREA_p area_p,  STICK_p st_p,
                    VOL_p vol_p, AFM_p afm,
                    ACTIVE_p activity, SPRING_p spring) {
@@ -221,7 +221,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       int idx = rand_int(rng);
       cm_idx = mesh.nghst * idx;
       num_nbr = mesh.numnbr[idx];
-      Eini = energy_mc_3d(pos, mesh, lij_t0, idx, &area_i, mbrane, area_p, st_p, vol_p,
+      Eini = energy_mc_3d(pos, mesh, lij_t0, KK, idx, &area_i, mbrane, area_p, st_p, vol_p,
               afm, spring);
       if(vol_p.do_volume) vol_i = volume_ipart(pos,
               (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
@@ -250,7 +250,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       pos[idx].y = y_n;
       pos[idx].z = z_n;
 
-      Efin = energy_mc_3d(pos, mesh, lij_t0, idx, &area_f, mbrane, area_p, st_p, vol_p,
+      Efin = energy_mc_3d(pos, mesh, lij_t0, KK, idx, &area_f, mbrane, area_p, st_p, vol_p,
               afm, spring);
 
       de = (Efin - Eini);

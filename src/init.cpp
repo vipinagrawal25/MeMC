@@ -2,17 +2,16 @@
 #include "subroutine.h"
 std::mt19937 rng2;
 
-extern "C" void Membrane_listread(int *, double *,  double *, 
-        double *, int *, char *);
+extern "C"  void Membrane_listread(int *, double *,  double *, 
+            double *, int *, char *);
 
-extern "C" void Area_listread(bool *, double *, double *, char *);
+extern "C"  void Area_listread(bool *, double *, double *, char *);
 
+extern "C"  void Stick_listread(bool *, double *, double *, double *, 
+            double *,  char *);
 
-extern "C" void Stick_listread(bool *, double *, double *, double *, 
-        double *,  char *);
-
-extern "C" void  MC_listread(char *, double *, double *, bool *,
-           int *, int *, char *);
+extern "C"  void  MC_listread(char *, double *, double *, bool *,
+            int *, int *, char *);
 
 extern "C"  void  Activity_listread(char *, double *, double *, char *);
 
@@ -22,7 +21,14 @@ extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
 extern "C"  void  Spring_listread(bool *, double *, double *, double *, char *);
 
 extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
-extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
+extern "C"  void   Volume_listread(bool *, bool *, double *, double*, char *); 
+
+void init_rng2(uint32_t seed_val) {
+
+  ///  @brief Generates random number
+  rng2.seed(seed_val);
+}
+
 
 
 void init_system_random_pos(Vec2d *Pos,  double len, 
@@ -317,6 +323,22 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
             << " sPole_eq_z " << spring_para.sPole_eq_z << endl;
 
     out_.close();
+}
+
+void init_KK_0(double *KK, AREA_p area_p, MESH_p mesh, int N){
+    int i, k;
+    int num_nbr, cm_idx;
+    double kk_t = area_p.YY;
+    std::uniform_real_distribution<> rand_real(-kk_t/4.0, kk_t/4);
+    for(i = 0; i < N; i++){
+        num_nbr = mesh.numnbr[i];
+        cm_idx = mesh.nghst * i;
+        for(k = cm_idx; k < cm_idx + num_nbr; k++) {
+            KK[k] = kk_t + rand_real(rng2);
+            printf("%lf \n", KK[k]);
+        }
+    }
+    exit(0);
 }
 
 

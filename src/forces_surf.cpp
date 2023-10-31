@@ -163,7 +163,7 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
 }
 
  double stretch_energy_ipart(Vec3d *pos,
-         int *node_nbr, double *lij_t0,
+         int *node_nbr, double *lij_t0, double *KK,
          int num_nbr, int idx, AREA_p para){
 
     /// @brief Estimate the Stretching energy contribution when ith particle position changes
@@ -185,16 +185,16 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
     //
     idx_ener = 0e0;
     // HH = para.coef_str/(para.av_bond_len*para.av_bond_len);
-    HH = para.YY*sqrt(3)/2;
+    /* HH = para.YY*sqrt(3)/2; */
     for (i =0; i < num_nbr; i++){
         j = node_nbr[i];
         rij = pos[idx] - pos[j];
         mod_rij = sqrt(inner_product(rij, rij));
         //
-        idx_ener = idx_ener + (mod_rij - lij_t0[i])*(mod_rij - lij_t0[i]);
+        idx_ener = idx_ener + KK[i]*(mod_rij - lij_t0[i])*(mod_rij - lij_t0[i]);
     }
     //
-    return 0.5*idx_ener*HH;
+    return 0.5*idx_ener;
 }
 
 //
@@ -435,7 +435,7 @@ Vec2d bending_energy_ipart_neighbour(Vec3d *pos,
 
 
  double stretch_energy_total(Vec3d *pos,
-       MESH_p mesh, double *lij_t0, MBRANE_p para, AREA_p area_p){
+       MESH_p mesh, double *lij_t0, double *KK_, MBRANE_p para, AREA_p area_p){
 
     /// @brief Estimate the total Stretching energy  
     ///  @param Pos array containing co-ordinates of all the particles
@@ -459,7 +459,7 @@ Vec2d bending_energy_ipart_neighbour(Vec3d *pos,
 
         se += stretch_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
-                 (double *) (lij_t0 + cm_idx), num_nbr,
+                 (double *) (lij_t0 + cm_idx), (double *) (KK_ + cm_idx), num_nbr,
                  idx, area_p);
 
         /* printf( "stretch: %lf \n", se); */

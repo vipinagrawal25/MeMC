@@ -141,7 +141,7 @@ int main(int argc, char *argv[]){
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     /* seed_v = 12345; //(uint32_t) 7*3*11*(mpi_rank+1)*rand(); */
-    seed_v = (uint32_t) (time(0));
+    seed_v = (uint32_t) (mpi_rank + time(0));
     init_rng(seed_v);
     init_rng2(seed_v);
     //

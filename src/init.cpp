@@ -329,16 +329,19 @@ void init_KK_0(double *KK, AREA_p area_p, MESH_p mesh, int N){
     int i, k;
     int num_nbr, cm_idx;
     double kk_t = area_p.YY;
+    int mpi_err, mpi_rank;
+
+    mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     std::uniform_real_distribution<> rand_real(-kk_t/4.0, kk_t/4);
     for(i = 0; i < N; i++){
         num_nbr = mesh.numnbr[i];
         cm_idx = mesh.nghst * i;
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             KK[k] = kk_t + rand_real(rng2);
-            printf("%lf \n", KK[k]);
+            /* printf("%d  %lf \n", mpi_rank, KK[k]); */
         }
     }
-    exit(0);
+    /* exit(0); */
 }
 
 

@@ -1,6 +1,6 @@
 #include "global.h"
 #include "subroutine.h"
-std::mt19937 rng2;
+/* std::mt19937 rng2; */
 
 extern "C"  void Membrane_listread(int *, double *,  double *, 
             double *, int *, char *);
@@ -23,11 +23,11 @@ extern "C"  void  Spring_listread(bool *, double *, double *, double *, char *);
 extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
 extern "C"  void   Volume_listread(bool *, bool *, double *, double*, char *); 
 
-void init_rng2(uint32_t seed_val) {
+/* void init_rng2(uint32_t seed_val) { */
 
   ///  @brief Generates random number
-  rng2.seed(seed_val);
-}
+  /* rng2.seed(seed_val); */
+/* } */
 
 
 
@@ -51,8 +51,9 @@ void init_system_random_pos(Vec2d *Pos,  double len,
     n_ghost = (int) sqrt(N);
     dl = (len/n_ghost);
 
-    std::uniform_real_distribution<> rand_real(dl, len-dl);
+    /* std::uniform_real_distribution<> rand_real(dl, len-dl); */
 
+    
     is_sph = false;
     is_cart = false;
     if(strcmp(metric, "sph") == 0){
@@ -69,7 +70,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
         exit(0);
     }
 
-
+     //::generateUniform  rngu; //(0.0, 1.0)
      
     if(is_cart){
         switch (bdry_condt) {
@@ -87,8 +88,8 @@ void init_system_random_pos(Vec2d *Pos,  double len,
                 Pos[i].y = len; 
             }
             for(int i=n_ghost; i<N; i++){
-                Pos[i].x = rand_real(rng2);
-                Pos[i].y = rand_real(rng2);
+                Pos[i].x = RandomGenerator::generateUniform(dl, len-dl);//rand_real(rng2);
+                Pos[i].y = RandomGenerator::generateUniform(dl, len-dl); //rand_real(rng2);
             }
             break;
       case 1:
@@ -113,17 +114,17 @@ void init_system_random_pos(Vec2d *Pos,  double len,
                 Pos[i].y = (i +0.5 - 3*n_ghost/4)*dl; 
             }
             for(int i=n_ghost; i<N; i++){
-                Pos[i].x = rand_real(rng2);
-                Pos[i].y = rand_real(rng2);
+                Pos[i].x = RandomGenerator::generateUniform(dl, len-dl);//rand_real(rng2);
+                Pos[i].y = RandomGenerator::generateUniform(dl, len-dl); //rand_real(rng2);
             }
 
             break;
-       
-            default:
-                for(int i=0; i<N; i++){
-                    Pos[i].x = rand_real(rng2);
-                    Pos[i].y = rand_real(rng2);
-                }
+
+      default:
+            for(int i=0; i<N; i++){
+                Pos[i].x = RandomGenerator::generateUniform(dl, len-dl);//rand_real(rng2);
+                Pos[i].y = RandomGenerator::generateUniform(dl, len-dl); //rand_real(rng2);
+            }
         }
     }
     if(is_sph){
@@ -330,14 +331,18 @@ void init_KK_0(double *KK, AREA_p area_p, MESH_p mesh, int N){
     int num_nbr, cm_idx;
     double kk_t = area_p.YY;
     int mpi_err, mpi_rank;
+    double rndg;
+    /* std::cout << "Gaussian Random Number: " << gaussianNumber << std::endl; */
+
 
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    std::uniform_real_distribution<> rand_real(-kk_t/4.0, kk_t/4);
+    /* std::uniform_real_distribution<> rand_real(-kk_t/4.0, kk_t/4); */
     for(i = 0; i < N; i++){
         num_nbr = mesh.numnbr[i];
         cm_idx = mesh.nghst * i;
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
-            KK[k] = kk_t + rand_real(rng2);
+            rndg = RandomGenerator::generateGaussian(0.0,1.0);
+            KK[k] = kk_t + sqrt(kk_t)*rndg*0.5; //rand_real(rng2);
             /* printf("%d  %lf \n", mpi_rank, KK[k]); */
         }
     }
@@ -347,9 +352,8 @@ void init_KK_0(double *KK, AREA_p area_p, MESH_p mesh, int N){
 
 void init_activity(ACTIVE_p activity, int N){
     int i;
-    std::uniform_real_distribution<> rand_real(activity.minA, activity.maxA);
     if(activity.act == "random"){
-        for(i=0;i<N;i++) activity.activity[i] = rand_real(rng2);
+        for(i=0;i<N;i++) activity.activity[i] = RandomGenerator::generateUniform(activity.minA,activity.maxA); 
     }
     if(activity.act == "constant"){
         for(i=0;i<N;i++) activity.activity[i] = activity.maxA;

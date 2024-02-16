@@ -3,16 +3,14 @@
 #include <cmath>
 #include <cstdio>
 #include <iomanip>
-#include <random>
 #include <sstream>
 #include <unistd.h>
-std::mt19937 rng;
 
-void init_rng(uint32_t seed_val) {
+/* void init_rng(uint32_t seed_val) { */
 
-  ///  @brief Generates random number
-  rng.seed(seed_val);
-}
+/*   ///  @brief Generates random number */
+/*   rng.seed(seed_val); */
+/* } */
 
 int del_nbr(int *nbrs, int numnbr, int idx) {
   // delet int idx between i1 and i2 in the nbrs list
@@ -84,14 +82,15 @@ bool Metropolis(double DE, double activity, MC_p mcpara) {
   bool yes;
   double rand;
   DE += activity;
-  std::uniform_real_distribution<> rand_real(0, 1);
+  /* std::uniform_real_distribution<> rand_real(0, 1); */
   yes = (DE <= 0.e0);
   if (!yes) {
-    rand = rand_real(rng);
+    rand = RandomGenerator::generateUniform(0.0, 1.0); //  rand_real(rng);
     yes = rand < exp(-DE / mcpara.kBT);
   }
   return yes;
 }
+
 bool Glauber(double DE, double activity, MC_p mcpara) {
   /// @brief Glauber algorithm
   /// @param DE change in energy
@@ -99,21 +98,21 @@ bool Glauber(double DE, double activity, MC_p mcpara) {
   bool yes;
   double rand;
   DE += activity;
-  std::uniform_real_distribution<> rand_real(0, 1);
-  rand = rand_real(rng);
+  rand = RandomGenerator::generateUniform(0.0, 1.0); //  rand_real(rng);
   yes = rand < 1 / (1 + exp(DE / mcpara.kBT));
   return yes;
 }
-
+/* RandomGenerator::generateUniform */
 double rand_inc_theta(double th0, double dfac) {
   /// @brief increment the polar angle randomly
   double dth;
   double tmp_th0;
-  std::uniform_real_distribution<> rand_real(-1, 1);
+ // std::uniform_real_distribution<> rand_real(-1, 1);
 
   tmp_th0 = 10;
   while (tmp_th0 > pi || tmp_th0 < 0) {
-    dth = (pi / dfac) * (rand_real(rng));
+    dth = (pi / dfac) * RandomGenerator::generateUniform(0.0,1.0); 
+    //(rand_real(rng));
     tmp_th0 = th0 + dth;
   }
   return dth;
@@ -209,8 +208,8 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
   int nframe;
 
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
-  std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
-  std::uniform_real_distribution<> rand_real(-1, 1);
+  /* std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1); */
+  /* std::uniform_real_distribution<> rand_real(-1, 1); */
   ini_vol = (4. / 3.) * pi * pow(mbrane.radius, 3);
   /* if(mbrane.bdry_type == 0 || mbrane.bdry_type == 1 ) */
   ini_ar = 4 * pi * mbrane.radius*mbrane.radius; 
@@ -218,7 +217,8 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
   move = 0;
 
   for (i = 0; i < mcpara.one_mc_iter; i++) {
-      int idx = rand_int(rng);
+     int idx =  RandomGenerator::intUniform(nframe, mbrane.N - 1);
+      /* int idx = rand_int(rng); */
       cm_idx = mesh.nghst * idx;
       num_nbr = mesh.numnbr[idx];
       Eini = energy_mc_3d(pos, mesh, lij_t0, KK, idx, &area_i, mbrane, area_p, st_p, vol_p,
@@ -230,12 +230,12 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
       y_o = pos[idx].y;
       z_o = pos[idx].z;
 
-      dxinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
-      dyinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
-      dzinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
+      dxinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1,1));
+      dyinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1,1));
+      dzinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1,1));
 
       if(!area_p.is_tether){
-          double rand_random_ = rand_real(rng);
+          double rand_random_ = (RandomGenerator::generateUniform(-1,1));
           double magr_ = norm(pos[idx]);
           dxinc = (mcpara.delta / mcpara.dfac) * rand_random_*pos[idx].x/magr_;
           dyinc = (mcpara.delta / mcpara.dfac) * rand_random_*pos[idx].y/magr_;
@@ -319,8 +319,6 @@ int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
   int n_ghost;
 
   n_ghost = get_nstart(para.N, para.bdry_condt);
-  std::uniform_int_distribution<uint32_t> rand_int(n_ghost, para.N - 1);
-  std::uniform_real_distribution<> rand_real(-1, 1);
   is_sph = false;
   is_cart = false;
   if (strcmp(metric, "sph") == 0) {
@@ -331,24 +329,24 @@ int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
   }
   move = 0;
   for (i = 0; i < mcpara.one_mc_iter; i++) {
-    int idx = rand_int(rng);
+    int idx = RandomGenerator::intUniform(n_ghost, para.N-1);
     Eini = pairlj_ipart_energy(Pos, neib[idx].list, neib[idx].cnt, idx, para,
                                metric);
     x_o = Pos[idx].x;
     y_o = Pos[idx].y;
 
     if (is_cart) {
-      dxinc = (para.sigma / mcpara.dfac) * rand_real(rng);
+      dxinc = (para.sigma / mcpara.dfac) * RandomGenerator::generateUniform(-1,1); 
       x_n = fmod((x_o + dxinc + 30 * para.len), para.len);
       Pos[idx].x = x_n;
 
-      dyinc = (para.sigma / mcpara.dfac) * rand_real(rng);
+      dyinc = (para.sigma / mcpara.dfac) * RandomGenerator::generateUniform(-1,1);
       y_n = fmod((y_o + dyinc + 30 * para.len), para.len);
       Pos[idx].y = y_n;
     }
     if (is_sph) {
       dxinc = rand_inc_theta(Pos[idx].x, mcpara.dfac);
-      dyinc = (para.sigma / mcpara.dfac) * (rand_real(rng));
+      dyinc = (para.sigma / mcpara.dfac) * RandomGenerator::generateUniform(-1,1);
       x_n = x_o + para.sigma * dxinc;
       y_n = fmod((y_o + dyinc + 30 * 2 * pi), 2 * pi);
       Pos[idx].x = x_n;
@@ -402,9 +400,9 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
 
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
 
-  std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
-  std::uniform_int_distribution<uint32_t> rand_nbr(0, mesh.nghst - 1);
-  std::uniform_real_distribution<> rand_real(-1, 1);
+/*   std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1); */
+/*   std::uniform_int_distribution<uint32_t> rand_nbr(0, mesh.nghst - 1); */
+/*   std::uniform_real_distribution<> rand_real(-1, 1); */
 
   move = 0;
 
@@ -415,10 +413,10 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
     // stored as idx_del1 and idx_del2
     logic = false;
     while (!logic) {
-      idx_del1 = rand_int(rng);
+      idx_del1 = RandomGenerator::intUniform(nframe, mbrane.N-1); //rand_int(rng);
       cm_idx_del1 = mesh.nghst * idx_del1;
       nnbr_del1 = mesh.numnbr[idx_del1];
-      idxn = rand_nbr(rng);
+      idxn = RandomGenerator::intUniform(0, mesh.nghst-1); //rand_nbr(rng);
       if (mesh.node_nbr_list[cm_idx_del1 + idxn] != -1) {
         idx_del2 = mesh.node_nbr_list[cm_idx_del1 + idxn];
         cm_idx_del2 = mesh.nghst * idx_del2;

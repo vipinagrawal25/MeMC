@@ -49,8 +49,8 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
     if(vol_para.do_volume && !vol_para.is_pressurized) {log_headers+="vol_e ";}
     if (vol_para.do_volume && vol_para.is_pressurized){log_headers+="pressure_e ";}
     if (afm_para.do_afm){log_headers+="afm_fx, afm_fy afm_fz ";}
-    if (spring_para.do_spring){log_headers+="spr_north.z spr_south.z ";}
-    /* log_headers+="volume nPole_z sPole_z hrms"; */
+    if (spring_para.do_spring){log_headers+="spr_force_n.z spr_force_s.z ";}
+    if (spring_para.do_spring){log_headers+="nPole_z sPole_z";}
     log_headers+=" volume  area";
     fprintf(fid, "%s\n", log_headers.c_str());
     fflush(fid);
@@ -108,6 +108,7 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, double
 
     if (afm_para.do_afm){fprintf(fid, " %g %g %g", afm_force.x, afm_force.y, afm_force.z);}
     if (spring_para.do_spring){fprintf(fid, " %g %g", spring_force[0].z, spring_force[1].z);}
+    if (spring_para.do_spring){fprintf(fid, " %g %g", Pos[mesh.nPole].z, Pos[mesh.sPole].z);}
     {fprintf(fid, " %g  %g\n", vol_sph, ar_sph );}
     Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5]+ Et[6];
     fflush(fid);
@@ -117,7 +118,6 @@ double diag_energies(double *Et, Vec3d *Pos, MESH_p mesh, double *lij_t0, double
 
 int main(int argc, char *argv[]){
     pid_t pid = getpid();
-    //
     int iter, num_moves, num_bond_change;
     double Et[7], Ener_t;
     double vol_sph, e_t, s_t;
@@ -142,8 +142,10 @@ int main(int argc, char *argv[]){
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     /* seed_v = 12345; //(uint32_t) 7*3*11*(mpi_rank+1)*rand(); */
     seed_v = (uint32_t) (mpi_rank + time(0));
-    init_rng(seed_v);
-    init_rng2(seed_v);
+
+    /* init_rng(seed_v); */
+    /* init_rng2(seed_v); */
+    RandomGenerator::init(42);
     //
     //
 

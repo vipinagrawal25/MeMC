@@ -15,9 +15,9 @@ There are commercial packages, e.g. [COMSOL](www.comsol.com), to calculate the f
 
 MeMC requires following libraries:
 
-1) A C++ compiler. We have tested the code against gnu [g++](https://gcc.gnu.org/) versions 5.4.0 and above on x86_64 CPU.
+1) A mpic++ compiler. We have tested the code against gnu [g++](https://gcc.gnu.org/) versions 5.4.0 and above on x86_64 CPU.
 
-2) [Hdf5](https://www.hdfgroup.org/solutions/hdf5) libraries for reading and writing data.  
+2) [Hdf5](https://www.hdfgroup.org/solutions/hdf5) libraries for reading and writing data.
 
 3) [Python](https://www.python.org/) version with [scipy](https://www.scipy.org), [numpy](https://www.numpy.org), [h5py](https://www.h5py.org) and [numpy-quartenion](https://pypi.org/project/numpy-quaternion/) installed. We have tested the code against python version 3.8 and above.
 
@@ -27,13 +27,26 @@ For details of the installation for different packages, check the instructions o
 apt install g++ libhdf5-dev
 ```
 The environment variables for include and library path may not be set properly after the installation.
-In such a scenario, the user should set these paths manually in the Makefile to compile the package.
+In such a scenario, the user should set these paths manually either in the Makefile or in bashrc to compile the package.
 
 In order to install the required python libraries we suggest using the standard
 python package manager pip, 
 ```bash
 pip install scipy numpy-quaternion h5py
 ```
+
+The MeMC requires both h5c++ and mpic++ wrappers for compilation.
+There are two ways to achieve this:
+
+1) The user can link HDF5_CXX and HDF5_CLINKER to mpic++ using the following commands:
+```bash
+export HDF5_CXX=mpic++
+export HDF5_CLINKER=mpic++
+```
+This assumes that h5c++ is already in the path.
+For convenience the user may choose to add these commands to the .bashrc file.
+
+2) The user can opt to compile the code with mpic++ and specify the hdf5 library path. An example is provided in hosts/su.
 
 ## Installation
 
@@ -60,7 +73,7 @@ compilation terminated.
 ```
 then we suggest the user to compile the code as:
 
-```bash 
+```bash
 make CC=/path/to/h5c++.
 ```
 

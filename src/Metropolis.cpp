@@ -167,7 +167,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
 //
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
                    MBRANE_p mbrane, MC_p mcpara, STICK_p st_p,
-                   VOL_p vol_p, AFM_p afm,
+                   VOL_p vol_p, AREA_p area_p, AFM_p afm,
                    ACTIVE_p activity, SPRING_p spring,
                    SPCURV_p spcurv) {
   /// @brief Monte-Carlo routine for the membrane
@@ -249,7 +249,7 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0,
       yes = Glauber(de, activity.activity[idx], mcpara);
     }
     //
-    if (yes) {
+    if(yes) {
       move = move + 1;
       mbrane.tot_energy[0] += de;
       if(vol_p.do_volume || vol_p.is_pressurized) mbrane.volume[0] += dvol;

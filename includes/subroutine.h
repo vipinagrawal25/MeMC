@@ -12,7 +12,7 @@ using namespace std;
 // metropolis.cpp
 int monte_carlo_3d(Vec3d *pos, MESH_p mesh, 
                 double *lij_t0, MBRANE_p mbrane,
-                MC_p mcpara, STICK_p ,  VOL_p , AFM_p afm, 
+                MC_p mcpara, STICK_p ,  VOL_p, AREA_p, AFM_p afm, 
                 ACTIVE_p activity,  SPRING_p spring, SPCURV_p spcurv);
 double energy_mc_3d(Vec3d *pos, MESH_p mesh, 
          double *lij_t0, int idx, MBRANE_p , STICK_p ,
@@ -62,6 +62,8 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
 double lj_afm(Vec3d , AFM_p);
 double lj_afm_total(Vec3d *pos, Vec3d *afm_force,
         MBRANE_p para, AFM_p afm);
+void area_ipart(Vec3d *pos, double *area, int *node_nbr, int num_nbr, int idx);
+double area_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para, AREA_p area_para);
 //init.c
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
 double PV_change(double ,double );
@@ -75,14 +77,15 @@ void init_spcurv(SPCURV_p spcurv, Vec3d *pos, int N);
 void init_read_config();
 void init_afm_tip(AFM_p );
 bool init_read_parameters(MBRANE_p *mbrane_para, SPCURV_p *spcurv_para, MC_p *mc_para,
-        FLUID_p *fld_para, VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
+        FLUID_p *fld_para, VOL_p *vol_para, AREA_p *area_para,
+        STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
         SPRING_p *spring_para, string para_file);
 void init_activity(ACTIVE_p, int );
 int randint(int n);
-void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para, 
-        FLUID_p fld_para, VOL_p vol_p, STICK_p stick_para, AFM_p afm_para,  
-        ACTIVE_p act_para, SPRING_p spring_para, string out_file);
- 
+void write_parameters(MBRANE_p mbrane, SPCURV_p spcurv_para, MC_p mc_para,
+        FLUID_p fld_para, VOL_p vol_p, AREA_p area_para, STICK_p stick_para, 
+        AFM_p afm_para, ACTIVE_p act_para, SPRING_p spring_para, string out_file);
+void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_para);
 //hdf5_io
 void hdf5_io_write_pos(double *Pos, int N, string input_file);
 void hdf5_io_read_pos(double *Pos, string input_file);

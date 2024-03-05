@@ -38,7 +38,7 @@ pip install scipy numpy-quaternion h5py
 The MeMC requires both h5c++ and mpic++ wrappers for compilation.
 There are two ways to achieve this:
 
-1) The user can link HDF5_CXX and HDF5_CLINKER to mpic++ using the following commands:
+1) The user can link HDF5_CXX and HDF5_CLINKER to mpic++ using the following commands in terminal:
 ```bash
 export HDF5_CXX=mpic++
 export HDF5_CLINKER=mpic++

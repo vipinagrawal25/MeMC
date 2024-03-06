@@ -42,7 +42,6 @@ def new_way_nbrs(cmlist, node_nbr, nghst=12):
      end_idx = int(ip*nghst + num_nbr)
      new_nbr[st_idx:end_idx] = nnbrs[:]
  return new_nbr
-
 pos_file = sys.argv[1]
 mesh_file = sys.argv[2]
 out_file = sys.argv[3]

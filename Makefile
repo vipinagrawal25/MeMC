@@ -1,4 +1,4 @@
-HOST=su
+HOST=quetzal
 include hosts/$(HOST)
 # CC = mpic++
 #

@@ -46,7 +46,7 @@ export HDF5_CLINKER=mpic++
 This assumes that h5c++ is already in the path.
 For convenience the user may choose to add these commands to the .bashrc file.
 
-2) The user can opt to compile the code with mpic++ and specify the hdf5 library path. An example is provided in hosts/su.
+2) The user can opt to compile the code with mpic++ and specify the hdf5 library path. An example is provided in hosts/su. Also note that, the library path should be added to LD_LIBRARY_PATH as well.
 
 ## Installation
 

@@ -4,16 +4,14 @@
 #include <cmath>
 #include <cstdio>
 #include <iomanip>
-#include <random>
 #include <sstream>
 #include <unistd.h>
-std::mt19937 rng;
 
-void init_rng(uint32_t seed_val) {
+/* void init_rng(uint32_t seed_val) { */
 
-  ///  @brief Generates random number
-  rng.seed(seed_val);
-}
+/*   ///  @brief Generates random number */
+/*   rng.seed(seed_val); */
+/* } */
 
 int del_nbr(int *nbrs, int numnbr, int idx) {
   // delet int idx between i1 and i2 in the nbrs list
@@ -85,14 +83,15 @@ bool Metropolis(double DE, double activity, MC_p mcpara) {
   bool yes;
   double rand;
   DE += activity;
-  std::uniform_real_distribution<> rand_real(0, 1);
+  /* std::uniform_real_distribution<> rand_real(0, 1); */
   yes = (DE <= 0.e0);
   if (!yes) {
-    rand = rand_real(rng);
+    rand = RandomGenerator::generateUniform(0.0, 1.0); //  rand_real(rng);
     yes = rand < exp(-DE / mcpara.kBT);
   }
   return yes;
 }
+
 bool Glauber(double DE, double activity, MC_p mcpara) {
   /// @brief Glauber algorithm
   /// @param DE change in energy
@@ -100,29 +99,35 @@ bool Glauber(double DE, double activity, MC_p mcpara) {
   bool yes;
   double rand;
   DE += activity;
-  std::uniform_real_distribution<> rand_real(0, 1);
-  rand = rand_real(rng);
+  rand = RandomGenerator::generateUniform(0.0, 1.0); //  rand_real(rng);
   yes = rand < 1 / (1 + exp(DE / mcpara.kBT));
   return yes;
 }
-
+/* RandomGenerator::generateUniform */
 double rand_inc_theta(double th0, double dfac) {
   /// @brief increment the polar angle randomly
   double dth;
   double tmp_th0;
-  std::uniform_real_distribution<> rand_real(-1, 1);
+ // std::uniform_real_distribution<> rand_real(-1, 1);
 
   tmp_th0 = 10;
   while (tmp_th0 > pi || tmp_th0 < 0) {
-    dth = (pi / dfac) * (rand_real(rng));
+    dth = (pi / dfac) * RandomGenerator::generateUniform(0.0,1.0); 
+    //(rand_real(rng));
     tmp_th0 = th0 + dth;
   }
   return dth;
 }
 
+<<<<<<< HEAD
 double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0, 
                     int idx, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
                     VOL_p vol_p, AFM_p afm, SHEAR_p shear) {
+=======
+double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
+                    int idx, double *area_i, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
+                    VOL_p vol_p, AFM_p afm, SPRING_p spring) {
+>>>>>>> random-springs
   /// @brief Estimate the contribution from all the energies when a particle is
   /// moved randomly
   ///  @param Pos array containing co-ordinates of all the particles
@@ -136,7 +141,13 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
   /// @param AFM afm related parameter
   /// @return Change in Energy when idx particle is moved
 
+<<<<<<< HEAD
   double E_b, E_s, E_stick, E_afm, E_shr, area_i;
+=======
+  double E_b, E_s, E_stick, E_afm, E_spr;
+  double area_idx;
+  Vec2d be_ar;
+>>>>>>> random-springs
   int cm_idx, num_nbr;
   Vec2d be_ar;
 
@@ -152,6 +163,7 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];
 
+<<<<<<< HEAD
 
       be_ar = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
               idx, mbrane);
@@ -168,6 +180,27 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
                             //area_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
                             //num_nbr, idx);
           E_s = area_p.sigma*area_i;
+=======
+  be_ar = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
+                             idx, mbrane);
+  E_b = be_ar.x;
+  /* area_idx = be_ar.y; */
+
+  be_ar = bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
+
+  E_b += be_ar.x;
+
+  if(area_p.is_tether){
+      E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+              (lij_t0 + cm_idx), (KK + cm_idx), num_nbr, idx, area_p);
+  }
+
+  /* *area_i = area_idx + be_ar.y; */ 
+
+  area_idx = area_ipart(pos,  (int *) (mesh.node_nbr_list + cm_idx),
+                 num_nbr, idx);
+   *area_i = area_idx;
+>>>>>>> random-springs
 
       }
 
@@ -181,6 +214,7 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
   return E_b + E_s + E_stick + E_afm + E_shr;
 }
 
+<<<<<<< HEAD
 int monte_carlo_shear(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,  double *lij_t0,
         MBRANE_p mbrane,  ACTIVE_p activity,
         MC_p mcpara, AREA_p area_p, SHEAR_p shear) {
@@ -246,6 +280,9 @@ int monte_carlo_shear(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,  double *lij_t0,
 
 
 int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0, 
+=======
+int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
+>>>>>>> random-springs
                    MBRANE_p mbrane, MC_p mcpara, AREA_p area_p,  STICK_p st_p,
                    VOL_p vol_p, AFM_p afm,
                    ACTIVE_p activity, SHEAR_p shear) {
@@ -267,18 +304,23 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
   double dxinc, dyinc, dzinc;
   double vol_i, vol_f;
   double dvol, de_vol, ini_vol, de_pressure;
-  double KAPPA;
+  double kappa;
+  double area_i, area_f, ini_ar;
+  double d_ar, de_area;
   bool yes;
 
   int nframe = 0;
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
-  std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
-  std::uniform_real_distribution<> rand_real(-1, 1);
+  /* std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1); */
+  /* std::uniform_real_distribution<> rand_real(-1, 1); */
   ini_vol = (4. / 3.) * pi * pow(mbrane.radius, 3);
-  KAPPA = vol_p.coef_vol_expansion;
+  /* if(mbrane.bdry_type == 0 || mbrane.bdry_type == 1 ) */
+  ini_ar = 4 * pi * mbrane.radius*mbrane.radius; 
+  kappa = vol_p.coef_vol_expansion;
   move = 0;
 
   for (i = 0; i < mcpara.one_mc_iter; i++) {
+<<<<<<< HEAD
     int idx = rand_int(rng);
     cm_idx = mesh.nghst * idx;
     num_nbr = mesh.numnbr[idx];
@@ -287,28 +329,56 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
                         afm, shear);
     if(vol_p.do_volume) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+=======
+     int idx =  RandomGenerator::intUniform(nframe, mbrane.N - 1);
+      /* int idx = rand_int(rng); */
+      cm_idx = mesh.nghst * idx;
+      num_nbr = mesh.numnbr[idx];
+      Eini = energy_mc_3d(pos, mesh, lij_t0, KK, idx, &area_i, mbrane, area_p, st_p, vol_p,
+              afm, spring);
+      if(vol_p.do_volume) vol_i = volume_ipart(pos,
+              (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
 
-    x_o = pos[idx].x;
-    y_o = pos[idx].y;
-    z_o = pos[idx].z;
+      x_o = pos[idx].x;
+      y_o = pos[idx].y;
+      z_o = pos[idx].z;
+>>>>>>> random-springs
 
-    dxinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
-    dyinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
-    dzinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
+      dxinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1,1));
+      dyinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1,1));
+      dzinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1,1));
 
-    x_n = x_o + dxinc;
-    y_n = y_o + dyinc;
-    z_n = z_o + dzinc;
+      if(!area_p.is_tether){
+          double rand_random_ = (RandomGenerator::generateUniform(-1,1));
+          double magr_ = norm(pos[idx]);
+          dxinc = (mcpara.delta / mcpara.dfac) * rand_random_*pos[idx].x/magr_;
+          dyinc = (mcpara.delta / mcpara.dfac) * rand_random_*pos[idx].y/magr_;
+          dzinc = (mcpara.delta / mcpara.dfac) * rand_random_*pos[idx].z/magr_;
+      }
 
-    pos[idx].x = x_n;
-    pos[idx].y = y_n;
-    pos[idx].z = z_n;
+      x_n = x_o + dxinc;
+      y_n = y_o + dyinc;
+      z_n = z_o + dzinc;
 
+      pos[idx].x = x_n;
+      pos[idx].y = y_n;
+      pos[idx].z = z_n;
+
+<<<<<<< HEAD
     Efin = energy_mc_3d(pos, pos_t0, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
                         afm, shear);
+=======
+      Efin = energy_mc_3d(pos, mesh, lij_t0, KK, idx, &area_f, mbrane, area_p, st_p, vol_p,
+              afm, spring);
+>>>>>>> random-springs
 
-    de = (Efin - Eini);
+      de = (Efin - Eini);
+      if(!area_p.is_tether){
+          d_ar = area_f - area_i;
+         de_area = (2*d_ar/(ini_ar*ini_ar))*(mbrane.area[0]  - ini_ar)
+                  + (d_ar/ini_ar)*(d_ar/ini_ar);
 
+<<<<<<< HEAD
     if(vol_p.do_volume){
         vol_f = volume_ipart(pos,
                 (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
@@ -339,6 +409,43 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
       pos[idx].y = y_o;
       pos[idx].z = z_o;
     }
+=======
+            de +=  area_p.Ka*de_area;
+      }
+      if(vol_p.do_volume){
+          vol_f = volume_ipart(pos,
+                  (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+          dvol=(vol_f - vol_i);
+
+          if(!vol_p.is_pressurized){
+              de_vol = (2*dvol/(ini_vol*ini_vol))*(*mbrane.volume  - ini_vol)
+                  + (dvol/ini_vol)*(dvol/ini_vol);
+              de +=  kappa*de_vol;
+          }
+          if(vol_p.is_pressurized){
+              de_pressure = vol_p.pressure*dvol;
+              /* de_pressure = vol_p.pressure*dvol*(*mbrane.volume/ini_vol); */
+              de +=  de_pressure;
+          }
+      }
+     /* yes = Metropolis(de, 0.0, mcpara); */
+      if (mcpara.algo == "mpolis") {
+          yes = Metropolis(de, activity.activity[idx], mcpara);
+      } else if (mcpara.algo == "glauber") {
+          yes = Glauber(de, activity.activity[idx], mcpara);
+      }
+
+      if (yes) {
+          move = move + 1;
+          *mbrane.tot_energy += de;
+          if(vol_p.do_volume) *mbrane.volume += dvol; 
+          *mbrane.area += d_ar; 
+      } else {
+          pos[idx].x = x_o;
+          pos[idx].y = y_o;
+          pos[idx].z = z_o;
+      }
+>>>>>>> random-springs
   }
   return move;
 }
@@ -364,8 +471,6 @@ int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
   int n_ghost;
 
   n_ghost = get_nstart(para.N, para.bdry_condt);
-  std::uniform_int_distribution<uint32_t> rand_int(n_ghost, para.N - 1);
-  std::uniform_real_distribution<> rand_real(-1, 1);
   is_sph = false;
   is_cart = false;
   if (strcmp(metric, "sph") == 0) {
@@ -376,24 +481,24 @@ int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
   }
   move = 0;
   for (i = 0; i < mcpara.one_mc_iter; i++) {
-    int idx = rand_int(rng);
+    int idx = RandomGenerator::intUniform(n_ghost, para.N-1);
     Eini = pairlj_ipart_energy(Pos, neib[idx].list, neib[idx].cnt, idx, para,
                                metric);
     x_o = Pos[idx].x;
     y_o = Pos[idx].y;
 
     if (is_cart) {
-      dxinc = (para.sigma / mcpara.dfac) * rand_real(rng);
+      dxinc = (para.sigma / mcpara.dfac) * RandomGenerator::generateUniform(-1,1); 
       x_n = fmod((x_o + dxinc + 30 * para.len), para.len);
       Pos[idx].x = x_n;
 
-      dyinc = (para.sigma / mcpara.dfac) * rand_real(rng);
+      dyinc = (para.sigma / mcpara.dfac) * RandomGenerator::generateUniform(-1,1);
       y_n = fmod((y_o + dyinc + 30 * para.len), para.len);
       Pos[idx].y = y_n;
     }
     if (is_sph) {
       dxinc = rand_inc_theta(Pos[idx].x, mcpara.dfac);
-      dyinc = (para.sigma / mcpara.dfac) * (rand_real(rng));
+      dyinc = (para.sigma / mcpara.dfac) * RandomGenerator::generateUniform(-1,1);
       x_n = x_o + para.sigma * dxinc;
       y_n = fmod((y_o + dyinc + 30 * 2 * pi), 2 * pi);
       Pos[idx].x = x_n;
@@ -441,15 +546,20 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
   int N_nbr_add2, N_nbr_add1;
   double det1, det2;
   Vec3d bef_ij, aft_ij;
+<<<<<<< HEAD
   double KAPPA;
+=======
+
+  double kappa;
+>>>>>>> random-springs
   bool yes, logic;
   bool do_move_pt;
 
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
 
-  std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
-  std::uniform_int_distribution<uint32_t> rand_nbr(0, mesh.nghst - 1);
-  std::uniform_real_distribution<> rand_real(-1, 1);
+/*   std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1); */
+/*   std::uniform_int_distribution<uint32_t> rand_nbr(0, mesh.nghst - 1); */
+/*   std::uniform_real_distribution<> rand_real(-1, 1); */
 
   move = 0;
 
@@ -460,10 +570,10 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
     // stored as idx_del1 and idx_del2
     logic = false;
     while (!logic) {
-      idx_del1 = rand_int(rng);
+      idx_del1 = RandomGenerator::intUniform(nframe, mbrane.N-1); //rand_int(rng);
       cm_idx_del1 = mesh.nghst * idx_del1;
       nnbr_del1 = mesh.numnbr[idx_del1];
-      idxn = rand_nbr(rng);
+      idxn = RandomGenerator::intUniform(0, mesh.nghst-1); //rand_nbr(rng);
       if (mesh.node_nbr_list[cm_idx_del1 + idxn] != -1) {
         idx_del2 = mesh.node_nbr_list[cm_idx_del1 + idxn];
         cm_idx_del2 = mesh.nghst * idx_del2;
@@ -494,6 +604,7 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
         aft_ij = pos[idx_add2] - pos[idx_add1];
         double dl = norm(aft_ij);
 
+<<<<<<< HEAD
         N_nbr_del1 = mesh.numnbr[idx_del1];
         N_nbr_del2 = mesh.numnbr[idx_del2];
         N_nbr_add1 = mesh.numnbr[idx_add1];
@@ -504,6 +615,19 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
         flip_condt1 = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len);
         flip_condt2 =  N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
         flip_condt3 =  N_nbr_add1 < 9 && N_nbr_add2 < 9;
+=======
+      N_nbr_del1 = mesh.numnbr[idx_del1];
+      N_nbr_del2 = mesh.numnbr[idx_del2];
+
+      bool flip_condt1, flip_condt2, flip_condt3;
+      bool accept_flip;
+
+      flip_condt1 = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len);
+      flip_condt2 =  N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
+      flip_condt3 =  N_nbr_add1 < 9 && N_nbr_add2 < 9;
+
+      accept_flip = flip_condt1 && flip_condt2 && flip_condt3;
+>>>>>>> random-springs
 
         accept_flip = flip_condt1 && flip_condt2 && flip_condt3;
 

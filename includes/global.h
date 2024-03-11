@@ -11,10 +11,11 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <cstdlib>
-#include <random>
 #include "Vector.h"
 #include <fstream>
 #include <mpi.h>
+#include "random_gen.h"
+
 using namespace std;
 #define pi 3.14159265358979
 #define R_del 0.05
@@ -69,6 +70,7 @@ typedef struct{
     double av_bond_len; // average length of the bond
     double *tot_energy;
     double *volume; // these are updated after each monte carlo 
+    double *area; // these are updated after each monte carlo 
     int N;   // number of particles in mesh
     double len;
     int bdry_type;
@@ -78,7 +80,7 @@ typedef struct{
 typedef struct{
     bool is_tether;
     double YY;
-    double sigma;
+    double Ka;
 }AREA_p;
 
 typedef struct{
@@ -107,7 +109,6 @@ typedef struct{
     bool *is_attractive;
 }STICK_p;
 
-
 //
 typedef struct{
     /// @brief Mesh Structure
@@ -135,7 +136,7 @@ typedef struct{
 //
 
 typedef struct{
-  /// @brief LJ parameters for initial montecarlo in start.cpp
+    /// @brief LJ parameters for initial montecarlo in start.cpp
     /// @param N; number of particles 
     /// @param sigma, epsilon; sigma epsilon of the LJ potential used to model AFM
     /// @param len length of the box

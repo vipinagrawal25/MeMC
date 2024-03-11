@@ -11,11 +11,11 @@ opt=-O3
 link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
 sources += src/init.cpp  src/hdf5_io.cpp
-sources += src/cubic_solve.cpp
+sources += src/cubic_solve.cpp src/random_gen.cpp
 sources += src/misc.cpp
 #
 object =  obj/forces_lj.o obj/init.o obj/forces_surf.o obj/Metropolis.o
-object += obj/hdf5_io.o 
+object += obj/hdf5_io.o  obj/random_gen.o
 object += obj/cubic_solve.o obj/misc.o obj/vector.o
 #
 includes += includes/global.h includes/subroutine.h includes/Vector.h 

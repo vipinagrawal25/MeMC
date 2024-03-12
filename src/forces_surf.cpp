@@ -164,7 +164,7 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
 }
 
  double stretch_energy_ipart(Vec3d *pos,
-         int *node_nbr, double *lij_t0, double *KK,
+         int *node_nbr, double *lij_t0, 
          int num_nbr, int idx, AREA_p para){
 
     /// @brief Estimate the Stretching energy contribution when ith particle position changes
@@ -186,13 +186,13 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
     //
     idx_ener = 0e0;
     // HH = para.coef_str/(para.av_bond_len*para.av_bond_len);
-    /* HH = para.YY*sqrt(3)/2; */
+    HH = para.YY*sqrt(3)/2;
     for (i =0; i < num_nbr; i++){
         j = node_nbr[i];
         rij = pos[idx] - pos[j];
         mod_rij = sqrt(inner_product(rij, rij));
         //
-        idx_ener = idx_ener + KK[i]*(mod_rij - lij_t0[i])*(mod_rij - lij_t0[i]);
+        idx_ener = idx_ener + HH*(mod_rij - lij_t0[i])*(mod_rij - lij_t0[i]);
     }
     //
     return 0.5*idx_ener;
@@ -436,7 +436,7 @@ Vec2d bending_energy_ipart_neighbour(Vec3d *pos,
 
 
  double stretch_energy_total(Vec3d *pos,
-       MESH_p mesh, double *lij_t0, double *KK_, MBRANE_p para, AREA_p area_p){
+       MESH_p mesh, double *lij_t0,  MBRANE_p para, AREA_p area_p){
 
     /// @brief Estimate the total Stretching energy  
     ///  @param Pos array containing co-ordinates of all the particles
@@ -460,7 +460,7 @@ Vec2d bending_energy_ipart_neighbour(Vec3d *pos,
 
         se += stretch_energy_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
-                 (double *) (lij_t0 + cm_idx), (double *) (KK_ + cm_idx), num_nbr,
+                 (double *) (lij_t0 + cm_idx),  num_nbr,
                  idx, area_p);
 
         /* printf( "stretch: %lf \n", se); */
@@ -496,16 +496,23 @@ double lj_attr(double sqdr, double eps){
 }
 
 double stick_bottom_surface(Vec3d pt, Vec3d pt_t0, STICK_p st_p){
+  double inv_sqdz, ds, ds2, ener;
 
-    double inv_sqdz, ds;
+  // ds = norm(pt_t0 - pt);
 
-        ds = norm(pt_t0 - pt);
-        inv_sqdz = (st_p.sigma*st_p.sigma)/(ds*ds);
-        if(st_p.is_pot_harmonic){
-            return  st_p.sigma*ds*ds;
-        }else{
-            return  lj_attr(inv_sqdz, st_p.epsilon);
-        }
+  ds = pt.z - st_p.pos_bot_wall;
+  ds2 = ds*ds;
+  ener = 0;
+  if(ds2 < st_p.epsilon*st_p.epsilon){
+    ener = st_p.sigma*ds2;
+  }
+  // inv_sqdz = (st_p.sigma*st_p.sigma)/(ds*ds);
+  // if(st_p.is_pot_harmonic){
+    // return  st_p.sigma*ds*ds;
+  // }else{
+    // return  lj_attr(inv_sqdz, st_p.epsilon);
+  // }
+  return ener;
 }
 
 
@@ -651,21 +658,21 @@ double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force,
 */
 //
 
-double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
-    if (!spring.do_spring) return 0;
-    double ener_spr=0e0;
-    double kk=spring.constant;
-    double nZeq = spring.nPole_eq_z;
-    double sZeq = spring.sPole_eq_z;
-    if (mesh.nPole==idx){
-        ener_spr=kk*pow((pos.z-nZeq),2)/2;
-    }
-    if (mesh.sPole==idx){
-        ener_spr=kk*pow((pos.z-sZeq),2)/2;
-    }
-    return ener_spr;
-}
-*/
+// double spring_energy(Vec3d pos, int idx, MESH_p mesh, SPRING_p spring){
+//     if (!spring.do_spring) return 0;
+//     double ener_spr=0e0;
+//     double kk=spring.constant;
+//     double nZeq = spring.nPole_eq_z;
+//     double sZeq = spring.sPole_eq_z;
+//     if (mesh.nPole==idx){
+//         ener_spr=kk*pow((pos.z-nZeq),2)/2;
+//     }
+//     if (mesh.sPole==idx){
+//         ener_spr=kk*pow((pos.z-sZeq),2)/2;
+//     }
+//     return ener_spr;
+// }
+// 
 
 
 //

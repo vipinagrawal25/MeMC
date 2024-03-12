@@ -103,6 +103,7 @@ bool Glauber(double DE, double activity, MC_p mcpara) {
   yes = rand < 1 / (1 + exp(DE / mcpara.kBT));
   return yes;
 }
+
 /* RandomGenerator::generateUniform */
 double rand_inc_theta(double th0, double dfac) {
   /// @brief increment the polar angle randomly
@@ -119,15 +120,9 @@ double rand_inc_theta(double th0, double dfac) {
   return dth;
 }
 
-<<<<<<< HEAD
 double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0, 
-                    int idx, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
-                    VOL_p vol_p, AFM_p afm, SHEAR_p shear) {
-=======
-double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
                     int idx, double *area_i, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
-                    VOL_p vol_p, AFM_p afm, SPRING_p spring) {
->>>>>>> random-springs
+                    VOL_p vol_p, AFM_p afm) {
   /// @brief Estimate the contribution from all the energies when a particle is
   /// moved randomly
   ///  @param Pos array containing co-ordinates of all the particles
@@ -141,15 +136,10 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
   /// @param AFM afm related parameter
   /// @return Change in Energy when idx particle is moved
 
-<<<<<<< HEAD
-  double E_b, E_s, E_stick, E_afm, E_shr, area_i;
-=======
   double E_b, E_s, E_stick, E_afm, E_spr;
   double area_idx;
   Vec2d be_ar;
->>>>>>> random-springs
   int cm_idx, num_nbr;
-  Vec2d be_ar;
 
   int nframe;
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
@@ -158,29 +148,10 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
   E_s = 0.0;
   E_stick = 0.0;
   E_afm = 0.0;
-  E_shr = 0.0;
 
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];
 
-<<<<<<< HEAD
-
-      be_ar = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
-              idx, mbrane);
-      E_b = be_ar.x;
-
-      E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane);
-
-      if(area_p.is_tether){
-          E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-                  (lij_t0 + cm_idx), num_nbr, idx, area_p);
-      }
-      else{
-          area_i = be_ar.y; // TODO Work on this part; 
-                            //area_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
-                            //num_nbr, idx);
-          E_s = area_p.sigma*area_i;
-=======
   be_ar = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
                              idx, mbrane);
   E_b = be_ar.x;
@@ -192,7 +163,7 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
 
   if(area_p.is_tether){
       E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-              (lij_t0 + cm_idx), (KK + cm_idx), num_nbr, idx, area_p);
+              (lij_t0 + cm_idx),  num_nbr, idx, area_p);
   }
 
   /* *area_i = area_idx + be_ar.y; */ 
@@ -200,89 +171,18 @@ double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
   area_idx = area_ipart(pos,  (int *) (mesh.node_nbr_list + cm_idx),
                  num_nbr, idx);
    *area_i = area_idx;
->>>>>>> random-springs
 
-      }
 
       if(st_p.do_stick && st_p.is_attractive[idx])
           E_stick = stick_bottom_surface(pos[idx], pos_t0[idx], st_p); 
 
       if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
-      if(shear.do_scale_shear) E_shr = scale_shear(pos[idx], shear); 
       /* fprintf(stderr, "%d \n", idx); */
-      /* if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring); */
-  return E_b + E_s + E_stick + E_afm + E_shr;
+
+  return E_b + E_s + E_stick + E_afm;
 }
-
-<<<<<<< HEAD
-int monte_carlo_shear(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,  double *lij_t0,
-        MBRANE_p mbrane,  ACTIVE_p activity,
-        MC_p mcpara, AREA_p area_p, SHEAR_p shear) {
-
-  /// @brief Monte-Carlo routine for the membrane
-  ///  @param Pos array containing co-ordinates of all the particles
-  ///  @param mesh mesh related parameters -- connections and neighbours
-  /// information
-  /// @param lij_t0 initial distance between points of membrane
-  /// @param is_attractive true if the zz sees the  bottom wall
-  ///  @param mbrane  Membrane related parameters;
-  /// @param mcpara Monte-Carlo related parameters
-  /// @param AFM afm related parameter
-  /// @return number of accepted moves
-  int i, move, cm_idx, num_nbr;
-  double x_o, y_o, z_o, x_n, y_n, z_n;
-  double de, Eini, Efin;
-  double dxinc;
-  bool yes;
-
-  int nframe = 0;
-  nframe = get_nstart(mbrane.N, mbrane.bdry_type);
-  std::uniform_int_distribution<uint32_t> rand_int(0, nframe);
-  std::uniform_real_distribution<> rand_real(-1, 1);
-
-  move = 0;
-
-  for (i = 0; i < 2*nframe; i++) {
-    int idx = rand_int(rng);
-    cm_idx = mesh.nghst * idx;
-    num_nbr = mesh.numnbr[idx];
-
-
-    Eini = frame_spring_energy(pos[idx], pos_t0[idx], shear); 
-    Eini += stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-                  (lij_t0 + cm_idx), num_nbr, idx, area_p);
-
-    x_o = pos[idx].x;
-    dxinc = (mcpara.delta / mcpara.dfac) * (rand_real(rng));
-    x_n = x_o + dxinc;
-    pos[idx].x = x_n;
-     Efin = frame_spring_energy(pos[idx], pos_t0[idx], shear); 
-    Efin += stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-                  (lij_t0 + cm_idx), num_nbr, idx, area_p);
-
-    de = (Efin - Eini);
-    if (mcpara.algo == "mpolis") {
-      yes = Metropolis(de, activity.activity[idx], mcpara);
-    } else if (mcpara.algo == "glauber") {
-      yes = Glauber(de, activity.activity[idx], mcpara);
-    }
-    if (yes) {
-      move = move + 1;
-      mbrane.tot_energy[0] += de;
-    } else {
-      pos[idx].x = x_o;
-    }
-  }
-  return move;
-}
-
-
-
 
 int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0, 
-=======
-int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
->>>>>>> random-springs
                    MBRANE_p mbrane, MC_p mcpara, AREA_p area_p,  STICK_p st_p,
                    VOL_p vol_p, AFM_p afm,
                    ACTIVE_p activity, SHEAR_p shear) {
@@ -320,29 +220,18 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
   move = 0;
 
   for (i = 0; i < mcpara.one_mc_iter; i++) {
-<<<<<<< HEAD
-    int idx = rand_int(rng);
-    cm_idx = mesh.nghst * idx;
-    num_nbr = mesh.numnbr[idx];
-
-    Eini = energy_mc_3d(pos, pos_t0, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
-                        afm, shear);
-    if(vol_p.do_volume) vol_i = volume_ipart(pos,
-            (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-=======
      int idx =  RandomGenerator::intUniform(nframe, mbrane.N - 1);
       /* int idx = rand_int(rng); */
       cm_idx = mesh.nghst * idx;
       num_nbr = mesh.numnbr[idx];
-      Eini = energy_mc_3d(pos, mesh, lij_t0, KK, idx, &area_i, mbrane, area_p, st_p, vol_p,
-              afm, spring);
+      Eini = energy_mc_3d(pos, pos_t0, mesh, lij_t0,  idx, &area_i, mbrane, area_p, st_p, vol_p,
+              afm);
       if(vol_p.do_volume) vol_i = volume_ipart(pos,
               (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
 
       x_o = pos[idx].x;
       y_o = pos[idx].y;
       z_o = pos[idx].z;
->>>>>>> random-springs
 
       dxinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1,1));
       dyinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1,1));
@@ -364,13 +253,8 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
       pos[idx].y = y_n;
       pos[idx].z = z_n;
 
-<<<<<<< HEAD
-    Efin = energy_mc_3d(pos, pos_t0, mesh, lij_t0, idx, mbrane, area_p, st_p, vol_p,
-                        afm, shear);
-=======
-      Efin = energy_mc_3d(pos, mesh, lij_t0, KK, idx, &area_f, mbrane, area_p, st_p, vol_p,
-              afm, spring);
->>>>>>> random-springs
+      Efin = energy_mc_3d(pos, pos_t0, mesh, lij_t0,  idx, &area_f, mbrane, area_p, st_p, vol_p,
+              afm);
 
       de = (Efin - Eini);
       if(!area_p.is_tether){
@@ -378,38 +262,6 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
          de_area = (2*d_ar/(ini_ar*ini_ar))*(mbrane.area[0]  - ini_ar)
                   + (d_ar/ini_ar)*(d_ar/ini_ar);
 
-<<<<<<< HEAD
-    if(vol_p.do_volume){
-        vol_f = volume_ipart(pos,
-                (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-        dvol=0.5*(vol_f - vol_i);
-
-        if(!vol_p.is_pressurized){
-            de_vol = vol_energy_change(mbrane, vol_p, dvol);
-            de = (Efin - Eini)  + de_vol;
-        }
-        if(vol_p.is_pressurized){
-            de_pressure = PV_change(vol_p.pressure, dvol);
-            de = (Efin - Eini)  + de_pressure;
-        }
-    }
-
-    if (mcpara.algo == "mpolis") {
-      yes = Metropolis(de, activity.activity[idx], mcpara);
-    } else if (mcpara.algo == "glauber") {
-      yes = Glauber(de, activity.activity[idx], mcpara);
-    }
-
-    if (yes) {
-      move = move + 1;
-      mbrane.tot_energy[0] += de;
-      if(vol_p.do_volume) mbrane.volume[0] += dvol; 
-    } else {
-      pos[idx].x = x_o;
-      pos[idx].y = y_o;
-      pos[idx].z = z_o;
-    }
-=======
             de +=  area_p.Ka*de_area;
       }
       if(vol_p.do_volume){
@@ -445,7 +297,6 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, double *KK,
           pos[idx].y = y_o;
           pos[idx].z = z_o;
       }
->>>>>>> random-springs
   }
   return move;
 }
@@ -546,20 +397,16 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
   int N_nbr_add2, N_nbr_add1;
   double det1, det2;
   Vec3d bef_ij, aft_ij;
-<<<<<<< HEAD
-  double KAPPA;
-=======
 
   double kappa;
->>>>>>> random-springs
   bool yes, logic;
   bool do_move_pt;
 
   nframe = get_nstart(mbrane.N, mbrane.bdry_type);
 
-/*   std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1); */
-/*   std::uniform_int_distribution<uint32_t> rand_nbr(0, mesh.nghst - 1); */
-/*   std::uniform_real_distribution<> rand_real(-1, 1); */
+  /*   std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1); */
+  /*   std::uniform_int_distribution<uint32_t> rand_nbr(0, mesh.nghst - 1); */
+  /*   std::uniform_real_distribution<> rand_real(-1, 1); */
 
   move = 0;
 
@@ -588,10 +435,10 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
     }
 
     if(fl_para.is_semifluid){
-        do_move_pt = fl_para.solid_idx[idx_del1] + fl_para.solid_idx[idx_del2] + 
-                     fl_para.solid_idx[idx_add1] + fl_para.solid_idx[idx_add2] == 0;
+      do_move_pt = fl_para.solid_idx[idx_del1] + fl_para.solid_idx[idx_del2] + 
+        fl_para.solid_idx[idx_add1] + fl_para.solid_idx[idx_add2] == 0;
     }else{
-        do_move_pt = true;
+      do_move_pt = true;
     }
     /* det1 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del1], mbrane.len); */
     /* det2 = determinant(pos[idx_add1], pos[idx_add2], pos[idx_del2], mbrane.len); */
@@ -604,7 +451,6 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
         aft_ij = pos[idx_add2] - pos[idx_add1];
         double dl = norm(aft_ij);
 
-<<<<<<< HEAD
         N_nbr_del1 = mesh.numnbr[idx_del1];
         N_nbr_del2 = mesh.numnbr[idx_del2];
         N_nbr_add1 = mesh.numnbr[idx_add1];
@@ -615,22 +461,10 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
         flip_condt1 = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len);
         flip_condt2 =  N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
         flip_condt3 =  N_nbr_add1 < 9 && N_nbr_add2 < 9;
-=======
-      N_nbr_del1 = mesh.numnbr[idx_del1];
-      N_nbr_del2 = mesh.numnbr[idx_del2];
-
-      bool flip_condt1, flip_condt2, flip_condt3;
-      bool accept_flip;
-
-      flip_condt1 = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len);
-      flip_condt2 =  N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
-      flip_condt3 =  N_nbr_add1 < 9 && N_nbr_add2 < 9;
-
-      accept_flip = flip_condt1 && flip_condt2 && flip_condt3;
->>>>>>> random-springs
 
         accept_flip = flip_condt1 && flip_condt2 && flip_condt3;
 
+      /* cout<< N_nbr_add2 << "  " << flip_condt2<< "  " << N_nbr_add1 << endl; */
         if (accept_flip) {
             move = move + 1;
             /* print_sanity(pos, mesh.node_nbr_list+cm_idx_del1,
@@ -673,8 +507,8 @@ int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLU
             mesh.numnbr[idx_add2] = N_nbr_add2;
 
             /* exit(0); */
-        }
+      }
     }
-    }
+  }
   return move;
 }

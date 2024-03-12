@@ -186,8 +186,9 @@ subroutine Spring_listread(do_spring, constant, nPole_eq_z, sPole_eq_z, &
     namelist /springpara/ do_spring, constant, nPole_eq_z, sPole_eq_z 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
-    read(unit=100,nml=shearpara)
+    read(unit=100,nml=springpara)
     close(unit=100)
 
      end subroutine
+
 end module

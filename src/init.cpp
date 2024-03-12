@@ -8,7 +8,7 @@ extern "C"  void Membrane_listread(int *, double *,  double *,
 
 extern "C"  void Area_listread(bool *, double *, double *, char *);
 
-extern "C"  void Stick_listread(bool *, double *, double *, double *, 
+extern "C"  void Stick_listread(bool *, bool *, double *, double *, double *, 
             double *,  char *);
 
 extern "C"  void  MC_listread(char *, double *, double *, bool *,
@@ -18,10 +18,7 @@ extern "C"  void  Activity_listread(char *, double *, double *, char *);
 
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
-
-extern "C"  void  Spring_listread(bool *, double *, double *, double *, char *);
-
-extern "C"  void  Fluid_listread(bool *, int * , int *, double *, char *);
+extern "C"  void  Fluid_listread(bool *, bool *, int * , int *, int*, double *, char *);
 extern "C"  void   Volume_listread(bool *, bool *, double *, double*, char *); 
 
 /* void init_rng2(uint32_t seed_val) { */
@@ -153,7 +150,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
 
 
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
-         MBRANE_p *para, SHEAR_p *shear, bool is_fluid){
+         MBRANE_p *para, bool is_fluid){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
    /// @param lij_t0 initial distance between points of membrane
@@ -220,11 +217,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
             &mc_para->tot_mc_iter, &mc_para->dump_skip, tmp_fname);
     mc_para->algo=temp_algo;
 
-    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
-    Spring_listread(&spring_para->do_spring, &spring_para->constant,
-            &spring_para->nPole_eq_z, &spring_para->sPole_eq_z, tmp_fname);
-
-    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
+     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Afm_listread(&afm_para->do_afm, &afm_para->tip_rad, 
             &afm_para->tip_pos_z, &afm_para->sigma, &afm_para->epsilon,
              tmp_fname);
@@ -319,37 +312,7 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
             << " sigma " << stick_para.sigma << endl
             << " epsilon " << stick_para.epsilon << endl
             << " theta " << stick_para.theta << endl;
-
-    out_<< "# =========== Spring Parameters ==========" << endl
-            << " do spring " << spring_para.do_spring << endl
-            << " constant " << spring_para.constant << endl
-            << " nPole_eq_z " << spring_para.nPole_eq_z << endl
-            << " sPole_eq_z " << spring_para.sPole_eq_z << endl;
-
     out_.close();
-}
-
-void init_KK_0(double *KK, AREA_p area_p, MESH_p mesh, int N){
-    int i, k;
-    int num_nbr, cm_idx;
-    double kk_t = area_p.YY;
-    int mpi_err, mpi_rank;
-    double rndg;
-    /* std::cout << "Gaussian Random Number: " << gaussianNumber << std::endl; */
-
-
-    mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    /* std::uniform_real_distribution<> rand_real(-kk_t/4.0, kk_t/4); */
-    for(i = 0; i < N; i++){
-        num_nbr = mesh.numnbr[i];
-        cm_idx = mesh.nghst * i;
-        for(k = cm_idx; k < cm_idx + num_nbr; k++) {
-            rndg = RandomGenerator::generateGaussian(0.0,1.0);
-            KK[k] = kk_t + sqrt(kk_t)*rndg*0.5; //rand_real(rng2);
-            /* printf("%d  %lf \n", mpi_rank, KK[k]); */
-        }
-    }
-    /* exit(0); */
 }
 
 
@@ -374,7 +337,6 @@ void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick,
     int *index_solid;
 
     index_solid =  (int *)calloc(tNs, sizeof(int));
-    printf("I am here \n");
     hdf5_io_read_int(index_solid,  outfolder+ "/solid_index.h5", "solid_idx");
 
 /*     if(fld_para.is_semifluid){ */ 
@@ -387,19 +349,19 @@ void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick,
         stick.is_attractive[i] = false;
     }
 
-    if(fld_para.is_semifluid){ 
-        for(i= 0; i<fld_para.num_solid_points; i++){
-            idx = index_solid[i];
-            stick.is_attractive[idx] = true;
-            cm_idx = mesh.nghst * idx;
-            num_nbr = mesh.numnbr[idx];
-            fld_para.solid_idx[idx] = 1;
-            for(j= cm_idx; j<cm_idx+num_nbr; j++){
-                idxn = mesh.node_nbr_list[j];
-                fld_para.solid_idx[idxn] = 1;
-            }
+    // if(fld_para.is_semifluid){ 
+    for(i= 0; i<fld_para.num_solid_points; i++){
+      idx = index_solid[i];
+      stick.is_attractive[idx] = true;
+      cm_idx = mesh.nghst * idx;
+      num_nbr = mesh.numnbr[idx];
+      fld_para.solid_idx[idx] = 1;
+      for(j= cm_idx; j<cm_idx+num_nbr; j++){
+        idxn = mesh.node_nbr_list[j];
+        fld_para.solid_idx[idxn] = 1;
+      }
 
-        }
+        // }
     }
 
 

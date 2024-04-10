@@ -1,0 +1,1 @@
+CC=mpic++ -O3 -w  -L/home/vipin/opt/hdf5/lib -I/home/vipin/opt/include/

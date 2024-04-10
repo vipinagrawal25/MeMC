@@ -1,4 +1,4 @@
-HOST=su
+HOST=norlx65
 include hosts/$(HOST)
 # CC = mpic++
 #

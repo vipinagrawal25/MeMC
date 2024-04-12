@@ -12,11 +12,11 @@ link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes #
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
 sources += src/init.cpp  src/hdf5_io.cpp
 sources += src/cubic_solve.cpp
-sources += src/misc.cpp
+sources += src/misc.cpp src/random_gen.cpp
 #
 object =  obj/forces_lj.o obj/init.o obj/forces_surf.o obj/Metropolis.o
 object += obj/hdf5_io.o 
-object += obj/cubic_solve.o obj/misc.o obj/vector.o
+object += obj/cubic_solve.o obj/misc.o obj/vector.o obj/random_gen.o
 #
 includes += includes/global.h includes/subroutine.h includes/Vector.h 
 bindir = ./bin

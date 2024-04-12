@@ -10,7 +10,6 @@ using namespace std;
 typedef struct{
   double x,y;
 }Vec2d;
-
 /*-----------------------------------------*/
 class Vec3d{
 public:
@@ -62,7 +61,6 @@ inline Vec3d Vec3d::operator-(Vec3d param){
   temp.z = z-param.z;
   return(temp);
 }
-
 inline Vec3d Vec3d::operator*(double param){
   Vec3d temp;
   temp.x=param*x;
@@ -74,7 +72,6 @@ inline void print(Vec3d a){
   cout<<a.x<<"\t"<<a.y<<"\t"<<a.z<<"\n";
 }
 /*---------------------------------------*/
-
 inline Vec3d Vec3d::operator/(double param){
   Vec3d temp;
   temp.x=x/param;
@@ -82,15 +79,11 @@ inline Vec3d Vec3d::operator/(double param){
   temp.z=z/param;
   return(temp);
 }
-
 double inner_product(Vec3d s1, Vec3d s2);
 double norm(Vec3d s1);
 double normsq(Vec3d s1);
-
 Vec3d Vec3d_add(Vec3d s1, Vec3d s2, double fac);
     /* Returns s1 + fac*s2*/
 Vec3d cross_product(Vec3d s1, Vec3d s2);
-
 Vec3d diff_pbc(Vec3d r1, Vec3d r2, double len);
-
 #endif /* !FILE_Position_SEEN */

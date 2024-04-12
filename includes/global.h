@@ -151,4 +151,10 @@ typedef struct{
     double nPole_eq_z;
     double sPole_eq_z;
 }SPRING_p;
+//
+typedef struct{
+    string which_spcurv;
+    double minC, maxC, theta;
+    double *spcurv;
+}SPCURV_p;
 #endif

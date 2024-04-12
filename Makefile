@@ -1,6 +1,6 @@
-# HOST=su
-# include hosts/$(HOST)
-CC = mpic++
+HOST=norlx65
+include hosts/$(HOST)
+# CC = mpic++
 #
 opt=-O3
 # opt=-pg

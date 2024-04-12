@@ -14,18 +14,13 @@ int monte_carlo_3d(Vec3d *pos, MESH_p mesh,
                 double *lij_t0, double *KK, MBRANE_p mbrane,
                 MC_p mcpara, AREA_p,  STICK_p ,  VOL_p , AFM_p afm, 
                 ACTIVE_p activity,  SPRING_p spring);
-
  /* double energy_mc_3d(Vec3d *pos, MESH_p mesh, */ 
          /* double *lij_t0, int idx, MBRANE_p , STICK_p , */
          /* VOL_p , AFM_p , SPRING_p ); */
-
 int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, 
         MC_p mcpara, char *metric);
-
 int monte_carlo_fluid(Vec3d *, MESH_p , MBRANE_p , MC_p, FLUID_p );
-
 void init_rng(uint32_t seed_val);
-
 //*************************************************//
 //forces_lj.c
 void make_nlist(Vec2d *Pos, Nbh_list *neib,

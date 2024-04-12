@@ -5,12 +5,12 @@
 #include <iomanip>
 #include <sstream>
 #include <unistd.h>
-
-/* void init_rng(uint32_t seed_val) { */
-
-/*   ///  @brief Generates random number */
-/*   rng.seed(seed_val); */
-/* } */
+std::mt19937 rng;
+/*#############################################*/
+void init_rng(uint32_t seed_val){
+/* ///  @brief Generates random number */
+  rng.seed(seed_val);
+}
 
 int del_nbr(int *nbrs, int numnbr, int idx) {
   // delet int idx between i1 and i2 in the nbrs list

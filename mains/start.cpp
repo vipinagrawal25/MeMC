@@ -2,7 +2,7 @@
 #include "subroutine.h"
 #include <random>
 #include <unistd.h>
-
+//
 int main(int argc, char **argv){
      pid_t pid = getpid();
      cout << "# ID for this process is: " << pid << endl;
@@ -31,7 +31,6 @@ int main(int argc, char **argv){
          mcpara.tot_mc_iter = atoi(argv[4]);
          fprintf(stderr, "Monte Carlo of %d particles on %s grid..\n",
                  para.N, metric);
-         
      }
      //
      syscmds="mkdir "+outfolder;
@@ -92,4 +91,3 @@ int main(int argc, char **argv){
     free(neib);
     return 0;
 }
-

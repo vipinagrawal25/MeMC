@@ -21,7 +21,6 @@ using namespace std;
 #define R_del 0.05
 #define char_len 64
 //not included the celid and particle id which i shall do in the cell linked list part
-
 ///  @brief Discriptions of the structure classes 
 typedef struct{
     /// @brief MCpara Structure
@@ -76,13 +75,12 @@ typedef struct{
     int bdry_type;
 }MBRANE_p;
 //
-//
 typedef struct{
     bool is_tether;
     double YY;
     double Ka;
 }AREA_p;
-
+//
 typedef struct{
     bool is_fluid;
     int min_allowed_nbr;
@@ -90,21 +88,20 @@ typedef struct{
     double fac_len_vertices;
     // fac_len_vertices time the average length
 }FLUID_p;
-
+//
 typedef struct{
     bool do_volume;
     bool is_pressurized;
     double coef_vol_expansion;   //coefficient of volume expansion
     double pressure;
 }VOL_p;
-
+//
 typedef struct{
     bool do_stick;
     double pos_bot_wall;  // position of the bottom attractive wall
     double sigma, epsilon, theta; // sigma and epsilon for the bottom attractive wall
     bool *is_attractive;
 }STICK_p;
-
 //
 typedef struct{
     /// @brief Mesh Structure
@@ -116,7 +113,6 @@ typedef struct{
     int nPole, sPole;
 }MESH_p;
 //
-
 typedef struct{
     /// @brief Afm structure
     /// @param tip_pos_z;  position of tip in z
@@ -130,7 +126,6 @@ typedef struct{
     int icompute;
 }AFM_p;
 //
-
 typedef struct{
     /// @brief LJ parameters for initial montecarlo in start.cpp
     /// @param N; number of particles 
@@ -144,7 +139,6 @@ typedef struct{
     double r_cut;
     int bdry_condt;
 }LJ_p;
-
 //
 typedef struct{
     int cnt;
@@ -157,5 +151,4 @@ typedef struct{
     double nPole_eq_z;
     double sPole_eq_z;
 }SPRING_p;
-
 #endif

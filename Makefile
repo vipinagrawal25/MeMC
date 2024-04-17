@@ -1,4 +1,4 @@
-HOST=quetzal
+HOST=norlx65
 include hosts/$(HOST)
 # CC = mpic++
 #

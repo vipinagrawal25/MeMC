@@ -1,5 +1,5 @@
-#include <hdf5/serial/hdf5.h>
-/* #include <hdf5.h> */
+// #include <hdf5/serial/hdf5.h>
+#include <hdf5.h>
 #include "global.h"
 #include "misc.h"
 #include <unistd.h>
@@ -8,21 +8,18 @@
  *  
  */
 
- 
 void hdf5_io_write_pos(double *Pos, int N, string input_file){
-
-	 ///  @brief hdf5 io for  the position 
-	 ///  @param Pos array containing co-ordinates of all the particles
-	 ///  @param N number of points 
-	 ///  @param input_file File name to dump all the co-ordinate
-	 /// 
-
+	///  @brief hdf5 io for  the position 
+	///  @param Pos array containing co-ordinates of all the particles
+	///  @param N number of points 
+	///  @param input_file File name to dump all the co-ordinate
+	///
 
     hid_t   file_id, dset1, space_id;  /* identifiers */
     herr_t  status;
-    hsize_t          dims; 
+    hsize_t dims;
 
-  /* Open an existing file. */
+    /* Open an existing file. */
     dims = N;
     file_id = H5Fcreate (input_file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

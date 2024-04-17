@@ -1,4 +1,4 @@
-HOST=norlx65
+HOST=quet_vipin
 include hosts/$(HOST)
 # CC = mpic++
 #
@@ -22,18 +22,21 @@ includes += includes/global.h includes/subroutine.h includes/Vector.h
 bindir = ./bin
 #
 #
-all : start memc 
+all : start memc
 	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
 	mv exe* $(bindir)/
 
-obj/readnml.o: src/read_namelist.f90
-	gfortran -c src/read_namelist.f90 -o obj/readnml.o
+objdir:
+	@mkdir -p obj
 
-start: $(object) obj/start.o obj/readnml.o
+start: objdir $(object) obj/start.o obj/readnml.o
 	$(CC) $(object) obj/start.o obj/readnml.o $(link) -lgfortran -o exe_start
 
-memc: $(object) obj/memc.o obj/readnml.o
+memc: objdir $(object) obj/memc.o obj/readnml.o
 	$(CC) $(object) obj/readnml.o obj/memc.o  $(link) -lgfortran -o exe_memc
+
+obj/readnml.o: src/read_namelist.f90
+	gfortran -c src/read_namelist.f90 -o obj/readnml.o
 #
 
 obj/memc.o: mains/memc.cpp $(includes)
@@ -45,7 +48,6 @@ obj/start.o: mains/start.cpp $(includes)
 
 object : $(object) obj/readnml.o
 obj/%.o : src/%.cpp $(includes) obj/readnml.o
-	@mkdir -p $(@D)
 	$(info Compiling $<)
 	$(CC) -Iobj -c $< obj/readnml.o -o $@ $(link)
 #

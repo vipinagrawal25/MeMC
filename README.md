@@ -17,7 +17,7 @@ MeMC requires following libraries:
 
 1) A mpic++ compiler. We have tested the code against gnu [g++](https://gcc.gnu.org/) versions 5.4.0 and above on x86_64 CPU.
 
-2) [Hdf5](https://www.hdfgroup.org/solutions/hdf5) libraries for reading and writing data. Ready to use binaries are available [here][https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.3/bin/unix/].
+2) [Hdf5](https://www.hdfgroup.org/solutions/hdf5) libraries for reading and writing data. Ready-to-use binaries are available [here](https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.3/bin/unix/).
 
 3) [Python](https://www.python.org/) version with [scipy](https://www.scipy.org), [numpy](https://www.numpy.org), [h5py](https://www.h5py.org) and [numpy-quartenion](https://pypi.org/project/numpy-quaternion/) installed. We have tested the code against python version 3.8 and above.
 

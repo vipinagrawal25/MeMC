@@ -1,4 +1,4 @@
-# MeMC
+ # MeMC
 The MeMC is an open-source software package for monte-carlo simulation of elastic shells. The package can be useful to study the mechanics of biological nano-vesicles e.g. Exosomes. 
 
 Micro and nano vesicles play a crucial role in biology and medicine. The physical properties of these vesicles play an important role in their biological functions. Hence it is important to measure their elastic constants. One of the ways, to measure elastic constants of cells, is to poke them with Atomic Force Microscopy (AFM) tip to compute force-distance curve. Then the cell is modeled as a linear elastic material and by fitting this model to the experimental force-distance curve, the parameters of elastic model i.e. cell is estimated. However nano-vesicles differ from cells in two ways:
@@ -17,7 +17,7 @@ MeMC requires following libraries:
 
 1) A mpic++ compiler. We have tested the code against gnu [g++](https://gcc.gnu.org/) versions 5.4.0 and above on x86_64 CPU.
 
-2) [Hdf5](https://www.hdfgroup.org/solutions/hdf5) libraries for reading and writing data.
+2) [Hdf5](https://www.hdfgroup.org/solutions/hdf5) libraries for reading and writing data. Ready to use binaries are available [here][https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.3/bin/unix/].
 
 3) [Python](https://www.python.org/) version with [scipy](https://www.scipy.org), [numpy](https://www.numpy.org), [h5py](https://www.h5py.org) and [numpy-quartenion](https://pypi.org/project/numpy-quaternion/) installed. We have tested the code against python version 3.8 and above.
 

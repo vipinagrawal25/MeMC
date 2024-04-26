@@ -37,11 +37,12 @@ int main(int argc, char **argv){
      syscmds="mkdir "+outfolder;
     // sprintf(syscmds, "%s %s","mkdir ",outfolder);
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder");
-    init_rng(23177);
+    RandomGenerator::init(42);
+    /* init_rng(23177); */
     /* define all the paras */ 
      para.len = 2*pi;
      para.epsilon = 1;
-     para.bdry_condt = 1;
+     para.bdry_condt = 3;
      // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          para.sigma = para.len/sqrt((double)para.N);

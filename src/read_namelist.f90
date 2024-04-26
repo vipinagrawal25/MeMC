@@ -37,13 +37,13 @@ subroutine convert_fstr_cstr(f_str, c_str)
 end subroutine
 
 
-subroutine Area_listread(is_tethered, YY, sigma, parafile) bind(c, name='Area_listread')
-    real(kind=c_double) :: YY, sigma
+subroutine Area_listread(is_tethered, YY, Ka, parafile) bind(c, name='Area_listread')
+    real(kind=c_double) :: YY, Ka
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     logical(c_bool) :: is_tethered
     character(len=char_len) :: f_fname
 
-    namelist /Areapara/ is_tethered, YY, sigma
+    namelist /Areapara/ is_tethered, YY, Ka
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=Areapara)
@@ -174,20 +174,21 @@ subroutine Fluid_listread(is_fluid, is_semifluid,  min_allowed_nbr, &
     close(unit=100)
 end subroutine
 
-subroutine Shear_listread(do_shear, do_scale_shear, shear_every, slope, scale, constant, & 
-        parafile) bind(c, name='Shear_listread')
+subroutine Spring_listread(do_spring, constant, nPole_eq_z, sPole_eq_z, &
+         parafile) bind(c, name='Spring_listread')
 
-    real(c_double) :: slope, constant, scale
-    logical(kind=c_bool) :: do_shear, do_scale_shear
-    integer(kind=c_int) :: shear_every
-    character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
+       real(c_double) :: nPole_eq_z, sPole_eq_z, constant
+       logical(kind=c_bool) :: do_spring
+       character(kind=c_char, len=1), dimension(char_len) :: which_act
+       character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
     character(len=char_len) :: f_fname
 
-    namelist /shearpara/ do_shear, do_scale_shear, shear_every, slope, scale, constant
+    namelist /springpara/ do_spring, constant, nPole_eq_z, sPole_eq_z 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
-    read(unit=100,nml=shearpara)
+    read(unit=100,nml=springpara)
     close(unit=100)
 
      end subroutine
+
 end module

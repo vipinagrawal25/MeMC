@@ -1,29 +1,32 @@
 #include "Vector.h"
 #include "global.h"
 #include "subroutine.h"
-std::mt19937 rng2;
+/* std::mt19937 rng2; */
 
-extern "C" void Membrane_listread(int *, double *,  double *, 
-        double *, int *, char *);
+extern "C"  void Membrane_listread(int *, double *,  double *, 
+            double *, int *, char *);
 
-extern "C" void Area_listread(bool *, double *, double *, char *);
+extern "C"  void Area_listread(bool *, double *, double *, char *);
 
+extern "C"  void Stick_listread(bool *, bool *, double *, double *, double *, 
+            double *,  char *);
 
-extern "C" void Stick_listread(bool *, bool* , double *, double *, double *, 
-        double *,  char *);
-
-extern "C" void  MC_listread(char *, double *, double *, bool *,
-           int *, int *, char *);
+extern "C"  void  MC_listread(char *, double *, double *, bool *,
+            int *, int *, char *);
 
 extern "C"  void  Activity_listread(char *, double *, double *, char *);
 
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
+extern "C"  void  Fluid_listread(bool *, bool *, int * , int *, int*, double *, char *);
+extern "C"  void   Volume_listread(bool *, bool *, double *, double*, char *); 
 
-extern "C"  void  Shear_listread(bool *, bool *, int *, double *, double *, double *, char *);
+/* void init_rng2(uint32_t seed_val) { */
 
-extern "C"  void  Fluid_listread(bool *, bool *, int * , int *, int *, double *, char *);
-extern "C" void   Volume_listread(bool *, bool *, double *, double*, char *); 
+  ///  @brief Generates random number
+  /* rng2.seed(seed_val); */
+/* } */
+
 
 
 void init_system_random_pos(Vec2d *Pos,  double len, 
@@ -46,8 +49,9 @@ void init_system_random_pos(Vec2d *Pos,  double len,
     n_ghost = (int) sqrt(N);
     dl = (len/n_ghost);
 
-    std::uniform_real_distribution<> rand_real(dl, len-dl);
+    /* std::uniform_real_distribution<> rand_real(dl, len-dl); */
 
+    
     is_sph = false;
     is_cart = false;
     if(strcmp(metric, "sph") == 0){
@@ -64,7 +68,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
         exit(0);
     }
 
-
+     //::generateUniform  rngu; //(0.0, 1.0)
      
     if(is_cart){
         switch (bdry_condt) {
@@ -82,8 +86,8 @@ void init_system_random_pos(Vec2d *Pos,  double len,
                 Pos[i].y = len; 
             }
             for(int i=n_ghost; i<N; i++){
-                Pos[i].x = rand_real(rng2);
-                Pos[i].y = rand_real(rng2);
+                Pos[i].x = RandomGenerator::generateUniform(dl, len-dl);//rand_real(rng2);
+                Pos[i].y = RandomGenerator::generateUniform(dl, len-dl); //rand_real(rng2);
             }
             break;
       case 1:
@@ -108,17 +112,17 @@ void init_system_random_pos(Vec2d *Pos,  double len,
                 Pos[i].y = (i +0.5 - 3*n_ghost/4)*dl; 
             }
             for(int i=n_ghost; i<N; i++){
-                Pos[i].x = rand_real(rng2);
-                Pos[i].y = rand_real(rng2);
+                Pos[i].x = RandomGenerator::generateUniform(dl, len-dl);//rand_real(rng2);
+                Pos[i].y = RandomGenerator::generateUniform(dl, len-dl); //rand_real(rng2);
             }
 
             break;
-       
-            default:
-                for(int i=0; i<N; i++){
-                    Pos[i].x = rand_real(rng2);
-                    Pos[i].y = rand_real(rng2);
-                }
+
+      default:
+            for(int i=0; i<N; i++){
+                Pos[i].x = RandomGenerator::generateUniform(dl, len-dl);//rand_real(rng2);
+                Pos[i].y = RandomGenerator::generateUniform(dl, len-dl); //rand_real(rng2);
+            }
         }
     }
     if(is_sph){
@@ -146,7 +150,7 @@ void init_system_random_pos(Vec2d *Pos,  double len,
 
 
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh, double *lij_t0,
-         MBRANE_p *para, SHEAR_p *shear, bool is_fluid){
+         MBRANE_p *para, bool is_fluid){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
    /// @param lij_t0 initial distance between points of membrane
@@ -213,11 +217,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
             &mc_para->tot_mc_iter, &mc_para->dump_skip, tmp_fname);
     mc_para->algo=temp_algo;
 
-    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
-    Shear_listread(&shear_para->do_shear, &shear_para->do_scale_shear, &shear_para->shear_every, 
-          &shear_para->slope,  &shear_para->scale, &shear_para->constant, tmp_fname);
-
-    /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
+     /* sprintf(tmp_fname, "%s", para_file.c_str() ); */
     Afm_listread(&afm_para->do_afm, &afm_para->tip_rad, 
             &afm_para->tip_pos_z, &afm_para->sigma, &afm_para->epsilon,
              tmp_fname);
@@ -237,7 +237,7 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
             &vol_para->coef_vol_expansion, &vol_para->pressure, tmp_fname);
 
     Area_listread(&area_para->is_tether, &area_para->YY,
-            &area_para->sigma, tmp_fname);
+            &area_para->Ka, tmp_fname);
 
 
   // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
@@ -280,7 +280,7 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
     out_<< "# =========== Area Parameters ==========" << endl
             << " is tether = " << area_para.is_tether << endl
             << " YY " << area_para.YY << endl
-            << " sigma " << area_para.sigma << endl;
+            << " sigma " << area_para.Ka << endl;
 
 
     out_<< "# =========== Activity Parameters ==========" << endl
@@ -312,82 +312,14 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
             << " sigma " << stick_para.sigma << endl
             << " epsilon " << stick_para.epsilon << endl
             << " theta " << stick_para.theta << endl;
-
-    out_<< "# =========== Shear Parameters ==========" << endl
-            << " do shear " << shear_para.do_shear << endl
-            << " shear_every " << shear_para.shear_every << endl
-            << " constant " << shear_para.constant << endl
-            << " slope " << shear_para.slope << endl;
-
     out_.close();
 }
 
-void init_stick_bottom(Vec3d *pos, MESH_p mesh, STICK_p stick, 
-        FLUID_p fld_para, MBRANE_p mbrane){
-
-    /// @brief identify all the points which substends theta_attr with the centre 
-    ///  @param Pos array containing co-ordinates of all the particles
-    ///  @param is_attractive true for all the particles which sees bottom wall 
-    ///  @param theta_attr \Theta_0 see paper/paper.pdf 
-    /// N number of points making the membrane
-    ///
-    // Okay need to think carefully to make this subroutine more general.
-
-    int i, idx, cm_idx, num_nbr; 
-    int j, idxn;
-    double theta;
-    int nframe;
-    nframe = get_nstart(mbrane.N, mbrane.bdry_type);
-
-    std::uniform_int_distribution<uint32_t> rand_int(nframe, mbrane.N - 1);
-
-    for(i= 0; i<mbrane.N; i++){
-        fld_para.solid_idx[i] = 0;
-        stick.is_attractive[i] = false;
-    }
-
-    if(fld_para.is_semifluid){ 
-        for(i= 0; i<fld_para.num_solid_points; i++){
-            int idx = rand_int(rng2);
-            stick.is_attractive[idx] = true;
-            cm_idx = mesh.nghst * idx;
-            num_nbr = mesh.numnbr[idx];
-            fld_para.solid_idx[idx] = 1;
-            for(j= cm_idx; j<cm_idx+num_nbr; j++){
-                idxn = mesh.node_nbr_list[j];
-                fld_para.solid_idx[idxn] = 1;
-            }
-
-        }
-    }
-
-    if(stick.theta > 1e-12){
-        for(i= 0; i<mbrane.N; i++){
-            theta = pi - acos(pos[i].z);
-            if(stick.do_stick){ 
-                stick.is_attractive[i] = theta < stick.theta;
-            }else{
-                stick.is_attractive[i] = false;
-            }
-        }
-    }
-}
-
-void shear_positions(Vec3d *Pos, int N, SHEAR_p shear ){
-    int i, j;
-    double kk = shear.constant;
-    double shift_y = shear.slope;
-    double ener_spr, xmin;
-    for(i=0; i<N; i++){
-        Pos[i].x = Pos[i].x + shift_y*(Pos[i].y - 3.14159); // TODO length hard coded remove it
-    }
-}
 
 void init_activity(ACTIVE_p activity, int N){
     int i;
-    std::uniform_real_distribution<> rand_real(activity.minA, activity.maxA);
     if(activity.act == "random"){
-        for(i=0;i<N;i++) activity.activity[i] = rand_real(rng2);
+        for(i=0;i<N;i++) activity.activity[i] = RandomGenerator::generateUniform(activity.minA,activity.maxA); 
     }
     if(activity.act == "constant"){
         for(i=0;i<N;i++) activity.activity[i] = activity.maxA;
@@ -405,7 +337,6 @@ void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick,
     int *index_solid;
 
     index_solid =  (int *)calloc(tNs, sizeof(int));
-    printf("I am here \n");
     hdf5_io_read_int(index_solid,  outfolder+ "/solid_index.h5", "solid_idx");
 
 /*     if(fld_para.is_semifluid){ */ 
@@ -418,19 +349,19 @@ void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick,
         stick.is_attractive[i] = false;
     }
 
-    if(fld_para.is_semifluid){ 
-        for(i= 0; i<fld_para.num_solid_points; i++){
-            idx = index_solid[i];
-            stick.is_attractive[idx] = true;
-            cm_idx = mesh.nghst * idx;
-            num_nbr = mesh.numnbr[idx];
-            fld_para.solid_idx[idx] = 1;
-            for(j= cm_idx; j<cm_idx+num_nbr; j++){
-                idxn = mesh.node_nbr_list[j];
-                fld_para.solid_idx[idxn] = 1;
-            }
+    // if(fld_para.is_semifluid){ 
+    for(i= 0; i<fld_para.num_solid_points; i++){
+      idx = index_solid[i];
+      stick.is_attractive[idx] = true;
+      cm_idx = mesh.nghst * idx;
+      num_nbr = mesh.numnbr[idx];
+      fld_para.solid_idx[idx] = 1;
+      for(j= cm_idx; j<cm_idx+num_nbr; j++){
+        idxn = mesh.node_nbr_list[j];
+        fld_para.solid_idx[idxn] = 1;
+      }
 
-        }
+        // }
     }
 
 

@@ -3,75 +3,43 @@
 #include "subroutine.h"
 #include <cstring>
 //
-
-int frame_shear(Vec3d *pos, Vec3d *pos_t0, double shear_slope,
-        MBRANE_p mbrane, SHEAR_p shear) {
-
-    int nframe = 0;
-    int i;
-    nframe = get_nstart(mbrane.N, mbrane.bdry_type);
-
-  for (i = 0; i < nframe; i++) {
-    pos[i].x =  pos_t0[i].x + shear_slope*(pos_t0[i].y - 3.14159); 
-  }
-
-return 0;
-
-}
-
-int vol_expansion(Vec3d *pos, int N, SHEAR_p shear) {
-
-    int nframe = 0;
-    int i;
-    double delta;
-
-    delta = 2*pi/32;
-
-  for (i = 0; i < N; i++) {
-    pos[i].x =  pos[i].x + shear.slope*(pos[i].x - 3.14159); 
-    pos[i].y =  pos[i].y + shear.slope*(pos[i].y - 3.14159); 
-  }
-return 0;
-}
-
-//
-
-double start_simulation(Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0, 
+int * start_simulation(Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0, 
                     MBRANE_p mbrane_para, MC_p mc_para, STICK_p stick_para,
                     VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
-                    SHEAR_p shear_para, FLUID_p fld_para, string outfolder){
+                     FLUID_p fld_para, string outfolder){
     double Pole_zcoord;
+    int* poleidx = new int[2];
     if(!mc_para.is_restart){
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
         memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
-        if(shear_para.do_shear){
-            /* vol_expansion(Pos, mbrane_para.N, shear_para); */
-            shear_positions(Pos, mbrane_para.N, shear_para);
-        }
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos_t0, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
-        init_stick_bottom(Pos, mesh , stick_para , fld_para , mbrane_para );
+        init_eval_lij_t0(Pos_t0, mesh, lij_t0,  &mbrane_para,  fld_para.is_fluid);
+        init_stick_bottom_new(Pos, mesh, stick_para, fld_para, mbrane_para, outfolder );
         hdf5_io_dump_int(fld_para.solid_idx, mbrane_para.N, outfolder+ "/solid_pos_id.h5", "solid_id");
         hdf5_io_dump_bool(stick_para.is_attractive, mbrane_para.N, outfolder+ "/stick_pos_id.h5", "stick_id");
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
+        poleidx[0] = mesh.nPole;
+        poleidx[1] = mesh.sPole;
+        /* exit(0); */
     }else{
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
         memcpy((double*) Pos_t0, (double *) Pos, sizeof(double)* 3*mbrane_para.N);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
-        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, &shear_para, fld_para.is_fluid);
-        hdf5_io_read_int(fld_para.solid_idx,  outfolder+ "/solid_pos_id.h5", "solid_id");
-        hdf5_io_read_bool(stick_para.is_attractive, outfolder+ "/stick_pos_id.h5", "stick_id");
+        init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, fld_para.is_fluid);
+        // if(stick_para.do_stick)
+            // identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
+        max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
+        min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
+        // if(stick_para.do_stick)
+            // identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
         hdf5_io_read_double( (double *)Pos,  outfolder+"/restart.h5", "pos");
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/restart.h5");
-        /* for (int k =0; k<12*mbrane_para.N; k++) */
-            /* printf("%lf %g %d \n", Pos[512].z, lij_t0[20], mesh.node_nbr_list[k]); */
-        /* exit(0); */
     }
-    return Pole_zcoord;
+    return poleidx;
 }
 
 void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
@@ -86,8 +54,7 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
     if(vol_para.do_volume && !vol_para.is_pressurized) {log_headers+="vol_e ";}
     if (vol_para.do_volume && vol_para.is_pressurized){log_headers+="pressure_e ";}
     if (afm_para.do_afm){log_headers+="afm_fx, afm_fy afm_fz ";}
-    /* log_headers+="volume nPole_z sPole_z hrms"; */
-    log_headers+="volume ";
+    log_headers+=" volume  area";
     fprintf(fid, "%s\n", log_headers.c_str());
     fflush(fid);
 }
@@ -95,20 +62,27 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
 double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0, 
         MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
         VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
-        SHEAR_p shear_para, FILE *fid ){
-    double vol_sph;
+         FILE *fid ){
+    double vol_sph, ar_sph, ini_ar;
     double Ener_t;
     Vec3d afm_force,spring_force[2];
 
     /*-----------------------------------------------*/
     /*****  initialize energy values *****/
+
+   Et[0] = 0e0;    Et[1] = 0e0;     Et[2] = 0e0; Et[3] = 0e0; 
+   Et[4] = 0e0;    Et[5] = 0e0;     Et[6] = 0e0; 
+
     Et[0] = bending_energy_total(Pos, mesh, mbrane_para);
+    ar_sph = area_total(Pos, mesh, mbrane_para);
+    /* *mbrane_para.area = ar_sph; */
     if(area_para.is_tether){
         Et[1] = stretch_energy_total(Pos, mesh, lij_t0, mbrane_para, area_para);
     }else{
-        Et[1] = area_para.sigma*area_total(Pos, mesh,  mbrane_para);
+        ini_ar = (4.)*pi*pow(mbrane_para.radius,2);
+        Et[1] = area_para.Ka*(ar_sph/ini_ar - 1e0)*(ar_sph/ini_ar - 1e0);
     }
-    fprintf(fid, " %g %g %g", mbrane_para.tot_energy[0], Et[0], Et[1]);
+    fprintf(fid, " %g %g %g", *mbrane_para.tot_energy, Et[0], Et[1]);
     if(stick_para.do_stick){
         Et[2] = lj_bottom_surf_total(Pos, Pos_t0, mbrane_para, stick_para);
         fprintf(fid, " %g", Et[2]);
@@ -117,16 +91,13 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
         Et[3] = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para);
         fprintf(fid, " %g", Et[3]);
     }
-    if(shear_para.do_scale_shear){
-        Et[5] = scale_shear_total(Pos, mbrane_para , shear_para);
-        fprintf(fid, " %g  ", Et[5]);
-    }
+    
+    vol_sph = volume_total(Pos, mesh, mbrane_para);
+    /* *mbrane_para.volume = vol_sph; */
     if(vol_para.do_volume){
-        vol_sph = volume_total(Pos, mesh, mbrane_para);
         double  ini_vol = (4./3.)*pi*pow(mbrane_para.radius,3);
         if(!vol_para.is_pressurized){
             Et[4] = vol_para.coef_vol_expansion*(vol_sph/ini_vol - 1e0)*(vol_sph/ini_vol - 1e0);
-            mbrane_para.volume[0] = vol_sph;
             fprintf(fid, " %g", Et[4]);
         }
         if(vol_para.is_pressurized){
@@ -134,10 +105,9 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
             fprintf(fid, " %g", Et[6]);
         }
     }
-
     if (afm_para.do_afm){fprintf(fid, " %g %g %g", afm_force.x, afm_force.y, afm_force.z);}
-    {fprintf(fid, " %g \n", vol_sph );}
-    Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5] + Et[6];
+    {fprintf(fid, " %g  %g\n", vol_sph, ar_sph );}
+    Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5]+ Et[6];
     fflush(fid);
 
     return Ener_t;
@@ -145,8 +115,6 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
 
 int main(int argc, char *argv[]){
     pid_t pid = getpid();
-    cout << "# ID for this process is: " << pid << endl;
-    //
     int iter, num_moves, num_bond_change;
     double Et[7], Ener_t;
     double vol_sph, e_t, s_t;
@@ -172,16 +140,25 @@ int main(int argc, char *argv[]){
     //
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    seed_v = (uint32_t) (mpi_rank+1)*(time(0)/65534);
-    init_rng(seed_v);
+    /* seed_v = 12345; //(uint32_t) 7*3*11*(mpi_rank+1)*rand(); */
+    seed_v = (uint32_t) (mpi_rank + time(0));
+
+    /* init_rng(seed_v); */
+    /* init_rng2(seed_v); */
+    RandomGenerator::init(seed_v);
     //
-    outfolder = ZeroPadNumber(mpi_rank + atoi(argv[1]))+"/";
-    cout << "I am in folder "+ outfolder << endl;
+    //
+
+    cout << "# ID for this process is: " << pid << endl;
+    outfolder = ZeroPadNumber(mpi_rank+atoi(argv[1]))+"/";
+    cout << "# I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
 
     // ---------- open outfile_terminal ------------------- //
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
+    outfile_terminal << "The seed is  " << seed_v << endl; 
     /*************************************************/
+
     // read the input file
     init_read_parameters(&mbrane_para, &mc_para, &area_para, &fld_para, &vol_para,
             &stick_para, &afm_para,  &act_para, &shear_para, filename);
@@ -191,10 +168,11 @@ int main(int argc, char *argv[]){
 
    // check whether the string comparison works
    /* define all the paras */
-    mbrane_para.volume = (double *)calloc(1, sizeof(double));
+    mbrane_para.volume =  (double*)malloc(sizeof(double));
     *mbrane_para.volume = (4./3.)*pi*pow(mbrane_para.radius,3);
     act_para.activity = (double *)calloc(mbrane_para.N, sizeof(double));
-    mbrane_para.tot_energy = (double *)calloc(1, sizeof(double));
+    mbrane_para.tot_energy =  (double*)malloc(sizeof(double));
+    mbrane_para.area =  (double*)malloc(sizeof(double));
     *mbrane_para.tot_energy = 0e0;
     init_activity(act_para, mbrane_para.N);
     // allocate arrays
@@ -210,11 +188,20 @@ int main(int argc, char *argv[]){
     mask_ids = (bool *)calloc(mbrane_para.N, sizeof(bool));
 
     //
-    Pole_zcoord = start_simulation(Pos, Pos_t0, mesh, lij_t0, 
-            mbrane_para,  mc_para,  stick_para,
-            vol_para,  afm_para,  act_para, 
-            shear_para,  fld_para,  outfolder);
+    if(!mc_para.is_restart && afm_para.do_afm){
+        s_t = afm_para.sigma; 
+        afm_para.sigma = 0.00;
+        e_t = afm_para.epsilon;
+        afm_para.epsilon = 0.0;
+    }
+   int *poleidx;
 
+   poleidx = start_simulation(Pos, Pos_t0, mesh, lij_t0, 
+                     mbrane_para,  mc_para,  stick_para,
+                     vol_para,  afm_para,  act_para, 
+                     fld_para,  outfolder);
+   mesh.nPole = poleidx[0];
+   mesh.sPole = poleidx[1];
     //
     //
 
@@ -230,18 +217,20 @@ int main(int argc, char *argv[]){
          shear_para, fid );
 
 
-    /* fprintf(stderr, " The total area %g \n", area_total(Pos, mesh, mbrane_para)); */
-    /* exit(0); */
 
     fprintf(fid , "%d %g", 0, 0.0 );
     Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0,  mbrane_para, area_para,  stick_para,
-         vol_para,  afm_para,  act_para, shear_para,  fid );
-    mbrane_para.tot_energy[0] = Ener_t;
+         vol_para,  afm_para,  act_para,   fid );
+    *mbrane_para.tot_energy = Ener_t;
     filename = outfolder + "/para.out";
     write_parameters(mbrane_para, mc_para, area_para, fld_para, vol_para,
             stick_para, afm_para,  act_para, shear_para, filename);
 
-    /* printf("%lf \n", mbrane_para.tot_energy[0]); */
+    double ar_sph = area_total(Pos, mesh, mbrane_para);
+    *mbrane_para.area = ar_sph;
+    vol_sph = volume_total(Pos, mesh, mbrane_para);
+    *mbrane_para.volume = vol_sph;
+    //printf("%lf \n", mbrane_para.tot_energy[0]);
     num_moves = 0;
     start_time = MPI_Wtime();
     double shear_slope = 0.0;
@@ -256,7 +245,14 @@ int main(int argc, char *argv[]){
             syscmds="cp "+outfile+" "+outfolder+"/restart.h5";
             system(syscmds.c_str());
         }
-            num_moves = monte_carlo_3d(Pos, Pos_t0, mesh, lij_t0, 
+        if(iter == 10*mc_para.dump_skip && !mc_para.is_restart && afm_para.do_afm){
+            afm_para.sigma = s_t;
+            afm_para.epsilon = e_t;
+            e_t = lj_afm_total(Pos, &afm_force, mbrane_para, afm_para);
+            mbrane_para.tot_energy[0] += e_t;
+        }
+
+        num_moves = monte_carlo_3d(Pos, Pos_t0, mesh, lij_t0, 
                 mbrane_para, mc_para, area_para, stick_para, vol_para, 
                 afm_para, act_para,  shear_para);
 
@@ -272,12 +268,13 @@ int main(int argc, char *argv[]){
         }
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
-        Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0,  mbrane_para, area_para, stick_para,
-                vol_para,  afm_para,  act_para, shear_para,  fid );
+        Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0, mbrane_para, area_para, stick_para,
+                vol_para,  afm_para,  act_para,  fid );
 
         outfile_terminal << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
-            " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << vol_sph << endl;
+            " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << *mbrane_para.volume <<
+            "Area = "<< *mbrane_para.area << endl;
 
     }
 

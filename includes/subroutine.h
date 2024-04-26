@@ -15,16 +15,14 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,
                 MC_p mcpara, AREA_p,  STICK_p ,  VOL_p , AFM_p afm, 
                 ACTIVE_p activity,  SHEAR_p shear);
 
- double energy_mc_3d(Vec3d *pos, Vec3d *, MESH_p mesh, 
-         double *lij_t0, int idx, MBRANE_p , STICK_p ,
-         VOL_p , AFM_p , SHEAR_p );
-int monte_carlo_surf2d(Vec2d *Pos, 
-        Nbh_list *neib, LJ_p para, 
+ /* double energy_mc_3d(Vec3d *pos, MESH_p mesh, */ 
+         /* double *lij_t0, int idx, MBRANE_p , STICK_p , */
+         /* VOL_p , AFM_p , SPRING_p ); */
+
+int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, 
         MC_p mcpara, char *metric);
 
 int monte_carlo_fluid(Vec3d *, MESH_p , MBRANE_p , MC_p, FLUID_p );
-
-void init_rng(uint32_t seed_val);
 
 //*************************************************//
 //forces_lj.c
@@ -43,7 +41,7 @@ double vol_energy_change(MBRANE_p mbrane, VOL_p , double dvol);
 double bending_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para);
 Vec2d bending_energy_ipart(Vec3d *pos, int *node_nbr,  
         int num_nbr, int idx, MBRANE_p para);
-double bending_energy_ipart_neighbour(Vec3d *pos, 
+Vec2d bending_energy_ipart_neighbour(Vec3d *pos, 
         MESH_p mesh, int idx, MBRANE_p para);
 void mask_frame(bool *, MESH_p , MBRANE_p );
 Vec2d total_bend_stretch(Vec3d *, MESH_p , 
@@ -56,10 +54,10 @@ void identify_attractive_part(Vec3d *pos,
         bool *is_attractive, double theta_attr, int N);
 
 double stretch_energy_total(Vec3d *pos,
-         MESH_p mesh, double *lij_t0, MBRANE_p,  AREA_p );
+         MESH_p mesh, double *lij_t0,  MBRANE_p,  AREA_p );
 
 double stretch_energy_ipart(Vec3d *pos,
-         int *node_nbr, double *lij_t0, int num_nbr,
+         int *node_nbr, double *lij_t0,  int num_nbr,
                              int idx, AREA_p para);
 
 double stick_bottom_surface(Vec3d, Vec3d, STICK_p); 
@@ -86,16 +84,11 @@ int monte_carlo_shear(Vec3d *pos,  Vec3d *, MESH_p , double *,
 
 
 //init.c
-//
-void shear_positions(Vec3d *Pos, int N, SHEAR_p shear );
 void init_system_random_pos(Vec2d *Pos,  double len, int N, char *metric, int);
-double PV_change(double ,double );
-/* double spring_energy(Vec3d pos, int idx, MESH_p mesh, SHEAR_p shear); */
-/* double spring_tot_energy_force(Vec3d *Pos, Vec3d *spring_force, */ 
-                               /* MESH_p mesh, SHEAR_p shear); */
+
 //initialise.c
 void init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,
-         double *lij_t0, MBRANE_p *para, SHEAR_p *shear, bool );
+         double *lij_t0, MBRANE_p *para,  bool );
 void init_stick_bottom(Vec3d *, MESH_p , STICK_p , 
         FLUID_p , MBRANE_p );
 void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick, 

@@ -1,5 +1,5 @@
-#include <hdf5/serial/hdf5.h>
-/* #include <hdf5.h> */
+/* #include <hdf5/serial/hdf5.h> */
+#include <hdf5.h>
 #include "global.h"
 #include "misc.h"
 #include <unistd.h>
@@ -174,7 +174,6 @@ void hdf5_io_read_int(int *stick, string input_file, string dset_name){
     hid_t   file_id, dataset_id, space_id;  /* identifiers */
     herr_t  status;
     hsize_t          dims; 
-    printf("reading hdf5 int\n");
     /* Open an existing file. */
     file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT); 
 
@@ -183,7 +182,6 @@ void hdf5_io_read_int(int *stick, string input_file, string dset_name){
             H5S_ALL, H5S_ALL, H5P_DEFAULT, stick);
     status = H5Dclose(dataset_id);
     status = H5Fclose(file_id);
-    printf("read hdf5 int\n");
     if(status != 0){
         fprintf(stderr, "file close failed\n");
     }

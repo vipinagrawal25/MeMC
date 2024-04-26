@@ -149,7 +149,7 @@ inline double pos_coord(Vec3d pos, char dirn='z'){
   return 0e0;
 }
 /*-----------------------------------------------*/
-void max(int *amaxind, double *amaxval, Vec3d *pos, int ndim,char dirn){
+void max(int *amaxind, double *amaxval, Vec3d *pos, int ndim, char dirn){
   // function returns the value and index of the maximum entry.
   int maxind=0;
   double maxval=-1e+16;

@@ -31,6 +31,8 @@ int * start_simulation(Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0,
         init_eval_lij_t0(Pos, mesh, lij_t0,  &mbrane_para, fld_para.is_fluid);
         // if(stick_para.do_stick)
             // identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
+        hdf5_io_read_int(fld_para.solid_idx,  outfolder+ "/solid_pos_id.h5", "solid_id");
+        hdf5_io_read_bool(stick_para.is_attractive,  outfolder+ "/stick_pos_id.h5", "stick_id");
         max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
         min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
         // if(stick_para.do_stick)
@@ -115,7 +117,7 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
 
 int main(int argc, char *argv[]){
     pid_t pid = getpid();
-    int iter, num_moves, num_bond_change;
+    int iter, num_moves, num_bond_change, restartidx;
     double Et[7], Ener_t;
     double vol_sph, e_t, s_t;
     Vec3d *Pos; MBRANE_p mbrane_para;
@@ -151,9 +153,10 @@ int main(int argc, char *argv[]){
 
     cout << "# ID for this process is: " << pid << endl;
     outfolder = ZeroPadNumber(mpi_rank+atoi(argv[1]))+"/";
+    restartidx = atoi(argv[2]);
     cout << "# I am in folder "+ outfolder << endl;
     filename = outfolder + "/para_file.in";
-
+    
     // ---------- open outfile_terminal ------------------- //
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     outfile_terminal << "The seed is  " << seed_v << endl; 
@@ -186,13 +189,11 @@ int main(int argc, char *argv[]){
     stick_para.is_attractive = (bool *)calloc(mbrane_para.N, sizeof(bool));
     fld_para.solid_idx = (int *)calloc(mbrane_para.N, sizeof(int));
     mask_ids = (bool *)calloc(mbrane_para.N, sizeof(bool));
-
+     
     //
-    if(!mc_para.is_restart && afm_para.do_afm){
-        s_t = afm_para.sigma; 
-        afm_para.sigma = 0.00;
-        e_t = afm_para.epsilon;
-        afm_para.epsilon = 0.0;
+    if(mc_para.is_restart && restartidx == 0){
+        fprintf(stderr, "index of restart is 0");
+        MPI_Abort(MPI_COMM_WORLD, mpi_err); 
     }
    int *poleidx;
 
@@ -235,7 +236,7 @@ int main(int argc, char *argv[]){
     start_time = MPI_Wtime();
     double shear_slope = 0.0;
 
-    for(iter=0; iter < mc_para.tot_mc_iter; iter++){
+    for(iter=restartidx; iter < mc_para.tot_mc_iter; iter++){
 
         if(iter%mc_para.dump_skip == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mc_para.dump_skip)+".h5";
@@ -274,7 +275,7 @@ int main(int argc, char *argv[]){
         outfile_terminal << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  
             " totalener = "<< mbrane_para.tot_energy[0] << "; volume = " << *mbrane_para.volume <<
-            "Area = "<< *mbrane_para.area << endl;
+            "  Area = "<< *mbrane_para.area << endl;
 
     }
 

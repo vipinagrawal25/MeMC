@@ -147,7 +147,7 @@ double volume_ipart(Vec3d *pos, int *node_nbr,
     ri = pos[idx];
     for (i =0; i < num_nbr; i++){
         j = node_nbr[i];
-        k=node_nbr[(i+1)%num_nbr];
+        k = node_nbr[(i+1)%num_nbr];
         ri = pos[idx]; rj = pos[j]; 
         rk = pos[k];
         rij = Vec3d_add(ri, rj, 1e0);
@@ -503,15 +503,16 @@ double stick_bottom_surface(Vec3d pt, Vec3d pt_t0, STICK_p st_p){
   ds = pt.z - st_p.pos_bot_wall;
   ds2 = ds*ds;
   ener = 0;
-  if(ds2 < st_p.epsilon*st_p.epsilon){
-    ener = st_p.sigma*ds2;
+   inv_sqdz = (st_p.sigma*st_p.sigma)/(ds*ds); 
+   if(st_p.is_pot_harmonic){
+      if(ds2 < st_p.epsilon*st_p.epsilon){
+      ener = st_p.sigma*ds2;
+    }
+}else {
+    ener = lj_attr(inv_sqdz, st_p.epsilon);
   }
-  // inv_sqdz = (st_p.sigma*st_p.sigma)/(ds*ds);
-  // if(st_p.is_pot_harmonic){
     // return  st_p.sigma*ds*ds;
-  // }else{
-    // return  lj_attr(inv_sqdz, st_p.epsilon);
-  // }
+  // 
   return ener;
 }
 

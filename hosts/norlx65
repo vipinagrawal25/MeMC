@@ -1,1 +1,0 @@
-CC=mpic++ -O3 -w  -L/home/vipin/opt/pkgs/hdf5/src/.libs/ -I/home/vipin/opt/pkgs/hdf5/src/

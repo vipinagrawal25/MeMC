@@ -1,1 +1,0 @@
-CC=mpic++ -I /opt/ohpc/pub/libs/gnu8/hdf5/1.10.5/include -L /opt/ohpc/pub/libs/gnu8/hdf5/1.10.5/lib -O3 -w

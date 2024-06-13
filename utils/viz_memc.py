@@ -13,7 +13,7 @@ def read_data(filename):
     # dim = int(len(pos)/3)
     pos = pos.reshape(len(pos),3)
     return pos
- 
+
 triangles = h5py.File(conf_f)["triangles"][()]
 
 pos = read_data(inf)

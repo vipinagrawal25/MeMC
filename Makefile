@@ -1,26 +1,24 @@
-HOST=su
+HOST=quet_vipin
 include hosts/$(HOST)
+# CC = mpic++
 #
-#opt=-O3
-opt=-pg
-# ifeq ($(debug), y)
-# 	opt = -g3  -Wall -pedantic
-# endif
+opt=-O3
+# opt=-pg
+ifeq ($(debug), y)
+	opt = -g3  -Wall -pedantic
+endif
 
-link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes
-# 
+link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
 sources = src/forces_lj.cpp src/forces_surf.cpp src/Metropolis.cpp
-sources += src/init.cpp src/hdf5_io.cpp
+sources += src/init.cpp  src/hdf5_io.cpp
 sources += src/cubic_solve.cpp
-sources += src/misc.cpp
-sources += src/visit_io.cpp
+sources += src/misc.cpp src/random_gen.cpp
 #
 object =  obj/forces_lj.o obj/init.o obj/forces_surf.o obj/Metropolis.o
-object += obj/hdf5_io.o 
-object += obj/cubic_solve.o obj/misc.o
-object += obj/visit_io.o
+object += obj/hdf5_io.o
+object += obj/cubic_solve.o obj/misc.o obj/vector.o obj/random_gen.o
 #
-includes += includes/global.h includes/subroutine.h includes/Vector.h includes/misc.h
+includes += includes/global.h includes/subroutine.h includes/Vector.h
 bindir = ./bin
 #
 #
@@ -28,37 +26,33 @@ all : start memc
 	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
 	mv exe* $(bindir)/
 
-start: $(object) obj/start.o
-	echo $(CC) $(object) $(link)
-	@$(CC) $(object) obj/start.o $(link) -o exe_start
+objdir:
+	@mkdir -p obj
 
-memc: $(object) obj/memc.o
-	echo $(CC) $(object) $(link)
-	@$(CC) $(object) obj/memc.o $(link) -o exe_memc
+start: objdir $(object) obj/start.o obj/readnml.o
+	$(CC) $(object) obj/start.o obj/readnml.o $(link) -lgfortran -o exe_start
 
-energy: $(object) obj/energy.o
-	echo $(CC) $(object) $(link)
-	@$(CC) $(object) obj/energy.o $(link) -o exe_energy
-	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
-	mv exe_energy $(bindir)
+memc: objdir $(object) obj/memc.o obj/readnml.o
+	$(CC) $(object) obj/readnml.o obj/memc.o  $(link) -lgfortran -o exe_memc
+
+obj/readnml.o: src/read_namelist.f90
+	gfortran -c src/read_namelist.f90 -o obj/readnml.o
+#
 
 obj/memc.o: mains/memc.cpp $(includes)
 	@$(CC) -Jobj -c $< -o $@ $(link)
-#
+# 
+
 obj/start.o: mains/start.cpp $(includes)
 	$(CC) -Jobj -c $< -o $@ $(link)
-#
-obj/energy.o: utils/energy.cpp $(includes)
-	@$(CC) -Jobj -c $< -o $@ $(link)
 
-object : $(object)
-obj/%.o : src/%.cpp $(includes)
-	@mkdir -p $(@D)
+object : $(object) obj/readnml.o
+obj/%.o : src/%.cpp $(includes) obj/readnml.o
 	$(info Compiling $<)
-	$(CC) -Iobj -c $< -o $@ $(link)
+	$(CC) -Iobj -c $< obj/readnml.o -o $@ $(link)
 #
 clean:
-	@rm -rf bin $(object)
+	@rm -rf bin $(object) exe_*
 	@echo "all obj bin cleared"
 
 distclean:

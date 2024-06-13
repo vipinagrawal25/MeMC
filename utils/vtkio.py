@@ -32,7 +32,7 @@ def vtk_points_scalar(infile, points, scalar, name_scalar='points_data'):
     """
     Np = np.shape(points)[0]
     Nscalar = np.shape(scalar)[0]
-
+    #
     if(Np != Nscalar):
         print ("Error:: the dimension of points and scalar should be same") 
     else:

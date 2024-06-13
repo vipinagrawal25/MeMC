@@ -10,19 +10,19 @@ int main(int argc, char **argv){
      double Ener;
      Vec2d *Pos;
      Nbh_list *neib;
-     LJpara  para;
-     MCpara mcpara;
+     LJ_p  para;
+     MC_p  mcpara;
      FILE *fid;
      string outfolder,outfile,syscmds;
      char *metric;
      char log_file[128];
-     SPRING_para spring;
      //
      metric = (char *) malloc(128*sizeof(char));
      // outfolder = (char *) malloc(128*sizeof(char));
      // outfile = (char *) malloc(128*sizeof(char));
      if(argc!=5){
-         fprintf(stderr, "\n\n Requires argument <Number of points> <output folder>\n\n");
+         fprintf(stderr, "\n\n Requires argument <Number of points> <metric type> <output folder>\
+            <total mc iter>\n\n");
          exit(0);
      }else{
          para.N=atoi(argv[1]);
@@ -31,16 +31,17 @@ int main(int argc, char **argv){
          mcpara.tot_mc_iter = atoi(argv[4]);
          fprintf(stderr, "Monte Carlo of %d particles on %s grid..\n",
                  para.N, metric);
-         
      }
      //
      syscmds="mkdir "+outfolder;
     // sprintf(syscmds, "%s %s","mkdir ",outfolder);
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder");
-    init_rng(23077);
+    init_rng(23177);
     /* define all the paras */ 
      para.len = 2*pi;
      para.epsilon = 1;
+     para.bdry_condt = 3;
+     // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          para.sigma = para.len/sqrt((double)para.N);
      }else if(strcmp(metric,"sph")==0){
@@ -48,7 +49,7 @@ int main(int argc, char **argv){
      }
 
      para.r_cut = 4*para.sigma;
-     mcpara.dfac  = 32;
+     mcpara.dfac  = 16  ;
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
      mcpara.dump_skip = 100;
@@ -56,13 +57,12 @@ int main(int argc, char **argv){
      Pos = (Vec2d *)calloc(para.N, sizeof(Vec2d));
      neib = (Nbh_list *) calloc(para.N, sizeof(Nbh_list));
 
-     init_system_random_pos(Pos, para.len, para.N, metric);
+     init_system_random_pos(Pos, para.len, para.N, metric, para.bdry_condt );
 
      fprintf(stderr, "For N = %d, sigma = %lf, and epsilon=%lf \n", para.N,
              para.sigma, para.epsilon);
 
      make_nlist(Pos, neib,  para, metric);
-
 
     Ener = pairlj_total_energy(Pos, neib,  para, metric);
 
@@ -90,3 +90,4 @@ int main(int argc, char **argv){
     free(neib);
     return 0;
 }
+

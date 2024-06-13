@@ -25,12 +25,14 @@ which_file = sys.argv[1]
 file = sys.argv[2]
 fig, ax = plt.subplots()
 Np, pts_sph, pts_cart = read_data(file, which_file)
+np.savetxt('test.dat', pts_sph/(2*np.pi), fmt='%.16f')
 if(which_file == 'start'):
-    ax.plot(np.cos(pts_sph[:,0]), pts_sph[:,1], 's')
+    ax.plot((pts_sph[0:64,0]), pts_sph[0:64,1], 'o')
+    ax.plot((pts_sph[64:,0]), pts_sph[64:,1], 'o')
 if(which_file == 'memc'):
     ax.plot(np.cos(pts_sph[:,1]), pts_sph[:,2], 's')
 
-ax.set(xlim = [-1.1,1.1], ylim=[-0.1,6.36], 
-        xlabel='cos(theta)', ylabel='phi')
+# ax.set(xlim = [-1.1,1.1], ylim=[-0.1,6.36], 
+#         xlabel='cos(theta)', ylabel='phi')
 
 plt.show()

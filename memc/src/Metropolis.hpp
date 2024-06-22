@@ -1,26 +1,49 @@
-#ifndef METROPOLIS_H
-#define METROPOLIS_H
-#include "global.h"
+#ifndef METROPOLIS_HPP
+#define METROPOLIS_HPP
+#include <string>
+#include <fstream>
+#include "Mesh.hpp"
+#include "Vector.hpp"
+#include "Bending.hpp"
+#include "Stretching.hpp"
 
-extern "C" void  MC_listread(char *, double *, double *, bool *,
-           int *, int *, char *);
-class MC_P{
+// #include "global.h"
+class McP {
 public : 
-int monte_carlo_3d(Vec3d *pos, MESH_p mesh, 
-                double *lij_t0, MBRANE_p mbrane,
-                STICK_p ,  VOL_p, AREA_p, AFM_p afm, 
-                ACTIVE_p activity,  SPRING_p spring, SPCURV_p spcurv);
-double energy_mc_3d(Vec3d *pos, MESH_p mesh, 
-         double *lij_t0, int idx, MBRANE_p , STICK_p ,
-         VOL_p , AFM_p , SPRING_p , SPCURV_p );
-int monte_carlo_fluid(Vec3d *, MESH_p , MBRANE_p , MC_p, FLUID_p );
-int initMC(int, string);
+  McP (BE &beobj, STE &steobj): beobj(beobj), steobj(steobj) {};
+  int monte_carlo_3d(Vec3d *pos, MESH_p mesh);
+  double energy_mc_3d(Vec3d *pos, MESH_p mesh,  int );
+  int monte_carlo_fluid(Vec3d *, MESH_p, double);
+  bool Boltzman(double DE, double activity);
+  bool Glauber(double DE, double activity);
+  int initMC(int, std::string);
+  bool isfluid();
+  bool isrestart();
+  int fluidizeevery();
+  int dumpskip();
+  int totaliter();
+  int onemciter();
+  double evalEnergy(Vec3d *, MESH_p, fstream &, int);
+  double getarea();
+  double getvolume();
+  void setEneVol();
 private:
-    string algo;
+    BE &beobj;
+    STE &steobj;
+    std::string algo;
     double dfac;
-    int one_mc_iter, tot_mc_iter; dump_skip;
+    int one_mc_iter, tot_mc_iter, dump_skip;
     double kBT;
     double delta; // increment of position
+    bool is_restart;
+    bool is_fluid;
+    int min_allowed_nbr;
+    int fluidize_every;
+    double fac_len_vertices;
+    double totEner, totvol; 
+    double EneMonitored, VolMonitored;
+    double volt0;
+    int acceptedmoves;
 };
 
 #endif

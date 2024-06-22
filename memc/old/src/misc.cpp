@@ -2,10 +2,10 @@
 #include <sys/stat.h>
 #include "math.h"
 #include <string>
-#include "Vector.hpp"
+#include "Vector.h"
+#include "global.h"
 #include <iomanip>
 #include <sstream>
-#include <fstream>
 #include <string>
 using namespace std;
 /*-----------------------------------------------*/
@@ -180,17 +180,17 @@ void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn){
 }
 /*-----------------------------------------------*/
 /*-----------------------------------------------*/
-// double height_rms(Vec3d *Pos, MBRANE_p mbrane){
-//   double radius=mbrane.radius;
-//   double N=mbrane.N;
-//   double hrms=0;
-//   double hh;
-//   for (int i = 0; i < N; ++i){
-//     hh = sqrt(Pos[i].x*Pos[i].x+Pos[i].y*Pos[i].y+Pos[i].z*Pos[i].z) - radius;
-//     hrms += hh*hh;
-//   }
-//   return sqrt(hrms/N);
-// }
+double height_rms(Vec3d *Pos, MBRANE_p mbrane){
+  double radius=mbrane.radius;
+  double N=mbrane.N;
+  double hrms=0;
+  double hh;
+  for (int i = 0; i < N; ++i){
+    hh = sqrt(Pos[i].x*Pos[i].x+Pos[i].y*Pos[i].y+Pos[i].z*Pos[i].z) - radius;
+    hrms += hh*hh;
+  }
+  return sqrt(hrms/N);
+}
 /*-----------------------------------------------*/
 int get_nstart(int N, int bdrytype){
     static int nf1;

@@ -1,92 +1,11 @@
-#include "Metropolis.hpp"
-#include "random_gen.hpp"
+#include "global.h"
+#include "subroutine.h"
 #include <cmath>
-#include <cstring>
-const double pi = 3.14159265358979323846264;
-// #include <cstdio>
-// #include <iomanip>
-// #include <sstream>
-// #include <unistd.h>
-
-extern "C" void  MC_listread(char *, double *, double *, bool *,
-                             int *, int *, bool *, int *, int *, double *, char *);
-int get_nstart(int, int);
-
-
-int McP::initMC(int N, std::string fname){
-  char tmp_fname[128], temp_algo[128];
-  string parafile, outfile;
-
-  parafile = fname+"/para_file.in";
-  sprintf(tmp_fname, "%s", parafile.c_str());
-  MC_listread(temp_algo, &dfac, &kBT, &is_restart,
-              &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
-              &fluidize_every, &fac_len_vertices, tmp_fname);
-  algo=temp_algo;
-  one_mc_iter = 2*N;
-  dfac = sqrt(8*pi/(2*N-4))/dfac;
-  acceptedmoves = 0;
-  ofstream out_;
-  out_.open( fname+"/mcpara.out");
-  out_<< "# =========== monte carlo parameters ==========" << endl
-      << " N " << N << endl
-      << " algo = " << algo << endl
-      << " dfac " << dfac << endl
-      << " kbT " << kBT << endl
-      << " is_restart " << is_restart << endl
-      << " is_fluid " << is_fluid << endl
-      << " tot_mc_iter " << tot_mc_iter << endl
-      << " dump_skip " << dump_skip << endl
-      << " min_allowed_nbr " << min_allowed_nbr << endl
-      << " fluidize_every " << fluidize_every << endl;
-  out_.close();
-
-  return 1;
-}
-void McP::setEneVol() {
-  EneMonitored = totEner;
-  VolMonitored = totvol;
-  // volt0 = totvol;
-}
-
-double McP::evalEnergy(Vec3d *Pos, MESH_p mesh, std::fstream &fileptr, int itr){
-  // BE bendeobj;
-  // STE stretcheobj;
-  double bende, stretche, pre=0;
-if (fileptr.is_open()) {
-  fileptr << itr << "  " << acceptedmoves << "  "; 
-  bende = beobj.bending_energy_total(Pos, mesh);
-  stretche = steobj.stretch_energy_total(Pos, mesh);
-  fileptr << bende << "  "<<stretche << "  ";
-  totvol = steobj.volume_total(Pos, mesh);
-  // totarea = steobj.area_total(Pos, mesh);
-  }
-
- totEner = bende+stretche;
-
- if (steobj.dopressure()) {
-   pre = steobj.getpressure() * totvol;
-   fileptr << pre << "  ";
-   totEner += pre;
- }
- 
- fileptr << totEner  << "  " << totvol  << endl;
-
- if (is_fluid) {
-   EneMonitored = totEner;
-   VolMonitored = totvol;
- }
-  return totEner;
-}
-
-// double McP::getarea(){return totarea;}
-double McP::getvolume(){return totvol;}
-bool McP::isrestart(){return is_restart;}
-bool McP::isfluid(){return is_fluid;}
-int McP::fluidizeevery(){return fluidize_every;}
-int McP::dumpskip(){return dump_skip;}
-int McP::totaliter(){return tot_mc_iter;}
-int McP::onemciter(){return one_mc_iter;}
+#include <cstdio>
+#include <iomanip>
+#include <random>
+#include <sstream>
+#include <unistd.h>
 
 //
 int del_nbr(int *nbrs, int numnbr, int idx) {
@@ -148,7 +67,7 @@ int add_nbr(int *nbrs, int numnbr, int idx, int i1, int i2) {
   return numnbr + 1;
 }
 
-bool McP::Boltzman(double DE, double activity) {
+bool Metropolis(double DE, double activity, MC_p mcpara) {
   /// @brief Metropolis algorithm
   /// @param DE change in energy
   /// @param kbt boltzmann constant times temperature
@@ -162,11 +81,11 @@ bool McP::Boltzman(double DE, double activity) {
   yes = (DE <= 0.e0);
   if (!yes) {
     rand = RandomGenerator::generateUniform(0.0,1.0);
-    yes = rand < exp(-DE / kBT);
+    yes = rand < exp(-DE / mcpara.kBT);
   }
   return yes;
 }
-bool McP::Glauber(double DE, double activity) {
+bool Glauber(double DE, double activity, MC_p mcpara) {
   /// @brief Glauber algorithm
   /// @param DE change in energy
   /// @param kbt boltzmann constant times temperature
@@ -174,12 +93,40 @@ bool McP::Glauber(double DE, double activity) {
   double rand;
   DE += activity;
   rand = RandomGenerator::generateUniform(0.0,1.0);
-  yes = rand < 1 / (1 + exp(DE / kBT));
+  yes = rand < 1 / (1 + exp(DE / mcpara.kBT));
   return yes;
 }
 
+double rand_inc_theta(double th0, double dfac) {
+  /// @brief increment the polar angle randomly
+  double dth;
+  double tmp_th0;
 
-double McP::energy_mc_3d(Vec3d *pos, MESH_p mesh, int idx) {
+  tmp_th0 = 10;
+  while (tmp_th0 > pi || tmp_th0 < 0) {
+    dth = (pi / dfac) * RandomGenerator::generateUniform(0.0,1.0);
+    tmp_th0 = th0 + dth;
+  }
+  return dth;
+}
+
+double energy_mc_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
+                    int idx, MBRANE_p mbrane, STICK_p st_p, 
+                    VOL_p vol_p, AFM_p afm, SPRING_p spring,
+                    SPCURV_p spcurv) {
+  /// @brief Estimate the contribution from all the energies when a particle is
+  /// moved randomly
+  ///  @param Pos array containing co-ordinates of all the particles
+  ///  @param mesh mesh related parameters -- connections and neighbours
+  /// information
+  /// @param lij_t0 initial distance between points of membrane
+  /// @param is_attractive true if the zz sees the  bottom wall
+  ///  @param idx index of ith particle which is moved;
+  ///  @param mbrane  Membrane related parameters;
+  /// @param mcpara Monte-Carlo related parameters
+  /// @param AFM afm related parameter
+  /// @return Change in Energy when idx particle is moved
+
   double E_b, E_s, E_stick, E_afm, E_spr;
   int cm_idx, num_nbr;
 
@@ -192,93 +139,132 @@ double McP::energy_mc_3d(Vec3d *pos, MESH_p mesh, int idx) {
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];
 
-  E_b = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr, idx);
+  E_b = bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx), num_nbr,
+                             idx, mbrane, spcurv);
 
-  E_b += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
+  E_b += bending_energy_ipart_neighbour(pos, mesh, idx, mbrane, spcurv);
 
-  E_s = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-                              num_nbr, idx, mesh.nghst);
-//   if(st_p.do_stick)
-//   E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
-//       st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
+  E_s = stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+                             (lij_t0 + cm_idx), num_nbr, idx, mbrane);
+  if(st_p.do_stick)
+  E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
+      st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
 
-//     if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
+    if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
 
-//     if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring);
+    if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring);
   return E_b + E_s + E_stick + E_afm + E_spr;
 }
-// //
-
-
-int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
-  int i, num_nbr, cm_idx;
+//
+int monte_carlo_3d(Vec3d *pos, MESH_p mesh, double *lij_t0, 
+                   MBRANE_p mbrane, MC_p mcpara, STICK_p st_p,
+                   VOL_p vol_p, AREA_p area_p, AFM_p afm,
+                   ACTIVE_p activity, SPRING_p spring,
+                   SPCURV_p spcurv) {
+  /// @brief Monte-Carlo routine for the membrane
+  ///  @param Pos array containing co-ordinates of all the particles
+  ///  @param mesh mesh related parameters -- connections and neighbours
+  /// information
+  /// @param lij_t0 initial distance between points of membrane
+  /// @param is_attractive true if the zz sees the  bottom wall
+  ///  @param mbrane  Membrane related parameters;
+  /// @param mcpara Monte-Carlo related parameters
+  /// @param AFM afm related parameter
+  /// @return number of accepted moves
+  int i, move;
+  int num_nbr, cm_idx;
   double x_o, y_o, z_o, x_n, y_n, z_n;
   double de, Eini, Efin;
   double dxinc, dyinc, dzinc;
   double vol_i, vol_f;
   double dvol, de_vol, ini_vol, de_pressure;
+  double KAPPA;
   bool yes;
   int nframe;
   //
-  nframe = get_nstart(mesh.N, mesh.bdry_type);
+  nframe = get_nstart(mbrane.N, mbrane.bdry_type);
 
-  acceptedmoves = 0;
-
-  for (i = 0; i < one_mc_iter; i++) {
-    int idx = RandomGenerator::intUniform(nframe, mesh.N-1);
+  ini_vol = (4. / 3.) * pi * pow(mbrane.radius, 3);
+  KAPPA = vol_p.coef_vol_expansion;
+  move = 0;
+  for (i = 0; i < mcpara.one_mc_iter; i++) {
+    int idx = RandomGenerator::intUniform(nframe, mbrane.N -1);
     cm_idx = idx*mesh.nghst;
     num_nbr = mesh.numnbr[idx];
-    Eini = energy_mc_3d(pos, mesh, idx);
-    vol_i = steobj.volume_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-    //
-    x_o = pos[idx].x; y_o = pos[idx].y; z_o = pos[idx].z;
-    //
-    dxinc = (dfac) * (RandomGenerator::generateUniform(-1.0,1.0));
-    dyinc = (dfac) * (RandomGenerator::generateUniform(-1.0,1.0));
-    dzinc = (dfac) * (RandomGenerator::generateUniform(-1.0,1.0));
-    //
-    x_n = x_o + dxinc; y_n = y_o + dyinc; z_n = z_o + dzinc;
-    //
-    pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
-    //
-    Efin = energy_mc_3d(pos, mesh, idx);
-    de = (Efin - Eini);
-
-    vol_f = steobj.volume_ipart(pos,
+    Eini = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
+                        afm, spring, spcurv);
+    if(vol_p.do_volume || vol_p.is_pressurized) vol_i = volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
-    dvol=0.5*(vol_f - vol_i);
-
-    if(steobj.dovol()){
-    //   de_vol = vol_energy_change(mbrane, vol_p, dvol);
-    //   // cout << de << "\t";
-    //   de = (Efin - Eini) + de_vol;
-    //     // cout << de << endl;
+    //
+    x_o = pos[idx].x;
+    y_o = pos[idx].y;
+    z_o = pos[idx].z;
+    //
+    dxinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1.0,1.0));
+    dyinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1.0,1.0));
+    dzinc = (mcpara.delta / mcpara.dfac) * (RandomGenerator::generateUniform(-1.0,1.0));
+    //
+    x_n = x_o + dxinc;
+    y_n = y_o + dyinc;
+    z_n = z_o + dzinc;
+    //
+    pos[idx].x = x_n;
+    pos[idx].y = y_n;
+    pos[idx].z = z_n;
+    //
+    Efin = energy_mc_3d(pos, mesh, lij_t0, idx, mbrane, st_p, vol_p,
+                        afm, spring, spcurv);
+    de = (Efin - Eini);
+    if(vol_p.do_volume){
+      vol_f = volume_ipart(pos,
+            (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+      dvol = 0.5*(vol_f - vol_i);
+      de_vol = vol_energy_change(mbrane, vol_p, dvol);
+      // cout << de << "\t";
+      de = (Efin - Eini) + de_vol;
+        // cout << de << endl;
     }
-    if(steobj.dopressure()){
-      de_pressure = steobj.PV_change(dvol);
-      de = (Efin - Eini) + de_pressure;
+    if(vol_p.is_pressurized){
+       vol_f = volume_ipart(pos,
+            (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+        dvol=0.5*(vol_f - vol_i);
+        de_pressure = PV_change(vol_p.pressure, dvol);
+        // cout << de_pressure << endl;
+        de = (Efin - Eini) + de_pressure;
     }
-    if (algo == "mpolis") {
-      yes = Boltzman(de, 0.0);
-    } else if (algo == "glauber") {
-      yes = Glauber(de, 0.0);
+    // yes = Metropolis(de, 0.0, mcpara);
+    if (mcpara.algo == "mpolis") {
+      yes = Metropolis(de, activity.activity[idx], mcpara);
+    } else if (mcpara.algo == "glauber") {
+      yes = Glauber(de, activity.activity[idx], mcpara);
     }
     //
     if(yes) {
-      acceptedmoves +=  1;
-      EneMonitored += de;
-      VolMonitored += 2*dvol;
+      move = move + 1;
+      mbrane.tot_energy[0] += de;
+      if(vol_p.do_volume || vol_p.is_pressurized) mbrane.volume[0] += dvol;
     } else {
       pos[idx].x = x_o;
       pos[idx].y = y_o;
       pos[idx].z = z_o;
     }
   }
-  return acceptedmoves;
+  return move;
 }
-// //
+//
 
-int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len) {
+int monte_carlo_fluid(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane, MC_p mcpara, FLUID_p fl_para) {
+
+  /// @brief Monte-Carlo routine for the membrane
+  ///  @param Pos array containing co-ordinates of all the particles
+  ///  @param mesh mesh related parameters -- connections and neighbours
+  /// information
+  /// @param lij_t0 initial distance between points of membrane
+  /// @param is_attractive true if the zz sees the  bottom wall
+  ///  @param mbrane  Membrane related parameters;
+  /// @param mcpara Monte-Carlo related parameters
+  /// @param AFM afm related parameter
+  /// @return number of accepted moves
 
   int i, j, move;
   int nnbr_del1;
@@ -299,17 +285,17 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len) {
   double KAPPA;
   bool yes, logic;
 
-  nframe = get_nstart(mesh.N, mesh.bdry_type);
+  nframe = get_nstart(mbrane.N, mbrane.bdry_type);
   move = 0;
 
   int idxn, up, down;
 
-  for (i = 0; i < one_mc_iter; i++) {
+  for (i = 0; i < mcpara.one_mc_iter; i++) {
     // identify the pair to be divorced
     // stored as idx_del1 and idx_del2
     logic = false;
     while (!logic) {
-      idx_del1 = RandomGenerator::intUniform(nframe, mesh.N-1 );
+      idx_del1 = RandomGenerator::intUniform(nframe, mbrane.N-1 );
       cm_idx_del1 = mesh.nghst * idx_del1;
       nnbr_del1 = mesh.numnbr[idx_del1];
       idxn = RandomGenerator::intUniform(0, mesh.nghst-1 );
@@ -341,8 +327,8 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len) {
       bool flip_condt1, flip_condt2, flip_condt3;
       bool accept_flip;
 
-      flip_condt1 = (dl < fac_len_vertices*av_bond_len);
-      flip_condt2 =  N_nbr_del1 > min_allowed_nbr && N_nbr_del2 > min_allowed_nbr;
+      flip_condt1 = (dl < fl_para.fac_len_vertices*mbrane.av_bond_len);
+      flip_condt2 =  N_nbr_del1 > fl_para.min_allowed_nbr && N_nbr_del2 > fl_para.min_allowed_nbr;
       flip_condt3 =  N_nbr_add1 < 9 && N_nbr_add2 < 9;
 
       accept_flip = flip_condt1 && flip_condt2 && flip_condt3;

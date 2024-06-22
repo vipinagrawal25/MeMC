@@ -1,4 +1,4 @@
-#include "random_gen.hpp"
+#include "random_gen.h"
 
 std::default_random_engine RandomGenerator::generator;
 

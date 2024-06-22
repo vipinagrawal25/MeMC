@@ -8,13 +8,17 @@ ifeq ($(debug), y)
 	opt = -g3  -Wall -Wpedantic
 endif
 
-link = $(opt) -lm -std=c++17 -lhdf5 -Isrc # 
-sources =  src/Vector.cpp src/Metropolis.cpp src/random_gen.cpp src/Bending.cpp
-sources += src/Stretching.cpp  src/hdf5_io.cpp  src/misc.cpp
-# sources += src/misc.cpp
+link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
+sources =  src/forces_surf.cpp src/Metropolis.cpp src/random_gen.cpp
+sources += src/init.cpp  src/hdf5_io.cpp
+sources += src/cubic_solve.cpp
+sources += src/misc.cpp
 #
-object = obj/Vector.o obj/Metropolis.o obj/random_gen.o obj/Bending.o
-object += obj/Stretching.o  obj/hdf5_io.o obj/misc.o
+object =   obj/init.o obj/forces_surf.o obj/Metropolis.o obj/random_gen.o
+object += obj/hdf5_io.o 
+object += obj/cubic_solve.o obj/misc.o obj/vector.o
+#
+includes += includes/global.h includes/subroutine.h includes/Vector.h 
 bindir = ./bin
 #
 #
@@ -23,13 +27,13 @@ all : start memc
 	mv exe* $(bindir)/
 
 obj/readnml.o: src/read_namelist.f90
-	gfortran -c -Jobj src/read_namelist.f90 -o obj/readnml.o
+	gfortran -c src/read_namelist.f90 -o obj/readnml.o
 
-memc: $(object) obj/main.o obj/readnml.o
-	$(CC) $(object) obj/main.o obj/readnml.o  $(link) -lgfortran -o exe_memc
+memc: $(object) obj/memc.o obj/readnml.o
+	$(CC) $(object) obj/memc.o obj/readnml.o  $(link) -lgfortran -o exe_memc
 #
 
-obj/main.o: main.cpp $(includes)
+obj/memc.o: memc.cpp $(includes)
 	@$(CC) -Jobj -c $< -o $@ $(link)
 # 
 

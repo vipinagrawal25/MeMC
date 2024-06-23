@@ -65,7 +65,7 @@ if (fileptr.is_open()) {
  totEner = bende+stretche;
 
  if (steobj.dopressure()) {
-   pre = steobj.getpressure() * totvol;
+   pre = -steobj.getpressure() * totvol;
    fileptr << pre << "  ";
    totEner += pre;
  }

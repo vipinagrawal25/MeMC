@@ -22,6 +22,7 @@ int STE::initSTE(int N, std::string fname){
       << " coef_bend = " << YY << endl
       << " do_volume " << do_volume << endl
       << " is_pressurized " << is_pressurized << endl
+      << " pressure " << pressure << endl
       << " coef_vol_expansion " << coef_vol_expansion << endl
       << " do_area " << do_area << endl
       << " coef_area_expansion " << coef_area_expansion << endl;

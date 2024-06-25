@@ -54,7 +54,7 @@ double McP::evalEnergy(Vec3d *Pos, MESH_p mesh, std::fstream &fileptr, int itr){
   // STE stretcheobj;
   double bende, stretche, pre=0;
 if (fileptr.is_open()) {
-  fileptr << itr << "  " << acceptedmoves << "  "; 
+  fileptr << itr << "  " << (double)acceptedmoves/(double)one_mc_iter<< "  "; 
   bende = beobj.bending_energy_total(Pos, mesh);
   stretche = steobj.stretch_energy_total(Pos, mesh);
   fileptr << bende << "  "<<stretche << "  ";

@@ -19,7 +19,7 @@
 #include <fstream>
 #include <iostream>
 
-extern "C" void MeshRead(int *, int *, int *, char *);
+extern "C" void MeshRead(int *, int *, int *, double *, char *);
 
 template<typename T>
 string ZeroPadNumber(T num){
@@ -27,8 +27,12 @@ string ZeroPadNumber(T num){
     ss << setw( 5 ) << setfill( '0' ) << (int)num;
     return ss.str();
 }
+void scale_pos(Vec3d *pos, double R, int N){
+  for(int i = 0; i<N; i++) pos[i] = pos[i]*R;
+  // for (Vec3d elem : pos) elem = R*elem;
+}
 
-double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, string outfolder, int &residx){
+double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, string outfolder, double Radius, int &residx){
     double Pole_zcoord;
     double ave_bond_len;
     int tdumpskip, titer;
@@ -36,6 +40,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, str
 
     if(!mcobj.isrestart()){
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
+        scale_pos(Pos, Radius, mesh.N);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         ave_bond_len = stretchobj.init_eval_lij_t0(Pos, mesh, mcobj.isfluid());
@@ -47,6 +52,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, str
         // min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
     }else{
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
+        scale_pos(Pos, Radius, mesh.N);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         ave_bond_len = stretchobj.init_eval_lij_t0(Pos, mesh, mcobj.isfluid());
@@ -104,7 +110,7 @@ int main(int argc, char *argv[]){
     std::string fname;
     uint32_t seed_v;
     int iter, start, num_moves, num_bond_change;
-    double av_bond_len, Etot;
+    double av_bond_len, Etot, Radius;
     BE  bendobj;
     STE stretchobj;
     McP mcobj(bendobj, stretchobj); 
@@ -124,7 +130,7 @@ int main(int argc, char *argv[]){
 
     para_file = outfolder+"/para_file.in";
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    MeshRead(&mesh.N, &mesh.bdry_type, &mesh.nghst, tmp_fname);
+    MeshRead(&mesh.N, &mesh.bdry_type, &mesh.nghst, &Radius, tmp_fname);
 
     Pos = (Vec3d *)calloc(mesh.N, sizeof(Vec3d));
     mesh.numnbr = (int *)calloc(mesh.N, sizeof(int));
@@ -133,7 +139,7 @@ int main(int argc, char *argv[]){
     mcobj.initMC(mesh.N, outfolder);
     bendobj.initBE(mesh.N, outfolder);
     stretchobj.initSTE(mesh.N, outfolder);
-    av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, outfolder, residx);
+    av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, outfolder, Radius, residx);
     clock_t timer;
     Etot = mcobj.evalEnergy(Pos, mesh, fileptr, residx);
     mcobj.setEneVol();

@@ -78,12 +78,13 @@ subroutine BendRead(coef_bend, minC, maxC, theta, spcurv, parafile) bind(c, name
     close(unit=200)
 end subroutine
 
-subroutine MeshRead(N, bdry_cdt, nghst, parafile) bind(c, name="MeshRead")
+subroutine MeshRead(N, bdry_cdt, nghst, radius, parafile) bind(c, name="MeshRead")
   integer (kind=c_int) :: N, bdry_cdt, nghst
+  real(kind = c_double) :: radius
   character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
   character(len=char_len) :: f_fname
 
-  namelist /Meshpara/ N, bdry_cdt, nghst 
+  namelist /Meshpara/ N, bdry_cdt, radius, nghst 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=200,file=f_fname,status='old')
     read(unit=200,nml=Meshpara)

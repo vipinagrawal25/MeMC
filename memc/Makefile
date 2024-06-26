@@ -25,6 +25,12 @@ all : start memc
 obj/readnml.o: src/read_namelist.f90
 	gfortran -c -Jobj src/read_namelist.f90 -o obj/readnml.o
 
+objdir:
+	@mkdir -p obj
+
+start: objdir $(object) obj/start.o obj/readnml.o
+	$(CC) $(object) obj/start.o obj/readnml.o $(link) -lgfortran -o exe_start
+
 memc: $(object) obj/main.o obj/readnml.o
 	$(CC) $(object) obj/main.o obj/readnml.o  $(link) -lgfortran -o exe_memc
 #

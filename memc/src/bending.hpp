@@ -1,8 +1,8 @@
 #ifndef BENDING_HPP
 #define BENDING_HPP
 #include <string>
-#include "Mesh.hpp"
-#include "Vector.hpp"
+#include "mesh.hpp"
+#include "vector.hpp"
 // #include "global.h"
 
 class BE {

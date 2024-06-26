@@ -2,10 +2,10 @@
 #define METROPOLIS_HPP
 #include <string>
 #include <fstream>
-#include "Mesh.hpp"
-#include "Vector.hpp"
-#include "Bending.hpp"
-#include "Stretching.hpp"
+#include "mesh.hpp"
+#include "vector.hpp"
+#include "bending.hpp"
+#include "stretching.hpp"
 
 // #include "global.h"
 class McP {

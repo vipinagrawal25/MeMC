@@ -1,4 +1,4 @@
-#include "Bending.hpp"
+#include "bending.hpp"
 #include <fstream>
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
@@ -157,8 +157,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
     return bend_ener;
 }
 //
-double BE::bending_energy_ipart_neighbour(Vec3d *pos, 
-        MESH_p mesh, int idx){
+double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
     /// @brief Estimate the Bending energy contribution from the neighbours when ith particle position changes
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param mesh mesh related parameters -- connections and neighbours

@@ -11,9 +11,9 @@
 #include <iomanip>
 #include <mpi.h>
 
-#include "Metropolis.hpp"
-#include "Bending.hpp"
-#include "Stretching.hpp"
+#include "metropolis.hpp"
+#include "bending.hpp"
+#include "stretching.hpp"
 #include "random_gen.hpp"
 #include "hdf5_io.hpp"
 #include <fstream>
@@ -27,6 +27,7 @@ string ZeroPadNumber(T num){
     ss << setw( 5 ) << setfill( '0' ) << (int)num;
     return ss.str();
 }
+
 void scale_pos(Vec3d *pos, double R, int N){
   for(int i = 0; i<N; i++) pos[i] = pos[i]*R;
   // for (Vec3d elem : pos) elem = R*elem;
@@ -94,8 +95,6 @@ void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
     log_headers+="total_e  volume  area";
     fid << log_headers << endl;
 }
-
-
 
 
 int main(int argc, char *argv[]){
@@ -176,6 +175,3 @@ int main(int argc, char *argv[]){
     mpi_err = MPI_Finalize();
     return 0;
 }
-
-
-

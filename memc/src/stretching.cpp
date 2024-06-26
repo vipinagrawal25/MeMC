@@ -1,4 +1,4 @@
-#include "Stretching.hpp"
+#include "stretching.hpp"
 #include <fstream>
 
 extern "C" void StretchRead(double *, bool *, bool *, 

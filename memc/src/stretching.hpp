@@ -2,8 +2,8 @@
 #define STRETCHING_HPP
 #include <string>
 #include <vector>
-#include "Mesh.hpp"
-#include "Vector.hpp"
+#include "mesh.hpp"
+#include "vector.hpp"
 
 // #include "global.h"
 

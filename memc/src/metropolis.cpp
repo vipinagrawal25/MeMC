@@ -1,4 +1,4 @@
-#include "Metropolis.hpp"
+#include "metropolis.hpp"
 #include "random_gen.hpp"
 #include <cmath>
 #include <cstring>

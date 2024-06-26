@@ -2,7 +2,7 @@
 #define HDF5_IO_HPP
 #include <hdf5.h>
 #include <unistd.h>
-#include "Vector.hpp"
+#include "vector.hpp"
 
 void hdf5_io_write_double(double *Pos, int N, string input_file, string);
 void hdf5_io_read_double(double *Pos, string input_file, string);

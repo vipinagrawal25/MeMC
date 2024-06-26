@@ -1,4 +1,4 @@
-#include "Vector.hpp"
+#include "vector.hpp"
 
 double inner_product(Vec3d s1, Vec3d s2){
     return s1.x*s2.x + s1.y*s2.y + s1.z*s2.z;

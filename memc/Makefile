@@ -1,6 +1,8 @@
 # HOST=norlx65
 # include hosts/$(HOST)
-CC = mpic++
+# CC = mpic++
+CC=mpic++ -O3 -w  -L/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/lib/ \
+	-I/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/include/
 #
 opt=-O3
 # opt=-pg
@@ -8,7 +10,7 @@ ifeq ($(debug), y)
 	opt = -g3  -Wall -Wpedantic
 endif
 
-link = $(opt) -lm -std=c++17 -lhdf5 -Isrc # 
+link = $(opt) -lm -std=c++14 -lhdf5 -Isrc # 
 sources =  src/Vector.cpp src/Metropolis.cpp src/random_gen.cpp src/Bending.cpp
 sources += src/Stretching.cpp  src/hdf5_io.cpp  src/misc.cpp
 # sources += src/misc.cpp
@@ -18,27 +20,19 @@ object += obj/Stretching.o  obj/hdf5_io.o obj/misc.o
 bindir = ./bin
 #
 #
-all : start memc 
+all : memc 
 	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; mkdir $(bindir) ; fi
 	mv exe* $(bindir)/
-
+#
 obj/readnml.o: src/read_namelist.f90
 	gfortran -c -Jobj src/read_namelist.f90 -o obj/readnml.o
-
-objdir:
-	@mkdir -p obj
-
-start: objdir $(object) obj/start.o obj/readnml.o
-	$(CC) $(object) obj/start.o obj/readnml.o $(link) -lgfortran -o exe_start
-
+#
 memc: $(object) obj/main.o obj/readnml.o
 	$(CC) $(object) obj/main.o obj/readnml.o  $(link) -lgfortran -o exe_memc
 #
-
 obj/main.o: main.cpp $(includes)
 	@$(CC) -Jobj -c $< -o $@ $(link)
-# 
-
+#
 object : $(object)
 obj/%.o : src/%.cpp $(includes)
 	@mkdir -p $(@D)

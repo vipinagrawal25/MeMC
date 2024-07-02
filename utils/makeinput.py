@@ -1,27 +1,25 @@
 import numpy as np
+import h5py, os, sys, quaternion
+import vtkio as vtk
 from numpy import linalg as LA
-import quaternion
-import os, sys
 from scipy.spatial import ConvexHull
-import h5py
-# import meshzoo
-#***********************************************************#
+
 def read_data(filename):
-    pos = h5py.File(filename)["pos"][()]
-    pos = np.asarray(pos)
+    pos= h5py.File(filename)["pos"][()]
+    pos= np.asarray(pos)
     Np = int(len(pos)/2)
     pts_sph = pos.reshape(Np,2)
-    pts_cart = np.asarray([[np.sin(theta)*np.cos(phi),
-        np.sin(theta)*np.sin(phi), 
-        np.cos(theta)] for theta, phi in pts_sph]
-        ) 
+    pts_cart = np.asarray([[np.sin(theta)*np.cos(phi), 
+                np.sin(theta)*np.sin(phi),
+                np.cos(theta)] for theta, phi in pts_sph]
+                )
     return Np, pts_sph, pts_cart
 
 def triangulate(rr):
     hull = ConvexHull(rr)
     triangles = hull.simplices
     return triangles
-##-----------------------------------------------------------------------#
+
 def sort_simplices(cells):
     lsimples = len(cells)
     nsimplices = np.asarray([], dtype=np.int32)
@@ -67,14 +65,14 @@ def sort_2Dpoints_theta(x,y):
     #
     xysort = np.asarray(sorted(xyth, key=lambda x: (x[2])))
     return xysort[:,3].astype(int),np.array([xysort[:,0],xysort[:,1]])
-##-----------------------------------------------------------------------------#
+
 def polar(xyz):
     x=xyz[0]
     y=xyz[1]
     z=xyz[2]
     XsqPlusYsq = x**2 + y**2
     return np.arctan2(np.sqrt(XsqPlusYsq),z)
-##----------------------------------------------------------------------------#
+
 def rotate(vector,nhat,theta):
     '''rotate a vector about nhat by angle theta'''
     cos_thby2=np.cos(theta/2)
@@ -87,14 +85,14 @@ def rotate(vector,nhat,theta):
         q_vec=np.quaternion(0,vector[i][0],vector[i][1],vector[i][2])
         rot_vec[i]=quater2vec(q*q_vec*q_inv)
     return rot_vec
-##----------------------------------------------------------------------------#
+
 def quater2vec(qq,precision=1e-16):
     if qq.w>1e-8:
         print("# ERROR: Quaternion has non-zero scalar value.\n \
                # Can not convert to vector.")
         exit(1)
     return np.array([qq.x,qq.y,qq.z])
-#----------------------------------------------------------------------------#
+
 def sort_nbrs(R, Np, cmlst, node_nbr):
     zhat = np.array([0.,0.,1.])
     for i in range(Np):
@@ -115,20 +113,11 @@ def sort_nbrs(R, Np, cmlst, node_nbr):
     return node_nbr
     #
 
-def write_hdf5(R, cmlst, node_nbr,  cells, posfile, file):
-    if file.split(".")[-1]=="h5":
-        pass
-    else:
-        file=file+".h5"
+def write_hdf5(R, cmlst, node_nbr, posfile):
     hf = h5py.File(posfile,'w')
     hf.create_dataset('pos',data=R.reshape(-1))
-    hf.close()
-
-    hf = h5py.File(file,'w')
     hf.create_dataset('cumu_list',data=cmlst.astype(np.int32))
     hf.create_dataset('node_nbr',data=node_nbr.astype(np.int32))
-    hf.create_dataset('triangles',data=cells.astype(np.int32))
-    hf.close()
 
 def write_file(pts_cart, cmlist, node_nbr):
     file = open("../Examples/pts.bin", "wb")
@@ -140,22 +129,26 @@ def write_file(pts_cart, cmlist, node_nbr):
     file.write(node_nbr)
     file.close()
 
+def new_way_nbrs(cmlist, node_nbr, nghst=12):
+    new_nbr = np.zeros(nghst*Np, dtype=int)
+    new_nbr[:] = -1
+    for ip in range(0, Np):
+        nbrs = node_nbr[cmlist[ip]:cmlist[ip+1]]
+        num_nbr = -(cmlist[ip]-cmlist[ip+1])
+        nnbrs = nbrs
+        st_idx = int(ip*nghst); end_idx = int(ip*nghst + num_nbr)
+        new_nbr[st_idx:end_idx] = nnbrs[:]
+    return new_nbr
+
 inf = sys.argv[1]
-# if inf=='meshzoo':
-#     pts_cart,triangles = 
+outf = sys.argv[2]
 Np, pts_sph, pts_cart = read_data(inf)
 triangles = triangulate(pts_cart)
 sort_tri = sort_simplices(triangles)
 cmlist, node_nbr = neighbours(Np, sort_tri)
 node_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr)
-isDir = os.path.isdir("./conf/") 
-if(isDir):
-    write_hdf5(pts_cart, cmlist, node_nbr,
-             triangles, "./conf/dmemc_pos.h5",
-             "./conf/dmemc_conf.h5")
-else:
-    os.mkdir("conf")
-    write_hdf5(pts_cart, cmlist, node_nbr,
-             triangles, "./conf/dmemc_pos.h5", 
-             "./conf/dmemc_conf.h5")
-# write_file(pts_cart, cmlist, node_nbr)
+new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=12)
+ncmlist = np.diff(cmlist)
+write_hdf5(pts_cart, ncmlist, new_nbr, outf+"/input.h5")
+
+vtk.vtk_points(outf+"/input.vtk", pts_cart, triangles)

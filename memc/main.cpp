@@ -33,7 +33,9 @@ void scale_pos(Vec3d *pos, double R, int N){
   // for (Vec3d elem : pos) elem = R*elem;
 }
 
-double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, string outfolder, double Radius, int &residx){
+double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, string outfolder,
+        double radius, int &residx){
+
     double Pole_zcoord;
     double ave_bond_len;
     int tdumpskip, titer;
@@ -41,7 +43,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, str
 
     if(!mcobj.isrestart()){
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
-        scale_pos(Pos, Radius, mesh.N);
+        scale_pos(Pos, radius, mesh.N);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         ave_bond_len = stretchobj.init_eval_lij_t0(Pos, mesh, mcobj.isfluid());
@@ -53,7 +55,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, str
         // min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
     }else{
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
-        scale_pos(Pos, Radius, mesh.N);
+        scale_pos(Pos, radius, mesh.N);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         ave_bond_len = stretchobj.init_eval_lij_t0(Pos, mesh, mcobj.isfluid());
@@ -78,8 +80,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, str
 
     return ave_bond_len;
 }
-
-
+/*----------------------------------------------------------*/
 void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
   std::string log_headers = "#iter acceptedmoves bend_e stretch_e ";
     // if(stick_para.do_stick){log_headers+="stick_e ";}
@@ -95,73 +96,72 @@ void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
     log_headers+="total_e  volume  area";
     fid << log_headers << endl;
 }
-
-
+/*----------------------------------------------------------*/
 int main(int argc, char *argv[]){
-
     int mpi_err, mpi_rank, residx;
-
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
  
     pid_t pid = getpid();
-    cout << "# ID for this process is: " << pid << endl;
+    // cout << "# ID for this process is: " << pid << endl;
     std::string fname;
     uint32_t seed_v;
     int iter, start, num_moves, num_bond_change;
-    double av_bond_len, Etot, Radius;
+    double av_bond_len, Etot, radius;
     BE  bendobj;
     STE stretchobj;
-    McP mcobj(bendobj, stretchobj); 
+    McP mcobj(bendobj, stretchobj);
     Vec3d *Pos; 
     MESH_p mesh;
-    string outfolder, syscmds, para_file, log_file, outfile, filename;
+    string outfolder, syscmds, para_file, outfile, filename;
     char tmp_fname[128];
 
-   start = atoi(argv[1]);
+    start = atoi(argv[1]);
     outfolder = ZeroPadNumber(mpi_rank+start)+"/";
-
     fstream fileptr(outfolder+"/mc_log", ios::app);
-
     // Check if the file opened successfully
     //
     RandomGenerator::init(seed_v);
-
+    cout << "# The seed value is " << seed_v << endl;
+    //
     para_file = outfolder+"/para_file.in";
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    MeshRead(&mesh.N, &mesh.bdry_type, &mesh.nghst, &Radius, tmp_fname);
+    MeshRead(&mesh.N, &mesh.bdry_type, &mesh.nghst, &radius, tmp_fname);
+    // cout << mesh.N << "\t" << mesh.bdry_type << "\t" << mesh.nghst << "\t" << radius;
 
     Pos = (Vec3d *)calloc(mesh.N, sizeof(Vec3d));
     mesh.numnbr = (int *)calloc(mesh.N, sizeof(int));
     mesh.node_nbr_list = (int *)calloc(mesh.nghst*mesh.N, sizeof(int));
- 
+
     mcobj.initMC(mesh.N, outfolder);
     bendobj.initBE(mesh.N, outfolder);
     stretchobj.initSTE(mesh.N, outfolder);
-    av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, outfolder, Radius, residx);
+    av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, outfolder, radius, 
+                residx);
     clock_t timer;
     Etot = mcobj.evalEnergy(Pos, mesh, fileptr, residx);
     mcobj.setEneVol();
+
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
-    if(!mcobj.isrestart())diag_wHeader(bendobj,  stretchobj, fileptr);
+    if(!mcobj.isrestart()) diag_wHeader(bendobj,  stretchobj, fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
     for(iter=residx; iter < mcobj.totaliter(); iter++){
         if(iter%mcobj.dumpskip() == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mcobj.dumpskip())+".h5";
             hdf5_io_write_double((double*) Pos, 3*mesh.N, outfile, "pos");
-            hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list, 
-                    mesh.N, mesh.nghst, outfile);
+            hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list,
+                            mesh.N, mesh.nghst, outfile);
             fstream restartfile(outfolder+"/restartindex.txt", ios::out);
             restartfile << iter << " " << mcobj.dumpskip() << endl;
             restartfile.close();
         }
-        num_moves = mcobj.monte_carlo_3d(Pos, mesh );
+        num_moves = mcobj.monte_carlo_3d(Pos, mesh);
         if(mcobj.isfluid() && iter%mcobj.fluidizeevery()==0){
             num_bond_change = mcobj.monte_carlo_fluid(Pos, mesh, av_bond_len);
-            outfile_terminal << "fluid stats " << num_bond_change << " bonds flipped" << endl;
+            outfile_terminal << "fluid stats " << num_bond_change <<
+            " bonds flipped" << endl;
         }
         Etot = mcobj.evalEnergy(Pos, mesh, fileptr, iter);
-        //
         outfile_terminal << "iter = " << iter << "; Accepted Moves = "
                          << (double) num_moves*100/mcobj.onemciter() << " %;"<<  
             " totalener = "<< Etot << "; volume = " << mcobj.getvolume() << endl;

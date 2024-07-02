@@ -11,12 +11,12 @@ ifeq ($(debug), y)
 endif
 
 link = $(opt) -lm -std=c++14 -lhdf5 -Isrc # 
-sources =  src/Vector.cpp src/Metropolis.cpp src/random_gen.cpp src/Bending.cpp
-sources += src/Stretching.cpp  src/hdf5_io.cpp  src/misc.cpp
+sources =  src/vector.cpp src/metropolis.cpp src/random_gen.cpp src/bending.cpp
+sources += src/stretching.cpp  src/hdf5_io.cpp  src/misc.cpp
 # sources += src/misc.cpp
 #
-object = obj/Vector.o obj/Metropolis.o obj/random_gen.o obj/Bending.o
-object += obj/Stretching.o  obj/hdf5_io.o obj/misc.o
+object = obj/vector.o obj/metropolis.o obj/random_gen.o obj/bending.o
+object += obj/stretching.o  obj/hdf5_io.o obj/misc.o
 bindir = ./bin
 #
 #

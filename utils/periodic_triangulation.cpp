@@ -60,9 +60,10 @@ vector<vector<int>> sort_simplices(const vector<vector<int>>& cells) {
 }
 
 // Function to return cm_lst and node_nbr
-pair<vector<int>, vector<int>> neighbours(int Np, const vector<vector<int>>& simpl) {
+pair<vector<int>, vector<int>> neighbours(int* lst, int Np,
+   const vector<vector<int>>& simpl){
     
-   vector<int> r1, r2, r3, lst(Np,0), cumlst(Np + 1, 0);
+   vector<int> r1, r2, r3, cumlst(Np + 1, 0);
    for (const auto& s : simpl) {
       r1.push_back(s[0]);
       r2.push_back(s[1]);
@@ -73,7 +74,7 @@ pair<vector<int>, vector<int>> neighbours(int Np, const vector<vector<int>>& sim
       lst[i] = count(r1.begin(), r1.end(), i) / 2;
    }
 
-   partial_sum(lst.begin(), lst.end(), cumlst.begin() + 1);
+   partial_sum(lst, lst+Np, cumlst.begin() + 1);
 
    vector<int> node_neighbour(cumlst.back(), 0);
    for (size_t i = 0; i < node_neighbour.size(); ++i) {
@@ -144,12 +145,13 @@ void hdf5_io_read_pos(double *Pos, string input_file){
    
 }
 
-vector<int> cyclic_nbrs(const vector<int>& cmlist, const vector<int>& node_nbr,
+void cyclic_nbrs(int* new_nbr, const vector<int>& cmlist, 
+                        const vector<int>& node_nbr,
                         Point* pts, int Np, int nghst, double lenth){
 
-   vector<int> new_nbr(nghst * Np, -1);
-   double dx, dy;
+   // vector<int> new_nbr(nghst * Np, -1);
 
+   double dx, dy;
    for (int ip = 0; ip < Np; ++ip){
       vector<int> nbrs(node_nbr.begin()+cmlist[ip], node_nbr.begin()+cmlist[ip + 1]);
       int num_nbr = (cmlist[ip + 1] - cmlist[ip]);
@@ -174,7 +176,6 @@ vector<int> cyclic_nbrs(const vector<int>& cmlist, const vector<int>& node_nbr,
 
       vector<int> sorted(nbrs.size());
       iota(sorted.begin(), sorted.end(), 0);
-
       sort(sorted.begin(), sorted.end(), [&angles](int a, int b) {
          return angles[a] < angles[b];
       });
@@ -185,10 +186,7 @@ vector<int> cyclic_nbrs(const vector<int>& cmlist, const vector<int>& node_nbr,
       for (int j = st_idx, k = 0; j < end_idx && k < nbrs.size(); ++j, ++k) {
          new_nbr[j] = nbrs[sorted[k]];
       }
-
    }
-
-   return new_nbr;
 }
 
 void hdf5_io_write_mesh(int *cmlist,
@@ -315,34 +313,20 @@ int main(int argc, char const *argv[]){
    }
 
    vector<vector<int>> sorted_simplices = sort_simplices(cells);
-   auto [cmlist, node_nbr] = neighbours(t.number_of_vertices(), sorted_simplices);
-   vector<int> new_nbr = cyclic_nbrs(cmlist, node_nbr, points, Np, ng, box_len);
-
-   for (int i = 0; i < Np; ++i){
-      cidx=ng*i;
-      k=cidx;
-      for (int j = 0; j < ng-1; ++j){
-         k1=cidx+j;
-         if (new_nbr[k1+1]!=new_nbr[k1]){
-            nn_nbr[k] = new_nbr[k1];
-            k+=1;
-         }
-      }
-   }
-
-   for (int i = 0; i < Np; ++i){
-      cidx=ng*i;
-      for (int j = 0; j < ng; ++j){
-         k=cidx+j;
-         if (nn_nbr[k]!=-1){ncml[i] = ncml[i] + 1;}
-      }
-   }
+   auto [cmlist, node_nbr] = neighbours(ncml, t.number_of_vertices(), sorted_simplices);
+   cyclic_nbrs(nn_nbr, cmlist, node_nbr, points, Np, ng, box_len);
 
    for (int i = 0; i < Np; ++i){
       pts_3d[i] = Point_3(points[i].x(),points[i].y(),0.0);
+      // cout << cmlist[i+1]-cmlist[i] - ncml[i] << "\t" << nn_nbr[i] << endl;
    }
 
    hdf5_io_write_double((double*)pts_3d, 3*Np, argv[2], "pos");
    hdf5_io_write_mesh(ncml, nn_nbr, Np, ng, argv[2]);
+
+   free(ncml);
+   free(nn_nbr);
+   free(points);
+   free(pts_3d);
    return 0;
 }

@@ -317,8 +317,7 @@ int main(int argc, char const *argv[]){
    cyclic_nbrs(nn_nbr, cmlist, node_nbr, points, Np, ng, box_len);
 
    for (int i = 0; i < Np; ++i){
-      pts_3d[i] = Point_3(points[i].x(),points[i].y(),0.0);
-      // cout << cmlist[i+1]-cmlist[i] - ncml[i] << "\t" << nn_nbr[i] << endl;
+      pts_3d[i] = Point_3(points[i].x(),points[i].y(), 0.0);
    }
 
    hdf5_io_write_double((double*)pts_3d, 3*Np, argv[2], "pos");

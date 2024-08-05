@@ -69,13 +69,14 @@ int main(int argc, char **argv){
      fprintf(stderr, "For N = %d, sigma = %lf, and epsilon=%lf \n", para.N,
              para.sigma, para.epsilon);
 
-     make_nlist(Pos, neib,  para, metric);
-
+    make_nlist(Pos, neib,  para, metric);
+    fprintf(stderr, "neib list made");
     Ener = pairlj_total_energy(Pos, neib,  para, metric);
 
     sprintf(log_file, "%s%s",outfolder.c_str(),"/mc_log");
     fid = fopen(log_file, "a");
 
+    fprintf(stderr, "start main loop ");
     for(i=0; i<mcpara.tot_mc_iter; i++){
         if(i%mcpara.dump_skip == 0){
           outfile=outfolder+"/snap_"+ZeroPadNumber(i/mcpara.dump_skip)+".h5";

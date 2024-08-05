@@ -55,11 +55,12 @@ double rand_inc_theta(double th0, double dfac) {
   double dth;
   double tmp_th0;
 
-  std::uniform_real_distribution<> rand_real(0,1);
+  std::uniform_real_distribution<> rand_real(-1,1);
   tmp_th0 = 10;
   while (tmp_th0 > pi || tmp_th0 < 0) {
     dth = (pi / dfac) * rand_real(rng);
     tmp_th0 = th0 + dth;
+    /* cout << "here "<< tmp_th0<< " "<< th0 << " " << dth<< endl; */
   }
   return dth;
 }

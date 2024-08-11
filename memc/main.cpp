@@ -82,7 +82,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, str
 }
 /*----------------------------------------------------------*/
 void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
-  std::string log_headers = "#iter acceptedmoves bend_e stretch_e ";
+  std::string log_headers = "#iter acceptedmoves bend_e stretch_e stick_e ";
     // if(stick_para.do_stick){log_headers+="stick_e ";}
     // if(afm_para.do_afm){log_headers+="afm_e ";}
     // if (spring_para.do_spring){log_headers+="spring_e ";}

@@ -50,15 +50,13 @@ subroutine Membrane_listread(N, coef_bend, YY, radius, bdry_type, parafile) bind
     close(unit=100)
 end subroutine
 
-subroutine Stick_listread(do_stick, pos_bot_wall, sigma, epsilon, &
-        theta,  parafile) bind(c, name='Stick_listread')
-    real(kind=c_double) :: pos_bot_wall, sigma, theta, epsilon 
+subroutine Stick_listread(epsilon, sigma, pos_bot_wall, parafile) bind(c, name='StickRead')
+    real(kind=c_double) :: pos_bot_wall, sigma, epsilon 
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
     logical(kind=c_bool) :: do_stick;
 
-
-    namelist /Stick/ do_stick, pos_bot_wall, sigma, epsilon, theta
+    namelist /Stick/ pos_bot_wall, sigma, epsilon
 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')

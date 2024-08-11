@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include "math.h"
 #include <string>
-#include "Vector.hpp"
+#include "vector.hpp"
 #include <iomanip>
 #include <sstream>
 #include <fstream>

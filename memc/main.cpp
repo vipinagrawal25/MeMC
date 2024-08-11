@@ -110,7 +110,8 @@ int main(int argc, char *argv[]){
     double av_bond_len, Etot, radius;
     BE  bendobj;
     STE stretchobj;
-    McP mcobj(bendobj, stretchobj);
+    STICK stickobj;
+    McP mcobj(bendobj, stretchobj, stickobj);
     Vec3d *Pos; 
     MESH_p mesh;
     string outfolder, syscmds, para_file, outfile, filename;
@@ -136,6 +137,7 @@ int main(int argc, char *argv[]){
     mcobj.initMC(mesh.N, outfolder);
     bendobj.initBE(mesh.N, outfolder);
     stretchobj.initSTE(mesh.N, outfolder);
+    stickobj.initSTICK(mesh.N, outfolder);
     av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, outfolder, radius, 
                 residx);
     clock_t timer;

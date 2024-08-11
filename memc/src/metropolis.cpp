@@ -53,16 +53,18 @@ double McP::evalEnergy(Vec3d *Pos, MESH_p mesh, std::fstream &fileptr, int itr){
   // BE bendeobj;
   // STE stretcheobj;
   double bende, stretche, pre=0;
+  double stickener;
 if (fileptr.is_open()) {
   fileptr << itr << "  " << (double)acceptedmoves/(double)one_mc_iter<< "  "; 
   bende = beobj.bending_energy_total(Pos, mesh);
   stretche = steobj.stretch_energy_total(Pos, mesh);
-  fileptr << bende << "  "<<stretche << "  ";
+  stickener = stickobj.stick_energy_total(Pos, mesh.N);
+  fileptr << bende << "  "<<stretche << "  "<< stickener << "  ";
   totvol = steobj.volume_total(Pos, mesh);
   // totarea = steobj.area_total(Pos, mesh);
   }
 
- totEner = bende+stretche;
+ totEner = bende+stretche+stickener;
 
  if (steobj.dopressure()) {
    pre = -steobj.getpressure() * totvol;
@@ -198,10 +200,8 @@ double McP::energy_mc_3d(Vec3d *pos, MESH_p mesh, int idx) {
 
   E_s = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
                               num_nbr, idx, mesh.nghst);
+  E_stick = stickobj.stick_energy_ipart(pos[idx]); 
 //   if(st_p.do_stick)
-//   E_stick = lj_bottom_surface(pos[idx].z, st_p.is_attractive[idx],
-//       st_p.pos_bot_wall, st_p.epsilon, st_p.sigma); 
-
 //     if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
 
 //     if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring);

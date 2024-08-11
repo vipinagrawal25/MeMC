@@ -143,7 +143,6 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx)
     lap_bel = cot_times_rij/sigma_i;
     lap_bel_t0 = nhat*curv_t0;
     bend_ener = 0.5*BB*sigma_i*normsq(lap_bel-lap_bel_t0);
-    cout << bend_ener << endl;
     return bend_ener;
 }
 /*------------------------*/

@@ -56,11 +56,11 @@ subroutine Stick_listread(epsilon, sigma, pos_bot_wall, parafile) bind(c, name='
     character(len=char_len) :: f_fname
     logical(kind=c_bool) :: do_stick;
 
-    namelist /Stick/ pos_bot_wall, sigma, epsilon
+    namelist /StickPara/ pos_bot_wall, sigma, epsilon
 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
-    read(unit=100,nml=Stick)
+    read(unit=100,nml=StickPara)
     close(unit=100)
 end subroutine
 

@@ -160,6 +160,7 @@ bool McP::Boltzman(double DE, double activity) {
   /// https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm
   bool yes;
   double rand;
+ 
   DE += activity;
   yes = (DE <= 0.e0);
   if (!yes) {
@@ -217,11 +218,12 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
   double dxinc, dyinc, dzinc;
   double vol_i, vol_f;
   double dvol, de_vol, ini_vol, de_pressure;
+  double Volref;
   bool yes;
   int nframe;
   //
   nframe = get_nstart(mesh.N, mesh.bdry_type);
-
+  Volref = 4.0*pi/3;
   acceptedmoves = 0;
 
   for (i = 0; i < one_mc_iter; i++) {
@@ -255,7 +257,8 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
     //     // cout << de << endl;
     }
     if(steobj.dopressure()){
-      de_pressure = steobj.PV_change(dvol);
+      //de_pressure = steobj.PV_change(dvol);
+      de_pressure = steobj.getpressure()*log((VolMonitored + 2*dvol)/Volref);
       de = (Efin - Eini) + de_pressure;
     }
     if (algo == "mpolis") {

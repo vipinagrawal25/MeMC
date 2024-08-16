@@ -122,6 +122,7 @@ int main(int argc, char *argv[]){
     fstream fileptr(outfolder+"/mc_log", ios::app);
     // Check if the file opened successfully
     //
+    seed_v = (13974 + 13*(mpi_rank+1));
     RandomGenerator::init(seed_v);
     cout << "# The seed value is " << seed_v << endl;
     //

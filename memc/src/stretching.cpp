@@ -1,8 +1,8 @@
 #include "stretching.hpp"
 #include <fstream>
 
-extern "C" void StretchRead(double *, bool *, bool *, 
-                            double *, double *, double *, bool *, char *);
+extern "C" void StretchRead(double *, bool *, bool *, bool *,
+                            double *, double *, double *, double *, bool *, char *);
 
 int get_nstart(int, int);
 
@@ -12,8 +12,8 @@ int STE::initSTE(int N, std::string fname){
 
   parafile = fname+"/para_file.in";
   sprintf(tmp_fname, "%s", parafile.c_str() );
-  StretchRead(&YY, &do_volume, &is_pressurized, &coef_vol_expansion,
-              &pressure, &coef_area_expansion, &do_area, tmp_fname);
+  StretchRead(&YY, &do_volume, &is_pressurized, &is_pressure_ideal, &coef_vol_expansion,
+              &Pext, &Pint, &coef_area_expansion, &do_area, tmp_fname);
 
   ofstream out_;
   out_.open( fname+"/stretchpara.out");
@@ -22,9 +22,11 @@ int STE::initSTE(int N, std::string fname){
       << " coef_bend = " << YY << endl
       << " do_volume " << do_volume << endl
       << " is_pressurized " << is_pressurized << endl
-      << " pressure " << pressure << endl
+      << " external pressure " << Pext << endl
+      << " internal pressure " << Pint << endl
       << " coef_vol_expansion " << coef_vol_expansion << endl
       << " do_area " << do_area << endl
+      << " is_pressure_ideal " << is_pressure_ideal << endl
       << " coef_area_expansion " << coef_area_expansion << endl;
   out_.close();
   return 0;
@@ -33,7 +35,7 @@ int STE::initSTE(int N, std::string fname){
 
 bool STE::dovol(){return do_volume;}
 bool STE::dopressure(){return is_pressurized;}
-double STE::getpressure(){return pressure;}
+double STE::getpressure(){return Pext-Pint;}
 
 double STE::stretch_energy_ipart(Vec3d *pos,
                                  int *node_nbr, int num_nbr, int idx, int ghost){
@@ -57,7 +59,26 @@ double STE::stretch_energy_ipart(Vec3d *pos,
     //
     return 0.5*idx_ener*HH;
 }
-double STE::PV_change(double dvol){return pressure*dvol;}
+
+double STE::PressureEnergyTotal(double Volini, double Volt){
+    double dep;
+    if(is_pressure_ideal){
+       dep = (Pext*Volt - Pint*Volini*log(Volini/Volt));
+    }else{
+        dep = (Pext - Pint)*Volt;
+    }
+    return dep;
+}
+
+double STE::PV_change(double dvol, double Volini, double Volt){
+    double dep;
+    if(is_pressure_ideal){
+       dep = (Pext - Pint*Volini/(Volt))*2*dvol;
+    }else{
+        dep = (Pext - Pint)*dvol;
+    }
+    return dep;
+}
 
 double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
 

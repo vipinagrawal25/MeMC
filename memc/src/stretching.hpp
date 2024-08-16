@@ -22,13 +22,16 @@ public :
   bool dovol();
   bool dopressure();
   double getpressure();
-  double PV_change(double );
+  double PV_change(double, double, double);
+  double PressureEnergyTotal(double, double);
 private:
     double YY;  //coefficient stretching
     bool do_volume;
     bool is_pressurized;
     double coef_vol_expansion;   //coefficient of volume expansion
-    double pressure;
+    double Pext, Pint;
+    double Volt0;
+    bool is_pressure_ideal;
     bool do_area;
     double coef_area_expansion;   //coefficient of area expansion
     vector <double> area_t0;    //  area of each triangle at t=0

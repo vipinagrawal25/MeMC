@@ -46,7 +46,7 @@ int McP::initMC(int N, std::string fname){
 void McP::setEneVol() {
   EneMonitored = totEner;
   VolMonitored = totvol;
-  // volt0 = totvol;
+  volt0 = totvol;
 }
 
 double McP::evalEnergy(Vec3d *Pos, MESH_p mesh, std::fstream &fileptr, int itr){
@@ -67,7 +67,7 @@ if (fileptr.is_open()) {
  totEner = bende+stretche+stickener;
 
  if (steobj.dopressure()) {
-   pre = -steobj.getpressure() * totvol;
+   pre = steobj.PressureEnergyTotal(volt0, totvol);
    fileptr << pre << "  ";
    totEner += pre;
  }
@@ -218,12 +218,10 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
   double dxinc, dyinc, dzinc;
   double vol_i, vol_f;
   double dvol, de_vol, ini_vol, de_pressure;
-  double Volref;
   bool yes;
   int nframe;
   //
   nframe = get_nstart(mesh.N, mesh.bdry_type);
-  Volref = 4.0*pi/3;
   acceptedmoves = 0;
 
   for (i = 0; i < one_mc_iter; i++) {
@@ -257,8 +255,8 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
     //     // cout << de << endl;
     }
     if(steobj.dopressure()){
-      //de_pressure = steobj.PV_change(dvol);
-      de_pressure = steobj.getpressure()*log((VolMonitored + 2*dvol)/Volref);
+      de_pressure = steobj.PV_change(dvol, volt0, VolMonitored);
+      //de_pressure = steobj.getpressure()*log((VolMonitored + 2*dvol)/Volref);
       de = (Efin - Eini) + de_pressure;
     }
     if (algo == "mpolis") {

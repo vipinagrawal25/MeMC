@@ -43,10 +43,10 @@ int McP::initMC(int N, std::string fname){
 
   return 1;
 }
-void McP::setEneVol() {
+void McP::setEneVol(double radius) {
   EneMonitored = totEner;
   VolMonitored = totvol;
-  volt0 = totvol;
+  volt0 = (4./3.)*pi*pow(radius,3);
 }
 
 double McP::evalEnergy(Vec3d *Pos, MESH_p mesh, std::fstream &fileptr, int itr){
@@ -54,6 +54,7 @@ double McP::evalEnergy(Vec3d *Pos, MESH_p mesh, std::fstream &fileptr, int itr){
   // STE stretcheobj;
   double bende, stretche, pre=0;
   double stickener;
+  double areat;
 if (fileptr.is_open()) {
   fileptr << itr << "  " << (double)acceptedmoves/(double)one_mc_iter<< "  "; 
   bende = beobj.bending_energy_total(Pos, mesh);
@@ -71,8 +72,8 @@ if (fileptr.is_open()) {
    fileptr << pre << "  ";
    totEner += pre;
  }
- 
- fileptr << totEner  << "  " << totvol  << endl;
+ areat = steobj.area_total(Pos, mesh);
+ fileptr << totEner  << "  " << totvol  << "  " << areat  << "  " << volt0 << endl;
 
  if (is_fluid) {
    EneMonitored = totEner;

@@ -63,9 +63,10 @@ double STE::stretch_energy_ipart(Vec3d *pos,
 double STE::PressureEnergyTotal(double Volini, double Volt){
     double dep;
     if(is_pressure_ideal){
-       dep = (Pext*Volt - Pint*Volini*log(Volini/Volt));
+       dep = (Pext - Pint*Volini/Volt)*(Volt - Volini);
+       /* dep = (Pext*(Volt-Volini) - Pint*Volini*log(Volt/Volini)); */
     }else{
-        dep = (Pext - Pint)*Volt;
+        dep = (Pext - Pint)*(Volt - Volini);
     }
     return dep;
 }
@@ -73,7 +74,7 @@ double STE::PressureEnergyTotal(double Volini, double Volt){
 double STE::PV_change(double dvol, double Volini, double Volt){
     double dep;
     if(is_pressure_ideal){
-       dep = (Pext - Pint*Volini/(Volt))*2*dvol;
+       dep = (Pext - Pint*Volini/(Volt))*dvol;
     }else{
         dep = (Pext - Pint)*dvol;
     }

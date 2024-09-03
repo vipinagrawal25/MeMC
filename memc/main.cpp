@@ -93,7 +93,7 @@ void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
     // if (afm_para.do_afm){log_headers+="afm_fx, afm_fy afm_fz ";}
     // if (spring_para.do_spring){log_headers+="spr_north.z spr_south.z ";}
     // /* log_headers+="volume nPole_z sPole_z hrms"; */
-    log_headers+="total_e  volume  area";
+    log_headers+="total_e  volume  volt0";
     fid << log_headers << endl;
 }
 /*----------------------------------------------------------*/
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]){
                 residx);
     clock_t timer;
     Etot = mcobj.evalEnergy(Pos, mesh, fileptr, residx);
-    mcobj.setEneVol();
+    mcobj.setEneVol(radius);
 
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     if(!mcobj.isrestart()) diag_wHeader(bendobj,  stretchobj, fileptr);

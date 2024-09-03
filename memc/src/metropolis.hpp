@@ -27,7 +27,7 @@ public :
   double evalEnergy(Vec3d *, MESH_p, fstream &, int);
   double getarea();
   double getvolume();
-  void setEneVol();
+  void setEneVol(double );
 private:
     BE &beobj;
     STE &steobj;

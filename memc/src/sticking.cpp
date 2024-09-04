@@ -1,7 +1,7 @@
 #include "sticking.hpp"
 #include <fstream>
 
-extern "C" void StickRead(double *, double *, double *, char *);
+extern "C" void StickRead(double *, double *, double *, double *, char *);
 
 int get_nstart(int, int);
 
@@ -11,13 +11,13 @@ int STICK::initSTICK(int N, std::string fname){
 
   parafile = fname+"/para_file.in";
   sprintf(tmp_fname, "%s", parafile.c_str() );
-  StickRead(&epsilon, &sigma, &pos_bot_wall,  tmp_fname);
+  StickRead(&eps1, &eps2, &sigma, &pos_bot_wall,  tmp_fname);
 
   ofstream out_;
   out_.open( fname+"/stickpara.out");
   out_<< "# =========== stretching parameters ==========" << endl
       << " N " << N << endl
-      << " epsilon = " << epsilon << endl
+      << " eps1, eps2 = " << eps1 << " " << eps2 << endl
       << " sigma " << sigma << endl
       << " pos_bot_wall " << pos_bot_wall << endl;
   out_.close();
@@ -25,7 +25,7 @@ int STICK::initSTICK(int N, std::string fname){
 
 }
 
-double lj_attr(double sqdr, double eps){
+double lj_attr(double sqdr, double eps1, double eps2){
 
     /// @param sqdr square of the distance between two points
     /// @param eps coefficient of the potential 
@@ -34,7 +34,7 @@ double lj_attr(double sqdr, double eps){
 
     double r6;
     r6 = sqdr*sqdr*sqdr;
-    return 4*eps*(r6*(r6-1));
+    return 4*(r6*(eps1*r6 - eps2));
 }
 
 
@@ -52,7 +52,7 @@ double STICK::stick_energy_ipart(Vec3d pos){
 
         ds = pos_bot_wall - pos.z;
         inv_sqdz = (sigma*sigma)/(ds*ds);
-        return  lj_attr(inv_sqdz, epsilon);
+        return  lj_attr(inv_sqdz, eps1, eps2);
 }
 
 

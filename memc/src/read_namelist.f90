@@ -149,15 +149,16 @@ subroutine Spcurv_listread(which_spcurv, minC, maxC, theta, &
 end subroutine
 
 
-subroutine Activity_listread(which_act, minA, maxA, &
+subroutine Activity_listread(which_act, doactivity, minA, maxA, &
     parafile) bind(c, name='Activity_listread')
     real(kind=c_double) :: minA, maxA 
     character(kind=c_char, len=1), dimension(char_len) :: which_act
     character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
     character(len=char_len) :: f_fname
+    logical(kind=c_bool) :: doactivity 
     character(len=char_len) :: act_which
 
-    namelist /Actpara/ act_which, maxA, minA
+    namelist /Actpara/ act_which, doactivity, maxA, minA
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=Actpara)

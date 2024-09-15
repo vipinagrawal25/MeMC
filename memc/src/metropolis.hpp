@@ -7,11 +7,12 @@
 #include "bending.hpp"
 #include "stretching.hpp"
 #include "sticking.hpp"
+#include "activity.hpp"
 
 // #include "global.h"
 class McP {
 public : 
-  McP (BE &beobj, STE &steobj, STICK &stickobj): beobj(beobj), steobj(steobj), stickobj(stickobj) {};
+  McP (BE &beobj, STE &steobj, STICK &stickobj, ACT &actobj): beobj(beobj), steobj(steobj), stickobj(stickobj), actobj(actobj) {};
   int monte_carlo_3d(Vec3d *pos, MESH_p mesh);
   double energy_mc_3d(Vec3d *pos, MESH_p mesh,  int );
   int monte_carlo_fluid(Vec3d *, MESH_p, double);
@@ -31,7 +32,8 @@ public :
 private:
     BE &beobj;
     STE &steobj;
-  STICK &stickobj;
+    STICK &stickobj;
+    ACT &actobj;
     std::string algo;
     double dfac;
     int one_mc_iter, tot_mc_iter, dump_skip;

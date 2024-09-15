@@ -260,10 +260,14 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
       //de_pressure = steobj.getpressure()*log((VolMonitored + 2*dvol)/Volref);
       de = (Efin - Eini) + de_pressure;
     }
-    if (algo == "mpolis") {
-      yes = Boltzman(de, 0.0);
+    double act = 0.0;
+    if(actobj.is_active()){
+      act = actobj.getActivityIdx(idx);
+    }
+    if (algo == "mpolis"){
+      yes = Boltzman(de, act);
     } else if (algo == "glauber") {
-      yes = Glauber(de, 0.0);
+      yes = Glauber(de, act);
     }
     //
     if(yes) {

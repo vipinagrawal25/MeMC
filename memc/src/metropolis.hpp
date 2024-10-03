@@ -8,11 +8,14 @@
 #include "stretching.hpp"
 #include "sticking.hpp"
 #include "activity.hpp"
+#include "mdcelllist.hpp"
 
 // #include "global.h"
 class McP {
 public : 
-  McP (BE &beobj, STE &steobj, STICK &stickobj, ACT &actobj): beobj(beobj), steobj(steobj), stickobj(stickobj), actobj(actobj) {};
+  McP (BE &beobj, STE &steobj, STICK &stickobj,
+       ACT &actobj, MDCellList &celllistobj): beobj(beobj), steobj(steobj), stickobj(stickobj),
+                                              actobj(actobj), celllistobj(celllistobj) {};
   int monte_carlo_3d(Vec3d *pos, MESH_p mesh);
   double energy_mc_3d(Vec3d *pos, MESH_p mesh,  int );
   int monte_carlo_fluid(Vec3d *, MESH_p, double);
@@ -34,6 +37,7 @@ private:
     STE &steobj;
     STICK &stickobj;
     ACT &actobj;
+    MDCellList &celllistobj;
     std::string algo;
     double dfac;
     int one_mc_iter, tot_mc_iter, dump_skip;

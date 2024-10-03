@@ -12,11 +12,11 @@ endif
 
 link = $(opt) -lm -std=c++14 -lhdf5 -Isrc # 
 sources =  src/vector.cpp src/metropolis.cpp src/random_gen.cpp src/bending.cpp
-sources += src/stretching.cpp  src/hdf5_io.cpp  src/misc.cpp src/sticking.cpp
+sources += src/stretching.cpp  src/hdf5_io.cpp  src/activity.cpp src/mdcelllist.cpp src/misc.cpp src/sticking.cpp
 # sources += src/misc.cpp
 #
 object = obj/vector.o obj/metropolis.o obj/random_gen.o obj/bending.o
-object += obj/stretching.o  obj/hdf5_io.o obj/misc.o obj/sticking.o
+object += obj/stretching.o  obj/hdf5_io.o obj/activity.o obj/mdcelllist.o obj/misc.o obj/sticking.o
 bindir = ./bin
 #
 #

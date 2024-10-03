@@ -50,9 +50,13 @@ double STICK::stick_energy_ipart(Vec3d pos){
 
     double inv_sqdz, ds;
 
-        ds = pos_bot_wall - pos.z;
-        inv_sqdz = (sigma*sigma)/(ds*ds);
-        return  lj_attr(inv_sqdz, eps1, eps2);
+    ds = (pos_bot_wall - pos.z)*(pos_bot_wall - pos.z);
+    if(ds < 5.0*sigma*sigma){
+      inv_sqdz = (sigma*sigma)/(ds);
+      return  lj_attr(inv_sqdz, eps1, eps2);
+    } else {
+      return 0.0;
+    }
 }
 
 

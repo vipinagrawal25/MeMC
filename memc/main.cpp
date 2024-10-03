@@ -16,6 +16,7 @@
 #include "stretching.hpp"
 #include "random_gen.hpp"
 #include "hdf5_io.hpp"
+#include "mdcelllist.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -86,7 +87,7 @@ void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
     // if(stick_para.do_stick){log_headers+="stick_e ";}
     // if(afm_para.do_afm){log_headers+="afm_e ";}
     // if (spring_para.do_spring){log_headers+="spring_e ";}
-    if(steobj.dopressure()) {log_headers+=" Pressure_e ";}
+    if(steobj.dopressure()) {log_headers+=" Pressure_e  Eselfrep";}
     if(steobj.dovol()) {log_headers+=" Volume_e ";}
     // if(area_para.do_area) {log_headers+="area_e ";}
     // if (vol_para.is_pressurized){log_headers+="pressure_e ";}
@@ -98,28 +99,31 @@ void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
 }
 /*----------------------------------------------------------*/
 int main(int argc, char *argv[]){
-    int mpi_err, mpi_rank, residx;
+  int mpi_err, mpi_rank, residx, start;
+    string outfolder;
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
- 
+    start = atoi(argv[1]);
+    outfolder = ZeroPadNumber(mpi_rank+start)+"/";
+    // cout << outfolder << endl;
+
     pid_t pid = getpid();
     // cout << "# ID for this process is: " << pid << endl;
     std::string fname;
     uint32_t seed_v;
-    int iter, start, num_moves, num_bond_change;
+    int iter,  num_moves, num_bond_change;
     double av_bond_len, Etot, radius;
     BE  bendobj;
     ACT actobj;
     STE stretchobj;
     STICK stickobj;
-    McP mcobj(bendobj, stretchobj, stickobj, actobj);
+    MDCellList celllistobj(outfolder);
+    McP mcobj(bendobj, stretchobj, stickobj, actobj, celllistobj);
     Vec3d *Pos; 
     MESH_p mesh;
-    string outfolder, syscmds, para_file, outfile, filename;
     char tmp_fname[128];
+    string  syscmds, para_file, outfile, filename;
 
-    start = atoi(argv[1]);
-    outfolder = ZeroPadNumber(mpi_rank+start)+"/";
     fstream fileptr(outfolder+"/mc_log", ios::app);
     // Check if the file opened successfully
     //
@@ -141,15 +145,25 @@ int main(int argc, char *argv[]){
     stretchobj.initSTE(mesh.N, outfolder);
     stickobj.initSTICK(mesh.N, outfolder);
     actobj.initACT(mesh.N, outfolder);
+    // celllistobj.initCelllist(outfolder);
     av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, outfolder, radius, 
                 residx);
     clock_t timer;
     Etot = mcobj.evalEnergy(Pos, mesh, fileptr, residx);
     mcobj.setEneVol(radius);
 
+    if(celllistobj.isSelfRepulsive()) celllistobj.buildCellList(Pos, mesh.N);
+    // celllistobj.printParticlesInCells(Pos);
     fstream outfile_terminal(outfolder+"/terminal.out", ios::app);
     if(!mcobj.isrestart()) diag_wHeader(bendobj,  stretchobj, fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
+
+    // for (iter = 0; iter < mesh.N; ++iter){
+      
+    //   cout<< celllistobj.computeForces(Pos, mesh, iter)<< endl;
+    //   // outfile_terminal << Pos[iter].x << "       " << Pos[iter].y << " "<< Pos[iter].z << endl;
+    // }
+
     for(iter=residx; iter < mcobj.totaliter(); iter++){
         if(iter%mcobj.dumpskip() == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mcobj.dumpskip())+".h5";
@@ -170,7 +184,9 @@ int main(int argc, char *argv[]){
         outfile_terminal << "iter = " << iter << "; Accepted Moves = "
                          << (double) num_moves*100/mcobj.onemciter() << " %;"<<  
             " totalener = "<< Etot << "; volume = " << mcobj.getvolume() << endl;
+        if(celllistobj.isSelfRepulsive()) celllistobj.buildCellList(Pos, mesh.N);
     }
+
     outfile_terminal << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" << endl;
     outfile_terminal.close();
     fileptr.close();

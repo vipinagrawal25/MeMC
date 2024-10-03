@@ -55,6 +55,7 @@ double McP::evalEnergy(Vec3d *Pos, MESH_p mesh, std::fstream &fileptr, int itr){
   double bende, stretche, pre=0;
   double stickener;
   double areat;
+  double eself;
 if (fileptr.is_open()) {
   fileptr << itr << "  " << (double)acceptedmoves/(double)one_mc_iter<< "  "; 
   bende = beobj.bending_energy_total(Pos, mesh);
@@ -71,6 +72,11 @@ if (fileptr.is_open()) {
    pre = steobj.PressureEnergyTotal(volt0, totvol);
    fileptr << pre << "  ";
    totEner += pre;
+ }
+ if (celllistobj.isSelfRepulsive()){
+   eself = celllistobj.totalRepulsiveEnergy(Pos, mesh);
+   fileptr << eself << "  ";
+   totEner += eself;
  }
  areat = steobj.area_total(Pos, mesh);
  fileptr << totEner  << "  " << totvol  << "  " << areat  << "  " << volt0 << endl;
@@ -186,6 +192,7 @@ bool McP::Glauber(double DE, double activity) {
 double McP::energy_mc_3d(Vec3d *pos, MESH_p mesh, int idx) {
   double E_b, E_s, E_stick, E_afm, E_spr;
   int cm_idx, num_nbr;
+  double Eself = 0.0;
 
   E_b = 0.0;
   E_s = 0.0;
@@ -203,11 +210,13 @@ double McP::energy_mc_3d(Vec3d *pos, MESH_p mesh, int idx) {
   E_s = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
                               num_nbr, idx, mesh.nghst);
   E_stick = stickobj.stick_energy_ipart(pos[idx]); 
+  if(celllistobj.isSelfRepulsive()) Eself = celllistobj.computeSelfRep(pos, mesh, idx); 
+  // cout << Eself <<endl;
 //   if(st_p.do_stick)
 //     if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
 
 //     if(spring.do_spring) E_spr = spring_energy(pos[idx], idx, mesh, spring);
-  return E_b + E_s + E_stick + E_afm + E_spr;
+  return E_b + E_s + E_stick + E_afm + E_spr + Eself;
 }
 // //
 
@@ -248,7 +257,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
     vol_f = steobj.volume_ipart(pos,
             (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
     dvol=0.5*(vol_f - vol_i);
-
+    // std::cout << i << std::endl;
     if(steobj.dovol()){
     //   de_vol = vol_energy_change(mbrane, vol_p, dvol);
     //   // cout << de << "\t";

@@ -100,7 +100,7 @@ subroutine MeshRead(N, bdry_cdt, nghst, radius, parafile) bind(c, name="MeshRead
    
     funit = 473
     call convert_cstr_fstr(parafile, f_fname)
-    open(unit=funit,file="00000/para_file.in")
+    open(unit=funit,file=f_fname)
     read(unit=funit,nml=Meshpara)
     close(unit=funit)
 end subroutine

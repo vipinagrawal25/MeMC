@@ -5,7 +5,7 @@ extern "C" void StickRead(double *, double *, double *, double *, char *);
 
 int get_nstart(int, int);
 
-int STICK::initSTICK(int N, std::string fname){
+STICK::STICK(int N, std::string fname){
   char tmp_fname[128];
   string parafile, outfile;
 
@@ -21,7 +21,8 @@ int STICK::initSTICK(int N, std::string fname){
       << " sigma " << sigma << endl
       << " pos_bot_wall " << pos_bot_wall << endl;
   out_.close();
-  return 0;
+  for(int i = 0; i< N; i++){isattractive.push_back(true);}
+  // return 0;
 
 }
 
@@ -37,8 +38,14 @@ double lj_attr(double sqdr, double eps1, double eps2){
     return 4*(r6*(eps1*r6 - eps2));
 }
 
+void STICK::identify_attractive_part(Vec3d *pos){
+  int i;
+  for (i=0; i<isattractive.size(); i++){
+    isattractive[i] = pos[i].z < 0;
+  }
+}
 
-double STICK::stick_energy_ipart(Vec3d pos){
+double STICK::stick_energy_ipart(Vec3d pos, int idx){
     /// @brief Sticking of the bottom surface using LJ potential 
     /// @param zz z-coordinate of a point in shell
     /// @param eps coefficient of the potential 
@@ -51,7 +58,7 @@ double STICK::stick_energy_ipart(Vec3d pos){
     double inv_sqdz, ds;
 
     ds = (pos_bot_wall - pos.z)*(pos_bot_wall - pos.z);
-    if(ds < 5.0*sigma*sigma){
+    if(isattractive[idx]){
       inv_sqdz = (sigma*sigma)/(ds);
       return  lj_attr(inv_sqdz, eps1, eps2);
     } else {
@@ -76,7 +83,7 @@ double STICK::stick_energy_total(Vec3d *pos,
     lj_bote = 0e0;
     for(idx = 0; idx < N; idx++){
         /* idx = 2; */
-        lj_bote += stick_energy_ipart(pos[idx]);
+      lj_bote += stick_energy_ipart(pos[idx], idx);
     }
     return lj_bote;
 }

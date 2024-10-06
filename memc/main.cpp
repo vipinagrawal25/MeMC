@@ -34,7 +34,7 @@ void scale_pos(Vec3d *pos, double R, int N){
   // for (Vec3d elem : pos) elem = R*elem;
 }
 
-double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, string outfolder,
+double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, STICK &stickobj, string outfolder,
         double radius, int &residx){
 
     double Pole_zcoord;
@@ -48,6 +48,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, str
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         ave_bond_len = stretchobj.init_eval_lij_t0(Pos, mesh, mcobj.isfluid());
+        stickobj.identify_attractive_part(Pos);
         residx = 0; 
         // init_spcurv(spcurv_para, Pos, mbrane_para.N);
         // if(stick_para.do_stick)
@@ -56,6 +57,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, str
         // min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
     }else{
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
+        stickobj.identify_attractive_part(Pos);
         scale_pos(Pos, radius, mesh.N);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
@@ -101,10 +103,18 @@ void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
 int main(int argc, char *argv[]){
   int mpi_err, mpi_rank, residx, start;
     string outfolder;
+    MESH_p mesh;
+    string  syscmds, para_file, outfile, filename;
+    char tmp_fname[128];
+    double radius;
+    // Get the information of the mesh
     mpi_err = MPI_Init(0x0, 0x0);
     mpi_err =  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     start = atoi(argv[1]);
     outfolder = ZeroPadNumber(mpi_rank+start)+"/";
+    para_file = outfolder+"/para_file.in";
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    MeshRead(&mesh.N, &mesh.bdry_type, &mesh.nghst, &radius, tmp_fname);
     // cout << outfolder << endl;
 
     pid_t pid = getpid();
@@ -112,17 +122,14 @@ int main(int argc, char *argv[]){
     std::string fname;
     uint32_t seed_v;
     int iter,  num_moves, num_bond_change;
-    double av_bond_len, Etot, radius;
+    double av_bond_len, Etot;
     BE  bendobj;
     ACT actobj;
     STE stretchobj;
-    STICK stickobj;
+    STICK stickobj(mesh.N, outfolder);
     MDCellList celllistobj(outfolder);
     McP mcobj(bendobj, stretchobj, stickobj, actobj, celllistobj);
     Vec3d *Pos; 
-    MESH_p mesh;
-    char tmp_fname[128];
-    string  syscmds, para_file, outfile, filename;
 
     fstream fileptr(outfolder+"/mc_log", ios::app);
     // Check if the file opened successfully
@@ -131,9 +138,6 @@ int main(int argc, char *argv[]){
     RandomGenerator::init(seed_v);
     cout << "# The seed value is " << seed_v << endl;
     //
-    para_file = outfolder+"/para_file.in";
-    sprintf(tmp_fname, "%s", para_file.c_str() );
-    MeshRead(&mesh.N, &mesh.bdry_type, &mesh.nghst, &radius, tmp_fname);
     // cout << mesh.N << "\t" << mesh.bdry_type << "\t" << mesh.nghst << "\t" << radius;
 
     Pos = (Vec3d *)calloc(mesh.N, sizeof(Vec3d));
@@ -143,10 +147,10 @@ int main(int argc, char *argv[]){
     mcobj.initMC(mesh.N, outfolder);
     bendobj.initBE(mesh.N, outfolder);
     stretchobj.initSTE(mesh.N, outfolder);
-    stickobj.initSTICK(mesh.N, outfolder);
+    // stickobj.initSTICK(mesh.N, outfolder);
     actobj.initACT(mesh.N, outfolder);
     // celllistobj.initCelllist(outfolder);
-    av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, outfolder, radius, 
+    av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, stickobj, outfolder, radius, 
                 residx);
     clock_t timer;
     Etot = mcobj.evalEnergy(Pos, mesh, fileptr, residx);

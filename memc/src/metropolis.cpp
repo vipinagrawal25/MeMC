@@ -209,7 +209,7 @@ double McP::energy_mc_3d(Vec3d *pos, MESH_p mesh, int idx) {
 
   E_s = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
                               num_nbr, idx, mesh.nghst);
-  E_stick = stickobj.stick_energy_ipart(pos[idx]); 
+  E_stick = stickobj.stick_energy_ipart(pos[idx], idx); 
   if(celllistobj.isSelfRepulsive()) Eself = celllistobj.computeSelfRep(pos, mesh, idx); 
   // cout << Eself <<endl;
 //   if(st_p.do_stick)

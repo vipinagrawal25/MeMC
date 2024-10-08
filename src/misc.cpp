@@ -2,10 +2,16 @@
 #include <sys/stat.h>
 #include "math.h"
 #include <string>
-#include "Vector.h"
-#include "global.h"
+#include "vector.hpp"
 #include <iomanip>
 #include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include <random>
+#include <algorithm>
+#include <chrono>
 using namespace std;
 /*-----------------------------------------------*/
 double SqEr(double Arr1[], double Arr2[],int nn){
@@ -17,7 +23,7 @@ double SqEr(double Arr1[], double Arr2[],int nn){
   return error;
 }
 /*-----------------------------------------------*/
-bool FileExists(const std::string &s){
+bool FileExists(const string &s){
   struct stat buffer;
   return (stat (s.c_str(), &buffer) == 0);
 }
@@ -140,7 +146,6 @@ void zeros(double *yzero, int ndim){
   }
 }
 /*-----------------------------------------------*/
-
 inline double pos_coord(Vec3d pos, char dirn='z'){
   if (dirn=='x'){return pos.x;}
   else if(dirn=='y'){return pos.y;}
@@ -178,18 +183,17 @@ void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn){
   *aminval=minval;
 }
 /*-----------------------------------------------*/
-/*-----------------------------------------------*/
-double height_rms(Vec3d *Pos, MBRANE_p mbrane){
-  double radius=mbrane.radius;
-  double N=mbrane.N;
-  double hrms=0;
-  double hh;
-  for (int i = 0; i < N; ++i){
-    hh = sqrt(Pos[i].x*Pos[i].x+Pos[i].y*Pos[i].y+Pos[i].z*Pos[i].z) - radius;
-    hrms += hh*hh;
-  }
-  return sqrt(hrms/N);
-}
+// double height_rms(Vec3d *Pos, MBRANE_p mbrane){
+//   double radius=mbrane.radius;
+//   double N=mbrane.N;
+//   double hrms=0;
+//   double hh;
+//   for (int i = 0; i < N; ++i){
+//     hh = sqrt(Pos[i].x*Pos[i].x+Pos[i].y*Pos[i].y+Pos[i].z*Pos[i].z) - radius;
+//     hrms += hh*hh;
+//   }
+//   return sqrt(hrms/N);
+// }
 /*-----------------------------------------------*/
 int get_nstart(int N, int bdrytype){
     static int nf1;
@@ -200,7 +204,7 @@ int get_nstart(int N, int bdrytype){
             nf2 = 2 * nf1;
             break;
         case 1:
-            nf2 = 4 * nf1; 
+            nf2 = 4 * nf1;
             break;
         default:
             nf2 = 0;
@@ -270,15 +274,61 @@ int print_sanity(Vec3d *pos, int *nbr_del1, int *nbr_del2, int *nbr_add1,
   return 0;
 }
 
-double determinant(Vec3d X1, Vec3d X2, Vec3d X3, double len) {
-  Vec3d A = diff_pbc(X1, X2, len);
-  Vec3d B = diff_pbc(X1, X3, len);
+// void fillPoints(vector<int>& points, double fraction, int N){
+   
+//   int numOnes = static_cast<int>(fraction * N);
+//   int numZeros = N - numOnes;
 
-  double det = (A.x * B.y - A.y * B.x);
-  return det;
+//   // Fill the vector with the required number of 1s and 0s
+//   for (int i = 0; i < numOnes; ++i) points.push_back(1);
+//   for (int i = numOnes; i < N; ++i) points.push_back(0);
+
+//   // Shuffle the vector to mix 0s and 1s
+//   srand(unsigned(time(0)));
+//   random_shuffle(points.begin(), points.end());
+// }
+
+
+void fillPoints(vector<int>& points, double fraction, int N){
+    int numOnes = static_cast<int>(fraction * N);
+    int numZeros = N - numOnes;
+
+    // Fill the vector with the required number of 1s and 0s
+    points.clear(); // Clear the vector first if you're reusing it
+    for (int i = 0; i < numOnes; ++i) points.push_back(1);
+    for (int i = numOnes; i < N; ++i) points.push_back(0);
+
+    // Shuffle the vector using shuffle
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    shuffle(points.begin(), points.end(), default_random_engine(seed));
+}
+
+void fillPoints(int* points, double fraction, int N){
+    int numOnes = static_cast<int>(fraction * N);
+    int numZeros = N - numOnes;
+
+    // Fill the array with the required number of 1s and 0s
+    for (int i = 0; i < numOnes; ++i) points[i] = 1;
+    for (int i = numOnes; i < N; ++i) points[i] = 0;
+
+    // Shuffle the array
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(points, points + N, std::default_random_engine(seed));
+}
+
+void fillPoints(int* points, int N, int value){
+    // Fill the array with the required number of 1s and 0s
+    for (int i = 0; i < N; ++i) points[i] = value;
 }
 
 
+// double determinant(Vec3d X1, Vec3d X2, Vec3d X3, double len) {
+//   Vec3d A = diff_pbc(X1, X2, len);
+//   Vec3d B = diff_pbc(X1, X3, len);
+
+//   double det = (A.x * B.y - A.y * B.x);
+//   return det;
+// }
 
 /* void wDiag(FILE *fid, MBRANE_para mbrane, AFM_para afm, SPRING_para spring, MESH mesh, */
 /*             int i, int num_moves, double *Et,Vec3d *afm_force, */
@@ -294,4 +344,4 @@ double determinant(Vec3d X1, Vec3d X2, Vec3d X3, double len) {
 /*       height_rms(Pos,mbrane)); */
 /*     fflush(fid); */
 /* } */
-/*-----------------------------------------------*/
+/*-------------------------------------------------*/

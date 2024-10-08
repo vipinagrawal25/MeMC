@@ -1,0 +1,2 @@
+CC=/software/mpi/openmpi-4.1.4-gcc-11.2.0/bin/mpic++ -O3 -w \
+  -L/software/hdf5/1.10.6/lib/ -I/software/hdf5/1.10.6/include

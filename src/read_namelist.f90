@@ -102,12 +102,12 @@ subroutine MeshRead(bdry_cdt, nghst, radius, ncomp, compfrac, parafile) bind(c, 
     close(unit=200)
 end subroutine
 
-subroutine LipidRead(kai, epssqby2, parafile) bind(c, name="LipidRead")
-    real(kind=c_double) :: kai, epssqby2
+subroutine LipidRead(iregsoln, kai, epssqby2, parafile) bind(c, name="LipidRead")
+    real(kind=c_double) :: iregsoln, kai, epssqby2
     character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
     character(len=char_len) :: f_fname
 
-    namelist /Lipidpara/ kai, epssqby2
+    namelist /Lipidpara/ iregsoln, kai, epssqby2
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=200, file=f_fname, status='old')
     read(unit=200, nml=Lipidpara)
@@ -247,6 +247,19 @@ subroutine Spring_listread(do_spring, icompute, nPole_eq_z, sPole_eq_z, &
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
     read(unit=100,nml=springpara)
+    close(unit=100)
+end subroutine
+
+subroutine Cell_listread(isselfrepulsive, boxsize, cutoff, minL, sig, eps, parafile) bind(c, name='Cell_listread')
+    real(kind=c_double) :: boxsize, cutoff, sig, eps
+    logical(c_bool) :: isselfrepulsive
+    real(kind=c_double) :: minL
+    character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
+    character(len=char_len) :: f_fname
+    namelist /Celllist/isselfrepulsive, boxsize, cutoff, minL, sig, eps
+    call convert_cstr_fstr(parafile, f_fname)
+    open(unit=100,file=f_fname,status='old')
+    read(unit=100,nml=Celllist)
     close(unit=100)
 end subroutine
 

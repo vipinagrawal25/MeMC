@@ -41,7 +41,6 @@ int McP::initMC(MESH_p mesh, string fname){
    out_.open( fname+"/mcpara.out" );
    out_<< "# =========== monte carlo parameters ==========" << endl
       << " N " << N << endl
-      << " algo = " << algo << endl
       << " dfac " << dfac << endl
       << " kbT " << kBT << endl
       << " is_restart " << is_restart << endl
@@ -51,12 +50,12 @@ int McP::initMC(MESH_p mesh, string fname){
       << " min_allowed_nbr " << min_allowed_nbr << endl
       << " fluidize_every " << fluidize_every << endl;
 
-   if(!(chargeobj.ical) && (mesh.ncomp == 1)){
-      out_ << "Energy_mc_3d = energy_mc_best" << endl;
+   if(!(chargeobj.calculate()) && !(lipidobj.calculate())){
+      out_ << " Energy_mc_3d = energy_mc_best" << endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val) -> double {
       return this->energy_mc_best(vec , vec_ptr, mesh, val);};
-   }else if(chargeobj.ical && (mesh.ncomp == 1)){
-      out_ << "Energy_mc_3d = energy_mc_bestch"<< endl;
+   }else if(chargeobj.calculate() && !(lipidobj.calculate()) ){
+      out_ << " Energy_mc_3d = energy_mc_bestch"<< endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val) -> double {
       return this->energy_mc_bestch(vec, vec_ptr, mesh, val);};
    }
@@ -64,9 +63,11 @@ int McP::initMC(MESH_p mesh, string fname){
    algo=temp_algo;
 
    if (algo=="mpolis"){
+      out_ << " Algo = Metropolis"<< endl;
       Algo = [this](double DE, double activity) -> double {
       return this->Boltzman(DE,activity);};
-   }else if(algo=="glauber"){
+   }else if(algo=="Galuber"){
+      out_ << " Algo = mpolis"<< endl;
       Algo = [this](double DE, double activity) -> double {
       return this->Glauber(DE,activity);};
    }
@@ -88,12 +89,12 @@ double McP::evalEnergy(MESH_p mesh){
    bende = beobj.bending_energy_total(Pos, mesh);
    stretche = steobj.stretch_energy_total(Pos, mesh);
    totEner = bende+stretche;
-   if (chargeobj.ical){
+   if (chargeobj.calculate()){
       electroe = chargeobj.debye_huckel_total(Pos, mesh.N);
       totEner += electroe;
    }
    // It's okay to have if statement here.
-   if (mesh.ncomp>1) {
+   if (lipidobj.calculate()) {
       regsole = lipidobj.reg_soln_tot(Pos, mesh);
       totEner+=regsole;
    }
@@ -119,8 +120,8 @@ void McP::write_energy(fstream &fileptr, int itr, const MESH_p &mesh){
   if (fileptr.is_open()){
       fileptr << itr << " " << (double)acceptedmoves/(double)one_mc_iter<< "  ";
       fileptr << bende << " " << stretche << "  ";
-      if (chargeobj.ical) fileptr << electroe << " ";
-      if (mesh.ncomp>1) fileptr << regsole << " ";
+      if (chargeobj.calculate()) fileptr << electroe << " ";
+      if (lipidobj.calculate()) fileptr << regsole << " ";
       if (steobj.dopressure()) fileptr << pre << "  ";
       if (steobj.dovol()) fileptr << vole << " ";
       fileptr << EneMonitored  << "  ";
@@ -296,7 +297,7 @@ double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p mesh, in
 //    energy[1]=E_s;
 //    energy[2]=E_charge;
 //    // Try not to have if-else statements here.
-//    if (mesh.ncomp>1){
+//    if (lipidobj.calculate()){
 //       E_rs = lipidobj.gradphisq_ipart(pos,mesh,idx);
 //       E_rs += lipidobj.gradphisq_ipart_neighbour(pos, mesh,idx);
 //       energy[3] =lipidobj.getepssqby2()*E_rs;
@@ -448,13 +449,10 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
    /* if (det1 * det2 < 0.0) { */
    aft_ij = pos[idx_add2] - pos[idx_add1];
    double dl = norm(aft_ij);
-    // if (dl==0){
-    //    cout << idx_add2 << " " << idx_add1 << endl;
-    // }
-    N_nbr_del1 = mesh.numnbr[idx_del1];
-    N_nbr_del2 = mesh.numnbr[idx_del2];
-    N_nbr_add1 = mesh.numnbr[idx_add1];
-    N_nbr_add2 = mesh.numnbr[idx_add2];
+   N_nbr_del1 = mesh.numnbr[idx_del1];
+   N_nbr_del2 = mesh.numnbr[idx_del2];
+   N_nbr_add1 = mesh.numnbr[idx_add1];
+   N_nbr_add2 = mesh.numnbr[idx_add2];
 
    bool flip_condt1, flip_condt2, flip_condt3;
    bool accept_flip;
@@ -467,12 +465,6 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
 
       if (accept_flip) {
          move = move + 1;
-         /* print_sanity(pos, mesh.node_nbr_list+cm_idx_del1,
-         * mesh.node_nbr_list+cm_idx_del2, */
-         /*    mesh.node_nbr_list+cm_idx_add1,
-         * mesh.node_nbr_list+cm_idx_add2, */
-         /*         idx_del1, idx_del2, idx_add1, idx_add2, 
-            (char*)"bef", i); */
          memcpy(nbr_del_1, &mesh.node_nbr_list[cm_idx_del1],
                sizeof(int) * mesh.nghst);
          memcpy(nbr_del_2, &mesh.node_nbr_list[cm_idx_del2],
@@ -500,25 +492,6 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
          mesh.numnbr[idx_del1] = N_nbr_del1;
          mesh.numnbr[idx_del2] = N_nbr_del2;
          
-         // for (int j= 0; j < mesh.numnbr[idx_del1]; ++j){
-         //    if (mesh.node_nbr_list[cm_idx_del1+j] ==
-         //        mesh.node_nbr_list[cm_idx_del1+j+1]){
-
-         //       // cout << "idx_del1=" << idx_del1 << " " <<
-         //       // nbr_del_1[j] << " " << nbr_del_1[j+1]
-         //       // << endl;
-         //    }
-         // }
-
-         // for (int j= 0; j < mesh.numnbr[idx_del2]; ++j){
-         //    if (mesh.node_nbr_list[cm_idx_del2+j] ==
-         //        mesh.node_nbr_list[cm_idx_del2+j+1]){
-         //       // cout << "idx_del2="<< idx_del2 << " " <<
-         //       // nbr_del_2[j] << " " << nbr_del_2[j+1]
-         //       // << endl;
-         //    }
-         // }
-
          memcpy(mesh.node_nbr_list + cm_idx_add1, &nbr_add_1,
                sizeof(int) * mesh.nghst);
          memcpy(mesh.node_nbr_list + cm_idx_add2, &nbr_add_2,
@@ -526,41 +499,10 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
 
          mesh.numnbr[idx_add1] = N_nbr_add1;
          mesh.numnbr[idx_add2] = N_nbr_add2;
-
-         // for (int j= 0; j < mesh.numnbr[idx_add1]; ++j){
-         //    if (mesh.node_nbr_list[cm_idx_add1+j] ==
-         //        mesh.node_nbr_list[cm_idx_add1+j+1]){
-         //       // cout<< "idx_add1=" << idx_add1 << " "
-         //       // << nbr_add_1[j] << " " << nbr_add_1[j+1]
-         //       // << endl;
-         //    }
-         // }
-
-         // for (int j= 0; j < mesh.numnbr[idx_add2]; ++j){
-         //    if (mesh.node_nbr_list[cm_idx_add2+j] ==
-         //        mesh.node_nbr_list[cm_idx_add2+j+1]){
-         //       // cout<< "idx_add2=" << idx_add2 << " "
-         //       // << nbr_add_2[j] << " " << nbr_add_2[j+1]
-         //       // << endl;
-         //    }
-         // }
-
-
       }
-    /* } */
   }
   return move;
 }
-//
-// void McP::exchange(int idx1,int idx2){
-//    double temp = beobj.coef_bend[idx1];
-//    beobj.coef_bend[idx1] = beobj.coef_bend[idx2];
-//    beobj.coef_bend[idx2] = temp;
-
-//    temp = chargeobj.charges[idx1];
-//    chargeobj.charges[idx1] = chargeobj.charges[idx2];
-//    chargeobj.charges[idx2] = temp;
-// }
 //
 int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    int exchngdmoves = 0;

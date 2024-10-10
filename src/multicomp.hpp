@@ -15,8 +15,10 @@ public:
    double getepssqby2(){return epssqby2;}
    double gradphisq_ipart(Vec3d *pos, MESH_p mesh, int idx);
    double gradphisq_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx);
+   bool calculate(){return iregsoln;}
 private:
    // MESH_p &mesh;
+   bool iregsoln;
    double kai;
    double epssqby2;
    double phi_ipart(int *lipA, int *node_nbr, int num_nbr, int idx);

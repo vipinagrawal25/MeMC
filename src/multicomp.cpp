@@ -7,7 +7,7 @@
 #include "vector.hpp"
 #include "mesh.hpp"
 
-extern "C" void LipidRead(double *, double *, char *);
+extern "C" void LipidRead(bool *, double *, double *, char *);
 //
 MulCom::MulCom(const MESH_p& mesh, std::string fname){
     char tmp_fname[128];
@@ -16,7 +16,7 @@ MulCom::MulCom(const MESH_p& mesh, std::string fname){
     parafile = fname+"/para_file.in";
     sprintf(tmp_fname, "%s", parafile.c_str());
 
-    LipidRead(&kai, &epssqby2, tmp_fname);
+    LipidRead(&iregsoln, &kai, &epssqby2, tmp_fname);
 
     std::ofstream out_;
     out_.open(fname+"/lipidpara.out");

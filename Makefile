@@ -8,13 +8,13 @@ endif
 link = $(opt) -lm -std=c++17 -lhdf5 -Isrc#
 sources =  src/vector.cpp src/metropolis.cpp src/random_gen.cpp src/bending.cpp
 sources += src/stretching.cpp src/hdf5_io.cpp src/misc.cpp
-sources += src/electrostatics.cpp
+sources += src/electrostatics.cpp src/selfavoidance.cpp
 # sources += src/misc.cpp
 #
 object = obj/vector.o obj/metropolis.o obj/random_gen.o obj/bending.o
 object += obj/stretching.o obj/hdf5_io.o obj/misc.o
 object += obj/multicomp.o
-object += obj/electrostatics.o
+object += obj/electrostatics.o obj/selfavoidance.o
 #
 # Find directories that match the pattern (00000, 00001, 00002, etc.)
 DIRS := $(shell find . -maxdepth 1 -type d -name '[0-9][0-9][0-9][0-9][0-9]')

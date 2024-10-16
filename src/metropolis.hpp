@@ -12,12 +12,13 @@
 #include "stretching.hpp"
 #include "multicomp.hpp"
 #include "electrostatics.hpp"
+#include "selfavoidance.hpp"
 
 using namespace std;
 class McP{
 public : 
-  McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj);
-  McP (BE &beobj, STE &steobj);
+  McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj, 
+    SelfAvoid &repulsiveobj);
   int monte_carlo_3d(Vec3d *pos, MESH_p mesh);
   int monte_carlo_fluid(Vec3d *, MESH_p);
   int monte_carlo_lipid(Vec3d *pos, MESH_p mesh);
@@ -38,6 +39,7 @@ private:
   STE &steobj;
   MulCom &lipidobj;
   ESP &chargeobj;
+  SelfAvoid &repulsiveobj;
   std::string algo;
   double dfac;
   int one_mc_iter, tot_mc_iter, dump_skip;
@@ -49,13 +51,18 @@ private:
   int fluidize_every;
   double fac_len_vertices;
   double totEner, totvol, bende, stretche, pre, regsole=0, electroe, vole=0;
+  double selfe=0;
   double EneMonitored, VolMonitored;
   double volt0;
   int acceptedmoves;
   bool sphere;
-  function<double(vector<double> &, Vec3d*, MESH_p, int)> energy_mc_3d;
-  double energy_mc_best(vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx);
-  double energy_mc_bestch(vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx);
+  function<double(vector<double> &, Vec3d*, MESH_p, int, int, int)> energy_mc_exch;
+  function<double(vector<double> &, Vec3d*, MESH_p, int, int, int)> energy_mc_3d;
+  double energy_mc_best(vector<double>& , Vec3d *, MESH_p , int , int, int);
+  double energy_mc_bestch(vector<double>&, Vec3d *, MESH_p , int , int, int);
+  double energy_mc_bestchre(vector<double>&, Vec3d *, MESH_p , int , int, int);
+  double energy_mc_bech(vector<double>&, Vec3d *, MESH_p , int , int, int);
+  double energy_mc_ch(vector<double>&, Vec3d *, MESH_p , int , int, int);
   function<bool(double, double)> Algo;
   bool Boltzman(double DE, double activity);
   bool Glauber(double DE, double activity);

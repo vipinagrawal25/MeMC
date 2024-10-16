@@ -17,13 +17,14 @@
 // };
 
 // A class to handle the 3D cell list algorithm for molecular dynamics
-class SelfAvoid: private CellList {
+class SelfAvoid: public CellList {
 public:
-  SelfAvoid(string fname);
+  SelfAvoid(MESH_p, string fname);
   double computeSelfRep(MESH_p , int );
   double totalRepulsiveEnergy(MESH_p);
   bool isSelfRepulsive() {return doselfrepulsion;}
-  private:
+
+private:
   double sig, epsl;
   bool doselfrepulsion;
 };

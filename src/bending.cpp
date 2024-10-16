@@ -17,6 +17,11 @@ BE::BE(const MESH_p& mesh, std::string fname){
     init_coefbend(mesh.compA, mesh.N);
     spcurv=spC1;
 
+    if (mesh.ncomp==1){
+        bend2=bend1;
+        spC2=spC1;
+    }
+
     ofstream out_;
     out_.open( fname+"/bendpara.out");
     out_<< "# =========== bending parameters ==========" << endl
@@ -58,11 +63,9 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     int jdx,kdx,kpdx,jdxp1;
     double cot_sum,liksq,likpsq,ljkpsq;
     double sigma_i = 0e0;
-
     // store all the lengths
     if (bdry_type == 1 || idx>edge){
         for (int j = 0; j < num_nbr; ++j){
-            
             jdx = node_nbr[j];
             kdx = node_nbr[(j+1)%num_nbr]; // this is same as kdx
             xij[j]=pos[idx]-pos[jdx];
@@ -111,7 +114,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     bend_ener = 0.5*coef_bend[idx]*sigma_i*normsq(lap_bel-lap_bel_t0);
     return bend_ener;
 }
-/*------------------------*/
+/*--------------------------------------------------------------------------*/
 double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
     /// @brief Estimate the Bending energy contribution from the neighbours 
     /// when ith particle position changes
@@ -156,12 +159,16 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
         be += bending_energy_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
     }
-    // cout << be << endl;
     return be;
 }
-/*-------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
 void BE::exchange(int idx1, int idx2){
    double temp = coef_bend[idx1];
    coef_bend[idx1] = coef_bend[idx2];
    coef_bend[idx2] = temp;
 }
+// /*-------------------------------------------------------------------------------------*/
+// double BE::Gaussian_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
+//     int bdry_type, double lenth, int edge){
+
+// }

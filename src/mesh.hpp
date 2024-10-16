@@ -53,53 +53,5 @@ struct MESH_p{
         delete[] numnbr;
         delete[] compA;
     }
-
-    // ~MESH_p() {
-    //     delete[] pos;
-    //     delete[] node_nbr_list;
-    //     delete[] numnbr;
-    //     delete[] compA;
-    // }
-
-    // // Copy Constructor
-    // MESH_p(const MESH_p& other) {
-    //     N = other.N;
-    //     nghst = other.nghst;
-    //     numnbr = new int[N];
-    //     node_nbr_list = new int[N * nghst];
-    //     pos = new Vec3d[N];
-    //     compA = new int[N];
-
-    //     // Deep copy the arrays
-    //     std::copy(other.numnbr, other.numnbr + N, numnbr);
-    //     std::copy(other.node_nbr_list, other.node_nbr_list + (N * nghst), node_nbr_list);
-    //     std::copy(other.pos, other.pos + N, pos);
-    //     std::copy(other.compA, other.compA + N, compA);
-    // }
-
-    // // Assignment Operator
-    // MESH_p& operator=(const MESH_p& other) {
-    //     if (this != &other) {
-    //         // Deallocate current memory
-    //         delete[] numnbr;
-    //         delete[] node_nbr_list;
-    //         delete[] pos;
-    //         delete[] compA;
-
-    //         // Allocate new memory and copy
-    //         N = other.N;
-    //         nghst = other.nghst;
-    //         numnbr = new int[N];
-    //         node_nbr_list = new int[N * nghst];
-    //         pos = new Vec3d[N];
-    //         compA = new int[N];
-
-    //         std::copy(other.numnbr, other.numnbr + N, numnbr);
-    //         std::copy(other.node_nbr_list, other.node_nbr_list + (N * nghst), node_nbr_list);
-    //         std::copy(other.pos, other.pos + N, pos);
-    //         std::copy(other.compA, other.compA + N, compA);
-    //     }
-    //     return *this;
-    // }
 };
 #endif

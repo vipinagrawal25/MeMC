@@ -16,6 +16,8 @@ public :
   void init_coefbend(int *lipA, int N);
   void printbend(){print(coef_bend);}
   int getbend(int i){return coef_bend[i];}
+  double getbend1(){return bend1;}
+  double getbend2(){return bend2;}
   void exchange(int idx1, int idx2);
 private:
   double bend1, bend2, spC1, spC2;

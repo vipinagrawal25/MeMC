@@ -20,6 +20,7 @@
 #include "misc.hpp"
 #include "multicomp.hpp"
 #include "electrostatics.hpp"
+#include "selfavoidance.hpp"
 
 template<typename T>
 string ZeroPadNumber(T num){
@@ -105,7 +106,7 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
 void diag_wHeader(BE bendobj, STE steobj, ESP chargeobj, MESH_p mesh,
                 std::fstream &fid ){
     std::string log_headers = "#iter acceptedmoves bend_e stretch_e ";
-    if (chargeobj.ical) log_headers+="electroe ";
+    if (chargeobj.calculate()) log_headers+="electroe ";
     if(steobj.dopressure()) {log_headers+=" Pressure_e ";}
     if(steobj.dovol()) {log_headers+=" Volume_e ";}
     log_headers+="total_e ";
@@ -122,7 +123,7 @@ int main(int argc, char *argv[]){
 
     pid_t pid = getpid();
     uint32_t seed_v;
-    int iter, start, num_moves, num_bond_change, recaliter, num_exchange;
+    int iter, start, num_moves, num_bond_change, recaliter, num_exchange=0;
     double av_bond_len, Etot;
 
     // Vec3d *Pos;
@@ -142,9 +143,10 @@ int main(int argc, char *argv[]){
     STE stretchobj(mesh, outfolder);
     MulCom lipidobj(mesh, outfolder);
     ESP chargeobj(mesh, outfolder);
+    SelfAvoid repulsiveobj(mesh, outfolder);
 
     // makemcobj();
-    McP mcobj(bendobj, stretchobj, lipidobj, chargeobj);
+    McP mcobj(bendobj, stretchobj, lipidobj, chargeobj, repulsiveobj);
     mcobj.initMC(mesh, outfolder);
 
     mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,
@@ -153,19 +155,12 @@ int main(int argc, char *argv[]){
     // How often do you want to compute the total energy?
     if (mcobj.isfluid()) recaliter=mcobj.fluidizeevery();
     else recaliter=10;
-        
-    clock_t timer;
-    Etot = mcobj.evalEnergy(mesh);
-    mcobj.write_energy(fileptr, iter, mesh);
 
     ostream* terminal;
     ofstream out_file;
 
-    if (world_size == 1) {
-        // If running with 1 MPI process, output to the terminal (stdout)
-        terminal = &std::cout;
-    }else {
-        // If running with more than 1 MPI process, output to a file named "terminal"
+    if (world_size == 1) terminal = &std::cout;
+    else{
         out_file.open(outfolder+"/terminal.out", std::ios_base::app);
         terminal = &out_file;
     }
@@ -175,6 +170,9 @@ int main(int argc, char *argv[]){
     if(!mcobj.isrestart()) diag_wHeader(bendobj, stretchobj, chargeobj, mesh, fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 
+    clock_t timer;
+    Etot = mcobj.evalEnergy(mesh);
+    mcobj.write_energy(fileptr, iter, mesh);
     for(iter=residx; iter < mcobj.totaliter(); iter++){
         if(iter%mcobj.dumpskip() == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mcobj.dumpskip())+".h5";
@@ -189,8 +187,14 @@ int main(int argc, char *argv[]){
             restartfile.close();
         }
         //
+        if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
         num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
-        num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
+        if (mesh.ncomp>1) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
+        if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
+            num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
+            (*terminal) << "fluid stats " << num_bond_change << " bonds flipped" << endl;
+        }
+        //
         if(!(iter % recaliter)){
             Etot = mcobj.evalEnergy(mesh);
             (*terminal) << "iter = " << iter << 
@@ -199,10 +203,6 @@ int main(int argc, char *argv[]){
             "; Exchanged Moves = " << (double)num_exchange * 100 / mcobj.onemciter()
             << " %;"
             << " totalener = " << Etot << "; volume = " << mcobj.getvolume() << endl;
-        }
-        if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
-            num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
-            (*terminal) << "fluid stats " << num_bond_change << " bonds flipped" << endl;
         }
         mcobj.write_energy(fileptr, iter, mesh);
     }

@@ -1,19 +1,18 @@
 #include "selfavoidance.hpp"
-// Compute forces between particles using the cell list
 
-extern "C" void  Cell_listread(bool *, double *, double *,
+extern "C" void  SelfAvoidRead(bool *, double *, double *,
                                double *, double*, double *, char *);
 
-SelfAvoid::SelfAvoid(string fname){
+SelfAvoid::SelfAvoid(MESH_p mesh, string fname){
   char tmp_fname[128];
   string parafile, outfile;
 
   parafile = fname+"/para_file.in";
   sprintf(tmp_fname, "%s", parafile.c_str());
-  Cell_listread(&doselfrepulsion, &boxSize_, &cutoff_,
+  SelfAvoidRead(&doselfrepulsion, &boxSize_, &cutoff_,
                 &minL, &sig, &epsl, tmp_fname);
   numCells_ = static_cast<int>(boxSize_ / cutoff_);
-  cellSize_ = boxSize_ / numCells_;
+  cellSize_ = boxSize_/numCells_;
   cellList_.resize(numCells_ * numCells_ * numCells_);
 }
 //
@@ -39,7 +38,7 @@ double SelfAvoid::computeSelfRep(MESH_p mesh, int idx) {
         double dz = p1.z - p2.z;
         double r2 = dx * dx + dy * dy + dz * dz;
         sigr2 = sig*sig/r2;
-        EselfRep += (4*epsl*std::pow(sigr2, 3)); 
+        EselfRep += (4*epsl*std::pow(sigr2, 6));
         // Example Lennard-Jones force
     } 
   }
@@ -53,7 +52,7 @@ double SelfAvoid::computeSelfRep(MESH_p mesh, int idx) {
         double dz = p1.z - p2.z;
         double r2 = dx * dx + dy * dy + dz * dz;
         sigr2 = sig*sig/r2;
-        EselfRep += (4*epsl*std::pow(sigr2, 3)); // Example Lennard-Jones force
+        EselfRep += (4*epsl*std::pow(sigr2, 6)); // Example Lennard-Jones force
       }
     }
   }
@@ -68,4 +67,3 @@ double SelfAvoid::totalRepulsiveEnergy(MESH_p mesh){
   }
   return et;
 }
-

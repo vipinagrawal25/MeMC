@@ -13,6 +13,8 @@ public:
   double debye_huckel_total(Vec3d *Pos, int N);
   void exchange(int idx1, int idx2);
   bool calculate(){return ical;}
+  double getch1(){return charge1;}
+  double getch2(){return charge2;}
 private:
   bool ical=0;
   void initcharges(int *compA, int N);
@@ -23,6 +25,6 @@ private:
   // Debye length
   double debyelen ;
   double kappa ;
-  double lb = 0.7; // Bjerrum length
+  double lb = 0.71; // Bjerrum length
 };
 #endif

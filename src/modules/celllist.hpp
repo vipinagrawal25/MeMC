@@ -1,33 +1,23 @@
 #ifndef CELLLIST_HPP
 #define CELLLIST_HPP
-
 #include <vector>
 #include <array>
 #include <cmath>
 #include "mesh.hpp"
 #include "vector.hpp"
-// A structure representing a particle in 3D space
-// struct Particle {
-//     double x, y, z;  // Position
-//     std::array<double, 3> velocity; // Velocity in 3D
-//     std::array<double, 3> force;    // Force in 3D
-
-//     Particle(double x, double y, double z) : x(x), y(y), z(z), velocity({0.0, 0.0, 0.0}), force({0.0, 0.0, 0.0}) {}
-// };
-
 // A class to handle the 3D cell list algorithm for molecular dynamics
 class CellList {
 public:
-  void buildCellList(Vec3d *particles_, int N) {
+  void buildCellList(MESH_p mesh) {
     // Clear previous cell lists
     for (auto& cell : cellList_) {
         cell.clear();
     }
 
     // Assign particles to cells
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < mesh.N; ++i) {
       
-      int cellIdx = getCellIndex(particles_[i].x, particles_[i].y, particles_[i].z, minL);
+      int cellIdx = getCellIndex(mesh.pos[i].x, mesh.pos[i].y, mesh.pos[i].z, minL);
         // Remove the neighbours of the i here.
         cellList_[cellIdx].push_back(i);
     }
@@ -94,4 +84,3 @@ private:
 };
 
 #endif // CELLLIST_HPP
-

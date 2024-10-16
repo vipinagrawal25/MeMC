@@ -28,7 +28,7 @@ public :
     double getkappa(){return Kappa;}
 
 private:
-    double YY;                        // coefficient stretching
+    double YY;                       // coefficient stretching
     bool do_volume;
     bool is_pressurized;
     double Kappa;                   //coefficient of volume expansion

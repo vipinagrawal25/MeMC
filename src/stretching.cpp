@@ -18,8 +18,6 @@ STE::STE(const MESH_p& mesh, std::string fname){
               &pressure, &coef_area_expansion, &do_area, tmp_fname);
     ini_vol = mesh.ini_vol;
     
-    if (mesh.ncomp==1) charge2=charge1;
-
     ofstream out_;
     out_.open( fname+"/stretchpara.out");
     out_<< "# =========== stretching parameters ==========" << endl

@@ -22,7 +22,6 @@ public :
 private:
   double bend1, bend2, spC1, spC2;
   std::vector<double> coef_bend;
-  // std::vector<double> spcurv;
   double spcurv;
 /*------------------------*/
 double cotangent(Vec3d si, Vec3d sk, Vec3d sj){

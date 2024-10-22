@@ -128,14 +128,14 @@ subroutine LipidRead(iregsoln, kai, epssqby2, parafile) bind(c, name="LipidRead"
 end subroutine
 
 
-subroutine StretchRead(YY, do_volume, is_pressurized, coef_vol_expansion, &
+subroutine StretchRead(YY1, YY2, do_volume, is_pressurized, coef_vol_expansion, &
                pressure, coef_area_expansion, do_area, parafile) bind(c, name="StretchRead")
     logical (kind=c_bool) :: do_volume, is_pressurized, do_area
-    real (kind=c_double) :: YY, pressure, coef_area_expansion, coef_vol_expansion
+    real (kind=c_double) :: YY1, YY2, pressure, coef_area_expansion, coef_vol_expansion
     character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
     character(len=char_len) :: f_fname
 
-    namelist /stretchpara/ YY, do_volume, is_pressurized, coef_vol_expansion, &
+    namelist /stretchpara/ YY1, YY2, do_volume, is_pressurized, coef_vol_expansion, &
                          pressure, coef_area_expansion, do_area 
         call convert_cstr_fstr(parafile, f_fname)
         open(unit=200,file=f_fname, status='old')

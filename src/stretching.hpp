@@ -28,7 +28,7 @@ public :
     double getkappa(){return Kappa;}
 
 private:
-    double YY;                       // coefficient stretching
+    double YY1, YY2;                       // coefficient stretching
     bool do_volume;
     bool is_pressurized;
     double Kappa;                   //coefficient of volume expansion
@@ -37,6 +37,8 @@ private:
     double coef_area_expansion;     //coefficient of area expansion
     vector <double> area_t0;        // area of each triangle at t=0
     vector <double> lij_t0;
+    vector <double> HH;
     double ini_vol;
+    void init_coefstretch(MESH_p);
 };
 #endif

@@ -305,21 +305,21 @@ inline double McP::energy_mc_bestchre(vector<double> &energy, Vec3d *pos, MESH_p
    return Etot + energy[3];
 }
 //
-// inline int McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
-//          int idx, int cm_idx, int num_nbr){
-//    int *nbrcm=mesh.node_nbr_list + cm_idx;
-//    energy[0] = beobj.bending_energy_ipart(pos, nbrcm,
-//                   num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
-//    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
-//    energy[2] += chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
-//    return energy[0]+energy[2];
-// }
-// //
-// inline int McP::energy_mc_ch(vector<double> &energy, Vec3d *pos, MESH_p mesh,
-//       int idx, int cm_idx, int num_nbr){
-//    energy[2] += chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
-//    return energy[2];
-// }
+inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
+         int idx, int cm_idx, int num_nbr){
+   int *nbrcm=mesh.node_nbr_list + cm_idx;
+   energy[0] = beobj.bending_energy_ipart(pos, nbrcm,
+                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+   energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
+   energy[2] += chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
+   return energy[0]+energy[2];
+}
+// 
+inline double McP::energy_mc_ch(vector<double> &energy, Vec3d *pos, MESH_p mesh,
+      int idx, int cm_idx, int num_nbr){
+   energy[2] += chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
+   return energy[2];
+}
 // double McP::energy_mc_3d(vector<double> energy, Vec3d *pos, MESH_p mesh, int idx){
 //    double E_b, E_s, E_rs, E_charge;
 //    vector<double> energy(4,0);

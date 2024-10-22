@@ -39,15 +39,3 @@ extern "C" void  Cell_listread(bool *, double *, double *,
 //   // exit(0);
 // }
 
-// Helper function to get the 1D cell index for 3D space
- CellList::
-
-// Build the cell list by assigning particles to cells
- CellList::
-
-// Get neighboring cells (including the cell itself)
-CellList::
-
-// Print the particles in each cell for debugging
- CellList::
-

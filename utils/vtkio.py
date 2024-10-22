@@ -43,6 +43,7 @@ def vtk_points_scalar(infile, points, scalar, name_scalar='points_data'):
             f.write('LOOKUP_TABLE default \n')
             for p in scalar:
                 f.write("%.16E\n" %(p))
+                
 def cells_cells_scalar(infile,
         triangles, 
         scalar, 
@@ -65,4 +66,3 @@ def cells_cells_scalar(infile,
             for p in scalar:
                 f.write("%16.8f\n" %(p))
 #
-

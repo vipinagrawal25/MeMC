@@ -4,17 +4,16 @@ import quaternion
 import os, sys
 from scipy.spatial import ConvexHull
 import h5py
-# import meshzoo
-#***********************************************************#
+
 def read_data(filename):
-    pos = h5py.File(filename)["pos"][()]
-    pos = np.asarray(pos)
+    pos= h5py.File(filename)["pos"][()]
+    pos= np.asarray(pos)
     Np = int(len(pos)/2)
     pts_sph = pos.reshape(Np,2)
-    pts_cart = np.asarray([[np.sin(theta)*np.cos(phi),
-        np.sin(theta)*np.sin(phi), 
-        np.cos(theta)] for theta, phi in pts_sph]
-        ) 
+    pts_cart = np.asarray([[np.sin(theta)*np.cos(phi), 
+                np.sin(theta)*np.sin(phi),
+                np.cos(theta)] for theta, phi in pts_sph]
+                )
     return Np, pts_sph, pts_cart
 
 def triangulate(rr):
@@ -158,4 +157,3 @@ else:
     write_hdf5(pts_cart, cmlist, node_nbr,
              triangles, "./conf/dmemc_pos.h5", 
              "./conf/dmemc_conf.h5")
-# write_file(pts_cart, cmlist, node_nbr)

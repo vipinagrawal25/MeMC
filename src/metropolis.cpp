@@ -78,8 +78,8 @@ int McP::initMC(MESH_p mesh, string fname){
       out_ << " Algo = Metropolis"<< endl;
       Algo = [this](double DE, double activity) -> double {
       return this->Boltzman(DE,activity);};
-   }else if(algo=="Galuber"){
-      out_ << " Algo = mpolis"<< endl;
+   }else if(algo=="Glauber"){
+      out_ << " Algo = Glauber"<< endl;
       Algo = [this](double DE, double activity) -> double {
       return this->Glauber(DE,activity);};
    }
@@ -288,6 +288,7 @@ inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mes
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
    energy[1] = steobj.stretch_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.nghst, 
                mesh.bdry_type, mesh.boxlen, mesh.edge);
+
    return energy[0]+energy[1];
 }
 //
@@ -367,7 +368,8 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       cm_idx = idx*mesh.nghst;
       num_nbr = mesh.numnbr[idx];
       
-      Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst*idx, mesh.numnbr[idx]);
+      Einitot = energy_mc_best(Eini, pos, mesh, idx, mesh.nghst*idx, 
+         mesh.numnbr[idx]);
 
       if (mesh.sphere){
          vol_i = steobj.volume_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
@@ -384,15 +386,8 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       //
       pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
       //
-      // Efintot = energy_mc_3d(Efin, pos, mesh, idx);
-
-      // debe=Efin[0]-Eini[0];
-      // dest=Efin[1]-Eini[1];
-      // decharge=Efin[2]-Eini[2];
-      // ders = Efin[3]-Eini[3];
-
-      // de = debe+dest+decharge+ders;
-      // cout << debe << "\t"  << dest << "\t" << ders << endl;
+      Efintot = energy_mc_best(Efin, pos, mesh, idx, mesh.nghst*idx, 
+         mesh.numnbr[idx]);
       //
       de = Efintot - Einitot;
       if (mesh.sphere){

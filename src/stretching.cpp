@@ -2,7 +2,7 @@
 #include <fstream>
 #include "misc.hpp"
 
-extern "C" void StretchRead(double *, bool *, bool *, 
+extern "C" void StretchRead(double *, double *, bool *, bool *, 
                             double *, double *, double *, bool *, char *);
 
 int get_nstart(int, int);
@@ -14,15 +14,18 @@ STE::STE(const MESH_p& mesh, std::string fname){
 
     parafile = fname+"/para_file.in";
     sprintf(tmp_fname, "%s", parafile.c_str() );
-    StretchRead(&YY, &do_volume, &is_pressurized, &Kappa,
+    StretchRead(&YY1, &YY2, &do_volume, &is_pressurized, &Kappa,
               &pressure, &coef_area_expansion, &do_area, tmp_fname);
     ini_vol = mesh.ini_vol;
-    
+
+    init_coefstretch(mesh);
+
     ofstream out_;
     out_.open( fname+"/stretchpara.out");
     out_<< "# =========== stretching parameters ==========" << endl
       << " N " << mesh.N << endl
-      << " coef_stretch = " << YY*sqrt(3)/2 << endl
+      << " coef_stretch1 = " << YY1*sqrt(3)/2 << endl
+      << " coef_stretch2 = " << YY2*sqrt(3)/2 << endl
       << " do_volume " << do_volume << endl
       << " is_pressurized " << is_pressurized << endl
       << " pressure " << pressure << endl
@@ -30,6 +33,26 @@ STE::STE(const MESH_p& mesh, std::string fname){
       << " do_area " << do_area << endl
       << " coef_area_expansion " << coef_area_expansion << endl;
     out_.close();
+}
+/*-------------------------------------------------*/
+void STE::init_coefstretch(MESH_p mesh){
+    int *lipA = mesh.compA;
+    for(int i = 0; i < mesh.nghst*mesh.N; i++){
+        HH.push_back(0.0);
+    }
+    for (int i = 0; i < mesh.N; ++i) {
+        double Yi = lipA[i] ? YY2 : YY1;  
+        // Select YY2 if lipA[i] is true, otherwise YY1
+        int num_nbr = mesh.numnbr[i];
+        int cm_idx = mesh.nghst * i;
+        for (int k = cm_idx; k < cm_idx + num_nbr; ++k) {
+            int j = mesh.node_nbr_list[k];
+            double Yj = lipA[j] ? YY2 : YY1;  
+            // Select YY2 for j if lipA[j] is true, otherwise YY1
+            HH[k] = Yi * Yj / (Yi + Yj);
+            HH[k] = HH[k]*sqrt(3)/2;
+        }
+    }
 }
 
 inline Vec3d diff(Vec3d a, Vec3d b, double lenth, int bdry_type, int idx, int edge){
@@ -39,7 +62,6 @@ inline Vec3d diff(Vec3d a, Vec3d b, double lenth, int bdry_type, int idx, int ed
 
 double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx, 
             int ghost, int bdry_type, double lenth, int edge){
-   double HH;
    double idx_ener;
    Vec3d rij;
    double mod_rij, avg_lij;
@@ -47,7 +69,7 @@ double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx,
    //
    idx_ener = 0e0;
    // HH = para.coef_str/(para.av_bond_len*para.av_bond_len);
-   HH = YY*sqrt(3)/2;
+   // HH = YY*sqrt(3)/2;
    if (bdry_type == 1 || idx>edge){
       for (i =0; i < num_nbr; i++){
          j = node_nbr[i];
@@ -55,16 +77,18 @@ double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx,
          // rij = diff(pos[idx], pos[j], lenth, bdry_type, idx, edge);
          mod_rij = sqrt(inner_product(rij, rij));
          idx_ener = idx_ener + (mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
+            idx_ener = idx_ener*HH[idx*ghost+i];
       }
    }else{
-      for (i =0; i < num_nbr; i++){
+        for (i =0; i < num_nbr; i++){
          j = node_nbr[i];
          rij = diff_pbc(pos[idx], pos[j], lenth);
          mod_rij = sqrt(inner_product(rij, rij));
          idx_ener = idx_ener + (mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
+         idx_ener = idx_ener*HH[idx*ghost+i];
       }
    }
-   return 0.5*idx_ener*HH;
+   return 0.5*idx_ener;
 }
 
 double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
@@ -75,7 +99,6 @@ double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
     /// @param lij_t0 initial distance between points of membrane
     ///  @param para  Membrane related parameters;
     /// @return Total Stretching energy
-
     int idx, st_idx;
     int num_nbr, cm_idx;
     double se;

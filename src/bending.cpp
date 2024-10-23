@@ -58,10 +58,10 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     double cot_aij[num_nbr],cot_bij[num_nbr],area_ijk[num_nbr];
     double ljksq[num_nbr], lijsq[num_nbr];
     Vec3d xij[num_nbr],xjk;
-    double cot_jdx_k,cot_jdx_kp,cot_kdx,cot_kpdx,area_ijkp;
-    Vec3d xik,xikp,xjkp,nhat_local,xijp1;
-    int jdx,kdx,kpdx,jdxp1;
-    double cot_sum,liksq,likpsq,ljkpsq;
+    double cot_jdx_k,cot_jdx_km,cot_kdx,cot_kmdx,area_ijkm;
+    Vec3d xik,xikm,xjkm,nhat_local,xijp1;
+    int jdx,kdx,kmdx,jdxp1;
+    double cot_sum,liksq,likmsq,ljkmsq;
     double sigma_i = 0e0;
     // store all the lengths
     if (bdry_type == 1 || idx>edge){
@@ -88,19 +88,18 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     // Now compute all the angles
     for (int j = 0; j < num_nbr; ++j){
         liksq=lijsq[(j+1)%num_nbr];
-        likpsq=lijsq[(j-1+num_nbr)%num_nbr];
-        ljkpsq=ljksq[(j-1+num_nbr)%num_nbr];
-
-        area_ijkp=area_ijk[(j-1+num_nbr)%num_nbr];
-        cot_aij[j] = 0.25*(ljkpsq+likpsq-lijsq[j])/area_ijkp;
+        likmsq=lijsq[(j-1+num_nbr)%num_nbr];
+        ljkmsq=ljksq[(j-1+num_nbr)%num_nbr];
+        area_ijkm=area_ijk[(j-1+num_nbr)%num_nbr];
+        cot_aij[j] = 0.25*(ljkmsq+likmsq-lijsq[j])/area_ijkm;
         cot_bij[j] = 0.25*(ljksq[j]+liksq-lijsq[j])/area_ijk[j];
     }
     for (int j = 0; j < num_nbr; j++){
         cot_jdx_k = cot_aij[(j+1)%num_nbr];
-        cot_jdx_kp = cot_bij[(j-1+num_nbr)%num_nbr];
+        cot_jdx_km = cot_bij[(j-1+num_nbr)%num_nbr];
         liksq=lijsq[(j+1)%num_nbr];
-        likpsq=lijsq[(j-1+num_nbr)%num_nbr];
-        area_ijkp=area_ijk[(j-1+num_nbr)%num_nbr];
+        likmsq=lijsq[(j-1+num_nbr)%num_nbr];
+        area_ijkm=area_ijk[(j-1+num_nbr)%num_nbr];
         xijp1=xij[(j+1)%num_nbr];
         cot_sum=0.5*(cot_aij[j] + cot_bij[j]);
         cot_times_rij = cot_times_rij + xij[j]*cot_sum;

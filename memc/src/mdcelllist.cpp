@@ -130,7 +130,7 @@ double MDCellList::computeSelfRep(Vec3d *particles_, MESH_p mesh, int idx) {
         double dz = p1.z - p2.z;
         double r2 = dx * dx + dy * dy + dz * dz;
         sigr2 = sig*sig/r2;
-        EselfRep += (4*epsl*std::pow(sigr2, 3)); // Example Lennard-Jones force
+        EselfRep += (4*epsl*std::pow(sigr2, 6)); // Example Lennard-Jones force
 
     } 
     // std::cout << particles_[i].x << " " << particles_[i].y << " " << particles_[i].z << std::endl;
@@ -147,7 +147,7 @@ double MDCellList::computeSelfRep(Vec3d *particles_, MESH_p mesh, int idx) {
         double dz = p1.z - p2.z;
         double r2 = dx * dx + dy * dy + dz * dz;
         sigr2 = sig*sig/r2;
-        EselfRep += (4*epsl*std::pow(sigr2, 3)); // Example Lennard-Jones force
+        EselfRep += (4*epsl*std::pow(sigr2, 6)); // Example Lennard-Jones force
       }
     }
   }

@@ -58,12 +58,12 @@ double STICK::stick_energy_ipart(Vec3d pos, int idx){
     double inv_sqdz, ds;
 
     ds = (pos_bot_wall - pos.z)*(pos_bot_wall - pos.z);
-    if(isattractive[idx]){
+    // if(isattractive[idx]){
       inv_sqdz = (sigma*sigma)/(ds);
       return  lj_attr(inv_sqdz, eps1, eps2);
-    } else {
-      return 0.0;
-    }
+    // } else {
+      // return 0.0;
+    // }
 }
 
 

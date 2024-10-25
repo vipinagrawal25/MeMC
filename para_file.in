@@ -1,0 +1,60 @@
+&Meshpara
+	nghst=12		
+	bdry_cdt=2  	!0=channel 1=frame anything else periodic
+	radius=1 		!In nanometers
+	ncomp=2 		
+	compfrac=0.5	
+/
+
+&mcpara
+	Mcalgo = 'mpolis'	
+	dfac = 16.0
+	kbt =  1.0
+	is_restart = F
+	tot_mc_iter = 80001
+	dump_skip = 1000
+	is_fluid = T
+	min_allowed_nbr = 4
+	fac_len_vertices = 1.3
+	fluidize_every = 1
+/
+
+&Bendpara
+	bend1=10.0
+	bend2=10.0
+	spC1=2.0
+	spC2=2.0
+	iGauss=0
+/
+
+&Stretchpara
+	YY = 8660
+	do_volume = F
+	is_pressurized = F
+	do_area = F
+	coef_vol_expansion = 100000
+	pressure = 0
+	coef_area_expansion = 0
+/
+
+&Electrostatpara
+	charge1=0
+	charge2=0
+	conc=0
+/
+
+&Lipidpara
+	iregsoln=0
+	kai=0
+	epssqby2=0
+/
+
+
+&Selfavoidpara
+	isselfrepulsive=.false.
+	boxsize=0.0
+	cutoff=0.0
+	minL=0.0
+	sig=0.0
+	eps=0.0
+/

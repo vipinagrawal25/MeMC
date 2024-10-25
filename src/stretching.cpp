@@ -18,8 +18,6 @@ STE::STE(const MESH_p& mesh, std::string fname){
               &pressure, &coef_area_expansion, &do_area, tmp_fname);
     ini_vol = mesh.ini_vol;
 
-    init_coefstretch(mesh);
-
     ofstream out_;
     out_.open( fname+"/stretchpara.out");
     out_<< "# =========== stretching parameters ==========" << endl
@@ -34,14 +32,14 @@ STE::STE(const MESH_p& mesh, std::string fname){
       << " coef_area_expansion " << coef_area_expansion << endl;
     out_.close();
 }
-/*-------------------------------------------------*/
+/*--------------------------------------*/
 void STE::init_coefstretch(MESH_p mesh){
     int *lipA = mesh.compA;
     for(int i = 0; i < mesh.nghst*mesh.N; i++){
         HH.push_back(0.0);
     }
     for (int i = 0; i < mesh.N; ++i) {
-        double Yi = lipA[i] ? YY2 : YY1;  
+        double Yi = lipA[i] ? YY2 : YY1;
         // Select YY2 if lipA[i] is true, otherwise YY1
         int num_nbr = mesh.numnbr[i];
         int cm_idx = mesh.nghst * i;
@@ -50,7 +48,7 @@ void STE::init_coefstretch(MESH_p mesh){
             double Yj = lipA[j] ? YY2 : YY1;  
             // Select YY2 for j if lipA[j] is true, otherwise YY1
             HH[k] = Yi * Yj / (Yi + Yj);
-            HH[k] = HH[k]*sqrt(3)/2;
+            HH[k] = HH[k]*sqrt(3);
         }
     }
 }
@@ -76,16 +74,15 @@ double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx,
          rij = pos[idx] - pos[j];
          // rij = diff(pos[idx], pos[j], lenth, bdry_type, idx, edge);
          mod_rij = sqrt(inner_product(rij, rij));
-         idx_ener = idx_ener + (mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
-            idx_ener = idx_ener*HH[idx*ghost+i];
+         // cout << HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]) << endl;
+         idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
       }
    }else{
         for (i =0; i < num_nbr; i++){
          j = node_nbr[i];
          rij = diff_pbc(pos[idx], pos[j], lenth);
          mod_rij = sqrt(inner_product(rij, rij));
-         idx_ener = idx_ener + (mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
-         idx_ener = idx_ener*HH[idx*ghost+i];
+         idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
       }
    }
    return 0.5*idx_ener;

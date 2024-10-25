@@ -70,19 +70,21 @@ double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx,
    // HH = YY*sqrt(3)/2;
    if (bdry_type == 1 || idx>edge){
       for (i =0; i < num_nbr; i++){
-         j = node_nbr[i];
-         rij = pos[idx] - pos[j];
-         // rij = diff(pos[idx], pos[j], lenth, bdry_type, idx, edge);
-         mod_rij = sqrt(inner_product(rij, rij));
-         // cout << HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]) << endl;
-         idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
+        j = node_nbr[i];
+        rij = pos[idx] - pos[j];
+        // rij = diff(pos[idx], pos[j], lenth, bdry_type, idx, edge);
+        mod_rij = sqrt(inner_product(rij, rij));
+        // cout << HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]) << endl;
+        // idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
+        idx_ener = idx_ener + HH[idx*ghost+i]*mod_rij*mod_rij;
       }
    }else{
         for (i =0; i < num_nbr; i++){
          j = node_nbr[i];
          rij = diff_pbc(pos[idx], pos[j], lenth);
          mod_rij = sqrt(inner_product(rij, rij));
-         idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
+         // idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
+         idx_ener = idx_ener + HH[idx*ghost+i]*mod_rij*mod_rij;
       }
    }
    return 0.5*idx_ener;

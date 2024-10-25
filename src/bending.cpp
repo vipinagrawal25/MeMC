@@ -41,6 +41,8 @@ void BE::init_coefbend(int *lipA, int N){
     }
 }
 /*-------------------------------------------------*/
+// pair<>
+/*-------------------------------------------------*/
 double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
             int bdry_type, double lenth, int edge){
     /// @brief Estimate the Bending energy contribution when ith particle 
@@ -58,7 +60,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     double cot_aij[num_nbr],cot_bij[num_nbr],area_ijk[num_nbr];
     double ljksq[num_nbr], lijsq[num_nbr];
     Vec3d xij[num_nbr],xjk;
-    double cot_jdx_k,cot_jdx_km,cot_kdx,cot_kmdx,area_ijkm;
+    double cot_jdx_k,cot_kdx,cot_kmdx,area_ijkm;
     Vec3d xik,xikm,xjkm,nhat_local,xijp1;
     int jdx,kdx,kmdx,jdxp1;
     double cot_sum,liksq,likmsq,ljkmsq;
@@ -96,12 +98,11 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     }
     for (int j = 0; j < num_nbr; j++){
         cot_jdx_k = cot_aij[(j+1)%num_nbr];
-        cot_jdx_km = cot_bij[(j-1+num_nbr)%num_nbr];
         liksq=lijsq[(j+1)%num_nbr];
         likmsq=lijsq[(j-1+num_nbr)%num_nbr];
         area_ijkm=area_ijk[(j-1+num_nbr)%num_nbr];
         xijp1=xij[(j+1)%num_nbr];
-        cot_sum=0.5*(cot_aij[j] + cot_bij[j]);
+        cot_sum=cot_aij[j] + cot_bij[j];
         cot_times_rij = cot_times_rij + xij[j]*cot_sum;
         sigma_i=sigma_i+voronoi_area(cot_jdx_k,cot_bij[j],liksq,lijsq[j],area_ijk[j]);
         nhat_local=cross_product(xijp1,xij[j]);
@@ -109,6 +110,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     }
     nhat = nhat/norm(nhat);
     lap_bel = cot_times_rij/sigma_i;
+    lap_bel = lap_bel*0.5;
     lap_bel_t0 = nhat*spcurv;
     bend_ener = 0.5*coef_bend[idx]*sigma_i*normsq(lap_bel-lap_bel_t0);
     return bend_ener;

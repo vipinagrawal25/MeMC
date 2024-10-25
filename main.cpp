@@ -78,6 +78,7 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
         mesh.bdry_type=2;   // Sphere always has a pbc.
     }
     ave_bond_len = stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
+    stretchobj.init_coefstretch(mesh);
     // cout << ave_bond_len << endl;
     if(!mcobj.isrestart()) { residx = 0; }
     else{
@@ -98,7 +99,6 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
         hdf5_io_read_double( (double *)mesh.pos,  resfile, "pos");
         hdf5_io_read_mesh((int *) mesh.numnbr, (int *) mesh.node_nbr_list, resfile);
     }
-
     // init_activity(act_para, mbrane_para.N);
     return ave_bond_len;
 }

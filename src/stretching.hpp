@@ -26,7 +26,7 @@ public :
     double getpressure(){return pressure;}
     double PV_change(double dvol){return pressure*dvol;}
     double getkappa(){return Kappa;}
-
+    void init_coefstretch(MESH_p);
 private:
     double YY1, YY2;                       // coefficient stretching
     bool do_volume;
@@ -39,6 +39,5 @@ private:
     vector <double> lij_t0;
     vector <double> HH;
     double ini_vol;
-    void init_coefstretch(MESH_p);
 };
 #endif

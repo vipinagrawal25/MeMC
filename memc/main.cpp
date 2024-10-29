@@ -180,7 +180,7 @@ int main(int argc, char *argv[]){
         }
         num_moves = mcobj.monte_carlo_3d(Pos, mesh);
         if(mcobj.isfluid() && iter%mcobj.fluidizeevery()==0){
-            num_bond_change = mcobj.monte_carlo_fluid(Pos, mesh, av_bond_len);
+          num_bond_change = mcobj.monte_carlo_fluid(Pos, mesh, av_bond_len, outfolder, iter);
             outfile_terminal << "fluid stats " << num_bond_change <<
             " bonds flipped" << endl;
         }

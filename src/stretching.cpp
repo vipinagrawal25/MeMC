@@ -75,16 +75,16 @@ double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx,
         // rij = diff(pos[idx], pos[j], lenth, bdry_type, idx, edge);
         mod_rij = sqrt(inner_product(rij, rij));
         // cout << HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]) << endl;
-        // idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
-        idx_ener = idx_ener + HH[idx*ghost+i]*mod_rij*mod_rij;
+        idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
+        // idx_ener = idx_ener + HH[idx*ghost+i]*mod_rij*mod_rij;
       }
    }else{
         for (i =0; i < num_nbr; i++){
          j = node_nbr[i];
          rij = diff_pbc(pos[idx], pos[j], lenth);
          mod_rij = sqrt(inner_product(rij, rij));
-         // idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
-         idx_ener = idx_ener + HH[idx*ghost+i]*mod_rij*mod_rij;
+         idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
+         // idx_ener = idx_ener + HH[idx*ghost+i]*mod_rij*mod_rij;
       }
    }
    return 0.5*idx_ener;
@@ -175,32 +175,28 @@ double STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
     npairs = 0;
     Vec3d *Pos = mesh.pos;
     double lenth = mesh.boxlen;
-
+    double minlen=1;
     for(i = 0; i < mesh.nghst*mesh.N; i++){
         lij_t0.push_back(0.0);
     }
-
+    //
     for(i = 0; i < mesh.N; i++){
         num_nbr = mesh.numnbr[i];
         cm_idx = mesh.nghst * i;
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
             dr = diff_pbc(Pos[j], Pos[i], lenth);
-            lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
+            // lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             npairs++;
             /* printf("%g %g %g %g %g \n", Pos[i].x, Pos[j].x, Pos[i].y, Pos[j].y, lij_t0[k]); */
         }
     }
-    // print(mesh.node_nbr_list,mesh.N*mesh.nghst);
     av_bond_len = sum_lij/npairs;
-    // spring->constant=para->coef_bend/(r0*r0);
-    if(is_fluid){
-        for(i = 0; i < mesh.nghst*mesh.N; i++){
-            lij_t0[i] = av_bond_len;
-        }
+    for(i = 0; i < mesh.nghst*mesh.N; i++){
+        lij_t0[i] = av_bond_len;
+        // cout << lij_t0[i] << endl;
     }
-    // print(mesh.node_nbr_list,mesh.N*mesh.nghst);
     return av_bond_len;
 }
 

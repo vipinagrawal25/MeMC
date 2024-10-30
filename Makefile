@@ -1,4 +1,5 @@
-include hosts/quest#
+# include hosts/quest#
+CC=mpic++ -O3 -w  -L/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/lib/ -I/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/include/
 opt=-O3
 # opt=-pg
 ifeq ($(debug), y)
@@ -37,17 +38,21 @@ obj/%.o : src/%.cpp $(includes)
 	$(info Compiling $<)
 	$(CC) -Iobj -c $< -o $@ $(link)
 #
-clean:
+clean:	
 	@rm -rf bin $(object) exe_*
 	@echo "all obj bin cleared"
 
 distclean:
-	@rm -rf bin $(object) 
-	@echo "all data cleared"
+	@make clean
+	@make cleanfols
+
+cleanfols:
 	@echo "Deleting .out files in directories named like 00000, 00001, etc..."
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(OUT_PATTERN)" -exec rm -f {} \; -print; done
 	@echo "Deleting files matching $(SNAP_PATTERN) in directories named like 00000, 00001, etc..."
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(SNAP_PATTERN)" -exec rm -f {} \; -print; done
+	@echo "Deleting files matching $(VTK_PATTERN) in directories named like 00000, 00001, etc..."
+	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(VTK_PATTERN)" -exec rm -f {} \; -print; done
 	@echo "Deleting mc_log and restartindex.txt in directories named like 00000, 00001, etc..."
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "mc_log" -exec rm -f {} \; -print; done
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "restartindex.txt" -exec rm -f {} \; -print; done
@@ -70,4 +75,5 @@ obj/gradient.o: tests/gradient.cpp $(includes)
 # Define the patterns for the files to delete
 OUT_PATTERN = *.out
 SNAP_PATTERN = snap_*.h5
+VTK_PATTERN = snap_*.vtk
 OTHER_FILES = mc_log restartindex.txt

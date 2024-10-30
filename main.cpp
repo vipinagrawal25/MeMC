@@ -79,32 +79,27 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
     }
     ave_bond_len = stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
     stretchobj.init_coefstretch(mesh);
-    // cout << ave_bond_len << endl;
     if(!mcobj.isrestart()) { residx = 0; }
     else{
         fstream restartfile(outfolder+"/restartindex.txt", ios::in);
-        restartfile >> titer >>  tdumpskip;
-        restartfile.close();
+        if (restartfile.is_open()) {
+            restartfile >> titer >> tdumpskip;
+            restartfile.close();
+        } else {
+            cerr << "Error: restartindex.txt does not exist or could not be opened." 
+            << "\nPlease change the para_file to start code from begining." << std::endl;
+            exit(EXIT_FAILURE);
+        }
         residx = titer;
-        // if(area_para.do_area)init_area_t0(Pos,mesh,mbrane_para,area_para);
-        // init_spcurv(spcurv_para, Pos, mbrane_para.N);
-        // if(stick_para.do_stick)
-        // identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, 
-        // mbrane_para.N);
-        // max(&mesh.nPole,&Pole_zcoord,Pos,mbrane_para.N);
-        // min(&mesh.sPole,&Pole_zcoord,Pos,mbrane_para.N);
-        // identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, 
-        //  mbrane_para.N);
         resfile=outfolder+"/snap_"+ZeroPadNumber(titer/tdumpskip)+".h5";
         hdf5_io_read_double( (double *)mesh.pos,  resfile, "pos");
         hdf5_io_read_mesh((int *) mesh.numnbr, (int *) mesh.node_nbr_list, resfile);
     }
-    // init_activity(act_para, mbrane_para.N);
     return ave_bond_len;
 }
 /*----------------------------------------------------------*/
 void diag_wHeader(BE bendobj, STE steobj, ESP chargeobj, MESH_p mesh,
-                std::fstream &fid ){
+                std::fstream &fid){
     std::string log_headers = "#iter acceptedmoves bend_e stretch_e ";
     if (chargeobj.calculate()) log_headers+="electroe ";
     if(steobj.dopressure()) {log_headers+=" Pressure_e ";}
@@ -151,7 +146,6 @@ int main(int argc, char *argv[]){
 
     mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,
                         mesh.radius, residx);
-
     // How often do you want to compute the total energy?
     if (mcobj.isfluid()) recaliter=mcobj.fluidizeevery();
     else recaliter=10;
@@ -164,7 +158,6 @@ int main(int argc, char *argv[]){
         out_file.open(outfolder+"/terminal.out", std::ios_base::app);
         terminal = &out_file;
     }
-
     // ofstream terminal(outfolder+"/terminal.out", ios::app);
     (*terminal) << "# The seed value is " << seed_v << endl;
     if(!mcobj.isrestart()) diag_wHeader(bendobj, stretchobj, chargeobj, mesh, fileptr);

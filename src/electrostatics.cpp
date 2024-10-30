@@ -3,7 +3,7 @@
 #include <string>
 #include <fstream>
 #include "misc.hpp"
-
+#define tiny 1e-16
 extern "C" void  ElectroRead(double*, double*, double*, char *);
 
 void ESP::initcharges(int *compA, int N){
@@ -28,8 +28,7 @@ ESP::ESP(const MESH_p& mesh, std::string fname){
 
     // print(mesh.compA,mesh.N);
     initcharges((int *) mesh.compA, mesh.N);
-    
-    debyelen = 0.304/sqrt(conc);
+    debyelen = 0.304/sqrt(conc+tiny);
     kappa = 10/debyelen;
     lb = lb/10;
 

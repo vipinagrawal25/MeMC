@@ -1,7 +1,7 @@
 import h5py as h5py
 import numpy as np
 
-def writeHdf5(R, cmlst, node_nbr,  posfile, file):
+def write_hdf5(R, cmlst, node_nbr,  posfile, file):
     if file.split(".")[-1]=="h5":
         pass
     else:

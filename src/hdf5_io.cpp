@@ -31,30 +31,48 @@ int hdf5_io_get_Np(string input_file, string dset_name){
    return dims[0];
 }
 
-void hdf5_io_read_double(double *Pos, string input_file, 
-        string dset_name){
+void hdf5_io_read_double(double *Pos, string input_file, string dset_name){
+
     ///  @brief Read from the hdf5 file
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param input_file File name from which co-ordinate will be read
-    /// 
 
     hid_t   file_id,dataset_id;  /* identifiers */
     herr_t  status;
 
     if(access(input_file.c_str(),F_OK)!=0){
-        fprintf(stderr, "The configuration file does not exit\n");
-        exit(1);
+        std::cerr << "Error: The configuration file does not exist\n";
+        std::exit(EXIT_FAILURE);
     }
-  /* Open an existing file. */
-  file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-  dataset_id = H5Dopen(file_id, dset_name.c_str(), H5P_DEFAULT);
-  status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, 
-          H5S_ALL, H5S_ALL, H5P_DEFAULT,Pos);
-  status = H5Dclose(dataset_id);
-  status = H5Fclose(file_id);
-  if(status != 0){
-      fprintf(stderr, "file close failed\n");
-  }
+    /* Open an existing file. */
+    file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (file_id < 0) {
+        cerr << "Error: Could not open file " << input_file << "\n";
+        exit(EXIT_FAILURE);
+    }
+
+    dataset_id = H5Dopen(file_id, dset_name.c_str(), H5P_DEFAULT);
+    if (dataset_id < 0) {
+        std::cerr << "Error: Could not open dataset " << dset_name << " in file " << input_file << "\n";
+        H5Fclose(file_id);
+        std::exit(EXIT_FAILURE);
+    }
+    status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+            H5P_DEFAULT, Pos);
+    if (status < 0) {
+        std::cerr << "Error: Failed to read dataset " << dset_name << "\n";
+        H5Dclose(dataset_id);
+        H5Fclose(file_id);
+        std::exit(EXIT_FAILURE);
+    }
+    status = H5Dclose(dataset_id);
+    if (status < 0) {
+        std::cerr << "Error: Failed to close dataset " << dset_name << "\n";
+    }
+    status = H5Fclose(file_id);
+    if (status < 0) {
+        std::cerr << "Error: Failed to close file " << input_file << "\n";
+    }
 }
 
 
@@ -114,8 +132,7 @@ void hdf5_io_write_mesh(int *cmlist, int *node_nbr, int N, int ng,
 }
 
 
-void hdf5_io_read_mesh(int *cmlist,
-        int *node_nbr,  string input_file){
+void hdf5_io_read_mesh(int *cmlist, int *node_nbr,  string input_file){
 
     ///  @brief Read the mesh from the hdf5 file
     ///  @param cmlist array containing the number of neighbours for each particle  

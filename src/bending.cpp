@@ -29,9 +29,10 @@ BE::BE(const MESH_p& mesh, std::string fname){
       << " bend1 = " << bend1 << endl
       << " bend2 = " << bend2 << endl
       << " spC1 " << spC1 << endl
-      << " spC2 " << spC2 << endl;
-    out_.close();
+      << " spC2 " << spC2 << endl
+      << " iGauss " << iGauss << endl;
 
+    out_.close();
 }
 /*-------------------------------------------------*/
 void BE::init_coefbend(int *lipA, int N){
@@ -43,7 +44,11 @@ void BE::init_coefbend(int *lipA, int N){
 }
 /*--------------------------------------------------------------------------*/
 inline double acot(double x) {
-    return atan(1.0 / x);
+    double result = atan(1.0 / x); // Calculate arccot(x)
+    if (x < 0) {
+        result += M_PI; // Adjust for the range [0, pi]
+    }
+    return result;
 }
 /*-------------------------------------------------*/
 // There is a problem if we have the vertices on the polls -- zaxis.
@@ -58,7 +63,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     /// @param para  Membrane related parameters;
     /// @todo try openMP Pragmas;
     /// @return Bending Energy contribution when ith particle is displaced.
-    double bend_ener, Gauss_ener;
+    double bend_ener, Gauss_ener=0;
     Vec3d cot_times_rij;
     Vec3d lap_bel,lap_bel_t0, nhat;
     Vec3d xjk;
@@ -112,25 +117,21 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
         nhat_local=cross_product(xijp1,xij[j]);
         nhat = nhat + nhat_local*(1e0/norm(nhat_local));
     }
-    // cout << idx << " "<< norm(nhat) << endl;
     nhat = nhat/norm(nhat);
-    // if (idx==18||idx==23){
-    //     cout << sigma_i << endl;
-    // }
     lap_bel = cot_times_rij/sigma_i;
     lap_bel = lap_bel*0.5; 
     lap_bel_t0 = nhat*spcurv;
     bend_ener = 0.5*sigma_i*normsq(lap_bel-lap_bel_t0);
     if (iGauss){
+        bend_ener=0;
         Gauss_ener = M_PI*(2-num_nbr);
         for (int j = 0; j < num_nbr; ++j){
             Gauss_ener+=acot(cot_aij[j])+acot(cot_bij[j]);
         }
         bend_ener -= Gauss_ener;
-        // print(pos[idx]);
-        // cout  << " " << bend_ener/sigma_i << " " << Gauss_ener << endl;
+        // cout << Gauss_ener/sigma_i << endl;
     }
-    return coef_bend[idx]*bend_ener;
+    return bend_ener;
 }
 /*--------------------------------------------------------------------------*/
 double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, 
@@ -177,7 +178,7 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
     }
     cout << be << endl;
-    exit(1);
+    // exit(1);
     return be;
 }
 /*------------------------------------------------------------------------------*/

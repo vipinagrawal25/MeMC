@@ -126,6 +126,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
         for (int j = 0; j < num_nbr; ++j){
             Gauss_ener+=acot(cot_aij[j])+acot(cot_bij[j]);
         }
+        bend_ener += Gauss_ener;
         // print(pos[idx]);
         // cout  << " " << bend_ener/sigma_i << " " << Gauss_ener << endl;
     }

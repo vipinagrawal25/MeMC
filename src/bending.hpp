@@ -11,7 +11,7 @@ public :
   BE(const MESH_p& mesh, std::string fname);
   double bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx);
   double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
-                              int idx, int, double, int);
+      int, int, double, int);
   double bending_energy_total(Vec3d *pos, MESH_p mesh);
   void init_coefbend(int *lipA, int N);
   void printbend(){print(coef_bend);}
@@ -23,37 +23,7 @@ private:
   double bend1, bend2, spC1, spC2;
   std::vector<double> coef_bend;
   double spcurv;
-/*------------------------*/
-double cotangent(Vec3d si, Vec3d sk, Vec3d sj){
-  ///
-  ///  @param si  coordinate of ith point
-  ///  @param sk  coordinate of kth point
-  ///  @param sj  coordinate of jth point 
-   
-  ///  @return   ({si-sk}.{sj-sk})/sqrt(({si-sk}x{sj-sk})^2)
-  /// angle between vector si and sj
-  ///
-  Vec3d drik, drjk, cross;
-  double cot_theta;  
-  double inner_prod;
-  //
-  drik = si - sk; 
-  drjk = sj - sk; 
-  cross = cross_product(drik, drjk);
-  inner_prod = inner_product(drik, drjk);
-  cot_theta = inner_prod/sqrt(inner_product(cross,cross));
-  //
-  return cot_theta;
-}
-/*------------------------*/
-double cotangent(double a, double b, double c){
-   /// @brief  a, b, c are the length of the sides of a triangle 
-   ///  @return   0.25*(a*a+b*b-c*c)/area; where area is the area of triangle
-  double s = 0.5*(a+b+c);
-  double area = sqrt(s*(s-a)*(s-b)*(s-c));
-  double cot_theta=0.25*(a*a+b*b-c*c)/area;
-  return cot_theta;
-}
+  bool iGauss;
 /*------------------------*/
 double voronoi_area(double cotJ, double cotK, 
       double jsq, double ksq, double area){

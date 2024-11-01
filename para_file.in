@@ -24,7 +24,7 @@
 	bend2=10.0
 	spC1=2.0
 	spC2=2.0
-	iGauss=0
+	iGauss=1
 /
 
 &Stretchpara

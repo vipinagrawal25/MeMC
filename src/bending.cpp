@@ -4,7 +4,7 @@
 #import <cmath>
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
-extern "C" void BendRead(double *, double *, double *, double *, char *);
+extern "C" void BendRead(double *, double *, double *, double *, bool*, char *);
 int get_nstart(int , int);
 /*------------------------*/
 BE::BE(const MESH_p& mesh, std::string fname){
@@ -13,7 +13,7 @@ BE::BE(const MESH_p& mesh, std::string fname){
 
     parafile = fname+"/para_file.in";
     sprintf(tmp_fname, "%s", parafile.c_str());
-    BendRead(&bend1, &bend2, &spC1, &spC2, tmp_fname);
+    BendRead(&bend1, &bend2, &spC1, &spC2, &iGauss, tmp_fname);
     init_coefbend(mesh.compA, mesh.N);
     spcurv=spC1;
 

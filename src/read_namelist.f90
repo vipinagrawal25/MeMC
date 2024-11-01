@@ -90,12 +90,13 @@ subroutine SelfAvoidRead(isselfrepulsive, boxsize, cutoff, minl, sig, eps, paraf
         close(unit=200)
 end subroutine
 
-subroutine BendRead(bend1, bend2, spC1, spC2, parafile) bind(c, name="BendRead")
+subroutine BendRead(bend1, bend2, spC1, spC2, iGauss, parafile) bind(c, name="BendRead")
     real (kind=c_double) :: bend1, bend2, spC1, spC2
+    logical (kind=c_bool) :: iGauss
     character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
     character(len=char_len) :: f_fname
 
-    namelist /bendpara/ bend1, bend2, spC1, spC2 
+    namelist /bendpara/ bend1, bend2, spC1, spC2, iGauss
         call convert_cstr_fstr(parafile, f_fname)
         open(unit=200,file=f_fname,status='old')
         read(unit=200,nml=bendpara)

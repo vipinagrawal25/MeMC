@@ -121,9 +121,8 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     lap_bel = cot_times_rij/sigma_i;
     lap_bel = lap_bel*0.5; 
     lap_bel_t0 = nhat*spcurv;
-    bend_ener = 0.5*sigma_i*normsq(lap_bel-lap_bel_t0);
+    bend_ener = sigma_i*normsq(lap_bel-lap_bel_t0);
     if (iGauss){
-        bend_ener=0;
         Gauss_ener = M_PI*(2-num_nbr);
         for (int j = 0; j < num_nbr; ++j){
             Gauss_ener+=acot(cot_aij[j])+acot(cot_bij[j]);
@@ -131,7 +130,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
         bend_ener -= Gauss_ener;
         // cout << Gauss_ener/sigma_i << endl;
     }
-    return bend_ener;
+    return 0.5*coef_bend[idx]*bend_ener;
 }
 /*--------------------------------------------------------------------------*/
 double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, 

@@ -20,6 +20,7 @@ BE::BE(const MESH_p& mesh, std::string fname){
     if (mesh.ncomp==1){
         bend2=bend1;
         spC2=spC1;
+        iGauss=false;
     }
 
     ofstream out_;
@@ -37,7 +38,6 @@ BE::BE(const MESH_p& mesh, std::string fname){
 /*-------------------------------------------------*/
 void BE::init_coefbend(int *lipA, int N){
     for (int i = 0; i < N; ++i) {
-        // std::cout << lipA[i] << std::endl;
         if (lipA[i]) coef_bend.push_back(bend2);
         else coef_bend.push_back(bend1);
     }
@@ -176,7 +176,7 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
         be+= bending_energy_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
     }
-    cout << be << endl;
+    // cout << be << endl;
     // exit(1);
     return be;
 }

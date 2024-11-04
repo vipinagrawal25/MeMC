@@ -41,4 +41,8 @@ for k in range(Np):
 outf=file.replace(".h5",".vtk")
 tri_all = triangulate_solids(nbr_all)
 lib.vtk_points(outf, pts_3d, tri_all)
-lib.vtk_points_scalar(outf, pts_3d, lib.readHdf5(file,"lip"), name_scalar='lipid')
+try:
+    lip_data = lib.readHdf5(file, "lip")
+    lib.vtk_points_scalar(outf, pts_3d, lip_data, name_scalar='lipid')
+except KeyError:
+    lip_data=None

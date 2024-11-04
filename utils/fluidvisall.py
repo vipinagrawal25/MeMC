@@ -18,7 +18,6 @@ for dd in sys.argv[1:]:
     # dd=sys.argv[1]
     nfiles=lastfile(dd,"snap_")
     first = lastfile(dd,"snap_",suffix=".vtk")
-    first=0
     # if len(sys.argv)==2:
     #     jump=1
     # else:

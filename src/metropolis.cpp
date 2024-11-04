@@ -25,6 +25,26 @@ McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj,
 beobj(beobj), steobj(steobj), lipidobj(lipidobj), chargeobj(chargeobj), 
 repulsiveobj(repulsiveobj) {};
 
+void McP::updateparam(int anneal, string fname){
+   if (anneal>0){
+      dfac=dfac/2;
+      kBT=kBT*0.1;
+      is_restart=1;
+      tot_mc_iter=tot_mc_iter*2;
+      dump_skip=dump_skip*2;
+
+   ofstream out_;
+   out_.open( fname+"/mcpara.out", ios::app );
+   out_<< "# =========== parameter after annealing = " << anneal <<  " ==========" << endl
+      << " dfac " << dfac << endl
+      << " kbT " << kBT << endl
+      << " is_restart " << is_restart << endl
+      << " tot_mc_iter " << tot_mc_iter << endl
+      << " dump_skip " << dump_skip << endl;
+   out_.close();
+   }
+}
+//
 int McP::initMC(MESH_p mesh, string fname){
    int N = mesh.N;
    double radius = mesh.radius;
@@ -87,8 +107,8 @@ int McP::initMC(MESH_p mesh, string fname){
    if (chargeobj.getch1()!=chargeobj.getch2()){
       if(beobj.getbend1()!=beobj.getbend2()){
          out_ << " Energy_mc_ex = energy_mc_bech" << endl;
-         energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val,
-                           int val2, int val3) -> double {
+         energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                        int val, int val2, int val3) -> double {
          return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3);};
       }
    }else{
@@ -124,9 +144,7 @@ double McP::evalEnergy(MESH_p mesh){
       regsole = lipidobj.reg_soln_tot(Pos, mesh);
       totEner+=regsole;
    }
-   // fileptr << bende << "  "<<stretche << "  ";
    if (mesh.sphere) totvol = steobj.volume_total(Pos, mesh);
-   // cout << bende << " " << stretche << " " << regsole << endl;
    if (steobj.dovol()) {
       vole = steobj.getkappa()*(VolMonitored/volt0-1)*(VolMonitored/volt0-1);
       totEner += vole;
@@ -261,6 +279,7 @@ bool McP::Boltzman(double DE, double activity){
    double rand;
    DE += activity;
    yes = (DE <= 0.e0);
+   // if(yes)cout << DE << endl;
    if (!yes) {
       rand = RandomGenerator::generateUniform(0.0,1.0);
       yes = rand < exp(-DE / kBT);
@@ -288,7 +307,7 @@ inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mes
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
    energy[1] = steobj.stretch_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.nghst, 
                mesh.bdry_type, mesh.boxlen, mesh.edge);
-
+   
    return energy[0]+energy[1];
 }
 //
@@ -321,32 +340,6 @@ inline double McP::energy_mc_ch(vector<double> &energy, Vec3d *pos, MESH_p mesh,
    energy[2] += chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
    return energy[2];
 }
-// double McP::energy_mc_3d(vector<double> energy, Vec3d *pos, MESH_p mesh, int idx){
-//    double E_b, E_s, E_rs, E_charge;
-//    vector<double> energy(4,0);
-//    int cm_idx, num_nbr;
-
-//    cm_idx = mesh.nghst * idx;
-//    num_nbr = mesh.numnbr[idx];
-
-//    E_b = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-//                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
-//    E_b += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
-//    E_s = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-//                num_nbr, idx, mesh.nghst, mesh.bdry_type, mesh.boxlen, mesh.edge);
-//    E_charge = chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
-
-//    energy[0]=E_b;
-//    energy[1]=E_s;
-//    energy[2]=E_charge;
-//    // Try not to have if-else statements here.
-//    if (lipidobj.calculate()){
-//       E_rs = lipidobj.gradphisq_ipart(pos,mesh,idx);
-//       E_rs += lipidobj.gradphisq_ipart_neighbour(pos, mesh,idx);
-//       energy[3] =lipidobj.getepssqby2()*E_rs;
-//    }
-//    return energy;
-// }
 //
 int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    int i, num_nbr, cm_idx;

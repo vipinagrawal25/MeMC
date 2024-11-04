@@ -52,13 +52,13 @@ void STE::init_coefstretch(MESH_p mesh){
         }
     }
 }
-
+/*--------------------------------------*/
 inline Vec3d diff(Vec3d a, Vec3d b, double lenth, int bdry_type, int idx, int edge){
     if (bdry_type==1||idx<=edge) return a - b;
     else    return diff_pbc(a, b, lenth);
 }
-
-double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx, 
+/*--------------------------------------*/
+double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx,
             int ghost, int bdry_type, double lenth, int edge){
    double idx_ener;
    Vec3d rij;
@@ -89,7 +89,7 @@ double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx,
    }
    return 0.5*idx_ener;
 }
-
+/*--------------------------------------*/
 double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
     /// @brief Estimate the total Stretching energy  
     ///  @param Pos array containing co-ordinates of all the particles
@@ -195,7 +195,6 @@ double STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
     av_bond_len = sum_lij/npairs;
     for(i = 0; i < mesh.nghst*mesh.N; i++){
         lij_t0[i] = av_bond_len;
-        // cout << lij_t0[i] << endl;
     }
     return av_bond_len;
 }

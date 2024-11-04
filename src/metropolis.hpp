@@ -34,6 +34,7 @@ public :
   double getarea();
   double getvolume(); 
   void setEneVol();
+  void updateparam(int anneal, string fname);
 private:
   BE &beobj;
   STE &steobj;
@@ -66,5 +67,7 @@ private:
   function<bool(double, double)> Algo;
   bool Boltzman(double DE, double activity);
   bool Glauber(double DE, double activity);
+  void changeparam(double dfac, double kBT, bool is_restart, int tot_mc_iter, 
+      int dumpskip);
 };
 #endif

@@ -20,7 +20,7 @@ object += obj/electrostatics.o obj/selfavoidance.o
 # Find directories that match the pattern (00000, 00001, 00002, etc.)
 DIRS := $(shell find . -maxdepth 1 -type d -name '[0-9][0-9][0-9][0-9][0-9]')
 
-all : memc
+all : memc anneal
 	@if [ ! -d $(bindir) ] ; then echo "directory bin does not exist creating it" ; fi
 #
 obj/readnml.o: src/read_namelist.f90
@@ -28,6 +28,12 @@ obj/readnml.o: src/read_namelist.f90
 #
 memc: $(object) obj/main.o obj/readnml.o
 	$(CC) $(object) obj/main.o obj/readnml.o  $(link) -lgfortran -o exe_memc
+#
+anneal: $(object) obj/simanneal.o obj/readnml.o
+	$(CC) $(object) obj/simanneal.o obj/readnml.o  $(link) -lgfortran -o exe_anneal
+#
+obj/simanneal.o: simanneal.cpp $(includes)
+	@$(CC) -Jobj -c $< -o $@ $(link)
 #
 obj/main.o: main.cpp $(includes)
 	@$(CC) -Jobj -c $< -o $@ $(link)
@@ -51,11 +57,14 @@ cleanfols:
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(OUT_PATTERN)" -exec rm -f {} \; -print; done
 	@echo "Deleting files matching $(SNAP_PATTERN) in directories named like 00000, 00001, etc..."
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(SNAP_PATTERN)" -exec rm -f {} \; -print; done
-	@echo "Deleting files matching $(VTK_PATTERN) in directories named like 00000, 00001, etc..."
-	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(VTK_PATTERN)" -exec rm -f {} \; -print; done
 	@echo "Deleting mc_log and restartindex.txt in directories named like 00000, 00001, etc..."
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "mc_log" -exec rm -f {} \; -print; done
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "restartindex.txt" -exec rm -f {} \; -print; done
+	@make cleanvtk
+	
+cleanvtk:
+	@echo "Deleting files matching $(VTK_PATTERN) in directories named like 00000, 00001, etc..."
+	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(VTK_PATTERN)" -exec rm -f {} \; -print; done
 
 curv: $(object) obj/curv.o
 	echo $(CC) $(object) $(link)

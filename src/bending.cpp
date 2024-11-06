@@ -1,7 +1,7 @@
 #include "bending.hpp"
 #include "multicomp.hpp"
 #include <fstream>
-#import <cmath>
+#include <cmath>
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
 extern "C" void BendRead(double *, double *, double *, double *, bool*, char *);

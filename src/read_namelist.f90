@@ -108,10 +108,15 @@ subroutine MeshRead(bdry_cdt, nghst, radius, ncomp, compfrac, parafile) bind(c, 
     real(kind = c_double) :: radius, compfrac
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
-
+    integer :: ierr
     namelist /meshpara/ bdry_cdt, radius, nghst, ncomp, compfrac
         call convert_cstr_fstr(parafile, f_fname)
-        open(unit=200,file=f_fname,status='old')
+        print *, "Opening file: ", trim(f_fname)
+        open(unit=200,file=f_fname,status='old',iostat=ierr)
+        if (ierr /= 0) then
+            print *, "Error opening file:", trim(f_fname)
+            stop "File not found or cannot be opened"
+        end if
         read(unit=200,nml=meshpara)
         close(unit=200)
 end subroutine

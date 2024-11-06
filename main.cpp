@@ -173,7 +173,6 @@ int main(int argc, char *argv[]){
             hdf5_io_write((double*) mesh.pos, 3*mesh.N, outfile, "pos");
             hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list, mesh.N,
                                 mesh.nghst, outfile);
-            
             if (mesh.ncomp>1) hdf5_io_write(mesh.compA, mesh.N, outfile, "lip");
             fstream restartfile(outfolder+"/restartindex.txt", ios::out);
             restartfile << iter << " " << mcobj.dumpskip() << endl;
@@ -193,7 +192,7 @@ int main(int argc, char *argv[]){
             (*terminal) << "iter = " << iter << 
             "; Accepted Moves = " << (double)num_moves*100/mcobj.onemciter() 
             << " %;"
-            "; Exchanged Moves = " << (double)num_exchange * 100 / mcobj.onemciter()
+            "; Exchanged Moves = " << (double)num_exchange * 100 / (min(mesh.compfrac,1-mesh.compfrac)*mcobj.onemciter())
             << " %;"
             << " totalener = " << Etot << "; volume = " << mcobj.getvolume() << endl;
         }

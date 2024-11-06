@@ -30,8 +30,8 @@ void McP::updateparam(int anneal, string fname){
       dfac=dfac/2;
       kBT=kBT*0.1;
       is_restart=1;
-      tot_mc_iter=tot_mc_iter*2;
-      dump_skip=dump_skip*2;
+      tot_mc_iter=tot_mc_iter;
+      dump_skip=dump_skip;
 
    ofstream out_;
    out_.open( fname+"/mcpara.out", ios::app );
@@ -530,56 +530,56 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
   return move;
 }
 //
+inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
+         int idx, int cm_idx, int num_nbr){
+   int *nbrcm=mesh.node_nbr_list + cm_idx;
+   energy[0] = beobj.bending_energy_ipart(pos, nbrcm,
+                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+   energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
+   return energy[0];
+}
+//
 int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    int exchngdmoves = 0;
    int idx1, idx2, cm_idx1;
    int nframe = get_nstart(mesh.N, mesh.bdry_type);
-   double Eini, Efin;
-   // vector<double> Eini(4,0), Efin(4,0);
+   vector<double> Eini(4,0), Efin(4,0);
    bool yes, logic;
    int lip_idx1, lip_idx2, idxn, logic_break;
+   double Einitot, Efintot;
+   //
    for (int i = 0; i < one_mc_iter; ++i){
       logic = true;
       idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
       cm_idx1 = mesh.nghst * idx1;
-
-      idxn=0;
-      logic_break=0;
-      while(logic && logic_break<2*mesh.nghst){
-         idxn = RandomGenerator::intUniform(0, mesh.nghst-1);
-         idx2 = mesh.node_nbr_list[cm_idx1+idxn];
-         if (idx2!=-1){
-            logic = mesh.compA[idx1] == mesh.compA[idx2];
-         }
-         ++logic_break;
-      }
-
+      logic = (mesh.compA[idx1] == mesh.compA[idx2]);
+      
       if (!logic){
          lip_idx1 = mesh.compA[idx1];
          lip_idx2 = mesh.compA[idx2];
 
-         Eini  =  lipidobj.reg_soln_ipart(pos, mesh, idx1).x;
-         Eini +=  lipidobj.reg_soln_ipart_neighbour(pos, mesh, idx1);
-         Eini +=  lipidobj.reg_soln_ipart(pos, mesh, idx2).x;
-         Eini +=  lipidobj.reg_soln_ipart_neighbour(pos, mesh, idx2);
+         Einitot = energy_mc_be(Eini, pos, mesh, idx1, mesh.nghst*idx1, 
+                  mesh.numnbr[idx1]);
+         Einitot += energy_mc_be(Eini, pos, mesh, idx2, mesh.nghst*idx2,
+                  mesh.numnbr[idx2]);
 
          mesh.compA[idx2] = lip_idx1;
          mesh.compA[idx1] = lip_idx2;
+         beobj.exchange(idx1, idx2);
 
-         Efin = lipidobj.reg_soln_ipart(pos, mesh, idx1).x;
-         Efin += lipidobj.reg_soln_ipart_neighbour(pos, mesh, idx1);
-         Efin += lipidobj.reg_soln_ipart(pos, mesh, idx2).x;
-         Efin += lipidobj.reg_soln_ipart_neighbour(pos, mesh, idx2);
+         Efintot = energy_mc_be(Eini, pos, mesh, idx1, mesh.nghst*idx1, 
+                  mesh.numnbr[idx1]);
+         Efintot += energy_mc_be(Eini, pos, mesh, idx2, mesh.nghst*idx2, 
+                  mesh.numnbr[idx2]);
 
-         yes = Boltzman(Efin-Eini, 0.0);
-         // cout << exp(-Efin+Eini) << endl;
+         yes = Boltzman(Efintot-Einitot, 0.0);
+
          if (yes){
             ++exchngdmoves;
-            beobj.exchange(idx1, idx2);
-            chargeobj.exchange(idx1, idx2);
          }else{
             mesh.compA[idx1] = lip_idx1;
             mesh.compA[idx2] = lip_idx2;
+            beobj.exchange(idx2, idx1);
          }
       }
    }

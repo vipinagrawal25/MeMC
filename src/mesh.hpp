@@ -41,7 +41,7 @@ struct MESH_p{
         node_nbr_list = new int[N*nghst];
         compA = new int[N];
 
-        if (ncomp==1) compfrac=1;
+        if (ncomp==1) compfrac=0;
         fillPoints(compA, compfrac, N);
 
         ini_vol = 4e0/3e0*M_PI*radius*radius*radius;

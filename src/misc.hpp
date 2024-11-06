@@ -9,6 +9,8 @@ void print(double *arr, int nn);
 void fillPoints(std::vector<int>& points, double fraction, int N);
 void fillPoints(int *points, double fraction, int N);
 void fillPoints(int *points, int N, int value);
+void identify_attractive_part(int *is_attractive, Vec3d *pos,
+    double theta_attr, int N);
 
 template<typename T>
 void print(const std::vector<T>& vec){

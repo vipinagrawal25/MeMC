@@ -103,13 +103,17 @@ subroutine BendRead(bend1, bend2, spC1, spC2, iGauss, parafile) bind(c, name="Be
         close(unit=200)
 end subroutine
 
-subroutine MeshRead(bdry_cdt, nghst, radius, ncomp, compfrac, parafile) bind(c, name="MeshRead")
+subroutine MeshRead(bdry_cdt, nghst,  ncomp, compfrac, compdist, &
+    parafile) bind(c, name="MeshRead")
     integer(kind=c_int) :: bdry_cdt, nghst, ncomp
-    real(kind = c_double) :: radius, compfrac
+    real(kind = c_double) ::  compfrac
+    character(kind=c_char, len=1), dimension(char_len), intent(out) :: compdist
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
     integer :: ierr
-    namelist /meshpara/ bdry_cdt, radius, nghst, ncomp, compfrac
+    character(len=char_len) :: distribution
+
+    namelist /meshpara/ bdry_cdt, nghst, ncomp, compfrac, distribution
         call convert_cstr_fstr(parafile, f_fname)
         print *, "Opening file: ", trim(f_fname)
         open(unit=200,file=f_fname,status='old',iostat=ierr)
@@ -119,6 +123,9 @@ subroutine MeshRead(bdry_cdt, nghst, radius, ncomp, compfrac, parafile) bind(c, 
         end if
         read(unit=200,nml=meshpara)
         close(unit=200)
+
+        call convert_fstr_cstr(distribution, compdist)
+
 end subroutine
 
 subroutine LipidRead(iregsoln, kai, epssqby2, parafile) bind(c, name="LipidRead")

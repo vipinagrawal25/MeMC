@@ -70,5 +70,6 @@ private:
   bool Glauber(double DE, double activity);
   void changeparam(double dfac, double kBT, bool is_restart, int tot_mc_iter, 
       int dumpskip);
+  double ini_tot_mc_iter;
 };
 #endif

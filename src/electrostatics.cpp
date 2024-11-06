@@ -24,13 +24,11 @@ ESP::ESP(const MESH_p& mesh, std::string fname){
     sprintf(tmp_fname, "%s", parafile.c_str());
     ElectroRead(&charge1, &charge2, &conc, tmp_fname);
 
-    if (charge1*charge2) ical=1;
-
+    if (charge1||charge2) ical=1;
     // print(mesh.compA,mesh.N);
     initcharges((int *) mesh.compA, mesh.N);
     debyelen = 0.304/sqrt(conc+tiny);
-    kappa = 10/debyelen;
-    lb = lb/10;
+    kappa = 1/debyelen;
 
     std::ofstream out_;
     out_.open(fname+"/electrostatpara.out");

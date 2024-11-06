@@ -57,33 +57,16 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
 
     double Pole_zcoord;
     double ave_bond_len;
-    int fnumber, titer;
+    int tdumpskip, titer;
     string resfile;
-
-    hdf5_io_read_double( (double *)mesh.pos,  outfolder+"/input.h5", "pos" );
-    scale_pos(mesh.pos, radius, mesh.N);
-    hdf5_io_read_mesh((int *) mesh.numnbr, (int *) mesh.node_nbr_list, 
-        outfolder+"/input.h5");
-
-    if (isPlaner(mesh.pos,mesh.N)){
-        mesh.sphere=false;
-        mesh.edge = get_nstart(mesh.N, 1);
-        // To make sure that the edges do not coincide after pbc.
-        mesh.boxlen=get_box_dim(mesh).first*(1+1/sqrt(mesh.N));
-    }
-    else{
-        mesh.sphere=true;
-        mesh.edge = -1;
-        mesh.boxlen=0;
-        mesh.bdry_type=2;   // Sphere always has a pbc.
-    }
+    
     ave_bond_len = stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
-    stretchobj.init_coefstretch(mesh);
+    // stretchobj.init_coefstretch(mesh);
     if(!mcobj.isrestart()) { residx = 0; }
     else{
         fstream restartfile(outfolder+"/restartindex.txt", ios::in);
         if (restartfile.is_open()) {
-            restartfile >> titer >> fnumber;
+            restartfile >> titer >> tdumpskip;
             restartfile.close();
         } else {
             cerr << "Error: restartindex.txt does not exist or could not be opened." 
@@ -91,7 +74,7 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
             exit(EXIT_FAILURE);
         }
         residx = titer;
-        resfile=outfolder+"/snap_"+ZeroPadNumber(fnumber)+".h5";
+        resfile=outfolder+"/snap_"+ZeroPadNumber(titer/tdumpskip)+".h5";
         hdf5_io_read_double( (double *)mesh.pos,  resfile, "pos");
         hdf5_io_read_mesh((int *) mesh.numnbr, (int *) mesh.node_nbr_list, resfile);
     }

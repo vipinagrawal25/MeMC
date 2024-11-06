@@ -30,8 +30,8 @@ void McP::updateparam(int anneal, string fname){
       dfac=dfac/2;
       kBT=kBT*0.1;
       is_restart=1;
-      tot_mc_iter=tot_mc_iter;
-      dump_skip=dump_skip;
+      tot_mc_iter=tot_mc_iter+ini_tot_mc_iter;
+      // dump_skip=dump_skip;
 
    ofstream out_;
    out_.open( fname+"/mcpara.out", ios::app );
@@ -57,6 +57,7 @@ int McP::initMC(MESH_p mesh, string fname){
               &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
               &fluidize_every, &fac_len_vertices, tmp_fname);
 
+   ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
    dfac = sqrt(8*pi/(2*N-4))*radius/dfac;
    acceptedmoves = 0;
@@ -104,17 +105,10 @@ int McP::initMC(MESH_p mesh, string fname){
       return this->Glauber(DE,activity);};
    }
 
-   if (chargeobj.getch1()!=chargeobj.getch2()){
-      if(beobj.getbend1()!=beobj.getbend2()){
-         out_ << " Energy_mc_ex = energy_mc_bech" << endl;
-         energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
-                        int val, int val2, int val3) -> double {
-         return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3);};
-      }
-   }else{
-      out_ << " Energy_mc_ex = energy_mc_ch" << endl;
-      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val,
-                           int val2, int val3) -> double {
+   if(chargeobj.calculate()){
+      out_ << " Energy_mc_exch = energy_mc_ch" << endl;
+      energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                     int val, int val2, int val3) -> double {
       return this->energy_mc_ch(vec , vec_ptr, mesh, val, val2, val3);};
    }
 
@@ -361,7 +355,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       cm_idx = idx*mesh.nghst;
       num_nbr = mesh.numnbr[idx];
       
-      Einitot = energy_mc_best(Eini, pos, mesh, idx, mesh.nghst*idx, 
+      Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst*idx, 
          mesh.numnbr[idx]);
 
       if (mesh.sphere){
@@ -379,7 +373,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       //
       pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
       //
-      Efintot = energy_mc_best(Efin, pos, mesh, idx, mesh.nghst*idx, 
+      Efintot = energy_mc_3d(Efin, pos, mesh, idx, mesh.nghst*idx, 
          mesh.numnbr[idx]);
       //
       de = Efintot - Einitot;

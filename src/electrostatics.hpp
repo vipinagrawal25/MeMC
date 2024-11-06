@@ -25,6 +25,6 @@ private:
   // Debye length
   double debyelen ;
   double kappa ;
-  double lb = 0.71; // Bjerrum length
+  const double lb = 0.71; // Bjerrum length
 };
 #endif

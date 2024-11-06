@@ -22,6 +22,8 @@ STE::STE(const MESH_p& mesh, std::string fname){
         YY2=YY1;
     }
 
+    init_coefstretch(mesh);
+
     ofstream out_;
     out_.open( fname+"/stretchpara.out");
     out_<< "# =========== stretching parameters ==========" << endl

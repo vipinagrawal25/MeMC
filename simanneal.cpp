@@ -139,18 +139,19 @@ int main(int argc, char *argv[]){
         out_file.open(outfolder+"/terminal.out", std::ios_base::app);
         terminal = &out_file;
     }
-    // ofstream terminal(outfolder+"/terminal.out", ios::app);
-    (*terminal) << "# The seed value is " << seed_v << endl;
-    for(int anneal=0; anneal < 6; anneal++){
-        mcobj.updateparam(anneal, outfolder);
-        mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,
+
+    mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,
                         mesh.radius, residx);
-        if(!mcobj.isrestart()) diag_wHeader(bendobj, stretchobj, chargeobj, mesh, fileptr);
-        if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
-        //
-        Etot = mcobj.evalEnergy(mesh);
-        mcobj.write_energy(fileptr, iter, mesh);
-        //
+    if(!mcobj.isrestart()) diag_wHeader(bendobj, stretchobj, chargeobj, mesh, fileptr);
+    if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
+
+    (*terminal) << "# The seed value is " << seed_v << endl;
+    Etot = mcobj.evalEnergy(mesh);
+    mcobj.write_energy(fileptr, iter, mesh);
+
+    for(int anneal=0; anneal < 6; anneal++){
+        residx=iter;
+        mcobj.updateparam(anneal, outfolder);
         for(iter=residx; iter < mcobj.totaliter(); iter++){
             if(iter%mcobj.dumpskip() == 0){
                 outfile=outfolder+"/snap_"+ZeroPadNumber(fnumber)+".h5";
@@ -166,10 +167,11 @@ int main(int argc, char *argv[]){
             }
             if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
             num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
-            if (mesh.ncomp>1) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
+            // if (mesh.ncomp>1) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
             if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
                 num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
-                (*terminal) << "fluid stats " << num_bond_change << " bonds flipped" << endl;
+                (*terminal) << "fluid stats " << num_bond_change
+                            << " bonds flipped" << endl;
             }
             if(!(iter % recaliter)){
                 Etot = mcobj.evalEnergy(mesh);

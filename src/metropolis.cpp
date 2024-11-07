@@ -29,7 +29,7 @@ void McP::updateparam(int anneal, string fname){
    if (anneal>0){
       dfac=dfac/2;
       kBT=kBT*0.1;
-      is_restart=1;
+      // is_restart=1;
       tot_mc_iter=tot_mc_iter+ini_tot_mc_iter;
       // dump_skip=dump_skip;
 

@@ -4,9 +4,8 @@
 
 extern "C" void StretchRead(double *, double *, bool *, bool *, 
                             double *, double *, double *, bool *, char *);
-
 int get_nstart(int, int);
-
+/*--------------------------------------------------------------------------*/
 STE::STE(const MESH_p& mesh, std::string fname){
     char tmp_fname[128];
     double radius=mesh.radius;
@@ -23,7 +22,9 @@ STE::STE(const MESH_p& mesh, std::string fname){
     }
 
     init_coefstretch(mesh);
-
+    area_t0.resize(mesh.nghst*mesh.N);
+    init_area_t0(mesh);
+    
     ofstream out_;
     out_.open( fname+"/stretchpara.out");
     out_<< "# =========== stretching parameters ==========" << endl
@@ -37,6 +38,24 @@ STE::STE(const MESH_p& mesh, std::string fname){
       << " do_area " << do_area << endl
       << " coef_area_expansion " << coef_area_expansion << endl;
     out_.close();
+}
+/*--------------------------------------------------------------------------*/
+void STE::init_area_t0(MESH_p mesh){
+    /// @brief Compute area for each triangle
+    // int Nt = 2*mbrane_para.N-4;
+    int num_nbr,cm_idx, jdx, jdxp1;
+    Vec3d xij, xijp1;
+    int st_idx = get_nstart(mesh.N, mesh.bdry_type);
+    for(int idx = st_idx; idx < mesh.N; idx++){
+        num_nbr = mesh.numnbr[idx];
+        cm_idx = mesh.nghst*idx;
+        area_ipart((double *) (area_t0 + cm_idx), mesh.pos,
+                  (int *) (mesh.node_nbr_list + cm_idx),
+                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+        for (int k = cm_idx+num_nbr; k < cm_idx+mesh.nghst; ++k){
+            area_t0[k] = -1;
+        }
+    }
 }
 /*--------------------------------------*/
 void STE::init_coefstretch(MESH_p mesh){
@@ -117,52 +136,6 @@ double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
                 num_nbr, idx, mesh.nghst, mesh.bdry_type, mesh.boxlen, mesh.edge);
     }
     return se*0.5e0;
-}
-/*----------------------------------------------------------------------*/
-double STE::area_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx, 
-            int bdry_type, double lenth, int edge){
-    ///@brief This function computes the
-    ///area of all the triangles near the vertices.
-    int jdx, jdxp1;
-    Vec3d xij, xijp1;
-    double area_energy_idx=0;
-    double area_idx=0;
-    if (bdry_type==1||idx>edge){
-      for (int k = 0; k < num_nbr; ++k){
-        jdx = node_nbr[k];
-        jdxp1 = node_nbr[(k+1)%num_nbr];
-        xij = pos[idx]- pos[jdx];
-        xijp1 = pos[idx] - pos[jdxp1];
-        area_idx = area_idx + 0.5*norm(cross_product(xij,xijp1));
-      }
-    }else{
-      for (int k = 0; k < num_nbr; ++k){
-        jdx = node_nbr[k];
-        jdxp1 = node_nbr[(k+1)%num_nbr];
-        xij = change_vec_pbc(pos[idx]-pos[jdx], lenth);
-        xijp1 = change_vec_pbc(pos[idx]-pos[jdxp1],lenth);
-        area_idx = area_idx + 0.5*norm(cross_product(xij,xijp1));
-      }
-    }
-    return area_idx;
-}
-/*----------------------------------------------------------------------*/
-double STE::area_total(Vec3d *pos, MESH_p mesh){
-     int idx, st_idx;
-     int num_nbr, cm_idx;
-     double area;
-
-     st_idx = get_nstart(mesh.N, mesh.bdry_type);
-     area = 0e0;
-     for(idx = st_idx; idx < mesh.N; idx++){
-         /* idx = 2; */
-         cm_idx = idx*mesh.nghst;
-         num_nbr = mesh.numnbr[idx];
-         area += area_ipart(pos,  
-                 (int *) (mesh.node_nbr_list + cm_idx),
-                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
-     }
-     return area/3;
 }
 /*----------------------------------------------------------------------*/
 double STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
@@ -252,7 +225,6 @@ double STE::volume_ipart(Vec3d *pos, int *node_nbr,
     return volume1;
 }
 
-
 double STE::volume_total(Vec3d *pos, MESH_p mesh){
      /// @brief Estimate the total volume of the shell
      ///  @param Pos array containing co-ordinates of all the particles
@@ -274,7 +246,7 @@ double STE::volume_total(Vec3d *pos, MESH_p mesh){
      }
      return vol/3e0;
 }
-
+/*-------------------------------------------------------------------------------------*/
 double STE::vol_energy_change(double vi, double dvol){
     double vf = vi+dvol;
     double de_vol = (vf/ini_vol - 1)*(vf/ini_vol - 1) - (vi/ini_vol - 1)*(vi/ini_vol - 1);
@@ -282,35 +254,102 @@ double STE::vol_energy_change(double vi, double dvol){
     //                 + (dvol/ini_vol)*(dvol/ini_vol);
     return Kappa*de_vol;
 }
-// /*-------------------------------------------------------------------------------------*/
-// double area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0, int num_nbr,
-//                         int idx, double coef_area_expansion){
-//     int jdx, jdxp1;
-//     Vec3d xij, xijp1;
-//     double area_energy_idx=0;
-//     double area[num_nbr];
-//     area_ipart(pos, area, node_nbr, num_nbr, idx);
-//     for (int k = 0; k < num_nbr; ++k){
-//         area_energy_idx += (1 - area[k]/area_t0[k])*(1 - area[k]/area_t0[k]);
-//     }
-//     return coef_area_expansion/2*(area_energy_idx);
-// }
-/*-------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+double STE::area_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx, 
+            int bdry_type, double lenth, int edge){
+    ///@brief This function computes the
+    ///area of all the triangles near the vertices.
+    int jdx, jdxp1;
+    Vec3d xij, xijp1;
+    double area_energy_idx=0;
+    double area_idx=0;
+    if (bdry_type==1||idx>edge){
+      for (int k = 0; k < num_nbr; ++k){
+        jdx = node_nbr[k];
+        jdxp1 = node_nbr[(k+1)%num_nbr];
+        xij = pos[idx]- pos[jdx];
+        xijp1 = pos[idx] - pos[jdxp1];
+        area_idx = area_idx + 0.5*norm(cross_product(xij,xijp1));
+      }
+    }else{
+      for (int k = 0; k < num_nbr; ++k){
+        jdx = node_nbr[k];
+        jdxp1 = node_nbr[(k+1)%num_nbr];
+        xij = change_vec_pbc(pos[idx]-pos[jdx], lenth);
+        xijp1 = change_vec_pbc(pos[idx]-pos[jdxp1],lenth);
+        area_idx = area_idx + 0.5*norm(cross_product(xij,xijp1));
+      }
+    }
+    return area_idx;
+}
+/*----------------------------------------------------------------------*/
+double STE::area_total(Vec3d *pos, MESH_p mesh){
+     int idx, st_idx;
+     int num_nbr, cm_idx;
+     double area;
 
-// double area_energy_total(Vec3d *pos, MESH_p mesh, MBRANE_p para, AREA_p area_para){
-//     int idx, st_idx;
-//     int num_nbr, cm_idx;
-//     double ae;
-//     st_idx = get_nstart(para.N, para.bdry_type);
-//     ae = 0e0;
-//     for(idx = st_idx; idx < para.N; idx++){
-//         num_nbr = mesh.numnbr[idx];
-//         cm_idx = idx*mesh.nghst;
-//         ae += area_energy_ipart(pos,
-//                 (int *)(mesh.node_nbr_list + cm_idx),
-//                 (double *) (area_para.area_t0 + cm_idx),
-//                 num_nbr, idx, area_para.coef_area_expansion);
-//     }
-//     return ae/3e0;
-// }
+     st_idx = get_nstart(mesh.N, mesh.bdry_type);
+     area = 0e0;
+     for(idx = st_idx; idx < mesh.N; idx++){
+         /* idx = 2; */
+         cm_idx = idx*mesh.nghst;
+         num_nbr = mesh.numnbr[idx];
+         area += area_ipart(pos,  
+                 (int *) (mesh.node_nbr_list + cm_idx),
+                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+     }
+     return area/3;
+}
+/*---------------------------------------------------------------------*/
+void area_ipart(double* area, Vec3d *pos, int *node_nbr, int num_nbr, 
+    int idx, int bdry_type, double lenth, int edge){
+    int jdx, jdxp1;
+    Vec3d xij, xijp1;
+    if (bdry_type==1||idx>edge){
+      for (int k = 0; k < num_nbr; ++k){
+        jdx = node_nbr[k];
+        jdxp1 = node_nbr[(k+1)%num_nbr];
+        xij = pos[idx]- pos[jdx];
+        xijp1 = pos[idx] - pos[jdxp1];
+        area[k] = 0.5*norm(cross_product(xij,xijp1));
+      }
+    }else{
+      for (int k = 0; k < num_nbr; ++k){
+        jdx = node_nbr[k];
+        jdxp1 = node_nbr[(k+1)%num_nbr];
+        xij = change_vec_pbc(pos[idx]-pos[jdx], lenth);
+        xijp1 = change_vec_pbc(pos[idx]-pos[jdxp1],lenth);
+        area[k] = 0.5*norm(cross_product(xij,xijp1));
+      }
+    }
+}
+/*--------------------------------------------------------------------*/
+double STE::area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0, 
+            int num_nbr, int idx){
+    int jdx, jdxp1;
+    Vec3d xij, xijp1;
+    double area_energy_idx=0;
+    double area[num_nbr];
+    area_ipart(pos, area, node_nbr, num_nbr, idx);
+    for (int k = 0; k < num_nbr; ++k){
+        area_energy_idx += (1 - area[k]/area_t0[k])*(1 - area[k]/area_t0[k]);
+    }
+    return coef_area_expansion/2*(area_energy_idx);
+}
 /*-------------------------------------------------------------------------------------*/
+double STE::area_energy_total(MESH_p mesh){
+    int idx, st_idx;
+    int num_nbr, cm_idx;
+    double ae;
+    st_idx = get_nstart(mesh.N, mesh.bdry_type);
+    ae = 0e0;
+    for(idx = st_idx; idx < mesh.N; idx++){
+        num_nbr = mesh.numnbr[idx];
+        cm_idx = idx*mesh.nghst;
+        ae += area_energy_ipart(mesh.pos,
+                (int *)(mesh.node_nbr_list + cm_idx),
+                (double *) (area_t0 + cm_idx),
+                num_nbr, idx);
+    }
+    return ae/3e0;
+}

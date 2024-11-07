@@ -39,5 +39,9 @@ private:
     vector <double> lij_t0;
     vector <double> HH;
     double ini_vol;
+    double area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0,
+            int num_nbr, int idx);
+    double area_energy_total(MESH_p mesh);
+    void init_area_t0(MESH_p mesh);
 };
 #endif

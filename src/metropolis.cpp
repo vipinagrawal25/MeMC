@@ -106,10 +106,17 @@ int McP::initMC(MESH_p mesh, string fname){
    }
 
    if(chargeobj.calculate()){
-      out_ << " Energy_mc_exch = energy_mc_ch" << endl;
-      energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+      if (beobj.getbend1()!=beobj.getbend2()){
+         out_ << " Energy_mc_exch = energy_mc_bech" << endl;
+         energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                      int val, int val2, int val3) -> double {
-      return this->energy_mc_ch(vec , vec_ptr, mesh, val, val2, val3);};
+         return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3);};
+      }else{
+         out_ << " Energy_mc_exch = energy_mc_ch" << endl;
+         energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                     int val, int val2, int val3) -> double {
+         return this->energy_mc_ch(vec , vec_ptr, mesh, val, val2, val3);};
+      }
    }
 
    out_.close();
@@ -401,9 +408,6 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
          electroe += Efin[2]-Eini[2];
          vole += de_vol;
          VolMonitored += dvol;
-         // regsole += ders;
-         // electroe += decharge;
-         // pre += de_pressure;
       } else {
          pos[idx].x = x_o;
          pos[idx].y = y_o;
@@ -540,7 +544,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    vector<double> Eini(4,0), Efin(4,0);
    bool yes, logic;
    int lip_idx1, lip_idx2, idxn, logic_break;
-   double Einitot, Efintot;
+   double Einitot, Efintot, de;
    //
    for (int i = 0; i < one_mc_iter; ++i){
       logic = true;
@@ -566,10 +570,15 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          Efintot += energy_mc_be(Eini, pos, mesh, idx2, mesh.nghst*idx2, 
                   mesh.numnbr[idx2]);
 
+         de = Efintot-Einitot;
          yes = Boltzman(Efintot-Einitot, 0.0);
 
          if (yes){
             ++exchngdmoves;
+            EneMonitored += de;
+            bende += Efin[0]-Eini[0];
+            stretche += Efin[1]-Eini[1];
+            electroe += Efin[2]-Eini[2];
          }else{
             mesh.compA[idx1] = lip_idx1;
             mesh.compA[idx2] = lip_idx2;

@@ -167,7 +167,7 @@ int main(int argc, char *argv[]){
             }
             if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
             num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
-            // if (mesh.ncomp>1) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
+            if (mesh.ncomp>1) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
             if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
                 num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
                 (*terminal) << "fluid stats " << num_bond_change

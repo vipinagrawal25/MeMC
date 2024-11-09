@@ -128,6 +128,11 @@ double McP::evalEnergy(MESH_p mesh){
    Vec3d *Pos = mesh.pos;
    bende = beobj.bending_energy_total(Pos, mesh);
    stretche = steobj.stretch_energy_total(Pos, mesh);
+   cout << stretche << endl;
+   if (steobj.doarea()){
+      stretche =steobj.area_energy_total(mesh);
+      totEner += stretche;
+   }
    totEner = bende+stretche;
    if (chargeobj.calculate()){
       electroe = chargeobj.debye_huckel_total(Pos, mesh.N);
@@ -169,6 +174,7 @@ void McP::write_energy(fstream &fileptr, int itr, const MESH_p &mesh){
       if (repulsiveobj.isSelfRepulsive()) fileptr << selfe << " ";
       fileptr << EneMonitored  << "  ";
       if(mesh.sphere) fileptr << VolMonitored  << endl;
+      // if (steobj.doarea()) fileptr << AreaMonitored << endl;
   }  
 }
 /*-----------------------*/
@@ -191,19 +197,6 @@ int del_nbr(int *nbrs, int numnbr, int idx){
   logic = false;
   delete_here = 0;
 
-  //  for (int i = 0; i < numnbr; ++i){
-  //    if (nbrs[i]==nbrs[i+1]){
-  //       // cout << "delnbr=" << idx << " "<< nbrs[delete_here] <<endl;
-  //        for (int i = 0; i < numnbr; ++i){
-  //           cout << nbrs[i] << " ";
-  //        }
-  //        cout << endl;
-  //    }
-  // }
-
-  // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
-  // printf("\n\n");
-
   while (!logic) {
     logic = (nbrs[delete_here] == idx);
     ++delete_here;
@@ -224,19 +217,6 @@ int add_nbr(int *nbrs, int numnbr, int idx, int i1, int i2) {
 
    logic = false;
    insert_here = 0;
-
-   // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
-   //     printf("\n\n");
-
-   // for (int i = 0; i < numnbr; ++i){
-   //   if (nbrs[i]==nbrs[i+1]){
-   //       // cout << "delnbr=" << idx << " "<< nbrs[delete_here] <<endl;
-   //       for (int i = 0; i < numnbr; ++i){
-   //          cout << nbrs[i] << " ";
-   //       }
-   //       cout << endl;
-   //   }
-   // }
 
    while (!logic) {
       logic = (nbrs[insert_here] == i1) || (nbrs[insert_here] == i2);
@@ -296,12 +276,17 @@ bool McP::Glauber(double DE, double activity){
 inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
                int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
-   energy[0] = beobj.bending_energy_ipart(pos, nbrcm,
-               num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+   double lijsq[num_nbr];
+   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm,
+               num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
-   energy[1] = steobj.stretch_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.nghst, 
-               mesh.bdry_type, mesh.boxlen, mesh.edge);
-   
+   if (steobj.getyy1()!=0&&steobj.getyy2()!=0){
+      energy[1] = steobj.stretch_energy_ipart(lijsq, num_nbr, idx, mesh.nghst);
+   }
+   if (steobj.doarea()){
+      energy[1] +=  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.bdry_type,
+                     mesh.boxlen,mesh.edge);
+   }
    return energy[0]+energy[1];
 }
 //

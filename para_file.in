@@ -2,7 +2,7 @@
 	nghst=12		
 	bdry_cdt=2  	!0=channel 1=frame anything else periodic
 	radius=1 		!In nanometers
-	ncomp=2 		
+	ncomp=2
 	compfrac=0.5	
 /
 

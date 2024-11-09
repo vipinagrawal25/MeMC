@@ -53,7 +53,7 @@ inline double acot(double x) {
 /*-------------------------------------------------*/
 // There is a problem if we have the vertices on the polls -- zaxis.
 double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-            int bdry_type, double lenth, int edge){
+            int bdry_type, double lenth, int edge, double *lijsq){
     /// @brief Estimate the Bending energy contribution when ith particle 
     /// position changes
     /// @param Pos array containing co-ordinates of all the particles
@@ -73,7 +73,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     double liksq,likmsq,ljkmsq;
     double sigma_i = 0e0;
     double cot_aij[num_nbr],cot_bij[num_nbr],area_ijk[num_nbr];
-    double ljksq[num_nbr], lijsq[num_nbr];
+    double ljksq[num_nbr];
     Vec3d xij[num_nbr];
     // store all the lengths
     if (bdry_type == 1 || idx>edge){
@@ -119,7 +119,7 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     }
     nhat = nhat/norm(nhat);
     lap_bel = cot_times_rij/sigma_i;
-    lap_bel = lap_bel*0.5; 
+    lap_bel = lap_bel*0.5;
     lap_bel_t0 = nhat*spcurv;
     bend_ener = sigma_i*normsq(lap_bel-lap_bel_t0);
     if (iGauss){
@@ -131,6 +131,14 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
         // cout << Gauss_ener/sigma_i << endl;
     }
     return 0.5*coef_bend[idx]*bend_ener;
+}
+/*--------------------------------------------------------------------------*/
+// Wrapper function
+double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
+            int bdry_type, double lenth, int edge){
+    double lijsq[num_nbr];
+    return bending_energy_ipart(pos, node_nbr, num_nbr, idx, bdry_type, lenth,
+        edge, lijsq);
 }
 /*--------------------------------------------------------------------------*/
 double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, 

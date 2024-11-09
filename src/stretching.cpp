@@ -24,7 +24,8 @@ STE::STE(const MESH_p& mesh, std::string fname){
     init_coefstretch(mesh);
     area_t0=(double*)calloc(mesh.nghst*mesh.N, sizeof(double));
     init_area_t0(mesh);
-    
+    cout << "Initial area = " << area_total(mesh) << endl;
+
     ofstream out_;
     out_.open( fname+"/stretchpara.out");
     out_<< "# =========== stretching parameters ==========" << endl
@@ -83,36 +84,43 @@ inline Vec3d diff(Vec3d a, Vec3d b, double lenth, int bdry_type, int idx, int ed
     else    return diff_pbc(a, b, lenth);
 }
 /*--------------------------------------*/
-double STE::stretch_energy_ipart(Vec3d *pos,int *node_nbr, int num_nbr, int idx,
+double STE::stretch_energy_ipart(double *lijsq, int num_nbr, int idx, int ghost){
+    double idx_ener=0e0, mod_rij;
+    int i, j;
+    Vec3d rij;
+    for (i =0; i < num_nbr; i++){
+        mod_rij=sqrt(lijsq[i]);
+        // j = node_nbr[i];
+        // rij = pos[idx] - pos[j];
+        // cout << lijsq[i] <<" " << inner_product(rij, rij);
+        idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij-lij_t0[idx*ghost+i])*(mod_rij- lij_t0[idx*ghost+i]);
+    }
+   return 0.5*idx_ener;
+}
+/*--------------------------------------*/
+double STE::stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
             int ghost, int bdry_type, double lenth, int edge){
+    // Wrapper function if lijsq is not given
    double idx_ener;
    Vec3d rij;
-   double mod_rij, avg_lij;
+   double lijsq[num_nbr];
    int i,j;
    //
    idx_ener = 0e0;
-   // HH = para.coef_str/(para.av_bond_len*para.av_bond_len);
-   // HH = YY*sqrt(3)/2;
    if (bdry_type == 1 || idx>edge){
       for (i =0; i < num_nbr; i++){
         j = node_nbr[i];
         rij = pos[idx] - pos[j];
-        // rij = diff(pos[idx], pos[j], lenth, bdry_type, idx, edge);
-        mod_rij = sqrt(inner_product(rij, rij));
-        // cout << HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]) << endl;
-        idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
-        // idx_ener = idx_ener + HH[idx*ghost+i]*mod_rij*mod_rij;
+        lijsq[i] = inner_product(rij, rij);
       }
    }else{
         for (i =0; i < num_nbr; i++){
          j = node_nbr[i];
          rij = diff_pbc(pos[idx], pos[j], lenth);
-         mod_rij = sqrt(inner_product(rij, rij));
-         idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij - lij_t0[idx*ghost+i])*(mod_rij - lij_t0[idx*ghost+i]);
-         // idx_ener = idx_ener + HH[idx*ghost+i]*mod_rij*mod_rij;
+         lijsq[i] = inner_product(rij, rij);
       }
    }
-   return 0.5*idx_ener;
+   return stretch_energy_ipart(lijsq, num_nbr, idx, ghost);
 }
 /*--------------------------------------*/
 double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
@@ -165,10 +173,8 @@ double STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
             dr = diff_pbc(Pos[j], Pos[i], lenth);
-            // lij_t0[k] = sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             npairs++;
-            /* printf("%g %g %g %g %g \n", Pos[i].x, Pos[j].x, Pos[i].y, Pos[j].y, lij_t0[k]); */
         }
     }
     av_bond_len = sum_lij/npairs;
@@ -246,12 +252,10 @@ double STE::volume_total(Vec3d *pos, MESH_p mesh){
      }
      return vol/3e0;
 }
-/*-------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
 double STE::vol_energy_change(double vi, double dvol){
     double vf = vi+dvol;
     double de_vol = (vf/ini_vol - 1)*(vf/ini_vol - 1) - (vi/ini_vol - 1)*(vi/ini_vol - 1);
-    // double de_vol = (2*dvol/(ini_vol*ini_vol))*(volume  - ini_vol) 
-    //                 + (dvol/ini_vol)*(dvol/ini_vol);
     return Kappa*de_vol;
 }
 /*----------------------------------------------------------------------*/
@@ -324,7 +328,7 @@ void STE::area_ipart(double* area, Vec3d *pos, int *node_nbr, int num_nbr,
     }
 }
 /*--------------------------------------------------------------------*/
-double STE::area_energy_ipart(Vec3d *pos, int *node_nbr, double *area_t0,
+double STE::area_energy_ipart(Vec3d *pos, int *node_nbr,
             int num_nbr, int idx, int bdry_type, double lenth, int edge){
     int jdx, jdxp1;
     Vec3d xij, xijp1;
@@ -348,7 +352,6 @@ double STE::area_energy_total(MESH_p mesh){
         cm_idx = idx*mesh.nghst;
         ae += area_energy_ipart(mesh.pos,
                 (int *)(mesh.node_nbr_list + cm_idx),
-                (double *) (area_t0 + cm_idx),
                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
     }
     return ae/3e0;

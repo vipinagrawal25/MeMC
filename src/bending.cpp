@@ -182,8 +182,6 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
 }
 /*------------------------------------------------------------------------------*/
 void BE::exchange(int idx1, int idx2){
-   double temp = coef_bend[idx1];
-   coef_bend[idx1] = coef_bend[idx2];
-   coef_bend[idx2] = temp;
+    swap(coef_bend[idx1], coef_bend[idx2]);
 }
 /*------------------------------------------------------------------------------*/

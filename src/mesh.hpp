@@ -27,7 +27,7 @@ struct MESH_p{
     double compfrac;
     int *compA;
     std::string distribution;
-    double radius, ini_vol;
+    double radius, ini_vol, zattr;
     MESH_p(std::string outfolder){
         char tmp_fname[128], tmp_dist[128];;
         std::string para_file = outfolder+"/para_file.in";
@@ -58,7 +58,6 @@ struct MESH_p{
             bdry_type=2;   // Sphere always has a pbc.
             radius=calculateRadius();
             ini_vol = 4e0/3e0*M_PI*radius*radius*radius;
-            cout << radius << endl;
         }
 
         if (ncomp==1) compfrac=0;
@@ -66,9 +65,9 @@ struct MESH_p{
         if (distribution=="Random" || distribution=="random"){
             fillPoints(compA, compfrac, N);    
         }else if(distribution=="Janus" || distribution=="janus"){
-            identify_attractive_part(compA, pos, 2*M_PI*compfrac, N);
+            zattr=2*(compfrac-0.5) * radius;
+            identify_attractive_part(compA, pos, zattr, N);
         }
-
     }
 
     void free(){

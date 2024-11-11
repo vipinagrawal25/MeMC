@@ -119,6 +119,16 @@ int McP::initMC(MESH_p mesh, string fname){
       }
    }
 
+   if (exchtype=="Global" || exchtype == "global"){
+      out_ << "Component exchange type = Global" << endl;
+      get_idx2 = [this](int num_nbr, int *node_nbr_list, int cm_idx, int nframe,
+         int N) -> int{return this->global_idx(nframe, N);};
+   }else{
+      out_ << "Component exchange type = Local" << endl;
+      get_idx2 = [this](int num_nbr, int *node_nbr_list, int cm_idx, int nframe,
+         int N) -> int{return this->local_idx(num_nbr, node_nbr_list, cm_idx);};
+   }
+
    out_.close();
    volt0=mesh.ini_vol;
    return 1;
@@ -198,19 +208,6 @@ int del_nbr(int *nbrs, int numnbr, int idx){
   logic = false;
   delete_here = 0;
 
-  //  for (int i = 0; i < numnbr; ++i){
-  //    if (nbrs[i]==nbrs[i+1]){
-  //       // cout << "delnbr=" << idx << " "<< nbrs[delete_here] <<endl;
-  //        for (int i = 0; i < numnbr; ++i){
-  //           cout << nbrs[i] << " ";
-  //        }
-  //        cout << endl;
-  //    }
-  // }
-
-  // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
-  // printf("\n\n");
-
   while (!logic) {
     logic = (nbrs[delete_here] == idx);
     ++delete_here;
@@ -219,8 +216,6 @@ int del_nbr(int *nbrs, int numnbr, int idx){
   memcpy(nbrs + delete_here - 1, &nbrs[delete_here],
          sizeof(int) * (numnbr - delete_here + 1));
 
-  // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
-  // printf("\n\n");
   return numnbr - 1;
 }
 
@@ -231,19 +226,6 @@ int add_nbr(int *nbrs, int numnbr, int idx, int i1, int i2) {
 
    logic = false;
    insert_here = 0;
-
-   // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
-   //     printf("\n\n");
-
-   // for (int i = 0; i < numnbr; ++i){
-   //   if (nbrs[i]==nbrs[i+1]){
-   //       // cout << "delnbr=" << idx << " "<< nbrs[delete_here] <<endl;
-   //       for (int i = 0; i < numnbr; ++i){
-   //          cout << nbrs[i] << " ";
-   //       }
-   //       cout << endl;
-   //   }
-   // }
 
    while (!logic) {
       logic = (nbrs[insert_here] == i1) || (nbrs[insert_here] == i2);
@@ -537,38 +519,52 @@ inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos, MESH_p mesh,
    return energy[0];
 }
 //
+int McP::local_idx(int num_nbr, int *node_nbr_list, int cm_idx){
+   int idxn = RandomGenerator::intUniform(0, num_nbr-1);
+   return node_nbr_list[cm_idx+idxn];
+}
+//
+int McP::global_idx(int nframe, int N){
+   return RandomGenerator::intUniform(nframe, N-1);
+}
+//
 int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    int exchngdmoves = 0;
-   int idx1, idx2, cm_idx1;
+   int idx1, idx2, cm_idx1, cm_idx2;
    int nframe = get_nstart(mesh.N, mesh.bdry_type);
    vector<double> Eini(4,0), Efin(4,0);
    bool yes, logic;
    int lip_idx1, lip_idx2, idxn, logic_break;
    double Einitot, Efintot, de;
+   int num_nbr1, num_nbr2;
    //
    for (int i = 0; i < one_mc_iter; ++i){
       logic = true;
       idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
       cm_idx1 = mesh.nghst * idx1;
+      num_nbr1=mesh.numnbr[idx1];
+
+      idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, 
+               nframe, mesh.N);
+      cm_idx2 = mesh.nghst * idx2;
+
       logic = (mesh.compA[idx1] == mesh.compA[idx2]);
       
       if (!logic){
          lip_idx1 = mesh.compA[idx1];
          lip_idx2 = mesh.compA[idx2];
 
-         Einitot = energy_mc_be(Eini, pos, mesh, idx1, mesh.nghst*idx1, 
-                  mesh.numnbr[idx1]);
-         Einitot += energy_mc_be(Eini, pos, mesh, idx2, mesh.nghst*idx2,
-                  mesh.numnbr[idx2]);
+         Einitot = energy_mc_bech(Eini, pos, mesh, idx1, cm_idx1, num_nbr1);
+         Einitot += energy_mc_bech(Eini, pos, mesh, idx2, cm_idx2, num_nbr2);
 
          mesh.compA[idx2] = lip_idx1;
          mesh.compA[idx1] = lip_idx2;
-         beobj.exchange(idx1, idx2);
 
-         Efintot = energy_mc_be(Efin, pos, mesh, idx1, mesh.nghst*idx1, 
-                  mesh.numnbr[idx1]);
-         Efintot += energy_mc_be(Efin, pos, mesh, idx2, mesh.nghst*idx2, 
-                  mesh.numnbr[idx2]);
+         beobj.exchange(idx1,idx2);
+         chargeobj.exchange(idx1,idx2);
+
+         Efintot = energy_mc_bech(Efin, pos, mesh, idx1, cm_idx1, num_nbr1);
+         Efintot += energy_mc_bech(Efin, pos, mesh, idx2, cm_idx2, num_nbr2);
 
          de = Efintot-Einitot;
          yes = Boltzman(Efintot-Einitot, 0.0);

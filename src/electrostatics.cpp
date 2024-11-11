@@ -7,10 +7,7 @@
 extern "C" void  ElectroRead(double*, double*, double*, char *);
 
 void ESP::initcharges(int *compA, int N){
-    // print(compA,N);
-    // std::cout << N << "\n";
     for (int i = 0; i < N; ++i){
-        // std::cout << i << "\n";
         if (compA[i]) {charges.push_back(charge2);}
         else {charges.push_back(charge1);}
     }
@@ -77,7 +74,5 @@ double ESP::debye_huckel_total(Vec3d *Pos, int N){
 }
 
 void ESP::exchange(int idx1, int idx2){
-   double temp = charges[idx1];
-   charges[idx1] = charges[idx2];
-   charges[idx2] = temp;
+    swap(charges[idx1], charges[idx2]);
 }

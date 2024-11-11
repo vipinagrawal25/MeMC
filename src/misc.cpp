@@ -324,23 +324,40 @@ void fillPoints(int* points, int N, int value){
 }
 
 
-void identify_attractive_part(int *is_attractive, Vec3d *pos,
-    double theta_attr, int N){
+// void identify_attractive_part(int *is_attractive, Vec3d *pos,
+//     double theta_attr, int N){
+//   /// @brief identify all the points which substends theta_attr with the center
+//   ///  @param Pos array containing co-ordinates of all the particles
+//   ///  @param is_attractive true for all the particles which sees bottom wall 
+//   ///  @param theta_attr \Theta_0 see paper/paper.pdf 
+//   ///   N number of points making the membrane
+//   int i; 
+//   double theta;
+//   int inum=0;
+//   for(i= 0; i<N; i++){
+//     theta = atan2(pos[i].y, pos[i].x);
+//     if (theta < 0) {
+//       theta += 2 * M_PI;
+//     }
+//     is_attractive[i] = theta < theta_attr;
+//   }
+// }
+
+
+void identify_attractive_part(int *is_attractive, Vec3d *pos, double zattr,
+      int N){
   /// @brief identify all the points which substends theta_attr with the center
   ///  @param Pos array containing co-ordinates of all the particles
   ///  @param is_attractive true for all the particles which sees bottom wall 
   ///  @param theta_attr \Theta_0 see paper/paper.pdf 
   ///   N number of points making the membrane
   int i; 
-  double theta;
   int inum=0;
+  for(i= 0; i<N; i++) is_attractive[i] = pos[i].z<zattr;
   for(i= 0; i<N; i++){
-    theta = atan2(pos[i].y, pos[i].x);
-    if (theta < 0) {
-      theta += 2 * M_PI;
-    }
-    is_attractive[i] = theta < theta_attr;
+    if (is_attractive[i]) inum+=1;
   }
+  // cout << (double)inum/N << endl;
 }
 
 

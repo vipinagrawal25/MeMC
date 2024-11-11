@@ -72,5 +72,9 @@ private:
   void changeparam(double dfac, double kBT, bool is_restart, int tot_mc_iter, 
       int dumpskip);
   double ini_tot_mc_iter;
+  string exchtype="Global";
+  function<int(int, int*, int, int, int)> get_idx2;
+  int local_idx(int num_nbr, int *node_nbr_list, int cm_idx);
+  int global_idx(int nframe, int N);
 };
 #endif

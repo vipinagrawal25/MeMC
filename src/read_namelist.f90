@@ -37,15 +37,15 @@ end subroutine
 
 subroutine MC_listread(algo, dfac, kbt, is_restart, &
     tot_mc_iter, dump_skip, is_fluid, min_allowed_nbr, &
-    fluidize_every, fac_len_vertices, parafile) bind(c, name='MC_listread')
+    fluidize_every, fac_len_vertices, iexch, parafile) bind(c, name='MC_listread')
 
     use, intrinsic :: iso_c_binding
     implicit none
-
+    
     integer(kind=c_int) :: tot_mc_iter
     integer(kind=c_int) :: dump_skip, min_allowed_nbr
     integer(kind=c_int) :: fluidize_every
-    logical(kind=c_bool) :: is_restart, is_fluid
+    logical(kind=c_bool) :: is_restart, is_fluid, iexch
     real(kind=c_double) :: dfac, kbt, fac_len_vertices
     character(kind=c_char, len=1), dimension(char_len), intent(out) :: algo
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
@@ -53,7 +53,7 @@ subroutine MC_listread(algo, dfac, kbt, is_restart, &
     character(len=char_len) :: Mcalgo
 
     namelist /mcpara/ Mcalgo, dfac, kbt, is_restart, tot_mc_iter, dump_skip, &
-    is_fluid, min_allowed_nbr, fluidize_every, fac_len_vertices
+    is_fluid, min_allowed_nbr, fluidize_every, fac_len_vertices, iexch
 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=200, file=f_fname, status='old')

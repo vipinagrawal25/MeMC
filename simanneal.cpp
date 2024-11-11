@@ -57,7 +57,7 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
 
     double Pole_zcoord;
     double ave_bond_len;
-    int tdumpskip, titer;
+    int fnumber, titer;
     string resfile;
     
     ave_bond_len = stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
@@ -66,7 +66,7 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
     else{
         fstream restartfile(outfolder+"/restartindex.txt", ios::in);
         if (restartfile.is_open()) {
-            restartfile >> titer >> tdumpskip;
+            restartfile >> titer >> fnumber;
             restartfile.close();
         } else {
             cerr << "Error: restartindex.txt does not exist or could not be opened." 
@@ -74,7 +74,7 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
             exit(EXIT_FAILURE);
         }
         residx = titer;
-        resfile=outfolder+"/snap_"+ZeroPadNumber(titer/tdumpskip)+".h5";
+        resfile=outfolder+"/snap_"+ZeroPadNumber(fnumber)+".h5";
         hdf5_io_read_double( (double *)mesh.pos,  resfile, "pos");
         hdf5_io_read_mesh((int *) mesh.numnbr, (int *) mesh.node_nbr_list, resfile);
     }
@@ -148,9 +148,8 @@ int main(int argc, char *argv[]){
     (*terminal) << "# The seed value is " << seed_v << endl;
     Etot = mcobj.evalEnergy(mesh);
     mcobj.write_energy(fileptr, iter, mesh);
-
+    
     for(int anneal=0; anneal < 6; anneal++){
-        residx=iter;
         mcobj.updateparam(anneal, outfolder);
         for(iter=residx; iter < mcobj.totaliter(); iter++){
             if(iter%mcobj.dumpskip() == 0){
@@ -167,7 +166,7 @@ int main(int argc, char *argv[]){
             }
             if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
             num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
-            if (mesh.ncomp>1) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
+            if (mcobj.exchange()) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
             if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
                 num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
                 (*terminal) << "fluid stats " << num_bond_change
@@ -183,6 +182,7 @@ int main(int argc, char *argv[]){
                 << " totalener = " << Etot << "; volume = " << mcobj.getvolume() << endl;
             }
             mcobj.write_energy(fileptr, iter, mesh);
+            residx=iter;
         }
     }
     (*terminal) << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" << endl;

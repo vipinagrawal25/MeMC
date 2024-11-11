@@ -35,6 +35,7 @@ public :
   double getvolume(); 
   void setEneVol();
   void updateparam(int anneal, string fname);
+  bool exchange(){return iexch;}
 private:
   BE &beobj;
   STE &steobj;
@@ -46,7 +47,7 @@ private:
   int one_mc_iter, tot_mc_iter, dump_skip;
   double kBT;
   double delta; // increment of position
-  bool is_restart;
+  bool is_restart, iexch;
   bool is_fluid;
   int min_allowed_nbr;
   int fluidize_every;

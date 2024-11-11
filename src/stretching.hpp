@@ -23,6 +23,7 @@ public :
     double PV_change(double dvol){return pressure*dvol;}
     double getkappa(){return Kappa;}
     void init_coefstretch(MESH_p);
+    double stretch_energy_ipart(double *mod_rij, int num_nbr, int idx, int ghost);
 private:
     double YY1, YY2;                // coefficient stretching
     bool do_volume;

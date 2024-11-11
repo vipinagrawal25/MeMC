@@ -17,7 +17,7 @@ const double pi = 3.14159265358979323846264;
 
 using namespace std;
 extern "C" void  MC_listread(char *, double *, double *, bool *,int *, int *, 
-                  bool *, int *, int *, double *, char *);
+                  bool *, int *, int *, double *, bool *, char *);
 int get_nstart(int, int);
 
 McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj, 
@@ -55,7 +55,7 @@ int McP::initMC(MESH_p mesh, string fname){
    sprintf(tmp_fname, "%s", parafile.c_str());
    MC_listread(temp_algo, &dfac, &kBT, &is_restart,
               &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
-              &fluidize_every, &fac_len_vertices, tmp_fname);
+              &fluidize_every, &fac_len_vertices, &iexch, tmp_fname);
 
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
@@ -565,9 +565,9 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          mesh.compA[idx1] = lip_idx2;
          beobj.exchange(idx1, idx2);
 
-         Efintot = energy_mc_be(Eini, pos, mesh, idx1, mesh.nghst*idx1, 
+         Efintot = energy_mc_be(Efin, pos, mesh, idx1, mesh.nghst*idx1, 
                   mesh.numnbr[idx1]);
-         Efintot += energy_mc_be(Eini, pos, mesh, idx2, mesh.nghst*idx2, 
+         Efintot += energy_mc_be(Efin, pos, mesh, idx2, mesh.nghst*idx2, 
                   mesh.numnbr[idx2]);
 
          de = Efintot-Einitot;

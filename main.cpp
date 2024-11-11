@@ -54,8 +54,9 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
             restartfile >> titer >> tdumpskip;
             restartfile.close();
         } else {
-            cerr << "Error: restartindex.txt does not exist or could not be opened." 
-            << "\nPlease change the para_file to start code from begining." << std::endl;
+            cerr << "Error: restartindex.txt does not exist or could not be opened."
+            << "\nPlease change the para_file to start code from begining."
+            << std::endl;
             exit(EXIT_FAILURE);
         }
         residx = titer;
@@ -101,7 +102,7 @@ int main(int argc, char *argv[]){
     RandomGenerator::init(seed_v);
 
     MESH_p mesh(outfolder);
-
+    // exit(1);
     BE bendobj(mesh, outfolder);
     STE stretchobj(mesh, outfolder);
     MulCom lipidobj(mesh, outfolder);
@@ -128,7 +129,8 @@ int main(int argc, char *argv[]){
     }
     // ofstream terminal(outfolder+"/terminal.out", ios::app);
     (*terminal) << "# The seed value is " << seed_v << endl;
-    if(!mcobj.isrestart()) diag_wHeader(bendobj, stretchobj, chargeobj, mesh, fileptr);
+    if(!mcobj.isrestart()) diag_wHeader(bendobj, stretchobj, chargeobj, mesh, 
+        fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 
     clock_t timer;
@@ -149,10 +151,11 @@ int main(int argc, char *argv[]){
         //
         if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
         num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
-        if (mesh.ncomp>1) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
+        if (mcobj.exchange()) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
         if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
             num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
-            (*terminal) << "fluid stats " << num_bond_change << " bonds flipped" << endl;
+            (*terminal) << "fluid stats " << num_bond_change << " bonds flipped" 
+            << endl;
         }
         //
         if(!(iter % recaliter)){
@@ -166,7 +169,8 @@ int main(int argc, char *argv[]){
         }
         mcobj.write_energy(fileptr, iter, mesh);
     }
-    (*terminal) << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" << endl;
+    (*terminal) << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" 
+    << endl;
     if (world_size > 1) out_file.close();
     
     fileptr.close();

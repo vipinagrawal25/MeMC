@@ -52,16 +52,15 @@ pair<double, double> get_box_dim(MESH_p mesh){
     return {xlen, ylen};
 }
 
-double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, 
-    string outfolder, double radius, int &residx){
+double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, string outfolder, 
+        double radius, int &residx){
 
     double Pole_zcoord;
     double ave_bond_len;
     int fnumber, titer;
     string resfile;
-    
+
     ave_bond_len = stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
-    // stretchobj.init_coefstretch(mesh);
     if(!mcobj.isrestart()) { residx = 0; }
     else{
         fstream restartfile(outfolder+"/restartindex.txt", ios::in);
@@ -149,7 +148,7 @@ int main(int argc, char *argv[]){
     Etot = mcobj.evalEnergy(mesh);
     mcobj.write_energy(fileptr, iter, mesh);
     
-    for(int anneal=0; anneal < 6; anneal++){
+    for(int anneal=0; anneal < 5; anneal++){
         mcobj.updateparam(anneal, outfolder);
         for(iter=residx; iter < mcobj.totaliter(); iter++){
             if(iter%mcobj.dumpskip() == 0){

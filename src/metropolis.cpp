@@ -61,6 +61,7 @@ int McP::initMC(MESH_p mesh, string fname){
    one_mc_iter = 2*N;
    dfac = sqrt(8*pi/(2*N-4))*radius/dfac;
    acceptedmoves = 0;
+   if (mesh.ncomp==1) iexch=false;
    ofstream out_;
    out_.open( fname+"/mcpara.out" );
    out_<< "# =========== monte carlo parameters ==========" << endl
@@ -74,18 +75,12 @@ int McP::initMC(MESH_p mesh, string fname){
       << " min_allowed_nbr " << min_allowed_nbr << endl
       << " fluidize_every " << fluidize_every << endl;
 
-   if (chargeobj.calculate()){
-      if (repulsiveobj.isSelfRepulsive()){
-         out_ << " Energy_mc_3d = energy_mc_bestchre"<< endl;
-         energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val, 
-         int val2, int val3 ) -> double {
-         return this->energy_mc_bestchre(vec, vec_ptr, mesh, val, val2, val3);};
-      }else{
-         out_ << " Energy_mc_3d = energy_mc_bestch"<< endl;
-         energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val, 
-         int val2, int val3 ) -> double {
-         return this->energy_mc_bestch(vec, vec_ptr, mesh, val, val2, val3);};
-      }
+
+   if (chargeobj.calculate() && repulsiveobj.isSelfRepulsive()){
+      out_ << " Energy_mc_3d = energy_mc_bestchrep "<< endl;
+      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
+                  int val, int val2, int val3 ) -> double {
+      return this->energy_mc_bestchrep(vec, vec_ptr, mesh, val, val2, val3);};
    }else{
       out_ << " Energy_mc_3d = energy_mc_best" << endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val,
@@ -106,7 +101,7 @@ int McP::initMC(MESH_p mesh, string fname){
    }
 
    if(chargeobj.calculate()){
-      if (beobj.getbend1()!=beobj.getbend2()){
+      if (beobj.getbend1() != beobj.getbend2()){
          out_ << " Energy_mc_exch = energy_mc_bech" << endl;
          energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                      int val, int val2, int val3) -> double {
@@ -301,7 +296,7 @@ inline double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p m
    return Etot + energy[2];
 }
 //
-inline double McP::energy_mc_bestchre(vector<double> &energy, Vec3d *pos, MESH_p mesh,
+inline double McP::energy_mc_bestchrep(vector<double> &energy, Vec3d *pos, MESH_p mesh,
             int idx, int cm_idx, int num_nbr){
    double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr);
    energy[3] = repulsiveobj.computeSelfRep(mesh, idx);
@@ -547,6 +542,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
       idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, 
                nframe, mesh.N);
       cm_idx2 = mesh.nghst * idx2;
+      num_nbr2=mesh.numnbr[idx2];
 
       logic = (mesh.compA[idx1] == mesh.compA[idx2]);
       

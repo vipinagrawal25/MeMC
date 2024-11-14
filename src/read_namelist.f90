@@ -77,13 +77,13 @@ subroutine ElectroRead(charge1, charge2, conc, parafile) bind(c, name="ElectroRe
     close(unit=200)
 end subroutine
 
-subroutine SelfAvoidRead(isselfrepulsive, boxsize, cutoff, minl, sig, eps, parafile) bind(c, name='SelfAvoidRead')
-    real(kind=c_double) :: boxsize, cutoff, sig, eps, minl
+subroutine SelfAvoidRead(isselfrepulsive, cutoff, minl, sig, eps, parafile)bind(c, name='SelfAvoidRead')
+    real(kind=c_double) :: cutoff, sig, eps, minl
     logical(c_bool) :: isselfrepulsive
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
 
-    namelist /selfavoidpara/ isselfrepulsive, boxsize, cutoff, minl, sig, eps
+    namelist /selfavoidpara/ isselfrepulsive, cutoff, minl, sig, eps
         call convert_cstr_fstr(parafile, f_fname)
         open(unit=200,file=f_fname,status='old')
         read(unit=200,nml=selfavoidpara)

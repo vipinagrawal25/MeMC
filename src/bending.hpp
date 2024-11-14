@@ -26,6 +26,7 @@ private:
   std::vector<double> coef_bend;
   double spcurv;
   bool iGauss;
+  bool multicomp;
 /*------------------------*/
 double voronoi_area(double cotJ, double cotK, 
       double jsq, double ksq, double area){

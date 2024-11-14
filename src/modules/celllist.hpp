@@ -16,7 +16,6 @@ public:
 
     // Assign particles to cells
     for (int i = 0; i < mesh.N; ++i) {
-      
       int cellIdx = getCellIndex(mesh.pos[i].x, mesh.pos[i].y, mesh.pos[i].z, minL);
         // Remove the neighbours of the i here.
         cellList_[cellIdx].push_back(i);
@@ -45,7 +44,7 @@ protected:
   int getCellIndex(double x, double y, double z, double minL) {
     // Here need to add condition for x - minL - boxsize_. 
     // No particles can lie in the boundary
-    // Else one edge of particles will repel the edge of other. 
+    // Else one edge of particles will repel the edge of other.
     int ix = static_cast<int>((x - minL)/ cellSize_);
     int iy = static_cast<int>((y - minL)/ cellSize_);
     int iz = static_cast<int>((z - minL)/ cellSize_);
@@ -59,8 +58,8 @@ protected:
     int y = (cellIdx % (numCells_ * numCells_)) / numCells_;
     int x = cellIdx % numCells_;
     // Loop through neighboring cells in 3x3x3 cube
-    for (int dz = -1; dz <= 1; ++dz) {
-        for (int dy = -1; dy <= 1; ++dy) {
+    for (int dz = -1; dz <= 1; ++dz){
+        for (int dy = -1; dy <= 1; ++dy){
             for (int dx = -1; dx <= 1; ++dx) {
                 int nx = (x + dx + numCells_) % numCells_;
                 int ny = (y + dy + numCells_) % numCells_;

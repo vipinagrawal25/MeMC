@@ -2,21 +2,22 @@
     nghst = 12
     bdry_cdt = 2
     ncomp = 2
-    compfrac = 0.5
-    distribution = 'Random' !'Janus, Random are the options'
+    compfrac = 0.75
+    distribution = 'Janus' !'Janus, Random are the options'
 /
 
 &mcpara
     mcalgo = 'mpolis'
-    dfac = 4
-    kbt = 0.1
+    dfac = 8
+    kbt = 0.01
     is_restart = .false.
-    tot_mc_iter = 10000
+    tot_mc_iter = 20000
     dump_skip = 1000
     is_fluid = .false.
     min_allowed_nbr = 4
     fac_len_vertices = 1.3
     fluidize_every = 1
+    iexch=.false.
 /
 
 &bendpara
@@ -30,17 +31,17 @@
 &stretchpara
     yy1 = 0.3125
     yy2 = 0.3125
-    do_volume = .false.
+    do_volume = .true.
     is_pressurized = .false.
     do_area = .false.
-    coef_vol_expansion = 0
+    coef_vol_expansion = 5000
     pressure = 0
     coef_area_expansion = 0
 /
 
 &electrostatpara
     charge1 = 0
-    charge2 = 0
+    charge2 = 0.94
     conc = 0
 /
 
@@ -51,10 +52,9 @@
 /
 
 &selfavoidpara
-    isselfrepulsive = .false.
-    boxsize = 0.0
-    cutoff = 0.0
-    minl = 0.0
-    sig = 0.0
-    eps = 0.0
+    isselfrepulsive = .true.
+    cutoff = 0.5
+    minL = -1.0
+    sig = 0.05
+    eps = 2.0
 /

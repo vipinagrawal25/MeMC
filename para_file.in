@@ -1,60 +1,60 @@
-&Meshpara
-	nghst=12		
-	bdry_cdt=2  	!0=channel 1=frame anything else periodic
-	radius=1 		!In nanometers
-	ncomp=2
-	compfrac=0.5	
+&meshpara
+    nghst = 12
+    bdry_cdt = 2
+    ncomp = 2
+    compfrac = 0.75
+    distribution = 'Janus' !'Janus, Random are the options'
 /
 
 &mcpara
-	Mcalgo = 'mpolis'	
-	dfac = 16.0
-	kbt =  1.0
-	is_restart = F
-	tot_mc_iter = 80001
-	dump_skip = 1000
-	is_fluid = T
-	min_allowed_nbr = 4
-	fac_len_vertices = 1.3
-	fluidize_every = 1
+    mcalgo = 'mpolis'
+    dfac = 8
+    kbt = 0.01
+    is_restart = .false.
+    tot_mc_iter = 20000
+    dump_skip = 1000
+    is_fluid = .false.
+    min_allowed_nbr = 4
+    fac_len_vertices = 1.3
+    fluidize_every = 1
+    iexch=.false.
 /
 
-&Bendpara
-	bend1=10.0
-	bend2=10.0
-	spC1=2.0
-	spC2=2.0
-	iGauss=1
+&bendpara
+    bend1 = 5
+    bend2 = 5
+    spc1 = 0.0
+    spc2 = 0.0
+    igauss = .true.
 /
 
-&Stretchpara
-	YY = 8660
-	do_volume = F
-	is_pressurized = F
-	do_area = F
-	coef_vol_expansion = 100000
-	pressure = 0
-	coef_area_expansion = 0
+&stretchpara
+    yy1 = 0.3125
+    yy2 = 0.3125
+    do_volume = .true.
+    is_pressurized = .false.
+    do_area = .false.
+    coef_vol_expansion = 5000
+    pressure = 0
+    coef_area_expansion = 0
 /
 
-&Electrostatpara
-	charge1=0
-	charge2=0
-	conc=0
+&electrostatpara
+    charge1 = 0
+    charge2 = 0.94
+    conc = 0
 /
 
-&Lipidpara
-	iregsoln=0
-	kai=0
-	epssqby2=0
+&lipidpara
+    iregsoln = 0
+    kai = 0
+    epssqby2 = 0
 /
 
-
-&Selfavoidpara
-	isselfrepulsive=.false.
-	boxsize=0.0
-	cutoff=0.0
-	minL=0.0
-	sig=0.0
-	eps=0.0
+&selfavoidpara
+    isselfrepulsive = .true.
+    cutoff = 0.5
+    minL = -1.0
+    sig = 0.05
+    eps = 2.0
 /

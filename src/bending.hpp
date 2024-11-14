@@ -12,8 +12,8 @@ public :
   double bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx);
   double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
       int, int, double, int);
-    double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
-      int, int, double, int, double*);
+  double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
+      int, int, double, int, double *);
   double bending_energy_total(Vec3d *pos, MESH_p mesh);
   void init_coefbend(int *lipA, int N);
   void printbend(){print(coef_bend);}
@@ -26,6 +26,7 @@ private:
   std::vector<double> coef_bend;
   double spcurv;
   bool iGauss;
+  bool multicomp;
 /*------------------------*/
 double voronoi_area(double cotJ, double cotK, 
       double jsq, double ksq, double area){

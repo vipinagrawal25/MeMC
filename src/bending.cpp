@@ -23,6 +23,8 @@ BE::BE(const MESH_p& mesh, std::string fname){
         iGauss=false;
     }
 
+    if (bend1 != bend2 && mesh.ncomp>1) multicomp=true;
+
     ofstream out_;
     out_.open( fname+"/bendpara.out");
     out_<< "# =========== bending parameters ==========" << endl
@@ -85,6 +87,10 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
             lijsq[j] = inner_product(xij[j],xij[j]);
             ljksq[j] = inner_product(xjk,xjk);
             area_ijk[j] = 0.5*norm(cross_product(xij[j],xjk));
+            // if (area_ijk[j]<0.25){
+            //     print(pos[idx]);
+            //     cout << idx << endl;
+            // }
         }
     }else{
         for (int j = 0; j < num_nbr; ++j){
@@ -122,6 +128,12 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     lap_bel = lap_bel*0.5;
     lap_bel_t0 = nhat*spcurv;
     bend_ener = sigma_i*normsq(lap_bel-lap_bel_t0);
+    // if (idx==18 || idx ==23){
+        // cout << idx << " " << normsq(lap_bel) << endl;
+    // }
+    // if (bend_ener>5){
+    //     cout << idx << endl;
+    // }
     if (iGauss){
         Gauss_ener = M_PI*(2-num_nbr);
         for (int j = 0; j < num_nbr; ++j){
@@ -170,7 +182,7 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
     /// @param mesh mesh related parameters -- connections and 
     /// neighbours information;
     ///  @param para  Membrane related parameters;
-    /// @return Total Bending energy
+     /// @return Total Bending energy
     int idx, st_idx;
     int num_nbr, cm_idx;
     double be=0e0;
@@ -185,13 +197,10 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
     }
     // cout << be << endl;
-    // exit(1);
     return be;
 }
 /*------------------------------------------------------------------------------*/
 void BE::exchange(int idx1, int idx2){
-   double temp = coef_bend[idx1];
-   coef_bend[idx1] = coef_bend[idx2];
-   coef_bend[idx2] = temp;
+    swap(coef_bend[idx1], coef_bend[idx2]);
 }
 /*------------------------------------------------------------------------------*/

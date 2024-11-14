@@ -23,8 +23,8 @@ public:
   double computeSelfRep(MESH_p , int );
   double totalRepulsiveEnergy(MESH_p);
   bool isSelfRepulsive() {return doselfrepulsion;}
-
 private:
+  double LJ(Vec3d p1, Vec3d p2);
   double sig, epsl;
   bool doselfrepulsion;
 };

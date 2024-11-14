@@ -17,7 +17,7 @@ const double pi = 3.14159265358979323846264;
 
 using namespace std;
 extern "C" void  MC_listread(char *, double *, double *, bool *,int *, int *, 
-                  bool *, int *, int *, double *, char *);
+                  bool *, int *, int *, double *, bool *, char *);
 int get_nstart(int, int);
 
 McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj, 
@@ -55,12 +55,13 @@ int McP::initMC(MESH_p mesh, string fname){
    sprintf(tmp_fname, "%s", parafile.c_str());
    MC_listread(temp_algo, &dfac, &kBT, &is_restart,
               &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
-              &fluidize_every, &fac_len_vertices, tmp_fname);
+              &fluidize_every, &fac_len_vertices, &iexch, tmp_fname);
 
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
    dfac = sqrt(8*pi/(2*N-4))*radius/dfac;
    acceptedmoves = 0;
+   if (mesh.ncomp==1) iexch=false;
    ofstream out_;
    out_.open( fname+"/mcpara.out" );
    out_<< "# =========== monte carlo parameters ==========" << endl
@@ -74,18 +75,12 @@ int McP::initMC(MESH_p mesh, string fname){
       << " min_allowed_nbr " << min_allowed_nbr << endl
       << " fluidize_every " << fluidize_every << endl;
 
-   if (chargeobj.calculate()){
-      if (repulsiveobj.isSelfRepulsive()){
-         out_ << " Energy_mc_3d = energy_mc_bestchre"<< endl;
-         energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val, 
-         int val2, int val3 ) -> double {
-         return this->energy_mc_bestchre(vec, vec_ptr, mesh, val, val2, val3);};
-      }else{
-         out_ << " Energy_mc_3d = energy_mc_bestch"<< endl;
-         energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val, 
-         int val2, int val3 ) -> double {
-         return this->energy_mc_bestch(vec, vec_ptr, mesh, val, val2, val3);};
-      }
+
+   if (chargeobj.calculate() && repulsiveobj.isSelfRepulsive()){
+      out_ << " Energy_mc_3d = energy_mc_bestchrep "<< endl;
+      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
+                  int val, int val2, int val3 ) -> double {
+      return this->energy_mc_bestchrep(vec, vec_ptr, mesh, val, val2, val3);};
    }else{
       out_ << " Energy_mc_3d = energy_mc_best" << endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val,
@@ -106,10 +101,27 @@ int McP::initMC(MESH_p mesh, string fname){
    }
 
    if(chargeobj.calculate()){
-      out_ << " Energy_mc_exch = energy_mc_ch" << endl;
-      energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+      if (beobj.getbend1() != beobj.getbend2()){
+         out_ << " Energy_mc_exch = energy_mc_bech" << endl;
+         energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                      int val, int val2, int val3) -> double {
-      return this->energy_mc_ch(vec , vec_ptr, mesh, val, val2, val3);};
+         return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3);};
+      }else{
+         out_ << " Energy_mc_exch = energy_mc_ch" << endl;
+         energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                     int val, int val2, int val3) -> double {
+         return this->energy_mc_ch(vec , vec_ptr, mesh, val, val2, val3);};
+      }
+   }
+
+   if (exchtype=="Global" || exchtype == "global"){
+      out_ << "Component exchange type = Global" << endl;
+      get_idx2 = [this](int num_nbr, int *node_nbr_list, int cm_idx, int nframe,
+         int N) -> int{return this->global_idx(nframe, N);};
+   }else{
+      out_ << "Component exchange type = Local" << endl;
+      get_idx2 = [this](int num_nbr, int *node_nbr_list, int cm_idx, int nframe,
+         int N) -> int{return this->local_idx(num_nbr, node_nbr_list, cm_idx);};
    }
 
    out_.close();
@@ -205,8 +217,6 @@ int del_nbr(int *nbrs, int numnbr, int idx){
   memcpy(nbrs + delete_here - 1, &nbrs[delete_here],
          sizeof(int) * (numnbr - delete_here + 1));
 
-  // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
-  // printf("\n\n");
   return numnbr - 1;
 }
 
@@ -297,7 +307,7 @@ inline double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p m
    return Etot + energy[2];
 }
 //
-inline double McP::energy_mc_bestchre(vector<double> &energy, Vec3d *pos, MESH_p mesh,
+inline double McP::energy_mc_bestchrep(vector<double> &energy, Vec3d *pos, MESH_p mesh,
             int idx, int cm_idx, int num_nbr){
    double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr);
    energy[3] = repulsiveobj.computeSelfRep(mesh, idx);
@@ -386,9 +396,6 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
          electroe += Efin[2]-Eini[2];
          vole += de_vol;
          VolMonitored += dvol;
-         // regsole += ders;
-         // electroe += decharge;
-         // pre += de_pressure;
       } else {
          pos[idx].x = x_o;
          pos[idx].y = y_o;
@@ -518,43 +525,63 @@ inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos, MESH_p mesh,
    return energy[0];
 }
 //
+int McP::local_idx(int num_nbr, int *node_nbr_list, int cm_idx){
+   int idxn = RandomGenerator::intUniform(0, num_nbr-1);
+   return node_nbr_list[cm_idx+idxn];
+}
+//
+int McP::global_idx(int nframe, int N){
+   return RandomGenerator::intUniform(nframe, N-1);
+}
+//
 int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    int exchngdmoves = 0;
-   int idx1, idx2, cm_idx1;
+   int idx1, idx2, cm_idx1, cm_idx2;
    int nframe = get_nstart(mesh.N, mesh.bdry_type);
    vector<double> Eini(4,0), Efin(4,0);
    bool yes, logic;
    int lip_idx1, lip_idx2, idxn, logic_break;
-   double Einitot, Efintot;
+   double Einitot, Efintot, de;
+   int num_nbr1, num_nbr2;
    //
    for (int i = 0; i < one_mc_iter; ++i){
       logic = true;
       idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
       cm_idx1 = mesh.nghst * idx1;
+      num_nbr1=mesh.numnbr[idx1];
+
+      idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, 
+               nframe, mesh.N);
+      cm_idx2 = mesh.nghst * idx2;
+      num_nbr2=mesh.numnbr[idx2];
+
       logic = (mesh.compA[idx1] == mesh.compA[idx2]);
       
       if (!logic){
          lip_idx1 = mesh.compA[idx1];
          lip_idx2 = mesh.compA[idx2];
 
-         Einitot = energy_mc_be(Eini, pos, mesh, idx1, mesh.nghst*idx1, 
-                  mesh.numnbr[idx1]);
-         Einitot += energy_mc_be(Eini, pos, mesh, idx2, mesh.nghst*idx2,
-                  mesh.numnbr[idx2]);
+         Einitot = energy_mc_bech(Eini, pos, mesh, idx1, cm_idx1, num_nbr1);
+         Einitot += energy_mc_bech(Eini, pos, mesh, idx2, cm_idx2, num_nbr2);
 
          mesh.compA[idx2] = lip_idx1;
          mesh.compA[idx1] = lip_idx2;
-         beobj.exchange(idx1, idx2);
 
-         Efintot = energy_mc_be(Eini, pos, mesh, idx1, mesh.nghst*idx1, 
-                  mesh.numnbr[idx1]);
-         Efintot += energy_mc_be(Eini, pos, mesh, idx2, mesh.nghst*idx2, 
-                  mesh.numnbr[idx2]);
+         beobj.exchange(idx1,idx2);
+         chargeobj.exchange(idx1,idx2);
 
+         Efintot = energy_mc_bech(Efin, pos, mesh, idx1, cm_idx1, num_nbr1);
+         Efintot += energy_mc_bech(Efin, pos, mesh, idx2, cm_idx2, num_nbr2);
+
+         de = Efintot-Einitot;
          yes = Boltzman(Efintot-Einitot, 0.0);
 
          if (yes){
             ++exchngdmoves;
+            EneMonitored += de;
+            bende += Efin[0]-Eini[0];
+            stretche += Efin[1]-Eini[1];
+            electroe += Efin[2]-Eini[2];
          }else{
             mesh.compA[idx1] = lip_idx1;
             mesh.compA[idx2] = lip_idx2;

@@ -35,6 +35,7 @@ public :
   double getvolume(); 
   void setEneVol();
   void updateparam(int anneal, string fname);
+  bool exchange(){return iexch;}
 private:
   BE &beobj;
   STE &steobj;
@@ -46,7 +47,7 @@ private:
   int one_mc_iter, tot_mc_iter, dump_skip;
   double kBT;
   double delta; // increment of position
-  bool is_restart;
+  bool is_restart, iexch;
   bool is_fluid;
   int min_allowed_nbr;
   int fluidize_every;
@@ -62,7 +63,7 @@ private:
   double energy_mc_be(vector<double>& , Vec3d *, MESH_p , int , int, int);
   double energy_mc_best(vector<double>& , Vec3d *, MESH_p , int , int, int);
   double energy_mc_bestch(vector<double>&, Vec3d *, MESH_p , int , int, int);
-  double energy_mc_bestchre(vector<double>&, Vec3d *, MESH_p , int , int, int);
+  double energy_mc_bestchrep(vector<double>&, Vec3d *, MESH_p , int , int, int);
   double energy_mc_bech(vector<double>&, Vec3d *, MESH_p , int , int, int);
   double energy_mc_ch(vector<double>&, Vec3d *, MESH_p , int , int, int);
   function<bool(double, double)> Algo;
@@ -71,5 +72,9 @@ private:
   void changeparam(double dfac, double kBT, bool is_restart, int tot_mc_iter, 
       int dumpskip);
   double ini_tot_mc_iter;
+  string exchtype="Global";
+  function<int(int, int*, int, int, int)> get_idx2;
+  int local_idx(int num_nbr, int *node_nbr_list, int cm_idx);
+  int global_idx(int nframe, int N);
 };
 #endif

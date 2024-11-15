@@ -10,6 +10,7 @@ SelfAvoid::SelfAvoid(MESH_p mesh, string fname){
   parafile = fname+"/para_file.in";
   sprintf(tmp_fname, "%s", parafile.c_str());
   SelfAvoidRead(&doselfrepulsion, &cutoff_, &minL, &sig, &epsl, tmp_fname);
+  minL=-mesh.radius+minL;
   boxSize_ = 2*(mesh.radius-minL);
   numCells_ = static_cast<int>(boxSize_ / cutoff_);
   cellSize_ = boxSize_/numCells_;
@@ -23,7 +24,9 @@ double SelfAvoid::LJ(Vec3d p1, Vec3d p2){
   double dz = p1.z - p2.z;
   double r2 = dx * dx + dy * dy + dz * dz;
   double sigr2 = sig*sig/r2;
-  return 4*epsl*std::pow(sigr2, 6);
+  // 
+  double en=4*epsl*std::pow(sigr2, 6);
+  return en;
 }
 //
 double SelfAvoid::computeSelfRep(MESH_p mesh, int idx) {

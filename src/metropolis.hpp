@@ -36,6 +36,7 @@ public :
   void setEneVol();
   void updateparam(int anneal, string fname);
   bool exchange(){return iexch;}
+  void wHeader(const MESH_p &mesh, std::fstream &fid);
 private:
   BE &beobj;
   STE &steobj;

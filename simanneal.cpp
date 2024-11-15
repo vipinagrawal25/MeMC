@@ -80,17 +80,6 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, string outfold
     return ave_bond_len;
 }
 /*----------------------------------------------------------*/
-void diag_wHeader(BE bendobj, STE steobj, ESP chargeobj, MESH_p mesh,
-                std::fstream &fid){
-    std::string log_headers = "#iter acceptedmoves bend_e stretch_e ";
-    if (chargeobj.calculate()) log_headers+="electroe ";
-    if(steobj.dopressure()) {log_headers+=" Pressure_e ";}
-    if(steobj.dovol()) {log_headers+=" Volume_e ";}
-    log_headers+="total_e ";
-    if (mesh.sphere){log_headers+="volume";}
-    fid << log_headers << endl;
-}
-/*----------------------------------------------------------*/
 int main(int argc, char *argv[]){
     int mpi_err, mpi_rank, residx, world_size;
 
@@ -104,7 +93,6 @@ int main(int argc, char *argv[]){
     int fnumber=0;
     double av_bond_len, Etot;
     clock_t timer;
-    // Vec3d *Pos;
     string outfolder, para_file, outfile, filename;
 
     start=0;
@@ -141,7 +129,7 @@ int main(int argc, char *argv[]){
 
     mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,
                         mesh.radius, residx);
-    if(!mcobj.isrestart()) diag_wHeader(bendobj, stretchobj, chargeobj, mesh, fileptr);
+    if(!mcobj.isrestart()) mcobj.wHeader(mesh,fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 
     (*terminal) << "# The seed value is " << seed_v << endl;

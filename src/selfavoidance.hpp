@@ -7,16 +7,7 @@
 #include "mesh.hpp"
 #include "vector.hpp"
 #include "modules/celllist.hpp"
-// A structure representing a particle in 3D space
-// struct Particle {
-//     double x, y, z;  // Position
-//     std::array<double, 3> velocity; // Velocity in 3D
-//     std::array<double, 3> force;    // Force in 3D
 
-//     Particle(double x, double y, double z) : x(x), y(y), z(z), velocity({0.0, 0.0, 0.0}), force({0.0, 0.0, 0.0}) {}
-// };
-
-// A class to handle the 3D cell list algorithm for molecular dynamics
 class SelfAvoid: public CellList {
 public:
   SelfAvoid(MESH_p, string fname);

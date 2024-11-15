@@ -29,9 +29,7 @@ void McP::updateparam(int anneal, string fname){
    if (anneal>0){
       dfac=dfac/2;
       kBT=kBT*0.1;
-      // is_restart=1;
       tot_mc_iter=tot_mc_iter+ini_tot_mc_iter;
-      // dump_skip=dump_skip;
 
    ofstream out_;
    out_.open( fname+"/mcpara.out", ios::app );
@@ -140,7 +138,7 @@ double McP::evalEnergy(MESH_p mesh){
    Vec3d *Pos = mesh.pos;
    bende = beobj.bending_energy_total(Pos, mesh);
    stretche = steobj.stretch_energy_total(Pos, mesh);
-   cout << stretche << endl;
+   
    if (steobj.doarea()){
       stretche =steobj.area_energy_total(mesh);
       totEner += stretche;
@@ -169,10 +167,21 @@ double McP::evalEnergy(MESH_p mesh){
       totEner += selfe;
    }
 
-   EneMonitored = totEner;   
+   EneMonitored = totEner;
    VolMonitored = totvol;
    
    return totEner;
+}
+/*----------------------------------------------------------*/
+void McP::wHeader(const MESH_p &mesh, std::fstream &fid){
+    std::string log_headers = "#iter acceptedmoves bend_e stretch_e ";
+    if (chargeobj.calculate()) log_headers+="electroe ";
+    if(steobj.dopressure()) {log_headers+=" Pressure_e ";}
+    if(steobj.dovol()) {log_headers+=" Volume_e ";}
+    if (repulsiveobj.isSelfRepulsive()) {log_headers+=" Repulsive_e ";}
+    log_headers+="total_e ";
+    if (mesh.sphere){log_headers+="volume";}
+    fid << log_headers << endl;
 }
 /*-----------------------*/
 void McP::write_energy(fstream &fileptr, int itr, const MESH_p &mesh){

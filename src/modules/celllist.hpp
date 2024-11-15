@@ -16,7 +16,7 @@ public:
 
     // Assign particles to cells
     for (int i = 0; i < mesh.N; ++i) {
-      int cellIdx = getCellIndex(mesh.pos[i].x, mesh.pos[i].y, mesh.pos[i].z, minL);
+        int cellIdx = getCellIndex(mesh.pos[i].x, mesh.pos[i].y, mesh.pos[i].z, minL);
         // Remove the neighbours of the i here.
         cellList_[cellIdx].push_back(i);
     }
@@ -48,7 +48,6 @@ protected:
     int ix = static_cast<int>((x - minL)/ cellSize_);
     int iy = static_cast<int>((y - minL)/ cellSize_);
     int iz = static_cast<int>((z - minL)/ cellSize_);
-    // std::cout << x - minL << " " << y - minL << " " << cellSize_ << std::endl;
     return ix + numCells_ * (iy + numCells_ * iz);
   }
   // Get neighboring cells' indices (including itself)

@@ -67,17 +67,6 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
     return ave_bond_len;
 }
 /*----------------------------------------------------------*/
-void diag_wHeader(BE bendobj, STE steobj, ESP chargeobj, MESH_p mesh,
-                std::fstream &fid){
-    std::string log_headers = "#iter acceptedmoves bend_e stretch_e ";
-    if (chargeobj.calculate()) log_headers+="electroe ";
-    if(steobj.dopressure()) {log_headers+=" Pressure_e ";}
-    if(steobj.dovol()) {log_headers+=" Volume_e ";}
-    log_headers+="total_e ";
-    if (mesh.sphere){log_headers+="volume";}
-    fid << log_headers << endl;
-}
-/*----------------------------------------------------------*/
 int main(int argc, char *argv[]){
     int mpi_err, mpi_rank, residx, world_size;
 
@@ -130,8 +119,7 @@ int main(int argc, char *argv[]){
     }
     // ofstream terminal(outfolder+"/terminal.out", ios::app);
     (*terminal) << "# The seed value is " << seed_v << endl;
-    if(!mcobj.isrestart()) diag_wHeader(bendobj, stretchobj, chargeobj, mesh, 
-        fileptr);
+    if(!mcobj.isrestart()) mcobj.wHeader(mesh, fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 
     clock_t timer;

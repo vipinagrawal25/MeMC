@@ -46,7 +46,7 @@ obj/%.o : src/%.cpp $(includes)
 	$(CC) -Iobj -c $< -o $@ $(link)
 #
 clean:	
-	@rm -rf bin $(object) exe_*
+	@rm -rf bin obj/ $(object) exe_*
 	@echo "all obj bin cleared"
 
 distclean:

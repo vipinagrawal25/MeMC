@@ -6,7 +6,7 @@
 #include <cmath>
 #include "mesh.hpp"
 #include "vector.hpp"
-#include "modules/celllist.hpp"
+#include "modules/sparse_celllist.hpp"
 
 class SelfAvoid: public CellList {
 public:

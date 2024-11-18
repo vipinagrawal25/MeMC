@@ -45,7 +45,7 @@ private:
   SelfAvoid &repulsiveobj;
   std::string algo;
   double dfac;
-  int one_mc_iter, tot_mc_iter, dump_skip;
+  int one_mc_iter, tot_mc_iter, dump_skip, nexch_iter;
   double kBT;
   double delta; // increment of position
   bool is_restart, iexch;

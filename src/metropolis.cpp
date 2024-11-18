@@ -17,7 +17,7 @@ const double pi = 3.14159265358979323846264;
 
 using namespace std;
 extern "C" void  MC_listread(char *, double *, double *, bool *,int *, int *, 
-                  bool *, int *, int *, double *, bool *, char *);
+                  bool *, int *, int *, double *, bool *, int*, char *);
 int get_nstart(int, int);
 
 McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj, 
@@ -53,7 +53,7 @@ int McP::initMC(MESH_p mesh, string fname){
    sprintf(tmp_fname, "%s", parafile.c_str());
    MC_listread(temp_algo, &dfac, &kBT, &is_restart,
               &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
-              &fluidize_every, &fac_len_vertices, &iexch, tmp_fname);
+              &fluidize_every, &fac_len_vertices, &iexch, &nexch_iter, tmp_fname);
 
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
@@ -71,14 +71,19 @@ int McP::initMC(MESH_p mesh, string fname){
       << " tot_mc_iter " << tot_mc_iter << endl
       << " dump_skip " << dump_skip << endl
       << " min_allowed_nbr " << min_allowed_nbr << endl
-      << " fluidize_every " << fluidize_every << endl;
-
+      << " fluidize_every " << fluidize_every << endl
+      << " Number_exch_iter " << nexch_iter*one_mc_iter << endl;
 
    if (chargeobj.calculate() && repulsiveobj.isSelfRepulsive()){
       out_ << " Energy_mc_3d = energy_mc_bestchrep "<< endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
                   int val, int val2, int val3 ) -> double {
       return this->energy_mc_bestchrep(vec, vec_ptr, mesh, val, val2, val3);};
+   }else if(chargeobj.calculate()){
+      out_ << " Energy_mc_3d = energy_mc_bestch" << endl;
+      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val,
+                           int val2, int val3) -> double {
+      return this->energy_mc_bestch(vec , vec_ptr, mesh, val, val2, val3);};
    }else{
       out_ << " Energy_mc_3d = energy_mc_best" << endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val,
@@ -553,7 +558,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    double Einitot, Efintot, de;
    int num_nbr1, num_nbr2;
    //
-   for (int i = 0; i < one_mc_iter; ++i){
+   for (int i = 0; i < nexch_iter*one_mc_iter; ++i){
       logic = true;
       idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
       cm_idx1 = mesh.nghst * idx1;

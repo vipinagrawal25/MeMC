@@ -259,9 +259,6 @@ int add_nbr(int *nbrs, int numnbr, int idx, int i1, int i2) {
       nbrs[insert_here] = idx;
    }
 
-   // for(int i=0; i<numnbr+3; i++)printf("%d \n", nbrs[i]);
-   //     printf("\n\n");
-
    return numnbr + 1;
 }
 
@@ -575,8 +572,8 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          lip_idx1 = mesh.compA[idx1];
          lip_idx2 = mesh.compA[idx2];
 
-         Einitot = energy_mc_bech(Eini, pos, mesh, idx1, cm_idx1, num_nbr1);
-         Einitot += energy_mc_bech(Eini, pos, mesh, idx2, cm_idx2, num_nbr2);
+         Einitot = energy_mc_exch(Eini, pos, mesh, idx1, cm_idx1, num_nbr1);
+         Einitot += energy_mc_exch(Eini, pos, mesh, idx2, cm_idx2, num_nbr2);
 
          mesh.compA[idx2] = lip_idx1;
          mesh.compA[idx1] = lip_idx2;
@@ -584,11 +581,11 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          beobj.exchange(idx1,idx2);
          chargeobj.exchange(idx1,idx2);
 
-         Efintot = energy_mc_bech(Efin, pos, mesh, idx1, cm_idx1, num_nbr1);
-         Efintot += energy_mc_bech(Efin, pos, mesh, idx2, cm_idx2, num_nbr2);
+         Efintot = energy_mc_exch(Efin, pos, mesh, idx1, cm_idx1, num_nbr1);
+         Efintot += energy_mc_exch(Efin, pos, mesh, idx2, cm_idx2, num_nbr2);
 
          de = Efintot-Einitot;
-         yes = Boltzman(Efintot-Einitot, 0.0);
+         yes = Boltzman(de, 0.0);
 
          if (yes){
             ++exchngdmoves;
@@ -600,6 +597,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
             mesh.compA[idx1] = lip_idx1;
             mesh.compA[idx2] = lip_idx2;
             beobj.exchange(idx2, idx1);
+            chargeobj.exchange(idx1,idx2);
          }
       }
    }

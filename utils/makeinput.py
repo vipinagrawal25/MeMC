@@ -1,5 +1,5 @@
 import numpy as np
-import h5py, os, sys, quaternion
+import h5py, os, sys
 import vtkio as vtk
 from numpy import linalg as LA
 from scipy.spatial import ConvexHull
@@ -73,17 +73,35 @@ def polar(xyz):
     XsqPlusYsq = x**2 + y**2
     return np.arctan2(np.sqrt(XsqPlusYsq),z)
 
-def rotate(vector,nhat,theta):
-    '''rotate a vector about nhat by angle theta'''
-    cos_thby2=np.cos(theta/2)
-    sin_thby2=np.sin(theta/2)
-    q=np.quaternion(cos_thby2,nhat[0]*sin_thby2,nhat[1]*sin_thby2,nhat[2]*sin_thby2)
-    q_inv=np.quaternion(cos_thby2,-nhat[0]*sin_thby2,-nhat[1]*sin_thby2,-nhat[2]*sin_thby2)
-    nn=vector.shape[0]
-    rot_vec=np.zeros([nn,3])
-    for i in range(nn):
-        q_vec=np.quaternion(0,vector[i][0],vector[i][1],vector[i][2])
-        rot_vec[i]=quater2vec(q*q_vec*q_inv)
+# def rotate(vector,nhat,theta):
+#     '''rotate a vector about nhat by angle theta'''
+#     cos_thby2=np.cos(theta/2)
+#     sin_thby2=np.sin(theta/2)
+#     q=np.quaternion(cos_thby2,nhat[0]*sin_thby2,nhat[1]*sin_thby2,nhat[2]*sin_thby2)
+#     q_inv=np.quaternion(cos_thby2,-nhat[0]*sin_thby2,-nhat[1]*sin_thby2,-nhat[2]*sin_thby2)
+#     nn=vector.shape[0]
+#     rot_vec=np.zeros([nn,3])
+#     for i in range(nn):
+#         q_vec=np.quaternion(0,vector[i][0],vector[i][1],vector[i][2])
+#         rot_vec[i]=quater2vec(q*q_vec*q_inv)
+#     return rot_vec
+
+# Rotation matrix-based implementation
+def rotate(vector, nhat, theta):
+    '''Rotate a vector about nhat by angle theta using a rotation matrix'''
+    nhat = nhat / np.linalg.norm(nhat)
+    cos_theta = np.cos(theta)
+    sin_theta = np.sin(theta)
+    one_minus_cos = 1 - cos_theta
+    nx, ny, nz = nhat
+    
+    rotation_matrix = np.array([
+        [cos_theta + nx**2 * one_minus_cos, nx*ny*one_minus_cos - nz*sin_theta, nx*nz*one_minus_cos + ny*sin_theta],
+        [ny*nx*one_minus_cos + nz*sin_theta, cos_theta + ny**2 * one_minus_cos, ny*nz*one_minus_cos - nx*sin_theta],
+        [nz*nx*one_minus_cos - ny*sin_theta, nz*ny*one_minus_cos + nx*sin_theta, cos_theta + nz**2 * one_minus_cos]
+    ])
+    
+    rot_vec = np.dot(vector, rotation_matrix.T)
     return rot_vec
 
 def quater2vec(qq,precision=1e-16):

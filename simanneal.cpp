@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
     Etot = mcobj.evalEnergy(mesh);
     mcobj.write_energy(fileptr, iter, mesh);
     
-    for(int anneal=0; anneal < 5; anneal++){
+    for(int anneal=0; anneal < 6; anneal++){
         mcobj.updateparam(anneal, outfolder);
         for(iter=residx; iter < mcobj.totaliter(); iter++){
             if(iter%mcobj.dumpskip() == 0){

@@ -65,85 +65,104 @@ double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     /// @param para  Membrane related parameters;
     /// @todo try openMP Pragmas;
     /// @return Bending Energy contribution when ith particle is displaced.
-    double bend_ener, Gauss_ener=0;
-    Vec3d cot_times_rij;
-    Vec3d lap_bel,lap_bel_t0, nhat;
-    Vec3d xjk;
-    double cot_jdx_k,cot_kdx,cot_kmdx,area_ijkm;
-    Vec3d xik,xikm,xjkm,nhat_local,xijp1;
-    int jdx,kdx,kmdx,jdxp1;
-    double liksq,likmsq,ljkmsq;
-    double sigma_i = 0e0;
-    double cot_aij[num_nbr],cot_bij[num_nbr],area_ijk[num_nbr];
-    double ljksq[num_nbr];
-    Vec3d xij[num_nbr];
-    // store all the lengths
-    if (bdry_type == 1 || idx>edge){
-        for (int j = 0; j < num_nbr; ++j){
-            jdx = node_nbr[j];
-            kdx = node_nbr[(j+1)%num_nbr]; // this is same as kdx
-            xij[j]=pos[idx]-pos[jdx];
-            xjk = pos[jdx]-pos[kdx];
-            lijsq[j] = inner_product(xij[j],xij[j]);
-            ljksq[j] = inner_product(xjk,xjk);
-            area_ijk[j] = 0.5*norm(cross_product(xij[j],xjk));
-            // if (area_ijk[j]<0.25){
-            //     print(pos[idx]);
-            //     cout << idx << endl;
-            // }
-        }
-    }else{
-        for (int j = 0; j < num_nbr; ++j){
-            jdx = node_nbr[j];
-            kdx = node_nbr[(j+1)%num_nbr]; // this is same as kdx
-            xij[j] = diff_pbc(pos[idx],pos[jdx],lenth);
-            xjk =  diff_pbc(pos[jdx],pos[kdx], lenth);
-            lijsq[j] = inner_product(xij[j],xij[j]);
-            ljksq[j] = inner_product(xjk,xjk);
-            area_ijk[j] = 0.5*norm(cross_product(xij[j],xjk));
-        }
-    }
-    // Now compute all the angles
+    double bend_ener=0;
+    Vec3d xij[num_nbr], ntri[num_nbr];
+    int jdx, kdx;
     for (int j = 0; j < num_nbr; ++j){
-        liksq=lijsq[(j+1)%num_nbr];
-        likmsq=lijsq[(j-1+num_nbr)%num_nbr];
-        ljkmsq=ljksq[(j-1+num_nbr)%num_nbr];
-        area_ijkm=area_ijk[(j-1+num_nbr)%num_nbr];
-        cot_aij[j] = 0.25*(ljkmsq+likmsq-lijsq[j])/area_ijkm;
-        cot_bij[j] = 0.25*(ljksq[j]+liksq-lijsq[j])/area_ijk[j];
+        jdx = node_nbr[j];
+        xij[j]=pos[idx]-pos[jdx];
+        lijsq[j]=normsq(xij[j]);
     }
-    for (int j = 0; j < num_nbr; j++){
-        cot_jdx_k = cot_aij[(j+1)%num_nbr];
-        liksq=lijsq[(j+1)%num_nbr];
-        likmsq=lijsq[(j-1+num_nbr)%num_nbr];
-        area_ijkm=area_ijk[(j-1+num_nbr)%num_nbr];
-        xijp1=xij[(j+1)%num_nbr];
-        cot_times_rij = cot_times_rij + xij[j]*(cot_aij[j] + cot_bij[j]);
-        sigma_i=sigma_i+voronoi_area(cot_jdx_k,cot_bij[j],liksq,lijsq[j],area_ijk[j]);
-        nhat_local=cross_product(xijp1,xij[j]);
-        nhat = nhat + nhat_local*(1e0/norm(nhat_local));
+    for (int j = 0; j < num_nbr; ++j){
+        ntri[j] = cross_product(xij[j],xij[(j+1)%num_nbr]);
+        ntri[j] = ntri[j]/norm(ntri[j]);
     }
-    nhat = nhat/norm(nhat);
-    lap_bel = cot_times_rij/sigma_i;
-    lap_bel = lap_bel*0.5;
-    lap_bel_t0 = nhat*spcurv;
-    bend_ener = sigma_i*normsq(lap_bel-lap_bel_t0);
-    // if (idx==18 || idx ==23){
-        // cout << idx << " " << normsq(lap_bel) << endl;
-    // }
-    // if (bend_ener>5){
-    //     cout << idx << endl;
-    // }
-    if (iGauss){
-        Gauss_ener = M_PI*(2-num_nbr);
-        for (int j = 0; j < num_nbr; ++j){
-            Gauss_ener+=acot(cot_aij[j])+acot(cot_bij[j]);
-        }
-        bend_ener -= Gauss_ener;
-        // cout << Gauss_ener/sigma_i << endl;
+    for (int j = 0; j < num_nbr; ++j){
+        bend_ener+=inner_product(ntri[j],ntri[(j+1)%num_nbr]);
     }
-    return 0.5*coef_bend[idx]*bend_ener;
+    return 2*coef_bend[idx]*(num_nbr-bend_ener);
 }
+/*-------------------------------------------------*/
+// // There is a problem if we have the vertices on the polls -- zaxis.
+// double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
+//             int bdry_type, double lenth, int edge, double *lijsq){
+//     /// @brief Estimate the Bending energy contribution when ith particle 
+//     /// position changes
+//     /// @param Pos array containing co-ordinates of all the particles
+//     /// @param idx index of ith particle;
+//     /// @param node_nbr nearest neigbours of idx; 
+//     /// @param num_nbr number of nearest neigbours of idx; 
+//     /// @param para  Membrane related parameters;
+//     /// @todo try openMP Pragmas;
+//     /// @return Bending Energy contribution when ith particle is displaced.
+//     double bend_ener, Gauss_ener=0;
+//     Vec3d cot_times_rij;
+//     Vec3d lap_bel,lap_bel_t0, nhat;
+//     Vec3d xjk;
+//     double cot_jdx_k,cot_kdx,cot_kmdx,area_ijkm;
+//     Vec3d xik,xikm,xjkm,nhat_local,xijp1;
+//     int jdx,kdx,kmdx,jdxp1;
+//     double liksq,likmsq,ljkmsq;
+//     double sigma_i = 0e0;
+//     double cot_aij[num_nbr],cot_bij[num_nbr],area_ijk[num_nbr];
+//     double ljksq[num_nbr];
+//     Vec3d xij[num_nbr];
+//     // store all the lengths
+//     if (bdry_type == 1 || idx>edge){
+//         for (int j = 0; j < num_nbr; ++j){
+//             jdx = node_nbr[j];
+//             kdx = node_nbr[(j+1)%num_nbr]; // this is same as kdx
+//             xij[j]=pos[idx]-pos[jdx];
+//             xjk = pos[jdx]-pos[kdx];
+//             lijsq[j] = inner_product(xij[j],xij[j]);
+//             ljksq[j] = inner_product(xjk,xjk);
+//             area_ijk[j] = 0.5*norm(cross_product(xij[j],xjk));
+//         }
+//     }else{
+//         for (int j = 0; j < num_nbr; ++j){
+//             jdx = node_nbr[j];
+//             kdx = node_nbr[(j+1)%num_nbr]; // this is same as kdx
+//             xij[j] = diff_pbc(pos[idx],pos[jdx],lenth);
+//             xjk =  diff_pbc(pos[jdx],pos[kdx], lenth);
+//             lijsq[j] = inner_product(xij[j],xij[j]);
+//             ljksq[j] = inner_product(xjk,xjk);
+//             area_ijk[j] = 0.5*norm(cross_product(xij[j],xjk));
+//         }
+//     }
+//     // Now compute all the angles
+//     for (int j = 0; j < num_nbr; ++j){
+//         liksq=lijsq[(j+1)%num_nbr];
+//         likmsq=lijsq[(j-1+num_nbr)%num_nbr];
+//         ljkmsq=ljksq[(j-1+num_nbr)%num_nbr];
+//         area_ijkm=area_ijk[(j-1+num_nbr)%num_nbr];
+//         cot_aij[j] = 0.25*(ljkmsq+likmsq-lijsq[j])/area_ijkm;
+//         cot_bij[j] = 0.25*(ljksq[j]+liksq-lijsq[j])/area_ijk[j];
+//     }
+//     for (int j = 0; j < num_nbr; j++){
+//         cot_jdx_k = cot_aij[(j+1)%num_nbr];
+//         liksq=lijsq[(j+1)%num_nbr];
+//         likmsq=lijsq[(j-1+num_nbr)%num_nbr];
+//         area_ijkm=area_ijk[(j-1+num_nbr)%num_nbr];
+//         xijp1=xij[(j+1)%num_nbr];
+//         cot_times_rij = cot_times_rij + xij[j]*(cot_aij[j] + cot_bij[j]);
+//         sigma_i=sigma_i+voronoi_area(cot_jdx_k,cot_bij[j],liksq,lijsq[j],area_ijk[j]);
+//         nhat_local=cross_product(xijp1,xij[j]);
+//         nhat = nhat + nhat_local*(1e0/norm(nhat_local));
+//     }
+//     nhat = nhat/norm(nhat);
+//     lap_bel = cot_times_rij/sigma_i;
+//     lap_bel = lap_bel*0.5;
+//     lap_bel_t0 = nhat*spcurv;
+//     bend_ener = sigma_i*normsq(lap_bel-lap_bel_t0);
+//     if (iGauss){
+//         Gauss_ener = M_PI*(2-num_nbr);
+//         for (int j = 0; j < num_nbr; ++j){
+//             Gauss_ener+=acot(cot_aij[j])+acot(cot_bij[j]);
+//         }
+//         bend_ener -= Gauss_ener;
+//     }
+//     return 0.5*coef_bend[idx]*bend_ener;
+// }
 /*--------------------------------------------------------------------------*/
 // Wrapper function
 double BE::bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,

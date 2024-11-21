@@ -87,8 +87,8 @@ int main(int argc, char *argv[]){
     fstream fileptr(outfolder+"/mc_log", ios::app);
 
     // Check if the file opened successfully
-    // seed_v = (uint32_t) (mpi_rank + time(0));
-    seed_v = 42;
+    seed_v = (uint32_t) (mpi_rank + time(0));
+    // seed_v = 42;
     RandomGenerator::init(seed_v);
 
     MESH_p mesh(outfolder);

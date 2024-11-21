@@ -298,8 +298,8 @@ inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mes
                int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
    double lijsq[num_nbr];
-   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm,
-               num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
+   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.bdry_type, 
+                      mesh.boxlen, mesh.edge, lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
    if (steobj.getyy1()!=0&&steobj.getyy2()!=0){
       energy[1] = steobj.stretch_energy_ipart(lijsq, num_nbr, idx, mesh.nghst);

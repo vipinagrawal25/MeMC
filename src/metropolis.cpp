@@ -328,8 +328,9 @@ inline double McP::energy_mc_bestchrep(vector<double> &energy, Vec3d *pos, MESH_
 inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
          int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
+   double *lijsq;
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm,
-                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
    energy[2] += chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
    return energy[0]+energy[2];
@@ -530,8 +531,9 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
 inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
          int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
+   double *lijsq;
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm,
-                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge,lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
    return energy[0];
 }

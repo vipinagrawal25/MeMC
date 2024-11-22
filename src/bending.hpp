@@ -5,15 +5,16 @@
 #include "vector.hpp"
 #include "misc.hpp"
 #include <vector>
+#include <functional>
 // #include "global.h"
 class BE{
 public :
   BE(const MESH_p& mesh, std::string fname);
   double bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx);
-  double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
-      int, int, double, int);
-    double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
-      int, int, double, int, double*);
+  // double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
+  //     int, int, double, int);
+  // double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
+  //     int, int, double, int, double*);
   double bending_energy_total(Vec3d *pos, MESH_p mesh);
   void init_coefbend(int *lipA, int N);
   void printbend(){print(coef_bend);}
@@ -21,14 +22,17 @@ public :
   double getbend1(){return bend1;}
   double getbend2(){return bend2;}
   void exchange(int idx1, int idx2);
+  std::function<double(Vec3d *, int *, int , int, int , double , int ,
+          double *)> bending_energy_ipart;
+  double SeungNelson(Vec3d *, int *, int , int, int , double , int , double *);
+  double Itzykson(Vec3d *, int *, int , int, int , double , int , double *);
 private:
   double bend1, bend2, spC1, spC2;
   std::vector<double> coef_bend;
   double spcurv;
   bool iGauss;
   bool multicomp;
-  // string method="SN";
-  // function<double(Vec3d *, int *, int , int, int , double , int , double *)> bending_energy_ipart;
+  string method="SN";
 /*------------------------*/
 double voronoi_area(double cotJ, double cotK, 
       double jsq, double ksq, double area){

@@ -28,6 +28,7 @@ public :
   double Itzykson(Vec3d *, int *, int , int, int , double , int , double *);
 private:
   double bend1, bend2, spC1, spC2;
+  std::vector<double> bendij; // bond based bending
   std::vector<double> coef_bend;
   double spcurv;
   bool iGauss;

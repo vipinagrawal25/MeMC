@@ -26,6 +26,7 @@ public :
           double *)> bending_energy_ipart;
   double SeungNelson(Vec3d *, int *, int , int, int , double , int , double *);
   double Itzykson(Vec3d *, int *, int , int, int , double , int , double *);
+  bool isexch(){return multicomp;}
 private:
   double bend1, bend2, spC1, spC2;
   std::vector<double> coef_bend;

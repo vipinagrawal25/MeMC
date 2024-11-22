@@ -26,6 +26,7 @@ BE::BE(const MESH_p& mesh, std::string fname){
     }
 
     if (bend1 != bend2 && mesh.ncomp>1) multicomp=true;
+    ghost=mesh.nghst;   // not recommended.
 
     ofstream out_;
     out_.open( fname+"/bendpara.out");
@@ -61,7 +62,8 @@ void BE::init_coefbend(int *lipA, int N){
     }
 }
 /*-------------------------------------------------*/
-void BE::init_bendij(int *lipA, int N){
+void BE::init_bendij(MESH_p mesh){
+    int *lipA = mesh.compA;
     for(int i = 0; i < mesh.nghst*mesh.N; i++){
         bendij.push_back(0.0);
     }
@@ -118,10 +120,9 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
         ntri[j] = ntri[j]/norm(ntri[j]);
     }
     for (int j = 0; j < num_nbr; ++j){
-        bend_ener+=1-inner_product(ntri[j],ntri[(j+1)%num_nbr]);
+        bend_ener+=bendij[idx*ghost+j]*(1-inner_product(ntri[j],ntri[(j+1)%num_nbr]));
     }
-    cout << bend_ener << endl;
-    return 0.5*kappa*(num_nbr-bend_ener);
+    return 0.5*bend_ener;
 }
 /*-------------------------------------------------*/
 // There is a problem if we have the vertices on the polls -- zaxis.

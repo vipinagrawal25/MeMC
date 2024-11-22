@@ -16,7 +16,6 @@ struct MESH_p{
     int N, bdry_type;
     int nghst;
     bool sphere;
-    // std::string topology;
     int *numnbr;
     int *node_nbr_list;
     double boxlen;

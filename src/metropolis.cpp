@@ -102,20 +102,20 @@ int McP::initMC(MESH_p mesh, string fname){
       Algo = [this](double DE, double activity) -> double {
       return this->Glauber(DE,activity);};
    }
+  
 
-   if(chargeobj.calculate()){
-      if (beobj.getbend1() != beobj.getbend2()){
+
+   if(chargeobj.calculate() && beobj.isexch()){
          out_ << " Energy_mc_exch = energy_mc_bech" << endl;
          energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                      int val, int val2, int val3) -> double {
          return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3);};
-      }else{
-         out_ << " Energy_mc_exch = energy_mc_ch" << endl;
+	}else if(beobj.isexch()){
+         out_ << " Energy_mc_exch = energy_mc_be" << endl;
          energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                      int val, int val2, int val3) -> double {
-         return this->energy_mc_ch(vec , vec_ptr, mesh, val, val2, val3);};
-      }
-   }
+         return this->energy_mc_be(vec , vec_ptr, mesh, val, val2, val3);};
+	}
 
    if (exchtype=="Global" || exchtype == "global"){
       out_ << "Component exchange type = Global" << endl;
@@ -531,7 +531,7 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
 inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
          int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
-   double *lijsq;
+   double lijsq[num_nbr];
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm,
                   num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge,lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);

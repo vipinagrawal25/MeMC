@@ -90,9 +90,6 @@ double STE::stretch_energy_ipart(double *lijsq, int num_nbr, int idx, int ghost)
     Vec3d rij;
     for (i =0; i < num_nbr; i++){
         mod_rij=sqrt(lijsq[i]);
-        // j = node_nbr[i];
-        // rij = pos[idx] - pos[j];
-        // cout << lijsq[i] <<" " << inner_product(rij, rij);
         idx_ener = idx_ener + HH[idx*ghost+i]*(mod_rij-lij_t0[idx*ghost+i])*(mod_rij- lij_t0[idx*ghost+i]);
     }
    return 0.5*idx_ener;

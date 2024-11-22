@@ -16,7 +16,6 @@ public :
   // double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
   //     int, int, double, int, double*);
   double bending_energy_total(Vec3d *pos, MESH_p mesh);
-  void init_coefbend(int *lipA, int N);
   void printbend(){print(coef_bend);}
   int getbend(int i){return coef_bend[i];}
   double getbend1(){return bend1;}
@@ -35,6 +34,11 @@ private:
   bool iGauss;
   bool multicomp;
   string method="SN";
+  // This is required by SeungNelson. Right way is to pass it, but I do not want
+  // to change the function call everywhere.
+  int ghost;
+  void init_coefbend(int *lipA, int N);
+  void init_bendij(MESH_p mesh);
 /*------------------------*/
 double voronoi_area(double cotJ, double cotK, 
       double jsq, double ksq, double area){

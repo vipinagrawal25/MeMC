@@ -203,11 +203,11 @@ double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh,
     int num_nbr_j;
     int nbr, cm_idx_nbr;
     double be=0e0;
-    double *lijsq;
     for(j = idx*mesh.nghst; j < idx*mesh.nghst + mesh.numnbr[idx]; j++){
         nbr = mesh.node_nbr_list[j];
         num_nbr_j = mesh.numnbr[nbr];
         cm_idx_nbr = nbr*mesh.nghst;
+   	 double lijsq[num_nbr_j];
         be += bending_energy_ipart(pos,
             (int *) mesh.node_nbr_list + cm_idx_nbr,
             num_nbr_j, nbr, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
@@ -221,10 +221,10 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
     /// @param mesh mesh related parameters -- connections and 
     /// neighbours information;
     ///  @param para  Membrane related parameters;
-     /// @return Total Bending energy
+    /// @return Total Bending energy
     int idx, st_idx;
     int num_nbr, cm_idx;
-    double be=0e0, *lijsq;
+    double be=0e0, lijsq[12];
     //
     st_idx = get_nstart(mesh.N, mesh.bdry_type);
     for(idx = st_idx; idx < mesh.N; idx++){
@@ -234,7 +234,7 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
         be+= bending_energy_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
     }
-    // exit(1);
+     // exit(1);
     // cout << be << endl;
     return be;
 }

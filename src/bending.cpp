@@ -61,25 +61,38 @@ void BE::init_coefbend(int *lipA, int N){
         else coef_bend.push_back(bend1);
     }
 }
-/*-------------------------------------------------*/
-void BE::init_bendij(MESH_p mesh){
+/*--------------------------------------------------------------------------*/
+void BE::init_bendij(MESH_p mesh) {
     int *lipA = mesh.compA;
-    for(int i = 0; i < mesh.nghst*mesh.N; i++){
-        bendij.push_back(0.0);
-    }
+
+    // Ensure `bendij` has the correct size based on `mesh.node_nbr_list`
+    int totalNbrs = mesh.nghst * mesh.N;  // Or the maximum size of node_nbr_list
+    bendij.resize(totalNbrs, 0.0);        // Resize instead of pushing
+
     for (int i = 0; i < mesh.N; ++i) {
-        double bendi = lipA[i] ? bend2 : bend1;
-        // Select bend2 if lipA[i] is true, otherwise bend1
+        double bendi = lipA[i] ? bend2 : bend1;  // Select bend2 if lipA[i] is true
         int num_nbr = mesh.numnbr[i];
         int cm_idx = mesh.nghst * i;
+
         for (int k = cm_idx; k < cm_idx + num_nbr; ++k) {
             int j = mesh.node_nbr_list[k];
-            double bendj = lipA[j] ? bend2 : bend1;
-            // Select YY2 for j if lipA[j] is true, otherwise YY1
-            bendij[k] = (bend1+bend2)*0.866;
+
+            // Validate `j` index to ensure it is within bounds of `lipA`
+            if (j < 0 || j >= mesh.N) {
+                std::cerr << "Error: Neighbor index " << j << " out of bounds." 
+                << std::endl;
+                continue;
+            }
+
+            double bendj = lipA[j] ? bend2 : bend1;  // Select bend2 for j if lipA[j] is true
+            if (k < totalNbrs) {
+                bendij[k] = (bendi + bendj) * 0.866;  // Store computed value
+            } else {
+                std::cerr << "Error: bendij index " << k << " out of bounds." << 
+                std::endl;
+            }
         }
     }
-    std::copy(bendij.begin(), bendij.end(), std::ostream_iterator<int>(std::cout, " "));
     exit(1);
 }
 /*--------------------------------------------------------------------------*/

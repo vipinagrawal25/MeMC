@@ -2,6 +2,8 @@
 #include "multicomp.hpp"
 #include <fstream>
 #include <cmath>
+#include <iterator>
+
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
 extern "C" void BendRead(double *, double *, double *, double *, bool*, char *);
@@ -14,7 +16,7 @@ BE::BE(const MESH_p& mesh, std::string fname){
     parafile = fname+"/para_file.in";
     sprintf(tmp_fname, "%s", parafile.c_str());
     BendRead(&bend1, &bend2, &spC1, &spC2, &iGauss, tmp_fname);
-    init_coefbend(mesh.compA, mesh.N);
+    
     spcurv=spC1;
 
     if (mesh.ncomp==1){
@@ -36,14 +38,14 @@ BE::BE(const MESH_p& mesh, std::string fname){
       << " iGauss " << iGauss << endl;
 
     if (method=="SN"){
-        bend1=1.732*bend1;
-        bend2=1.732*bend2;
         out_ << " bending_energy_ipart = Seung and Nelson" << endl;
+        init_bendij(mesh);
         bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx,
             int bdry_type, double lenth, int edge, double *lijsq) -> double{
         return this->SeungNelson(pos, node_nbr, num_nbr, idx, bdry_type, lenth, edge,lijsq);};
     }else{
         out_ << " bending_energy_ipart = Itzykson" << endl;
+        init_coefbend(mesh.compA, mesh.N);
         bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx,
             int bdry_type, double lenth, int edge, double *lijsq) -> double{
         return this->Itzykson(pos, node_nbr, num_nbr, idx, bdry_type, lenth, edge,lijsq);};
@@ -57,6 +59,26 @@ void BE::init_coefbend(int *lipA, int N){
         if (lipA[i]) coef_bend.push_back(bend2);
         else coef_bend.push_back(bend1);
     }
+}
+/*-------------------------------------------------*/
+void BE::init_bendij(int *lipA, int N){
+    for(int i = 0; i < mesh.nghst*mesh.N; i++){
+        bendij.push_back(0.0);
+    }
+    for (int i = 0; i < mesh.N; ++i) {
+        double bendi = lipA[i] ? bend2 : bend1;
+        // Select bend2 if lipA[i] is true, otherwise bend1
+        int num_nbr = mesh.numnbr[i];
+        int cm_idx = mesh.nghst * i;
+        for (int k = cm_idx; k < cm_idx + num_nbr; ++k) {
+            int j = mesh.node_nbr_list[k];
+            double bendj = lipA[j] ? bend2 : bend1;
+            // Select YY2 for j if lipA[j] is true, otherwise YY1
+            bendij[k] = (bend1+bend2)*0.866;
+        }
+    }
+    std::copy(bendij.begin(), bendij.end(), std::ostream_iterator<int>(std::cout, " "));
+    exit(1);
 }
 /*--------------------------------------------------------------------------*/
 inline double acot(double x) {
@@ -96,8 +118,9 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
         ntri[j] = ntri[j]/norm(ntri[j]);
     }
     for (int j = 0; j < num_nbr; ++j){
-        bend_ener+=inner_product(ntri[j],ntri[(j+1)%num_nbr]);
+        bend_ener+=1-inner_product(ntri[j],ntri[(j+1)%num_nbr]);
     }
+    cout << bend_ener << endl;
     return 0.5*kappa*(num_nbr-bend_ener);
 }
 /*-------------------------------------------------*/
@@ -234,8 +257,6 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
         be+= bending_energy_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
     }
-     // exit(1);
-    // cout << be << endl;
     return be;
 }
 /*------------------------------------------------------------------------------*/

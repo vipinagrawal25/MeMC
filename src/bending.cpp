@@ -44,12 +44,20 @@ BE::BE(const MESH_p& mesh, std::string fname){
         bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx,
             int bdry_type, double lenth, int edge, double *lijsq) -> double{
         return this->SeungNelson(pos, node_nbr, num_nbr, idx, bdry_type, lenth, edge,lijsq);};
+
+        out_ << "Bond based bending" << endl;
+        exchange = [this](int idx1, int idx2, const MESH_p& mesh) -> void{
+        return this->exchange_bond(idx1, idx2, mesh);};
     }else{
         out_ << " bending_energy_ipart = Itzykson" << endl;
         init_coefbend(mesh.compA, mesh.N);
         bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx,
             int bdry_type, double lenth, int edge, double *lijsq) -> double{
         return this->Itzykson(pos, node_nbr, num_nbr, idx, bdry_type, lenth, edge,lijsq);};
+
+        out_ << "Node based bending" << endl;
+        exchange = [this](int idx1, int idx2, const MESH_p& mesh) -> void{
+        return this->exchange_node(idx1, idx2);};
     }
 
     out_.close();
@@ -70,30 +78,44 @@ void BE::init_bendij(MESH_p mesh) {
     bendij.resize(totalNbrs, 0.0);        // Resize instead of pushing
 
     for (int i = 0; i < mesh.N; ++i) {
-        double bendi = lipA[i] ? bend2 : bend1;  // Select bend2 if lipA[i] is true
-        int num_nbr = mesh.numnbr[i];
-        int cm_idx = mesh.nghst * i;
+        set_nbrbending(i, mesh);
+        // double bendi = lipA[i] ? bend2 : bend1;  // Select bend2 if lipA[i] is true
+        // int num_nbr = mesh.numnbr[i];
+        // int cm_idx = mesh.nghst * i;
 
-        for (int k = cm_idx; k < cm_idx + num_nbr; ++k) {
-            int j = mesh.node_nbr_list[k];
+        // for (int k = cm_idx; k < cm_idx + num_nbr; ++k) {
+        //     int j = mesh.node_nbr_list[k];
 
-            // Validate `j` index to ensure it is within bounds of `lipA`
-            if (j < 0 || j >= mesh.N) {
-                std::cerr << "Error: Neighbor index " << j << " out of bounds." 
-                << std::endl;
-                continue;
-            }
+        //     // Validate `j` index to ensure it is within bounds of `lipA`
+        //     if (j < 0 || j >= mesh.N) {
+        //         std::cerr << "Error: Neighbor index " << j << " out of bounds." 
+        //         << std::endl;
+        //         continue;
+        //     }
 
-            double bendj = lipA[j] ? bend2 : bend1;  // Select bend2 for j if lipA[j] is true
-            if (k < totalNbrs) {
-                bendij[k] = (bendi + bendj) * 0.866;  // Store computed value
-            } else {
-                std::cerr << "Error: bendij index " << k << " out of bounds." << 
-                std::endl;
-            }
-        }
+        //     double bendj = lipA[j] ? bend2 : bend1;  // Select bend2 for j if lipA[j] is true
+        //     if (k < totalNbrs) {
+        //         coef_bend[k] = (bendi + bendj) * 0.866;  // Store computed value
+        //     } else {
+        //         std::cerr << "Error: coef_bend index " << k << " out of bounds." << 
+        //         std::endl;
+        //     }
+        // }
     }
-    exit(1);
+}
+/*------------------------------------------------------------------------------*/
+void BE::set_nbrbending(int idx, const MESH_p& mesh){
+    int *lipA = mesh.compA;
+    int cm_idx = ghost*idx;
+    // double bendi=coef_bend[idx];
+    double bendi = lipA[idx] ? bend2 : bend1;
+    int num_nbr = mesh.numnbr[idx];
+    double bendj;
+    for (int k = cm_idx; k < cm_idx+num_nbr; ++k) {
+        int j = mesh.node_nbr_list[k];
+        bendj = lipA[j] ? bend2 : bend1;
+        bendij[k] = (bendi + bendj) * 0.866;  // Store computed value
+    }
 }
 /*--------------------------------------------------------------------------*/
 inline double acot(double x) {
@@ -120,7 +142,6 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     /// @note Multiplies by 0.5 to avoid double-counting; 
     /// single-counted contributions cancel in energy differences.
     double bend_ener=0;
-    double kappa=coef_bend[idx];
     Vec3d xij[num_nbr], ntri[num_nbr];
     int jdx, kdx;
     for (int j = 0; j < num_nbr; ++j){
@@ -274,7 +295,11 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
     return be;
 }
 /*------------------------------------------------------------------------------*/
-void BE::exchange(int idx1, int idx2){
+void BE::exchange_node(int idx1, int idx2){
     swap(coef_bend[idx1], coef_bend[idx2]);
 }
 /*------------------------------------------------------------------------------*/
+void BE::exchange_bond(int idx1, int idx2, const MESH_p& mesh){
+    set_nbrbending(idx1, mesh);
+    set_nbrbending(idx2, mesh);
+}

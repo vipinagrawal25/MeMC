@@ -328,7 +328,7 @@ inline double McP::energy_mc_bestchrep(vector<double> &energy, Vec3d *pos, MESH_
 inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
          int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
-   double *lijsq;
+   double lijsq[num_nbr];
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm,
                   num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
@@ -580,7 +580,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          mesh.compA[idx2] = lip_idx1;
          mesh.compA[idx1] = lip_idx2;
 
-         beobj.exchange(idx1,idx2);
+         beobj.exchange(idx1,idx2, mesh);
          chargeobj.exchange(idx1,idx2);
 
          Efintot = energy_mc_exch(Efin, pos, mesh, idx1, cm_idx1, num_nbr1);
@@ -598,10 +598,11 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          }else{
             mesh.compA[idx1] = lip_idx1;
             mesh.compA[idx2] = lip_idx2;
-            beobj.exchange(idx2, idx1);
+            beobj.exchange(idx2, idx1, mesh);
             chargeobj.exchange(idx1,idx2);
          }
       }
    }
+   exit(1);
    return exchngdmoves;
 }

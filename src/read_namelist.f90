@@ -142,18 +142,24 @@ end subroutine
 
 
 subroutine StretchRead(YY1, YY2, do_volume, is_pressurized, coef_vol_expansion, &
-               pressure, coef_area_expansion, do_area, parafile) bind(c, name="StretchRead")
+               pressure, coef_area_expansion, do_area, temp_l0, &
+               parafile) bind(c, name="StretchRead")
     logical (kind=c_bool) :: do_volume, is_pressurized, do_area
     real (kind=c_double) :: YY1, YY2, pressure, coef_area_expansion, coef_vol_expansion
-    character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
+    character(kind=c_char, len=1), dimension(char_len), intent(out) ::  temp_l0
+    character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
+    character(len=char_len) :: initial_l0
 
-    namelist /stretchpara/ YY1, YY2, do_volume, is_pressurized, coef_vol_expansion, &
-                         pressure, coef_area_expansion, do_area 
+    namelist /stretchpara/ YY1, YY2, initial_l0, do_volume, is_pressurized, &
+    coef_vol_expansion, pressure, coef_area_expansion, do_area
         call convert_cstr_fstr(parafile, f_fname)
         open(unit=200,file=f_fname, status='old')
         read(unit=200,nml=stretchpara)
         close(unit=200)
+
+    call convert_fstr_cstr(initial_l0, temp_l0)
+
 end subroutine
 
 end module

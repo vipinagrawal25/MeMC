@@ -300,6 +300,8 @@ void BE::exchange_node(int idx1, int idx2){
 }
 /*------------------------------------------------------------------------------*/
 void BE::exchange_bond(int idx1, int idx2, const MESH_p& mesh){
+    // It's important that you have already swiped the components.
     set_nbrbending(idx1, mesh);
     set_nbrbending(idx2, mesh);
 }
+/*------------------------------------------------------------------------------*/

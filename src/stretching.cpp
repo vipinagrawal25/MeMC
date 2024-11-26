@@ -1,22 +1,26 @@
 #include "stretching.hpp"
 #include <fstream>
 #include "misc.hpp"
+#include <iterator>
 
 extern "C" void StretchRead(double *, double *, bool *, bool *, 
-                            double *, double *, double *, bool *, char *);
+                            double *, double *, double *, bool *, char*,
+                            char *);
 int get_nstart(int, int);
 /*--------------------------------------------------------------------------*/
 STE::STE(const MESH_p& mesh, std::string fname){
-    char tmp_fname[128];
+    char tmp_fname[128], temp_initial_l0[128];
     double radius=mesh.radius;
     string parafile, outfile;
 
     parafile = fname+"/para_file.in";
     sprintf(tmp_fname, "%s", parafile.c_str() );
     StretchRead(&YY1, &YY2, &do_volume, &is_pressurized, &Kappa,
-              &pressure, &coef_area_expansion, &do_area, tmp_fname);
+              &pressure, &coef_area_expansion, &do_area, temp_initial_l0,
+                tmp_fname);
     ini_vol = mesh.ini_vol;
-
+    initial_l0 = temp_initial_l0;
+    
     if (mesh.ncomp==1){
         YY2=YY1;
     }
@@ -37,7 +41,8 @@ STE::STE(const MESH_p& mesh, std::string fname){
       << " pressure " << pressure << endl
       << " coef_vol_expansion " << Kappa << endl
       << " do_area " << do_area << endl
-      << " coef_area_expansion " << coef_area_expansion << endl;
+      << " coef_area_expansion " << coef_area_expansion << endl
+      << " Rest l0" << initial_l0 << endl;
     out_.close();
 }
 // /*--------------------------------------------------------------------------*/
@@ -71,7 +76,7 @@ void STE::init_coefstretch(MESH_p mesh){
         int cm_idx = mesh.nghst * i;
         for (int k = cm_idx; k < cm_idx + num_nbr; ++k) {
             int j = mesh.node_nbr_list[k];
-            double Yj = lipA[j] ? YY2 : YY1;  
+            double Yj = lipA[j] ? YY2 : YY1;
             // Select YY2 for j if lipA[j] is true, otherwise YY1
             HH[k] = Yi * Yj / (Yi + Yj);
             HH[k] = HH[k]*sqrt(3);
@@ -170,14 +175,18 @@ double STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
         for(k = cm_idx; k < cm_idx + num_nbr; k++) {
             j = mesh.node_nbr_list[k];
             dr = diff_pbc(Pos[j], Pos[i], lenth);
+            lij_t0[k]=sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
             npairs++;
         }
     }
     av_bond_len = sum_lij/npairs;
-    for(i = 0; i < mesh.nghst*mesh.N; i++){
-        lij_t0[i] = av_bond_len;
+    if (initial_l0=="avg"||is_fluid){
+        for(i = 0; i < mesh.nghst*mesh.N; i++){
+            lij_t0[i] = av_bond_len;
+        }
     }
+    // std::copy(lij_t0.begin(), lij_t0.end(), std::ostream_iterator<double>(std::cout, "\n"));
     return av_bond_len;
 }
 

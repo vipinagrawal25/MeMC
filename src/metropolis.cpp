@@ -102,8 +102,6 @@ int McP::initMC(MESH_p mesh, string fname){
       Algo = [this](double DE, double activity) -> double {
       return this->Glauber(DE,activity);};
    }
-  
-
 
    if(chargeobj.calculate() && beobj.isexch()){
          out_ << " Energy_mc_exch = energy_mc_bech" << endl;
@@ -580,7 +578,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          mesh.compA[idx2] = lip_idx1;
          mesh.compA[idx1] = lip_idx2;
 
-         beobj.exchange(idx1,idx2, mesh);
+         beobj.exchange(idx1,idx2, mesh); // Have you swiped the contents already?
          chargeobj.exchange(idx1,idx2);
 
          Efintot = energy_mc_exch(Efin, pos, mesh, idx1, cm_idx1, num_nbr1);
@@ -598,11 +596,10 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          }else{
             mesh.compA[idx1] = lip_idx1;
             mesh.compA[idx2] = lip_idx2;
-            beobj.exchange(idx2, idx1, mesh);
+            beobj.exchange(idx2, idx1, mesh); // Have you swiped the contents already?
             chargeobj.exchange(idx1,idx2);
          }
       }
    }
-   exit(1);
    return exchngdmoves;
 }

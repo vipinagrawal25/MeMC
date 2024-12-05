@@ -16,7 +16,11 @@ public :
   // double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
   //     int, int, double, int, double*);
   double bending_energy_total(Vec3d *pos, MESH_p mesh);
-  void printbend(){print(coef_bend);}
+  void printbend(const MESH_p& mesh){
+    for (int i = 0; i < mesh.nghst * mesh.N; ++i){
+      cout << bendij[i] << " ";
+    }
+  }
   int getbend(int i){return coef_bend[i];}
   double getbend1(){return bend1;}
   double getbend2(){return bend2;}
@@ -26,6 +30,7 @@ public :
   double Itzykson(Vec3d *, int *, int , int, int , double , int , double *);
   bool isexch(){return multicomp;}
   std::function<void(int, int, const MESH_p&)> exchange;
+  void set_nbrbending(int idx1, const MESH_p& mesh);
 private:
   double bend1, bend2, spC1, spC2;
   std::vector<double> coef_bend;
@@ -39,7 +44,6 @@ private:
   int ghost;
   void init_coefbend(int *lipA, int N);
   void init_bendij(MESH_p mesh);
-  void set_nbrbending(int idx1, const MESH_p& mesh);
   void exchange_node(int idx1, int idx2);
   void exchange_bond(int idx1, int idx2, const MESH_p& mesh);
 /*------------------------*/

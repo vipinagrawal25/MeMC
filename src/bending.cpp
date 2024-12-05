@@ -249,8 +249,7 @@ double BE::Itzykson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
 //         edge, lijsq);
 // }
 /*--------------------------------------------------------------------------*/
-double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, 
-    int idx){
+double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
     /// @brief Estimate the Bending energy contribution from the neighbours 
     /// when ith particle position changes
     /// @param Pos array containing co-ordinates of all the particles
@@ -265,7 +264,7 @@ double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh,
         nbr = mesh.node_nbr_list[j];
         num_nbr_j = mesh.numnbr[nbr];
         cm_idx_nbr = nbr*mesh.nghst;
-   	 double lijsq[num_nbr_j];
+   	    double lijsq[num_nbr_j];
         be += bending_energy_ipart(pos,
             (int *) mesh.node_nbr_list + cm_idx_nbr,
             num_nbr_j, nbr, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);

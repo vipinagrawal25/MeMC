@@ -32,6 +32,7 @@
 &stretchpara
     yy1 = 0.3125
     yy2 = 0.3125
+    initial_l0="avg"    !avg, spherical are the options right now
     do_volume = .true.
     is_pressurized = .false.
     do_area = .false.

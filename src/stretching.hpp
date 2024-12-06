@@ -47,5 +47,6 @@ private:
     void area_ipart(double* area, Vec3d *pos, int *node_nbr, int num_nbr, 
                     int idx, int bdry_type, double lenth, int edge);
     void init_area_t0(MESH_p mesh);
+    string initial_l0;
 };
 #endif

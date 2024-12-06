@@ -56,6 +56,7 @@ struct MESH_p{
             boxlen=0;
             bdry_type=2;   // Sphere always has a pbc.
             radius=calculateRadius();
+		cout << "radius = " << radius << endl;
             ini_vol = 4e0/3e0*M_PI*radius*radius*radius;
         }
 

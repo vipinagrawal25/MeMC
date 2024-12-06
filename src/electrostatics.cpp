@@ -51,7 +51,6 @@ double ESP::debye_huckel(const Vec3d p1, const Vec3d p2, double q1,
 double ESP::debye_huckel_ipart(Vec3d *Pos, int idx, int N){
     double total_potential = 0.0;
     double charge1 = charges[idx];
-    double charge2;
     Vec3d Pos1 = Pos[idx];
     // omp_set_num_threads(1);
     // #pragma omp parallel for reduction(+:total_potential) schedule(dynamic)

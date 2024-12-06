@@ -38,6 +38,7 @@ public :
   void updateparam(int anneal, string fname);
   bool exchange(){return iexch;}
   void wHeader(const MESH_p &mesh, std::fstream &fid);
+  std::string initial_l0;
 private:
   BE &beobj;
   STE &steobj;
@@ -61,14 +62,26 @@ private:
   double volt0;
   int acceptedmoves;
   bool sphere;
-  function<double(vector<double> &, Vec3d*, MESH_p, int, int, int)> energy_mc_exch;
+  function<double(vector<double> &, Vec3d*, MESH_p, 
+          int, int,
+          int, int,
+          int, int)> energy_mc_exch;
   function<double(vector<double> &, Vec3d*, MESH_p, int, int, int)> energy_mc_3d;
-  double energy_mc_be(vector<double>& , Vec3d *, MESH_p , int , int, int);
+  double energy_mc_be(vector<double>& , Vec3d *, MESH_p ,
+                      int , int, 
+                      int, int,
+                      int, int);
   double energy_mc_best(vector<double>& , Vec3d *, MESH_p , int , int, int);
   double energy_mc_bestch(vector<double>&, Vec3d *, MESH_p , int , int, int);
   double energy_mc_bestchrep(vector<double>&, Vec3d *, MESH_p , int , int, int);
-  double energy_mc_bech(vector<double>&, Vec3d *, MESH_p , int , int, int);
-  double energy_mc_ch(vector<double>&, Vec3d *, MESH_p , int , int, int);
+  double energy_mc_bech(vector<double>&, Vec3d *, MESH_p, 
+                        int, int,
+                        int, int,
+                        int, int);
+  double energy_mc_ch(vector<double>&, Vec3d *, MESH_p, 
+                    int, int, 
+                    int, int,
+                    int, int);
   function<bool(double, double)> Algo;
   bool Boltzman(double DE, double activity);
   bool Glauber(double DE, double activity);

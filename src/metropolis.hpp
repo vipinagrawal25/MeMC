@@ -57,6 +57,7 @@ private:
   int fluidize_every;
   double fac_len_vertices;
   double totEner, totvol, bende, stretche, pre, regsole=0, electroe, vole=0;
+  double linee=0;
   double selfe=0;
   double EneMonitored, VolMonitored;
   double volt0;

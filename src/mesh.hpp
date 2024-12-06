@@ -45,6 +45,17 @@ struct MESH_p{
         hdf5_io_read_mesh((int *) numnbr, (int *)node_nbr_list, 
             outfolder+"/input.h5");
 
+        // for (int i = 0; i < N ; ++i){
+        //     cout << numnbr[i] << " ";
+        //     int count=0;
+        //     for (int j = 0; j < nghst; ++j){
+        //         // if(node_nbr_list[j]!=-1){
+        //         cout << node_nbr_list[nghst*i+j] << " ";
+                
+        //     }
+        //     cout << count << endl;
+        // }
+
         if (isPlaner()){
             sphere=false;
             edge = get_nstart(N, 1);
@@ -56,7 +67,7 @@ struct MESH_p{
             boxlen=0;
             bdry_type=2;   // Sphere always has a pbc.
             radius=calculateRadius();
-		cout << "radius = " << radius << endl;
+            cout << "radius = " << radius << endl;
             ini_vol = 4e0/3e0*M_PI*radius*radius*radius;
         }
 
@@ -67,6 +78,8 @@ struct MESH_p{
         }else if(distribution=="Janus" || distribution=="janus"){
             zattr=2*(compfrac-0.5) * radius;
             identify_attractive_part(compA, pos, zattr, N);
+        }else if (distribution=="Point" || distribution=="point"){
+            compA[0]=1;
         }
     }
 

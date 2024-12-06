@@ -117,9 +117,9 @@ double STE::stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx
       }
    }else{
         for (i =0; i < num_nbr; i++){
-         j = node_nbr[i];
-         rij = diff_pbc(pos[idx], pos[j], lenth);
-         lijsq[i] = inner_product(rij, rij);
+            j = node_nbr[i];
+            rij = diff_pbc(pos[idx], pos[j], lenth);
+            lijsq[i] = inner_product(rij, rij);
       }
    }
    return stretch_energy_ipart(lijsq, num_nbr, idx, ghost);

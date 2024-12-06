@@ -1,7 +1,6 @@
 #include "selfavoidance.hpp"
 
-extern "C" void  SelfAvoidRead(bool *, double *, double *,
-                               double *, double*, char *);
+extern "C" void  SelfAvoidRead(bool *, double *, double *, double *, double*, char *);
 
 SelfAvoid::SelfAvoid(MESH_p mesh, string fname){
   char tmp_fname[128];
@@ -14,6 +13,7 @@ SelfAvoid::SelfAvoid(MESH_p mesh, string fname){
   boxSize_ = 2*(mesh.radius-minL);
   numCells_ = static_cast<int>(boxSize_ / cutoff_);
   cellSize_ = boxSize_/numCells_;
+
   // cellList_.resize(numCells_ * numCells_ * numCells_);
 }
 //

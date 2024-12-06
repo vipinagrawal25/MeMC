@@ -21,6 +21,7 @@
 #include "multicomp.hpp"
 #include "electrostatics.hpp"
 #include "selfavoidance.hpp"
+#include "linetension.hpp"
 
 template<typename T>
 string ZeroPadNumber(T num){
@@ -98,9 +99,11 @@ int main(int argc, char *argv[]){
     MulCom lipidobj(mesh, outfolder);
     ESP chargeobj(mesh, outfolder);
     SelfAvoid repulsiveobj(mesh, outfolder);
+    LTN lineobj(mesh, outfolder);
 
     // makemcobj();
-    McP mcobj(bendobj, stretchobj, lipidobj, chargeobj, repulsiveobj);
+    McP mcobj(bendobj, stretchobj, lipidobj, chargeobj, repulsiveobj, 
+            lineobj);
     mcobj.initMC(mesh, outfolder);
 
     mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,

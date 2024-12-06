@@ -13,12 +13,13 @@
 #include "multicomp.hpp"
 #include "electrostatics.hpp"
 #include "selfavoidance.hpp"
+#include "linetension.hpp"
 
 using namespace std;
 class McP{
 public : 
   McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj, 
-    SelfAvoid &repulsiveobj);
+    SelfAvoid &repulsiveobj, LTN &lineobj);
   int monte_carlo_3d(Vec3d *pos, MESH_p mesh);
   int monte_carlo_fluid(Vec3d *, MESH_p);
   int monte_carlo_lipid(Vec3d *pos, MESH_p mesh);
@@ -43,6 +44,7 @@ private:
   MulCom &lipidobj;
   ESP &chargeobj;
   SelfAvoid &repulsiveobj;
+  LTN &lineobj;
   std::string algo;
   double dfac;
   int one_mc_iter, tot_mc_iter, dump_skip, nexch_iter;

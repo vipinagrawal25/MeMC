@@ -93,7 +93,6 @@ void BE::init_bendij(MESH_p mesh) {
             }
         }
     }
-    exit(1);
 }
 /*--------------------------------------------------------------------------*/
 inline double acot(double x) {

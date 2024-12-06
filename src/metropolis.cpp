@@ -3,6 +3,7 @@
 #include "multicomp.hpp"
 #include "electrostatics.hpp"
 #include "selfavoidance.hpp"
+#include "linetension.hpp"
 
 #include <cmath>
 #include <cstring>
@@ -21,9 +22,9 @@ extern "C" void  MC_listread(char *, double *, double *, bool *,int *, int *,
 int get_nstart(int, int);
 
 McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj, 
-   SelfAvoid &repulsiveobj):
+   SelfAvoid &repulsiveobj, LTN &lineobj):
 beobj(beobj), steobj(steobj), lipidobj(lipidobj), chargeobj(chargeobj), 
-repulsiveobj(repulsiveobj) {};
+repulsiveobj(repulsiveobj), lineobj(lineobj){};
 
 void McP::updateparam(int anneal, string fname){
    if (anneal>0){
@@ -102,8 +103,6 @@ int McP::initMC(MESH_p mesh, string fname){
       Algo = [this](double DE, double activity) -> double {
       return this->Glauber(DE,activity);};
    }
-  
-
 
    if(chargeobj.calculate() && beobj.isexch()){
          out_ << " Energy_mc_exch = energy_mc_bech" << endl;
@@ -171,7 +170,10 @@ double McP::evalEnergy(MESH_p mesh){
       selfe = repulsiveobj.totalRepulsiveEnergy(mesh);
       totEner += selfe;
    }
-
+   if (lineobj.calculate()>0){
+      linee = lineobj.energy_total();
+      totEner += linee;
+   }
    EneMonitored = totEner;
    VolMonitored = totvol;
    
@@ -184,6 +186,7 @@ void McP::wHeader(const MESH_p &mesh, std::fstream &fid){
     if(steobj.dopressure()) {log_headers+=" Pressure_e ";}
     if(steobj.dovol()) {log_headers+=" Volume_e ";}
     if (repulsiveobj.isSelfRepulsive()) {log_headers+=" Repulsive_e ";}
+    if (lineobj.calculate()>0){log_headers+=" Line_e ";}
     log_headers+="total_e ";
     if (mesh.sphere){log_headers+="volume";}
     fid << log_headers << endl;
@@ -198,9 +201,9 @@ void McP::write_energy(fstream &fileptr, int itr, const MESH_p &mesh){
       if (steobj.dopressure()) fileptr << pre << "  ";
       if (steobj.dovol()) fileptr << vole << " ";
       if (repulsiveobj.isSelfRepulsive()) fileptr << selfe << " ";
+      if (lineobj.calculate()) fileptr << linee << " ";
       fileptr << EneMonitored  << "  ";
       if(mesh.sphere) fileptr << VolMonitored  << endl;
-      // if (steobj.doarea()) fileptr << AreaMonitored << endl;
   }  
 }
 /*-----------------------*/

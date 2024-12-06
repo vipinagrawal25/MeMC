@@ -71,7 +71,7 @@ void STE::init_coefstretch(MESH_p mesh){
         int cm_idx = mesh.nghst * i;
         for (int k = cm_idx; k < cm_idx + num_nbr; ++k) {
             int j = mesh.node_nbr_list[k];
-            double Yj = lipA[j] ? YY2 : YY1;  
+            double Yj = lipA[j] ? YY2 : YY1;
             // Select YY2 for j if lipA[j] is true, otherwise YY1
             HH[k] = Yi * Yj / (Yi + Yj);
             HH[k] = HH[k]*sqrt(3);

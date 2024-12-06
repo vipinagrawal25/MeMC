@@ -2,7 +2,7 @@
     nghst = 12
     bdry_cdt = 2
     ncomp = 2
-    compfrac = 0.75
+    compfrac = 0
     distribution = 'Janus' !'Janus, Random are the options'
 /
 
@@ -35,14 +35,14 @@
     do_volume = .true.
     is_pressurized = .false.
     do_area = .false.
-    coef_vol_expansion = 5000
+    coef_vol_expansion = 0
     pressure = 0
     coef_area_expansion = 0
 /
 
 &electrostatpara
     charge1 = 0
-    charge2 = 0.94
+    charge2 = 0
     conc = 0
 /
 

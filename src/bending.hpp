@@ -38,7 +38,7 @@ private:
   double spcurv;
   bool iGauss;
   bool multicomp;
-  string method="SN";
+  string method="Itzykson";
   // This is required by SeungNelson. Right way is to pass it, but I do not want
   // to change the function call everywhere.
   int ghost;

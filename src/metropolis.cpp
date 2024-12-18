@@ -75,7 +75,12 @@ int McP::initMC(MESH_p mesh, string fname){
       << " fluidize_every " << fluidize_every << endl
       << " Number_exch_iter " << nexch_iter*one_mc_iter << endl;
 
-   if (chargeobj.calculate() && repulsiveobj.isSelfRepulsive()){
+   if (chargeobj.calculate() && lineobj.calculate()){
+      out_ << " Energy_mc_3d = energy_mc_bestchli "<< endl;
+      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
+                  int val, int val2, int val3 ) -> double {
+      return this->energy_mc_bestchli(vec, vec_ptr, mesh, val, val2, val3);};
+   }else if (chargeobj.calculate() && repulsiveobj.isSelfRepulsive()){
       out_ << " Energy_mc_3d = energy_mc_bestchrep "<< endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
                   int val, int val2, int val3 ) -> double {
@@ -104,22 +109,30 @@ int McP::initMC(MESH_p mesh, string fname){
       return this->Glauber(DE,activity);};
    }
 
-   if(chargeobj.calculate() && beobj.isexch()){
-         out_ << " Energy_mc_exch = energy_mc_bech" << endl;
-         energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
-                     int val, int val2, 
-                     int val3, int val4,
-                     int val5, int val6) -> double {
-         return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3, 
-                                    val4, val5, val6);};
+   if (chargeobj.calculate() && beobj.isexch() && lineobj.calculate()){
+      out_ << " Energy_mc_exch = energy_mc_bechli" << endl;
+      energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                  int val, int val2,
+                  int val3, int val4,
+                  int val5, int val6) -> double {
+      return this->energy_mc_bechli(vec , vec_ptr, mesh, val, val2, val3, 
+                                 val4, val5, val6);};
+   }else if(chargeobj.calculate() && beobj.isexch()){
+      out_ << " Energy_mc_exch = energy_mc_bech" << endl;
+      energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                  int val, int val2, 
+                  int val3, int val4,
+                  int val5, int val6) -> double {
+      return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3, 
+                                 val4, val5, val6);};
 	}else if(beobj.isexch()){
-         out_ << " Energy_mc_exch = energy_mc_be" << endl;
-         energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
-                     int val, int val2,
-                     int val3, int val4,
-                     int val5, int val6) -> double {
-         return this->energy_mc_be(vec , vec_ptr, mesh, val, val2, val3, 
-                     val4, val5, val6);};
+      out_ << " Energy_mc_exch = energy_mc_be" << endl;
+      energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                  int val, int val2,
+                  int val3, int val4,
+                  int val5, int val6) -> double {
+      return this->energy_mc_be(vec , vec_ptr, mesh, val, val2, val3, 
+                  val4, val5, val6);};
 	}
 
    if (exchtype=="Global" || exchtype == "global"){
@@ -327,6 +340,13 @@ inline double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p m
    return Etot + energy[2];
 }
 //
+inline double McP::energy_mc_bestchli(vector<double> &energy, Vec3d *pos, MESH_p mesh,
+                  int idx, int cm_idx, int num_nbr){
+   double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr);
+   energy[4] = lineobj.energy_ipart(idx);
+   return Etot + energy[4];
+}
+//
 inline double McP::energy_mc_bestchrep(vector<double> &energy, Vec3d *pos, MESH_p mesh,
             int idx, int cm_idx, int num_nbr){
    double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr);
@@ -351,6 +371,14 @@ inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mes
    return energy[0]+energy[2];
 }
 // 
+inline double McP::energy_mc_bechli(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
+         int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2){
+   double Etot = energy_mc_bech(energy, pos, mesh, idx1, idx2, cm_idx1,
+               cm_idx2, num_nbr1, num_nbr2);
+   energy[4] = lineobj.energy_ipart(idx1) + lineobj.energy_ipart(idx2);
+   return Etot+energy[4];
+}
+//
 inline double McP::energy_mc_ch(vector<double> &energy, Vec3d *pos, MESH_p mesh,
       int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2){
    energy[2] = chargeobj.debye_huckel_ipart(pos, idx1, mesh.N)
@@ -363,7 +391,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    double x_o, y_o, z_o, x_n, y_n, z_n;
    double de, debe, dest, decharge, ders;
    double Einitot, Efintot;
-   vector<double> Eini(4,0), Efin(4,0);
+   vector<double> Eini(5,0), Efin(5,0);
    double dxinc, dyinc, dzinc;
    double vol_i, vol_f;
    double dvol, de_vol, de_pressure;
@@ -422,6 +450,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
          bende += Efin[0]-Eini[0];
          stretche += Efin[1]-Eini[1];
          electroe += Efin[2]-Eini[2];
+         linee += Efin[4]-Eini[4];
          vole += de_vol;
          VolMonitored += dvol;
       } else {
@@ -574,7 +603,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    int exchngdmoves = 0;
    int idx1, idx2, cm_idx1, cm_idx2;
    int nframe = get_nstart(mesh.N, mesh.bdry_type);
-   vector<double> Eini(4,0), Efin(4,0);
+   vector<double> Eini(5,0), Efin(5,0);
    bool yes, logic;
    int lip_idx1, lip_idx2, idxn, logic_break;
    double Einitot, Efintot, de;
@@ -596,6 +625,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
       if (!logic){
          lip_idx1 = mesh.compA[idx1];
          lip_idx2 = mesh.compA[idx2];
+         auto tempE = chargeobj.debye_huckel_total(pos, mesh.N);
          Einitot = energy_mc_exch(Eini, pos, mesh,
                                  idx1, idx2, 
                                  cm_idx1, cm_idx2,
@@ -604,7 +634,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
          mesh.compA[idx2] = lip_idx1;
          mesh.compA[idx1] = lip_idx2;
 
-         beobj.exchange(idx1,idx2, mesh); // Have you swiped the contents already?
+         beobj.exchange(idx1,idx2,mesh); // Have you swiped the contents already?
          chargeobj.exchange(idx1,idx2);
          Efintot = energy_mc_exch(Efin, pos, mesh,
                                  idx1, idx2,
@@ -619,6 +649,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
             bende += Efin[0]-Eini[0];
             stretche += Efin[1]-Eini[1];
             electroe += Efin[2]-Eini[2];
+            linee += Efin[4]-Eini[4];
          }else{
             mesh.compA[idx1] = lip_idx1;
             mesh.compA[idx2] = lip_idx2;

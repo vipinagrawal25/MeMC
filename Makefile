@@ -16,7 +16,7 @@ sources += src/electrostatics.cpp src/selfavoidance.cpp
 object = obj/vector.o obj/metropolis.o obj/random_gen.o obj/bending.o
 object += obj/stretching.o obj/hdf5_io.o obj/misc.o
 object += obj/multicomp.o
-object += obj/electrostatics.o obj/selfavoidance.o
+object += obj/electrostatics.o obj/selfavoidance.o obj/linetension.o
 #
 # Find directories that match the pattern (00000, 00001, 00002, etc.)
 DIRS := $(shell find . -maxdepth 1 -type d -name '[0-9][0-9][0-9][0-9][0-9]')

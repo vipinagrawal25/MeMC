@@ -101,16 +101,14 @@ int main(int argc, char *argv[]){
     SelfAvoid repulsiveobj(mesh, outfolder);
     LTN lineobj(mesh, outfolder);
 
-    // makemcobj();
-    McP mcobj(bendobj, stretchobj, lipidobj, chargeobj, repulsiveobj, 
-            lineobj);
+    McP mcobj(bendobj, stretchobj, lipidobj, chargeobj, repulsiveobj, lineobj);
     mcobj.initMC(mesh, outfolder);
 
     mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,
                         mesh.radius, residx);
     // How often do you want to compute the total energy?
     if (mcobj.isfluid()) recaliter=mcobj.fluidizeevery();
-    else recaliter=10;
+    else recaliter=1;
 
     ostream* terminal;
     ofstream out_file;
@@ -126,7 +124,7 @@ int main(int argc, char *argv[]){
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 
     clock_t timer;
-    Etot = mcobj.evalEnergy(mesh);
+    Etot = mcobj.evalEnergy(mesh);ß
     mcobj.write_energy(fileptr, iter, mesh);
     for(iter=residx; iter < mcobj.totaliter(); iter++){
         if(iter%mcobj.dumpskip() == 0){
@@ -138,7 +136,7 @@ int main(int argc, char *argv[]){
             if (mesh.ncomp>1) hdf5_io_write(mesh.compA, mesh.N, outfile, "lip");
             fstream restartfile(outfolder+"/restartindex.txt", ios::out);
             restartfile << iter << " " << mcobj.dumpskip() << endl;
-            restartfile.close();
+            restartfile.close();™
         }
         //
         if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
@@ -161,8 +159,8 @@ int main(int argc, char *argv[]){
         }
         mcobj.write_energy(fileptr, iter, mesh);
     }
-    (*terminal) << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" 
-    << endl;
+    (*terminal) << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s"  << endl;
+    
     if (world_size > 1) out_file.close();
     
     fileptr.close();

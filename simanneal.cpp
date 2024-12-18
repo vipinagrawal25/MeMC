@@ -119,7 +119,7 @@ int main(int argc, char *argv[]){
     mcobj.initMC(mesh,outfolder);
 
     if (mcobj.isfluid()) recaliter=mcobj.fluidizeevery();
-    else recaliter=10;
+    else recaliter=1;
 
     ostream* terminal;
     ofstream out_file;

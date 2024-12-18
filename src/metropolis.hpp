@@ -74,8 +74,13 @@ private:
                       int, int);
   double energy_mc_best(vector<double>& , Vec3d *, MESH_p , int , int, int);
   double energy_mc_bestch(vector<double>&, Vec3d *, MESH_p , int , int, int);
+  double energy_mc_bestchli(vector<double>&, Vec3d *, MESH_p , int , int, int);
   double energy_mc_bestchrep(vector<double>&, Vec3d *, MESH_p , int , int, int);
   double energy_mc_bech(vector<double>&, Vec3d *, MESH_p, 
+                        int, int,
+                        int, int,
+                        int, int);
+  double energy_mc_bechli(vector<double>&, Vec3d *, MESH_p, 
                         int, int,
                         int, int,
                         int, int);

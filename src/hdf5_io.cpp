@@ -147,6 +147,7 @@ void hdf5_io_read_mesh(int *cmlist, int *node_nbr,  string input_file){
         exit(1);
     }
 
+
   /* Open an existing file. */
   file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT); 
 

@@ -22,6 +22,7 @@ ESP::ESP(const MESH_p& mesh, std::string fname){
     ElectroRead(&charge1, &charge2, &conc, tmp_fname);
 
     if (charge1||charge2) ical=1;
+    if (charge1 != charge2) iex=1;
     // print(mesh.compA,mesh.N);
     initcharges((int *) mesh.compA, mesh.N);
     debyelen = 0.304/sqrt(conc+tiny);

@@ -91,7 +91,6 @@ int main(int argc, char *argv[]){
     seed_v = (uint32_t) (mpi_rank + time(0));
     // seed_v = 42;
     RandomGenerator::init(seed_v);
-
     MESH_p mesh(outfolder);
     // exit(1);
     BE bendobj(mesh, outfolder);
@@ -124,7 +123,7 @@ int main(int argc, char *argv[]){
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 
     clock_t timer;
-    Etot = mcobj.evalEnergy(mesh);ß
+    Etot = mcobj.evalEnergy(mesh);
     mcobj.write_energy(fileptr, iter, mesh);
     for(iter=residx; iter < mcobj.totaliter(); iter++){
         if(iter%mcobj.dumpskip() == 0){
@@ -136,7 +135,7 @@ int main(int argc, char *argv[]){
             if (mesh.ncomp>1) hdf5_io_write(mesh.compA, mesh.N, outfile, "lip");
             fstream restartfile(outfolder+"/restartindex.txt", ios::out);
             restartfile << iter << " " << mcobj.dumpskip() << endl;
-            restartfile.close();™
+            restartfile.close();
         }
         //
         if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);

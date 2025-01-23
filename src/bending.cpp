@@ -41,9 +41,7 @@ BE::BE(const MESH_p& mesh, std::string fname){
     if (method=="SN"){
         out_ << " bending_energy_ipart = Seung and Nelson" << endl;
         init_bendij(mesh);
-        bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-            int bdry_type, double lenth, int edge, double *lijsq) -> double{
-        return this->SeungNelson(pos, node_nbr, num_nbr, idx, bdry_type, lenth, edge,lijsq);};
+        bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, int bdry_type, double lenth, int edge, double *lijsq) -> double{ return this->SeungNelson(pos, node_nbr, num_nbr, idx, bdry_type,lenth, edge,lijsq);};
 
         out_ << "Bond based bending" << endl;
         exchange = [this](int idx1, int idx2, const MESH_p& mesh) -> void{

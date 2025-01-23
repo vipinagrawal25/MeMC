@@ -13,10 +13,12 @@ public:
   double debye_huckel_total(Vec3d *Pos, int N);
   void exchange(int idx1, int idx2);
   bool calculate(){return ical;}
+  bool isexch(){return iex;}
   double getch1(){return charge1;}
   double getch2(){return charge2;}
 private:
   bool ical=0;
+  bool iex=0;
   void initcharges(int *compA, int N);
   double debye_huckel(const Vec3d p1, const Vec3d p2, double q1, double q2);
   double charge1, charge2;

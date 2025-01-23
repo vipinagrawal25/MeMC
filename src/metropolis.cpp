@@ -73,6 +73,7 @@ int McP::initMC(MESH_p mesh, string fname){
       << " dump_skip " << dump_skip << endl
       << " min_allowed_nbr " << min_allowed_nbr << endl
       << " fluidize_every " << fluidize_every << endl
+      << " iexch " << iexch << endl
       << " Number_exch_iter " << nexch_iter*one_mc_iter << endl;
 
    if (chargeobj.calculate() && lineobj.calculate()){
@@ -109,7 +110,7 @@ int McP::initMC(MESH_p mesh, string fname){
       return this->Glauber(DE,activity);};
    }
 
-   if (chargeobj.calculate() && beobj.isexch() && lineobj.calculate()){
+   if (chargeobj.isexch() && beobj.isexch() && lineobj.calculate()){
       out_ << " Energy_mc_exch = energy_mc_bechli" << endl;
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2,
@@ -117,7 +118,7 @@ int McP::initMC(MESH_p mesh, string fname){
                   int val5, int val6) -> double {
       return this->energy_mc_bechli(vec , vec_ptr, mesh, val, val2, val3, 
                                  val4, val5, val6);};
-   }else if(chargeobj.calculate() && beobj.isexch()){
+   }else if(chargeobj.isexch() && beobj.isexch()){
       out_ << " Energy_mc_exch = energy_mc_bech" << endl;
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2, 
@@ -125,7 +126,15 @@ int McP::initMC(MESH_p mesh, string fname){
                   int val5, int val6) -> double {
       return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3, 
                                  val4, val5, val6);};
-	}else if(beobj.isexch()){
+	}else if(chargeobj.isexch()){
+      out_ << " Energy_mc_exch = energy_mc_ch" << endl;
+      energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                  int val, int val2,
+                  int val3, int val4,
+                  int val5, int val6) -> double {
+      return this->energy_mc_ch(vec , vec_ptr, mesh, val, val2, val3, 
+                                 val4, val5, val6);};
+   }else if(beobj.isexch()){
       out_ << " Energy_mc_exch = energy_mc_be" << endl;
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2,
@@ -134,15 +143,15 @@ int McP::initMC(MESH_p mesh, string fname){
       return this->energy_mc_be(vec , vec_ptr, mesh, val, val2, val3, 
                   val4, val5, val6);};
 	}
-
+   
    if (exchtype=="Global" || exchtype == "global"){
       out_ << "Component exchange type = Global" << endl;
       get_idx2 = [this](int num_nbr, int *node_nbr_list, int cm_idx, int nframe,
-         int N) -> int{return this->global_idx(nframe, N);};
+         int N) -> int {return this->global_idx(nframe, N);};
    }else{
       out_ << "Component exchange type = Local" << endl;
       get_idx2 = [this](int num_nbr, int *node_nbr_list, int cm_idx, int nframe,
-         int N) -> int{return this->local_idx(num_nbr, node_nbr_list, cm_idx);};
+         int N) -> int {return this->local_idx(num_nbr, node_nbr_list, cm_idx);};
    }
 
    out_.close();
@@ -195,7 +204,8 @@ double McP::evalEnergy(MESH_p mesh){
    }
    EneMonitored = totEner;
    VolMonitored = totvol;
-   
+   // totarea = steobj.area_total(mesh);
+   AreaMonitored = steobj.area_total(mesh);
    return totEner;
 }
 /*----------------------------------------------------------*/
@@ -207,7 +217,8 @@ void McP::wHeader(const MESH_p &mesh, std::fstream &fid){
     if (repulsiveobj.isSelfRepulsive()) {log_headers+=" Repulsive_e ";}
     if (lineobj.calculate()>0){log_headers+=" Line_e ";}
     log_headers+="total_e ";
-    if (mesh.sphere){log_headers+="volume";}
+    if (mesh.sphere){log_headers+="Volume";}
+    log_headers+="Area";
     fid << log_headers << endl;
 }
 /*-----------------------*/
@@ -223,10 +234,12 @@ void McP::write_energy(fstream &fileptr, int itr, const MESH_p &mesh){
       if (lineobj.calculate()) fileptr << linee << " ";
       fileptr << EneMonitored  << "  ";
       if(mesh.sphere) fileptr << VolMonitored  << endl;
+      fileptr << AreaMonitored  << endl;
+      fileptr << endl;
   }  
 }
 /*-----------------------*/
-// double McP::getarea(){return totarea;}
+double McP::getarea(){return AreaMonitored;}
 double McP::getvolume(){return totvol;}
 bool McP::isrestart(){return is_restart;}
 bool McP::isfluid(){return is_fluid;}

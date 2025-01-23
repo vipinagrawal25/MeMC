@@ -59,7 +59,7 @@ private:
   double totEner, totvol, bende, stretche, pre, regsole=0, electroe, vole=0;
   double linee=0;
   double selfe=0;
-  double EneMonitored, VolMonitored;
+  double EneMonitored, VolMonitored, AreaMonitored;
   double volt0;
   int acceptedmoves;
   bool sphere;

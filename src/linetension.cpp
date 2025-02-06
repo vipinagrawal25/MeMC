@@ -7,9 +7,7 @@ LTN::LTN(const MESH_p& mesh, string fname): mesh(mesh){
     string parafile = fname+"/para_file.in";
     sprintf(tmp_fname, "%s", parafile.c_str() );
     LineTensionRead(&lambda, tmp_fname);
-
-    cout << "lambda = " << lambda << endl;
-
+    
     ofstream out_;
     out_.open( fname+"/linetensionpara.out");
     out_<< "# =========== Line tension parameters ==========" << endl

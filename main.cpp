@@ -35,18 +35,15 @@ void scale_pos(Vec3d *pos, double R, int N){
 }
 
 
-double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, 
+void start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, 
     string outfolder, double radius, int &residx){
-
+        
     double Pole_zcoord;
     double ave_bond_len;
     int tdumpskip, titer;
     string resfile;
 
-    // hdf5_io_read_double( (double *)mesh.pos,  outfolder+"/input.h5", "pos" );
-    // scale_pos(mesh.pos, radius, mesh.N);
-
-    ave_bond_len = stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
+    stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
     // stretchobj.init_coefstretch(mesh);
     if(!mcobj.isrestart()) { residx = 0; }
     else{
@@ -65,7 +62,6 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj,
         hdf5_io_read_double( (double *)mesh.pos,  resfile, "pos");
         hdf5_io_read_mesh((int *) mesh.numnbr, (int *) mesh.node_nbr_list, resfile);
     }
-    return ave_bond_len;
 }
 /*----------------------------------------------------------*/
 int main(int argc, char *argv[]){
@@ -103,9 +99,8 @@ int main(int argc, char *argv[]){
     McP mcobj(bendobj, stretchobj, lipidobj, chargeobj, repulsiveobj, lineobj);
     mcobj.initMC(mesh, outfolder);
 
-    mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,
-                        mesh.radius, residx);
-    // How often do you want to compute the total energy?
+    start_simulation(mesh, mcobj, stretchobj, outfolder, mesh.radius, residx);
+    //  ow often do you want to compute the total energy?
     if (mcobj.isfluid()) recaliter=mcobj.fluidizeevery();
     else recaliter=1;
 
@@ -143,8 +138,7 @@ int main(int argc, char *argv[]){
         if (mcobj.exchange()) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
         if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
             num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
-            (*terminal) << "fluid stats " << num_bond_change << " bonds flipped" 
-            << endl;
+            (*terminal) << "fluid stats " << num_bond_change << " bonds flipped" << endl;
         }
         //
         if(!(iter % recaliter)){

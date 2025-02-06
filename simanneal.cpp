@@ -53,15 +53,14 @@ pair<double, double> get_box_dim(MESH_p mesh){
     return {xlen, ylen};
 }
 
-double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, string outfolder, 
-        double radius, int &residx){
+void start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, string outfolder, double radius, int &residx){
 
     double Pole_zcoord;
     double ave_bond_len;
     int fnumber, titer;
     string resfile;
 
-    ave_bond_len = stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
+    stretchobj.init_eval_lij_t0(mesh, mcobj.isfluid());
     if(!mcobj.isrestart()) { residx = 0; }
     else{
         fstream restartfile(outfolder+"/restartindex.txt", ios::in);
@@ -78,7 +77,6 @@ double start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, string outfold
         hdf5_io_read_double( (double *)mesh.pos,  resfile, "pos");
         hdf5_io_read_mesh((int *) mesh.numnbr, (int *) mesh.node_nbr_list, resfile);
     }
-    return ave_bond_len;
 }
 /*----------------------------------------------------------*/
 int main(int argc, char *argv[]){
@@ -130,8 +128,7 @@ int main(int argc, char *argv[]){
         terminal = &out_file;
     }
 
-    mesh.av_bond_len = start_simulation(mesh, mcobj, stretchobj, outfolder,
-                        mesh.radius, residx);
+    start_simulation(mesh, mcobj, stretchobj, outfolder, mesh.radius, residx);
     if(!mcobj.isrestart()) mcobj.wHeader(mesh,fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 

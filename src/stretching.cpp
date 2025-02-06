@@ -100,8 +100,7 @@ double STE::stretch_energy_ipart(double *lijsq, int num_nbr, int idx, int ghost)
    return 0.5*idx_ener;
 }
 /*--------------------------------------*/
-double STE::stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-            int ghost, int bdry_type, double lenth, int edge){
+double STE::stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx, int ghost, int bdry_type, double lenth, int edge){
     // Wrapper function if lijsq is not given
    double idx_ener;
    Vec3d rij;
@@ -148,7 +147,7 @@ double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
     return se*0.5e0;
 }
 /*----------------------------------------------------------------------*/
-double STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
+void STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
     /// @brief evaluates distance between neighbouring points and stores in lij_t0
     ///  @param Pos array containing co-ordinates of all the particles
    ///  @param lij_t0 initial distance between points of membrane
@@ -169,25 +168,22 @@ double STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
         lij_t0.push_back(0.0);
     }
     //
-    for(i = 0; i < mesh.N; i++){
-        num_nbr = mesh.numnbr[i];
-        cm_idx = mesh.nghst * i;
-        for(k = cm_idx; k < cm_idx + num_nbr; k++) {
-            j = mesh.node_nbr_list[k];
-            dr = diff_pbc(Pos[j], Pos[i], lenth);
-            lij_t0[k]=sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
-            sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
-            npairs++;
-        }
-    }
-    av_bond_len = sum_lij/npairs;
     if (initial_l0=="avg"||is_fluid){
         for(i = 0; i < mesh.nghst*mesh.N; i++){
-            lij_t0[i] = av_bond_len;
+            lij_t0[i] = mesh.av_bond_len;
         }
+    }else{
+    	for(i = 0; i < mesh.N; i++){
+        	num_nbr = mesh.numnbr[i];
+          	cm_idx = mesh.nghst * i;
+          	for(k = cm_idx; k < cm_idx + num_nbr; k++) {
+              j = mesh.node_nbr_list[k];
+              dr = diff_pbc(Pos[j], Pos[i], lenth);
+              lij_t0[k]=sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
+          }
+      }
     }
-    // std::copy(lij_t0.begin(), lij_t0.end(), std::ostream_iterator<double>(std::cout, "\n"));
-    return av_bond_len;
+
 }
 
 double STE::volume_ipart(Vec3d *pos, int *node_nbr,

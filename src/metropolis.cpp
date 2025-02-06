@@ -58,7 +58,12 @@ int McP::initMC(MESH_p mesh, string fname){
 
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
-   dfac = sqrt(8*pi/(2*N-4))*radius/dfac;
+   dfac=mesh.av_bond_len/dfac;
+   // cout << mesh.av_bond_len << endl;
+   // exit(1);
+   // if(mesh.sphere) 
+   //    dfac = sqrt(16*pi/(2*N-4))*radius/dfac;
+   // else dfac = sqrt(8/(2*N-4))/dfac;
    acceptedmoves = 0;
    if (mesh.ncomp==1) iexch=false;
    ofstream out_;
@@ -217,13 +222,13 @@ void McP::wHeader(const MESH_p &mesh, std::fstream &fid){
     if (repulsiveobj.isSelfRepulsive()) {log_headers+=" Repulsive_e ";}
     if (lineobj.calculate()>0){log_headers+=" Line_e ";}
     log_headers+="total_e ";
-    if (mesh.sphere){log_headers+="Volume";}
-    log_headers+="Area";
+    if (mesh.sphere){log_headers+="Volume ";}
+    log_headers+="area";
     fid << log_headers << endl;
 }
 /*-----------------------*/
 void McP::write_energy(fstream &fileptr, int itr, const MESH_p &mesh){
-  if (fileptr.is_open()){
+   if (fileptr.is_open()){
       fileptr << itr << " " << (double)acceptedmoves/(double)one_mc_iter<< "  ";
       fileptr << bende << " " << stretche << "  ";
       if (chargeobj.calculate()) fileptr << electroe << " ";
@@ -233,10 +238,9 @@ void McP::write_energy(fstream &fileptr, int itr, const MESH_p &mesh){
       if (repulsiveobj.isSelfRepulsive()) fileptr << selfe << " ";
       if (lineobj.calculate()) fileptr << linee << " ";
       fileptr << EneMonitored  << "  ";
-      if(mesh.sphere) fileptr << VolMonitored  << endl;
+      if(mesh.sphere) fileptr << VolMonitored << " ";
       fileptr << AreaMonitored  << endl;
-      fileptr << endl;
-  }  
+   }
 }
 /*-----------------------*/
 double McP::getarea(){return AreaMonitored;}
@@ -329,32 +333,27 @@ bool McP::Glauber(double DE, double activity){
   return yes;
 }
 //
-inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
-               int idx, int cm_idx, int num_nbr){
+inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
    double lijsq[num_nbr];
-   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.bdry_type, 
-                      mesh.boxlen, mesh.edge, lijsq);
+   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
    if (steobj.getyy1()!=0&&steobj.getyy2()!=0){
       energy[1] = steobj.stretch_energy_ipart(lijsq, num_nbr, idx, mesh.nghst);
    }
    if (steobj.doarea()){
-      energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.bdry_type,
-                     mesh.boxlen,mesh.edge);
+      energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.bdry_type, mesh.boxlen,mesh.edge);
    }
    return energy[0]+energy[1];
 }
 //
-inline double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
-                  int idx, int cm_idx, int num_nbr){
+inline double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
    double Etot=energy_mc_best(energy, pos, mesh, idx, cm_idx, num_nbr);
    energy[2] = chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
    return Etot + energy[2];
 }
 //
-inline double McP::energy_mc_bestchli(vector<double> &energy, Vec3d *pos, MESH_p mesh,
-                  int idx, int cm_idx, int num_nbr){
+inline double McP::energy_mc_bestchli(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
    double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr);
    energy[4] = lineobj.energy_ipart(idx);
    return Etot + energy[4];
@@ -367,8 +366,7 @@ inline double McP::energy_mc_bestchrep(vector<double> &energy, Vec3d *pos, MESH_
    return Etot + energy[3];
 }
 //
-inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
-         int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2){
+inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2){
    int *nbrcm1=mesh.node_nbr_list + cm_idx1;
    int *nbrcm2=mesh.node_nbr_list + cm_idx2;
    double lijsq1[num_nbr1];
@@ -436,6 +434,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       x_n = x_o + dxinc; y_n = y_o + dyinc; z_n = z_o + dzinc;
       //
       pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
+      //
       //
       Efintot = energy_mc_3d(Efin, pos, mesh, idx, mesh.nghst*idx, 
          mesh.numnbr[idx]);
@@ -586,10 +585,9 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
   return move;
 }
 //
-inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
-                              int idx1, int idx2, 
-                              int cm_idx1, int cm_idx2,
-                              int num_nbr1, int num_nbr2){
+inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos, 
+         MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, 
+         int num_nbr1, int num_nbr2){
    int *nbrcm1=mesh.node_nbr_list + cm_idx1;
    int *nbrcm2=mesh.node_nbr_list + cm_idx2;
    double lijsq1[num_nbr1];
@@ -628,8 +626,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
       cm_idx1 = mesh.nghst * idx1;
       num_nbr1=mesh.numnbr[idx1];
 
-      idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, 
-               nframe, mesh.N);
+      idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, nframe, mesh.N);
       cm_idx2 = mesh.nghst * idx2;
       num_nbr2=mesh.numnbr[idx2];
 
@@ -638,7 +635,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
       if (!logic){
          lip_idx1 = mesh.compA[idx1];
          lip_idx2 = mesh.compA[idx2];
-         auto tempE = chargeobj.debye_huckel_total(pos, mesh.N);
+         // auto tempE = chargeobj.debye_huckel_total(pos, mesh.N);
          Einitot = energy_mc_exch(Eini, pos, mesh,
                                  idx1, idx2, 
                                  cm_idx1, cm_idx2,

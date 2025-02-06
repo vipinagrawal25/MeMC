@@ -9,7 +9,7 @@ class STE {
 public :
     STE(const MESH_p&, std::string);
     double stretch_energy_total(Vec3d *pos, MESH_p mesh);
-    double init_eval_lij_t0(MESH_p &mesh,  bool is_fluid);
+    void init_eval_lij_t0(MESH_p &mesh,  bool is_fluid);
     double stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx, int, 
             int bdry_type, double lenth, int edge);
     double stretch_energy_ipart(double *, int, int, int);

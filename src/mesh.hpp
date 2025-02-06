@@ -27,6 +27,10 @@ struct MESH_p{
     int *compA;
     std::string distribution;
     double radius, ini_vol, zattr;
+    double sum_lij = 0.0;
+    int npairs = 0;
+    Vec3d dr;
+    int num_nbr, cm_idx, i, j, k;
     MESH_p(std::string outfolder){
         char tmp_fname[128], tmp_dist[128];;
         std::string para_file = outfolder+"/para_file.in";
@@ -45,17 +49,6 @@ struct MESH_p{
         hdf5_io_read_mesh((int *) numnbr, (int *)node_nbr_list, 
             outfolder+"/input.h5");
 
-        // for (int i = 0; i < N ; ++i){
-        //     cout << numnbr[i] << " ";
-        //     int count=0;
-        //     for (int j = 0; j < nghst; ++j){
-        //         // if(node_nbr_list[j]!=-1){
-        //         cout << node_nbr_list[nghst*i+j] << " ";
-                
-        //     }
-        //     cout << count << endl;
-        // }
-
         if (isPlaner()){
             sphere=false;
             edge = get_nstart(N, 1);
@@ -71,8 +64,8 @@ struct MESH_p{
             ini_vol = 4e0/3e0*M_PI*radius*radius*radius;
         }
 
-        if (ncomp==1) compfrac=0;
-        
+        // if (ncomp==1) compfrac=0;
+        if (compfrac==0 || compfrac==1) ncomp=1;
         if (distribution=="Random" || distribution=="random"){
             fillPoints(compA, compfrac, N);    
         }else if(distribution=="Janus" || distribution=="janus"){
@@ -81,6 +74,18 @@ struct MESH_p{
         }else if (distribution=="Point" || distribution=="point"){
             compA[0]=1;
         }
+
+        for(i = 0; i < N; i++){
+            num_nbr = numnbr[i];
+            cm_idx = nghst * i;
+            for(k = cm_idx; k < cm_idx + num_nbr; k++){
+                j = node_nbr_list[k];
+                dr = diff_pbc(pos[j], pos[i], boxlen);
+                sum_lij += sqrt(dr.x*dr.x + dr.y*dr.y + dr.z*dr.z);
+                npairs++;
+            }
+        }
+        av_bond_len = sum_lij/npairs;
     }
 
     void free(){
@@ -108,8 +113,8 @@ struct MESH_p{
         for(int i=0;i<N;i++){if(pos[i].z!=0){return false;}}
     return true;
     }
-
-    double calculateRadius() {
+    
+    double calculateRadius(){
         double sum_distances = 0.0;
     
         for (int i=0; i<N; i++) {

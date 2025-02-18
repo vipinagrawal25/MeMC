@@ -206,7 +206,7 @@ int get_nstart(int N, int bdrytype){
             nf2 = 2 * nf1;
             break;
         case 1:
-            nf2 = 4 * nf1;
+            nf2 = (int) (-5+sqrt(40*N-15))/2;
             break;
         default:
             nf2 = 0;

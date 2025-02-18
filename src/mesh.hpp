@@ -64,10 +64,10 @@ struct MESH_p{
             ini_vol = 4e0/3e0*M_PI*radius*radius*radius;
         }
 
-        // if (ncomp==1) compfrac=0;
-        if (compfrac==0 || compfrac==1) ncomp=1;
+        if (ncomp==1) compfrac=0;
+        if (compfrac==0) ncomp=1;
         if (distribution=="Random" || distribution=="random"){
-            fillPoints(compA, compfrac, N);    
+            fillPoints(compA, compfrac, N);
         }else if(distribution=="Janus" || distribution=="janus"){
             zattr=2*(compfrac-0.5) * radius;
             identify_attractive_part(compA, pos, zattr, N);

@@ -6,9 +6,13 @@
 #include <vector>
 #include "misc.hpp"
 #include <cmath>
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <utility>  // for pair, make_pair
 
 extern "C" void MeshRead(int *, int *, int *, double *, char*, char *);
-
+using namespace std;
 struct MESH_p{
     /// @brief Mesh Structure
     /// @param numnbr; number of neighbours
@@ -19,21 +23,22 @@ struct MESH_p{
     int *numnbr;
     int *node_nbr_list;
     double boxlen;
-    int edge; // storing corner index specially for periodic case.
+    int lastbdry; // storing corner index specially for periodic case.
     double av_bond_len;
     Vec3d *pos;
     int ncomp;
     double compfrac;
     int *compA;
-    std::string distribution;
+    string distribution;
     double radius, ini_vol, zattr;
     double sum_lij = 0.0;
     int npairs = 0;
     Vec3d dr;
     int num_nbr, cm_idx, i, j, k;
-    MESH_p(std::string outfolder){
+    bool pbc;
+    MESH_p(string outfolder){
         char tmp_fname[128], tmp_dist[128];;
-        std::string para_file = outfolder+"/para_file.in";
+        string para_file = outfolder+"/para_file.in";
         sprintf(tmp_fname, "%s", para_file.c_str());
 
         MeshRead(&bdry_type, &nghst, &ncomp, &compfrac, tmp_dist, tmp_fname);
@@ -48,17 +53,25 @@ struct MESH_p{
         hdf5_io_read_double( (double *)pos,  outfolder+"/input.h5", "pos" );
         hdf5_io_read_mesh((int *) numnbr, (int *)node_nbr_list, 
             outfolder+"/input.h5");
-
         if (isPlaner()){
             sphere=false;
-            edge = get_nstart(N, 1);
+            auto allbonds = make_bond_list(node_nbr_list);
+            // Currently, the code saves the last index of the boundary, assuming that the boundary indices are at the beginning.
+            lastbdry = get_bdry(allbonds);
             boxlen=get_box_dim().first*(1+1/sqrt(N));
-        }
+            pbc = determine_pbc();
+            if (pbc){
+                if(bdry_type == 0 || bdry_type == 1) {
+                    cerr << "Error: Boundary type of fixed frame (0) or channel (1) cannot be used with periodic mesh. Run this code with the right boundary condition" << endl;
+                    exit(EXIT_FAILURE);
+                }
+            }
+        }   
         else{
             sphere=true;
-            edge = -1;
+            lastbdry = -1;
             boxlen=0;
-            bdry_type=2;   // Sphere always has a pbc.
+            bdry_type=2;   // Sphere always has a free boundary condition.
             radius=calculateRadius();
             cout << "radius = " << radius << endl;
             ini_vol = 4e0/3e0*M_PI*radius*radius*radius;
@@ -119,7 +132,7 @@ struct MESH_p{
     
         for (int i=0; i<N; i++) {
             auto point=pos[i];
-            double distance = std::sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
+            double distance = sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
             sum_distances += distance;
         }
     
@@ -127,6 +140,65 @@ struct MESH_p{
         double radius = sum_distances / N;
     return radius;
     }
+    
+    set<pair<int,int>> make_bond_list(int *node_nbr){
+        set<pair<int,int>> edge_set;
+        // Determine the number of vertices from the length of neighbor_indices and nghst.    
+        for (int i = 0; i < N; ++i) {
+            int current_index = i * nghst;
+            // Loop over the valid neighbors for vertex i
+            for (int j = 0; j < numnbr[i]; ++j) {
+                int neighbor = node_nbr[current_index + j];
+                // Create the edge (i, neighbor) in sorted order
+                pair<int,int> edge = make_pair(min(i, neighbor), max(i, neighbor));
+                edge_set.insert(edge);
+            }
+        }
+        return edge_set;
+    }
+
+    int get_bdry(const set<pair<int,int>>& edge_set){
+        for (int i = 0; i < N; ++i){
+            int* nbrs = node_nbr_list + i * nghst;
+            vector<int> nbr_list(nbrs, nbrs + numnbr[i]);
+            if (is_boundary_vertex(nbr_list, edge_set) == false) return i-1;
+        }
+        return -1;
+    }
+
+    bool is_boundary_vertex(const vector<int>& nbrs, const set<pair<int,int>>& edge_set){
+        size_t n = nbrs.size();
+        if (n < 3) {
+            return true;
+        }
+        for (size_t i = 0; i < n; ++i) {
+            int n1 = nbrs[i];
+            int n2 = nbrs[(i + 1) % n];
+            // Create an edge with sorted order
+            pair<int,int> edge = make_pair(min(n1, n2), max(n1, n2));
+            if (edge_set.find(edge) == edge_set.end()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool determine_pbc(){
+        // Check if any node has a neighbor that wraps around the boundary
+        for (int i = 0; i < N; ++i) {
+            int current_index = i * nghst;
+            for (int j = 0; j < numnbr[i]; ++j) {
+                int neighbor = node_nbr_list[current_index + j];
+                if (abs(pos[i].x - pos[neighbor].x) > boxlen / 2 ||
+                    abs(pos[i].y - pos[neighbor].y) > boxlen / 2 ||
+                    abs(pos[i].z - pos[neighbor].z) > boxlen / 2) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 };
+
 #endif

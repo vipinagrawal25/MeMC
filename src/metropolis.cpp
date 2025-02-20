@@ -273,7 +273,7 @@ int del_nbr(int *nbrs, int numnbr, int idx){
   return numnbr - 1;
 }
 
-int add_nbr(int *nbrs, int numnbr, int idx, int i1, int i2) {
+int add_nbr(int *nbrs, int numnbr, int idx, int i1, int i2){
   // add int idx between i1 and i2 in the nbrs list
    int insert_here;
    bool logic;
@@ -300,7 +300,7 @@ int add_nbr(int *nbrs, int numnbr, int idx, int i1, int i2) {
 
    return numnbr + 1;
 }
-
+//
 bool McP::Boltzman(double DE, double activity){
    /// @brief Metropolis algorithm
    /// @param DE change in energy
@@ -336,13 +336,13 @@ bool McP::Glauber(double DE, double activity){
 inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
    double lijsq[num_nbr];
-   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
+   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
    if (steobj.getyy1()!=0&&steobj.getyy2()!=0){
       energy[1] = steobj.stretch_energy_ipart(lijsq, num_nbr, idx, mesh.nghst);
    }
    if (steobj.doarea()){
-      energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.bdry_type, mesh.boxlen,mesh.edge);
+      energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.bdry_type, mesh.boxlen,mesh.lastbdry);
    }
    return energy[0]+energy[1];
 }
@@ -372,9 +372,9 @@ inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mes
    double lijsq1[num_nbr1];
    double lijsq2[num_nbr1];
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm1,
-                  num_nbr1, idx1, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq1)
+                  num_nbr1, idx1, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq1)
                +beobj.bending_energy_ipart(pos, nbrcm2,
-                  num_nbr2, idx2, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq2);
+                  num_nbr2, idx2, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq2);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx1)
                +beobj.bending_energy_ipart_neighbour(pos, mesh, idx2);
    energy[2] = chargeobj.debye_huckel_ipart(pos, idx1, mesh.N)
@@ -397,6 +397,13 @@ inline double McP::energy_mc_ch(vector<double> &energy, Vec3d *pos, MESH_p mesh,
    return energy[2];
 }
 //
+int get_nstart(int lastbdry, int bdry_type){
+   int nframe;
+   if (bdry_type == 0 || bdry_type == 1) nframe = lastbdry+1;
+   else nframe = 0;
+   return nframe;
+}
+//
 int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    int i, num_nbr, cm_idx;
    double x_o, y_o, z_o, x_n, y_n, z_n;
@@ -408,7 +415,8 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    double dvol, de_vol, de_pressure;
    bool yes;
    int nframe;
-  //
+   // the code does not generate random number for the boundary
+   // if bdry_type == 0,1
    nframe = get_nstart(mesh.N, mesh.bdry_type);
    acceptedmoves = 0;
 
@@ -417,12 +425,11 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       cm_idx = idx*mesh.nghst;
       num_nbr = mesh.numnbr[idx];
       
-      Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst*idx,
-         mesh.numnbr[idx]);
+      Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst*idx, mesh.numnbr[idx]);
 
       if (mesh.sphere){
          vol_i = steobj.volume_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
-               num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);         
+               num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry);         
       }
       //
       x_o = pos[idx].x; y_o = pos[idx].y; z_o = pos[idx].z;
@@ -435,7 +442,6 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       //
       pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
       //
-      //
       Efintot = energy_mc_3d(Efin, pos, mesh, idx, mesh.nghst*idx, 
          mesh.numnbr[idx]);
       //
@@ -443,7 +449,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       if (mesh.sphere){
          vol_f = steobj.volume_ipart(pos,
                (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx,
-               mesh.bdry_type, mesh.boxlen, mesh.edge);
+               mesh.bdry_type, mesh.boxlen, mesh.lastbdry);
          dvol = vol_f - vol_i;
          if(steobj.dovol()){
             de_vol = steobj.vol_energy_change(VolMonitored, dvol);
@@ -474,7 +480,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
   return acceptedmoves;
 }
 //
-int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){ 
+int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
   int i, j, move;
   int nnbr_del1;
   int cm_idx_del1, cm_idx_del2;
@@ -495,8 +501,11 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
   double av_bond_len=mesh.av_bond_len;
   bool yes, logic;
 
-  nframe = get_nstart(mesh.N, mesh.bdry_type);
-  move = 0;
+//   nframe = get_nstart(mesh.N, mesh.bdry_type);
+   // I may be wrong but I believe that boundary can be fluid too. 
+   // even for pbc, the boundary can be fluid.
+   nframe = 0;
+   move = 0;
 
   int idxn, up, down;
 
@@ -593,9 +602,9 @@ inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos,
    double lijsq1[num_nbr1];
    double lijsq2[num_nbr2];
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm1,
-                  num_nbr1, idx1, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq1)
+                  num_nbr1, idx1, mesh.bdry_type, mesh.boxlen, mesh.lastbdry,mesh.pbc, lijsq1)
                +beobj.bending_energy_ipart(pos, nbrcm2,
-                  num_nbr2, idx2, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq2);
+                  num_nbr2, idx2, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq2);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx1)
                +beobj.bending_energy_ipart_neighbour(pos, mesh, idx2);
    return energy[0];

@@ -57,7 +57,7 @@ void STE::init_area_t0(MESH_p mesh){
         cm_idx = mesh.nghst*idx;
         area_ipart((double *) (area_t0 + cm_idx), mesh.pos,
                   (int *) (mesh.node_nbr_list + cm_idx),
-                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry);
         for (int k = cm_idx+num_nbr; k < cm_idx+mesh.nghst; ++k){
             area_t0[k] = -1;
         }
@@ -84,10 +84,10 @@ void STE::init_coefstretch(MESH_p mesh){
     }
 }
 /*--------------------------------------*/
-inline Vec3d diff(Vec3d a, Vec3d b, double lenth, int bdry_type, int idx, int edge){
-    if (bdry_type==1||idx<=edge) return a - b;
-    else    return diff_pbc(a, b, lenth);
-}
+// inline Vec3d diff(Vec3d a, Vec3d b, double lenth, int bdry_type, int idx, int edge){
+//     if (bdry_type==1||idx<=edge) return a - b;
+//     else    return diff_pbc(a, b, lenth);
+// }
 /*--------------------------------------*/
 double STE::stretch_energy_ipart(double *lijsq, int num_nbr, int idx, int ghost){
     double idx_ener=0e0, mod_rij;
@@ -100,7 +100,7 @@ double STE::stretch_energy_ipart(double *lijsq, int num_nbr, int idx, int ghost)
    return 0.5*idx_ener;
 }
 /*--------------------------------------*/
-double STE::stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx, int ghost, int bdry_type, double lenth, int edge){
+double STE::stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx, int ghost, int bdry_type, double lenth, int edge, bool pbc){
     // Wrapper function if lijsq is not given
    double idx_ener;
    Vec3d rij;
@@ -108,19 +108,18 @@ double STE::stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx
    int i,j;
    //
    idx_ener = 0e0;
-   if (bdry_type == 1 || idx>edge){
+   if (idx>edge || !pbc){
       for (i =0; i < num_nbr; i++){
         j = node_nbr[i];
         rij = pos[idx] - pos[j];
-        lijsq[i] = inner_product(rij, rij);
       }
    }else{
         for (i =0; i < num_nbr; i++){
             j = node_nbr[i];
             rij = diff_pbc(pos[idx], pos[j], lenth);
-            lijsq[i] = inner_product(rij, rij);
       }
    }
+   for (i =0; i < num_nbr; i++){lijsq[i] = inner_product(rij, rij);}
    return stretch_energy_ipart(lijsq, num_nbr, idx, ghost);
 }
 /*--------------------------------------*/
@@ -142,7 +141,7 @@ double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
         num_nbr = mesh.numnbr[idx];
         cm_idx = idx*mesh.nghst;
         se += stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.nghst, mesh.bdry_type, mesh.boxlen, mesh.edge);
+                num_nbr, idx, mesh.nghst, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc);
     }
     return se*0.5e0;
 }
@@ -183,7 +182,6 @@ void STE::init_eval_lij_t0(MESH_p &mesh, bool is_fluid){
           }
       }
     }
-
 }
 
 double STE::volume_ipart(Vec3d *pos, int *node_nbr,
@@ -250,7 +248,7 @@ double STE::volume_total(Vec3d *pos, MESH_p mesh){
         num_nbr = mesh.numnbr[idx];
         vol += volume_ipart(pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
-                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+                  num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry);
      }
      return vol/3e0;
 }
@@ -302,7 +300,7 @@ double STE::area_total(MESH_p mesh){
          num_nbr = mesh.numnbr[idx];
          area += area_ipart(mesh.pos,
                  (int *) (mesh.node_nbr_list + cm_idx),
-                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+                 num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry);
      }
      return area/3;
 }
@@ -354,7 +352,7 @@ double STE::area_energy_total(MESH_p mesh){
         cm_idx = idx*mesh.nghst;
         ae += area_energy_ipart(mesh.pos,
                 (int *)(mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry);
     }
     return ae/3e0;
 }

@@ -24,9 +24,8 @@ public :
   int getbend(int i){return coef_bend[i];}
   double getbend1(){return bend1;}
   double getbend2(){return bend2;}
-  std::function<double(Vec3d *, int *, int , int, int , double , int ,
-          double *)> bending_energy_ipart;
-  double SeungNelson(Vec3d *, int *, int , int, int , double , int , double *);
+  std::function<double(Vec3d *, int *, int , int, int , double , int , bool, double *)> bending_energy_ipart;
+  double SeungNelson(Vec3d *, int *, int , int, int , double , int , bool, double *);
   double Itzykson(Vec3d *, int *, int , int, int , double , int , double *);
   bool isexch(){return multicomp;}
   std::function<void(int, int, const MESH_p&)> exchange;

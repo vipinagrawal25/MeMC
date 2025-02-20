@@ -41,20 +41,19 @@ BE::BE(const MESH_p& mesh, std::string fname){
     if (method=="SN"){
         out_ << " bending_energy_ipart = Seung and Nelson" << endl;
         init_bendij(mesh);
-        bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, int bdry_type, double lenth, int edge, double *lijsq) -> double{return this->SeungNelson(pos, node_nbr, num_nbr, idx, bdry_type,lenth, edge,lijsq);};
+        bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, int bdry_type, double lenth, int edge, bool pbc, double *lijsq) -> double {return this->SeungNelson(pos, node_nbr, num_nbr, idx, bdry_type,lenth, edge,pbc,lijsq);};
 
         out_ << "Bond based bending" << endl;
-        exchange = [this](int idx1, int idx2, const MESH_p& mesh) -> void{
+        exchange = [this](int idx1, int idx2, const MESH_p& mesh) -> void {
         return this->exchange_bond(idx1, idx2, mesh);};
     }else{
         out_ << " bending_energy_ipart = Itzykson" << endl;
         init_coefbend(mesh.compA, mesh.N);
-        bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-            int bdry_type, double lenth, int edge, double *lijsq) -> double{
+        bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, int bdry_type, double lenth, int edge, bool pbc, double *lijsq) -> double {
         return this->Itzykson(pos, node_nbr, num_nbr, idx, bdry_type, lenth, edge,lijsq);};
 
         out_ << "Node based bending" << endl;
-        exchange = [this](int idx1, int idx2, const MESH_p& mesh) -> void{
+        exchange = [this](int idx1, int idx2, const MESH_p& mesh) -> void {
         return this->exchange_node(idx1, idx2);};
     }
 
@@ -125,7 +124,7 @@ inline double acot(double x) {
 }
 /*-------------------------------------------------*/
 double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-            int bdry_type, double lenth, int edge, double *lijsq){
+            int bdry_type, double lenth, int edge, bool pbc, double *lijsq){
     /// @brief Computes the bending energy contribution in Seung and Nelson way
     /// when the position of the ith particle changes.
     /// @param pos Array containing coordinates of all particles.
@@ -142,25 +141,28 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     double bend_ener=0;
     Vec3d xij[num_nbr], ntri[num_nbr];
     int jdx, kdx;
-    for (int j = 0; j < num_nbr; ++j){
-        jdx = node_nbr[j];
-        xij[j]=pos[idx]-pos[jdx];
-        lijsq[j]=normsq(xij[j]);
-    }
-    for (int j = 0; j < num_nbr; ++j){
+    int nbrloopind; // this will decide whether we are cicrulating over all the neighbors or not. For boundary points (except pbc) we do not circulate over all the neighbors.
+    if (idx>edge || pbc) {nbrloopind = num_nbr;}
+    else {nbrloopind = num_nbr-1;}
+
+    if (idx>edge || !pbc) for (int j = 0; j < nbrloopind; ++j){ xij[j]=pos[idx]-pos[node_nbr[j]]; }
+    if (idx < edge && pbc) for (int j = 0; j < nbrloopind; ++j){ xij[j]=diff_pbc(pos[idx],pos[node_nbr[j]], lenth); }
+
+    for (int j = 0; j < nbrloopind; ++j){lijsq[j]=normsq(xij[j]);}
+    
+    for (int j = 0; j < nbrloopind; ++j){ 
         ntri[j] = cross_product(xij[j],xij[(j+1)%num_nbr]);
-        if (norm(ntri[j]) > 1e-10) {
-            ntri[j] = ntri[j]/norm(ntri[j]);
-        }
+        if (norm(ntri[j]) > 1e-10)  ntri[j] = ntri[j]/norm(ntri[j]);
     }
-    for (int j = 0; j < num_nbr; ++j){
+    for (int j = 0; j < nbrloopind; ++j){
         bend_ener+=bendij[idx*ghost+j]*(1-inner_product(ntri[j],ntri[(j+1)%num_nbr]));
     }
-    // cout << bend_ener << endl;
     return 0.5*bend_ener;
 }
 /*-------------------------------------------------*/
 // There is a problem if we have the vertices on the polls -- zaxis.
+// the code also needs to be fixed for pbc, boundary points etc.
+// see SeungNelson function.
 double BE::Itzykson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
             int bdry_type, double lenth, int edge, double *lijsq){
     /// @brief Estimate the Bending energy contribution when ith particle 
@@ -268,7 +270,7 @@ double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
    	    double lijsq[num_nbr_j];
         be += bending_energy_ipart(pos,
             (int *) mesh.node_nbr_list + cm_idx_nbr,
-            num_nbr_j, nbr, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
+            num_nbr_j, nbr, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
     }
     return be;
 }
@@ -290,7 +292,7 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
         cm_idx = idx*mesh.nghst;
         num_nbr = mesh.numnbr[idx];
         be+= bending_energy_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge, lijsq);
+                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
     }
     return be;
 }

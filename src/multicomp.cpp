@@ -108,7 +108,7 @@ double MulCom::gradphisq_ipart(Vec3d *pos, MESH_p mesh, int idx){
     phi_ipart_neighbour(phi, mesh, idx);
     int cm_idx = mesh.nghst*idx;
     return gradphisq(phi, pos, (int *)(mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge).x;
+                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry).x;
 }
 //
 double MulCom::gradphisq_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
@@ -143,7 +143,7 @@ Vec2d MulCom::reg_soln_ipart(Vec3d *pos, MESH_p mesh, int idx){
     // phi has a size of 1+num_nbr. You can't access phi[idx]
     int cm_idx = idx*mesh.nghst;
     grad_arr = gradphisq(phi, pos, (int *)(mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.edge);
+                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry);
     out_array.x = mixenergy + epssqby2*grad_arr.x;
     out_array.y = grad_arr.y;
     // if (isnan(out_array.x)){

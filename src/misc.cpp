@@ -197,22 +197,22 @@ void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn){
 //   return sqrt(hrms/N);
 // }
 /*-----------------------------------------------*/
-int get_nstart(int N, int bdrytype){
-    static int nf1;
-    int nf2;
-    nf1 = (int) sqrt((double)N);
-    switch (bdrytype) {
-        case 0:
-            nf2 = 2 * nf1;
-            break;
-        case 1:
-            nf2 = (int) (-5+sqrt(40*N-15))/2;
-            break;
-        default:
-            nf2 = 0;
-    }
-    return nf2;;
-}
+// int get_nstart(int N, int bdrytype){
+//     static int nf1;
+//     int nf2;
+//     nf1 = (int) sqrt((double)N);
+//     switch (bdrytype) {
+//         case 0:
+//             nf2 = 2 * nf1;
+//             break;
+//         case 1:
+//             nf2 = (int) (-5+sqrt(40*N-15))/2;
+//             break;
+//         default:
+//             nf2 = 0;
+//     }
+//     return nf2;;
+// }
 /*-----------------------------------------------*/
 // just in case I need it later;
 int print_sanity(int *nbr_del1, int *nbr_del2, int *nbr_add1, int *nbr_add2,

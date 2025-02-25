@@ -42,14 +42,13 @@ def neighbours(Np, simpl):
     cumlst=np.zeros(Np+1,dtype=int)
     for i in range(0, Np):
         lst[i]=len(r1[r1==i])/2
-
     cumlst[1:] = np.cumsum(lst)
     node_neighbour = np.zeros(cumlst[-1],dtype=int)
     for i in range(0, cumlst[-1], 1):
         node_neighbour[i]=r2[2*i]
+    ncmlist = np.diff(cumlist)
+    
     return cumlst,node_neighbour
-
-
 
 def write_hdf5(R, cmlst, node_nbr,  posfile):
     if posfile.split(".")[-1]=="h5":
@@ -71,8 +70,6 @@ def read_simplices(file):
     for it in range(0,len(data)):
         simplices.append([data[it,0], data[it,1], data[it,2]])
     return simplices
-
-
 
 def new_way_nbrs(cmlist, node_nbr, nghst=12):
     new_nbr = np.zeros(nghst*Np, dtype=int)

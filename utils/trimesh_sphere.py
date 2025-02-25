@@ -6,6 +6,8 @@ import sys
 
 # Generate an icosphere with a specific subdivision level
 mesh = trimesh.creation.icosphere(subdivisions=4, radius=20.0)
+# print(mesh.faces)
+# print(mesh.vertices)
 Np = mesh.vertices.shape[0]
 sort_tri = sort_simplices(mesh.faces)
 cmlist, node_nbr = neighbours(Np, sort_tri)

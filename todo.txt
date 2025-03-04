@@ -1,0 +1,19 @@
+1)	Implement Hamiltonian term in edge flip algorithm too.
+2)	Check the time efficiency of energy_mc_3d output as tuple vs vector.
+3) 	Implement Gaussian rigidity
+4) 	Find a way to get triangles from node_nbr
+5)	Why are there nan?
+	a) Use a debugger
+6)	Merge bending and regular solution together to increase the efficiency.
+7)	There are ways to optimize monte_carlo_lipid
+8) 	Decide automatically whether it's a periodic flat mesh or not?
+9)	Write restart for lipids as well.
+10) change things from Vector to Array. The ones which are used most by the code
+	e.g. coef_bend, lipA
+11) change between outfile_terminal and cout should be automatic
+12) Should we make MESH as a class and everything else as children class of that?
+	-- Nope.
+13) May think of making mesh as a class
+14) Try to convert all the vectors to array class.
+15) In the multicomp.cpp, we compute phi[i+numnbr] every time we compute gradphisq_ipart. When we compute for neighbours, it can be done fast
+16) Make energy_mc_3d a function pointer.

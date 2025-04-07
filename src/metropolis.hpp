@@ -35,6 +35,7 @@ public :
   double getarea();
   double getvolume(); 
   void setEneVol();
+  void startcycle(int cycle);
   void updateparam(int anneal, string fname);
   bool exchange(){return iexch;}
   void wHeader(const MESH_p &mesh, std::fstream &fid);
@@ -48,8 +49,10 @@ private:
   LTN &lineobj;
   std::string algo;
   double dfac;
+  double initial_dfac;
   int one_mc_iter, tot_mc_iter, dump_skip, nexch_iter;
   double kBT;
+  double initial_kBT;
   double delta; // increment of position
   bool is_restart, iexch;
   bool is_fluid;

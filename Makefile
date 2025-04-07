@@ -1,6 +1,6 @@
-# include hosts/quest#
-# CC=mpic++ -O3 -w  -L/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/lib/ -I/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/include/
-CC=h5c++
+include hosts/quest#
+# CC=/software/mpi/openmpi-4.1.4-gcc-11.2.0/bin/mpic++ -O3 -w  -L/software/hdf5/1.12.0/lib/ -I/software/hdf5/1.12.0/include/
+# CC=h5c++
 opt=-O3
 # opt=-pg
 ifeq ($(debug), y)

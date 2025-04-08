@@ -136,40 +136,43 @@ int main(int argc, char *argv[]){
     Etot = mcobj.evalEnergy(mesh);
     mcobj.write_energy(fileptr, iter, mesh);
     
-    for(int anneal=0; anneal < 6; anneal++){
-        mcobj.updateparam(anneal, outfolder);
-        for(iter=residx; iter < mcobj.totaliter(); iter++){
-            if(iter%mcobj.dumpskip() == 0){
-                outfile=outfolder+"/snap_"+ZeroPadNumber(fnumber)+".h5";
-                hdf5_io_delete(outfile);
-                hdf5_io_write((double*) mesh.pos, 3*mesh.N, outfile, "pos");
-                hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list, mesh.N,
-                                    mesh.nghst, outfile);
-                if (mesh.ncomp>1) hdf5_io_write(mesh.compA, mesh.N, outfile, "lip");
-                fstream restartfile(outfolder+"/restartindex.txt", ios::out);
-                restartfile << iter << " " << fnumber << endl;
-                restartfile.close();
-                fnumber++;
+    for(int cycle=0; cycle < 4; cycle++){
+        mcobj.startcycle(cycle);
+        for(int anneal=0; anneal < 6; anneal++){
+            mcobj.updateparam(anneal, outfolder);
+            for(iter=residx; iter < mcobj.totaliter(); iter++){
+                if(iter%mcobj.dumpskip() == 0){
+                    outfile=outfolder+"/snap_"+ZeroPadNumber(fnumber)+".h5";
+                    hdf5_io_delete(outfile);
+                    hdf5_io_write((double*) mesh.pos, 3*mesh.N, outfile, "pos");
+                    hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list, mesh.N,
+                                        mesh.nghst, outfile);
+                    if (mesh.ncomp>1) hdf5_io_write(mesh.compA, mesh.N, outfile, "lip");
+                    fstream restartfile(outfolder+"/restartindex.txt", ios::out);
+                    restartfile << iter << " " << fnumber << endl;
+                    restartfile.close();
+                    fnumber++;
+                }
+                if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
+                num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
+                if (mcobj.exchange()) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
+                if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
+                    num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
+                    (*terminal) << "fluid stats " << num_bond_change
+                                << " bonds flipped" << endl;
+                }
+                if(!(iter % recaliter)){
+                    Etot = mcobj.evalEnergy(mesh);
+                    (*terminal) << "iter = " << iter << 
+                    "; Accepted Moves = " << (double)num_moves*100/mcobj.onemciter() 
+                    << " %;"
+                    "; Exchanged Moves = " << (double)num_exchange * 100 / mcobj.onemciter()
+                    << " %;"
+                    << " totalener = " << Etot << "; volume = " << mcobj.getvolume() << endl;
+                }
+                mcobj.write_energy(fileptr, iter, mesh);
+                residx=iter;
             }
-            if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
-            num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
-            if (mcobj.exchange()) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
-            if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){
-                num_bond_change = mcobj.monte_carlo_fluid(mesh.pos, mesh);
-                (*terminal) << "fluid stats " << num_bond_change
-                            << " bonds flipped" << endl;
-            }
-            if(!(iter % recaliter)){
-                Etot = mcobj.evalEnergy(mesh);
-                (*terminal) << "iter = " << iter << 
-                "; Accepted Moves = " << (double)num_moves*100/mcobj.onemciter() 
-                << " %;"
-                "; Exchanged Moves = " << (double)num_exchange * 100 / mcobj.onemciter()
-                << " %;"
-                << " totalener = " << Etot << "; volume = " << mcobj.getvolume() << endl;
-            }
-            mcobj.write_energy(fileptr, iter, mesh);
-            residx=iter;
         }
     }
     (*terminal) << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" << endl;

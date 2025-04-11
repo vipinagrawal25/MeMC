@@ -260,7 +260,8 @@ def make_edge_list(neighbor_indices,ncmlist,nghst=12):
 
 vertices,faces=create_arrays()
 Np = vertices.shape[0]
-print(Np)
+print(f"Number of mesh points: {Np}")
+print(f"Disc area: {np.pi * 10**2:.3f}")
 sort_tri = sort_simplices(faces)
 cmlist, node_nbr = neighbours(Np, sort_tri, vertices=vertices)
 ncmlist = np.diff(cmlist)

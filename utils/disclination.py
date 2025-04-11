@@ -7,7 +7,8 @@ import os
 from collections import defaultdict
 from collections import Counter
 
-tot_rings = 10
+tot_rings = int(sys.argv[2])
+outer_radius = 10
 def create_arrays(tot_rings=tot_rings):
     num_fold = 5     # number of connections in disclination
     Nfaces = num_fold*(tot_rings**2)                       # number of triangles  with r rings
@@ -19,18 +20,19 @@ def create_arrays(tot_rings=tot_rings):
     V[0,:]=[0,0,0]             # the center is at the origin
     count=1
     for r in range(1,tot_rings+1):
-        theta=np.linspace(0,2*np.pi,num_fold*r,endpoint=False)     # divide theta uniformly in num_fold*r parts
-        V[count:count+num_fold*r,0]=r*np.cos(theta)                # x = r cos(theta)
-        V[count:count+num_fold*r,1]=r*np.sin(theta)                # y = r sin(theta)
-        V[count:count+num_fold*r,2]=0                              # z = 0 for a flat case
+        radius = outer_radius * r / tot_rings
+        theta=np.linspace(0, 2*np.pi, num_fold*r, endpoint=False)     # divide theta uniformly in num_fold*r parts
+        V[count:count+num_fold*r,0] = radius*np.cos(theta)                # x = r cos(theta)
+        V[count:count+num_fold*r,1] = radius*np.sin(theta)                # y = r sin(theta)
+        V[count:count+num_fold*r,2] = 0                              # z = 0 for a flat case
         count += num_fold*r
 
     V=V[::-1]
     def distance(i,j): return np.linalg.norm(V[i,:]-V[j,:])
 
     # Faces
-    F=np.zeros((Nfaces,3))                                  # (v1, v2, v3, +/-1)
-    cutoff=np.sqrt(1+(2*np.pi/num_fold)**2)                 # lattice length=1
+    F=np.zeros((Nfaces,3))                                                     # (v1, v2, v3, +/-1)
+    cutoff=outer_radius/tot_rings*np.sqrt(1+(2*np.pi/num_fold)**2)             # lattice length=1
     count=0
     for i in range(Nverts-2):
         for j in range (i+1,Nverts-1):

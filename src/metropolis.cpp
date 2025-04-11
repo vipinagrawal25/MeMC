@@ -27,7 +27,7 @@ beobj(beobj), steobj(steobj), lipidobj(lipidobj), chargeobj(chargeobj),
 repulsiveobj(repulsiveobj), lineobj(lineobj){};
 
 void McP::startcycle(int cycle){
-   if (cycle > 0 && cycle < 5){
+   if (cycle >= 0 && cycle < 5){
       this -> kBT=initial_kBT;
       this -> dfac=initial_dfac;
    }

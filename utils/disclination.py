@@ -257,7 +257,6 @@ def make_edge_list(neighbor_indices,ncmlist,nghst=12):
     # Return a sorted list of edges for consistency.
     return sorted(list(edges))
 
-
 vertices,faces=create_arrays()
 Np = vertices.shape[0]
 print(f"Number of mesh points: {Np}")

@@ -20,8 +20,6 @@ BE::BE(const MESH_p& mesh, std::string fname){
     spcurv=spC1;
 
     if (mesh.ncomp==1){
-        bend2=bend1;
-        spC2=spC1;
         iGauss=false;
     }
 

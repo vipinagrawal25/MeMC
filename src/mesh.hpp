@@ -11,14 +11,14 @@
 #include <algorithm>
 #include <utility>  // for pair, make_pair
 
-extern "C" void MeshRead(int *, int *, int *, double *, char*, char *);
+extern "C" void MeshRead(int *, double *, char*, char *);
 using namespace std;
 struct MESH_p{
     /// @brief Mesh Structure
     /// @param numnbr; number of neighbours
     /// @param node_nbr_list; list of neighbours of a node
     int N, bdry_type;
-    int nghst;
+    const int nghst=12;
     bool sphere;
     int *numnbr;
     int *node_nbr_list;
@@ -41,9 +41,29 @@ struct MESH_p{
         string para_file = outfolder+"/para_file.in";
         sprintf(tmp_fname, "%s", para_file.c_str());
 
-        MeshRead(&bdry_type, &nghst, &ncomp, &compfrac, tmp_dist, tmp_fname);
+        MeshRead(&bdry_type, &compfrac, tmp_dist, tmp_fname);
         distribution=tmp_dist;
         N = (int)hdf5_io_get_Np(outfolder+"/input.h5", "pos")/3;
+        if(compfrac>1 || compfrac<0){
+            cerr << "Error: The fraction of the component should be between 0 and 1" << endl;
+            exit(EXIT_FAILURE);
+        }
+        if (distribution != "Random" && distribution != "random" &&
+            distribution != "Janus" && distribution != "janus" &&
+            distribution != "Point" && distribution != "point") {
+            cerr << "Error: The distribution type is not recognized. Please use either Random, Janus or Point." << endl;
+            exit(EXIT_FAILURE);
+        }
+
+        if(compfrac>0 && compfrac<=1 ){
+            ncomp=2;
+        }else{
+            ncomp=1;
+        }
+        if (bdry_type != 0 && bdry_type != 1 && bdry_type != 2) {
+            cerr << "Error: The boundary type is not recognized. Please use either 0, 1 or 2." << endl;
+            exit(EXIT_FAILURE);
+        }
 
         pos = new Vec3d[N];
         numnbr = new int[N];
@@ -51,22 +71,27 @@ struct MESH_p{
         compA = new int[N];
 
         hdf5_io_read_double( (double *)pos,  outfolder+"/input.h5", "pos" );
-        hdf5_io_read_mesh((int *) numnbr, (int *)node_nbr_list, 
-            outfolder+"/input.h5");
+        hdf5_io_read_mesh((int *) numnbr, (int *)node_nbr_list, outfolder+"/input.h5");
+
         if (isPlaner()){
             sphere=false;
+            // Make sure that the points are sorted such that first 4N points are boundary points and then rest are interior points
+            sort_boundary_points(node_nbr_list);
             auto allbonds = make_bond_list(node_nbr_list);
             // Currently, the code saves the last index of the boundary, assuming that the boundary indices are at the beginning.
             lastbdry = get_bdry(allbonds);
             boxlen=get_box_dim().first*(1+1/sqrt(N));
+            cout << boxlen << endl;
+            exit(1);
             pbc = determine_pbc();
             if (pbc){
                 if(bdry_type == 0 || bdry_type == 1) {
-                    cerr << "Error: Boundary type of fixed frame (0) or channel (1) cannot be used with periodic mesh. Run this code with the right boundary condition" << endl;
+                    cerr << "Error: Boundary type of fixed frame (0) or channel (1) cannot be used with periodic mesh.\n"
+                            "Run this code with the right boundary condition" << endl;
                     exit(EXIT_FAILURE);
                 }
             }
-        }   
+        }
         else{
             sphere=true;
             lastbdry = -1;
@@ -77,8 +102,9 @@ struct MESH_p{
             ini_vol = 4e0/3e0*M_PI*radius*radius*radius;
         }
 
-        if (ncomp==1) compfrac=0;
-        if (compfrac==0) ncomp=1;
+        // if (ncomp==1) compfrac=0;
+        // if (compfrac==0) ncomp=1;
+
         if (distribution=="Random" || distribution=="random"){
             fillPoints(compA, compfrac, N);
         }else if(distribution=="Janus" || distribution=="janus"){

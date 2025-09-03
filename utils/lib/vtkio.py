@@ -1,4 +1,10 @@
 import numpy as np
+import os
+import sys
+import vtk
+import vtk.util.numpy_support as VN
+import pyvista as pv
+from matplotlib.colors import LinearSegmentedColormap
 #
 def vtk_points(infile, points, triangles):
     """
@@ -26,6 +32,7 @@ def vtk_points(infile, points, triangles):
                 +str(4*num_triangles) + '\n')
         for it, tri in enumerate(triangles):
             f.write("%d %d %d %d\n" %(3, tri[0], tri[1], tri[2]))
+            
 def vtk_points_scalar(infile, points, scalar, name_scalar='points_data'):
     """
     subroutine to dump the scalars evaluated along points
@@ -43,6 +50,7 @@ def vtk_points_scalar(infile, points, scalar, name_scalar='points_data'):
             f.write('LOOKUP_TABLE default \n')
             for p in scalar:
                 f.write("%.16E\n" %(p))
+                
 def cells_cells_scalar(infile,
         triangles, 
         scalar, 
@@ -65,8 +73,6 @@ def cells_cells_scalar(infile,
             for p in scalar:
                 f.write("%16.8f\n" %(p))
 #
-
-
 def vtk_solid(infile, pts, solid_id, nnbr_solid_id, tri_solid):
     "triangulates only the solid points and dumps it in a file."
     Np = len(solid_id)
@@ -97,3 +103,19 @@ def vtkScatter(infile, pts):
         f.write("%0.5f %0.5f %0.5f 0.1\n" %(pt[0], pt[1], pt[2]))
         f.write("%0.5f %0.5f %0.5f 0.1\n" %(pt[0], pt[1], pt[2]))
     f.close()
+
+def plot_vtk(vtk_file):
+    custom_cmap = LinearSegmentedColormap.from_list("blue_white", [(1, 1, 1), (0, 0, 1)], N=256)
+    mesh = pv.read(vtk_file)
+    scalars = None
+    if mesh.point_data:
+        scalars = list(mesh.point_data.keys())[0]
+    elif mesh.cell_data:
+        scalars = list(mesh.cell_data.keys())[0]
+    # Set up the plotter
+    plotter = pv.Plotter(off_screen=False)  # Use off_screen for saving images without showing
+    plotter.add_mesh(mesh, cmap=custom_cmap, show_edges=False)
+    # Remove scalar bar if it exists
+    if plotter.scalar_bars:
+        plotter.remove_scalar_bar()
+    plotter.show()

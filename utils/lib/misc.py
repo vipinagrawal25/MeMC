@@ -1,132 +1,128 @@
 import numpy as np
 import h5py
 from numpy import linalg as LA
+import os
+import glob
+import re
+import matplotlib.pyplot as plt
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+home_dir = os.path.expanduser("~")
+plt.style.use(os.path.join(home_dir, '.matplotlibrc'))
 
-def sort_simplices(cells):
-    lsimples = len(cells)
-    nsimplices = np.asarray([], dtype=np.int32)
-    for scles in cells:
-        nscles = np.sort(scles)
-        nsimplices = np.hstack([nsimplices, nscles])
-        nsimplices = np.hstack([nsimplices, [nscles[1], nscles[2], nscles[0]]])
-        nsimplices = np.hstack([nsimplices, [nscles[2], nscles[0], nscles[1]]])
-        nsimplices = np.hstack([nsimplices, [nscles[0], nscles[2], nscles[1]]])
-        nsimplices = np.hstack([nsimplices, [nscles[1], nscles[0], nscles[2]]])
-        nsimplices = np.hstack([nsimplices, [nscles[2], nscles[1], nscles[0]]])
-    nsimplices = nsimplices.reshape(lsimples*6, 3)
-    nsimplices = np.asarray(sorted(nsimplices, key=lambda x: (x[0], x[1])))
-    return nsimplices
-
-def neighbours(Np, simpl):
-    r1=simpl[:,0]
-    r2=simpl[:,1]
-    r3=simpl[:,2]
-    lst=np.zeros(Np,dtype=int)
-    cumlst=np.zeros(Np+1,dtype=int)
-    for i in range(0, Np):
-       lst[i]=len(r1[r1==i])/2
-
-    cumlst[1:] = np.cumsum(lst)
-    node_neighbour = np.zeros(cumlst[-1],dtype=int)
-    for i in range(0, cumlst[-1], 1):
-        node_neighbour[i]=r2[2*i]
-    return cumlst,node_neighbour
-
-def sort_2Dpoints_theta(x,y):
-    len_x = len(x)
-    len_y = len(y)
-    if len_x!=len_y:
-        raise Exception("")
-    #
-    xsort=np.zeros(len_x)
-    ysort=np.zeros(len_y)
-    #
-    theta=np.arctan2(x,y)+np.pi
-    indices=np.linspace(0,len_x-1,len_x)
-    xyth=np.transpose(np.array([x,y,theta,indices]))
-    #
-    xysort = np.asarray(sorted(xyth, key=lambda x: (x[2])))
-    return xysort[:,3].astype(int),np.array([xysort[:,0],xysort[:,1]])
-
-def polar(xyz):
-    x=xyz[0]
-    y=xyz[1]
-    z=xyz[2]
-    XsqPlusYsq = x**2 + y**2
-    return np.arctan2(np.sqrt(XsqPlusYsq),z)
-
-# def rotate(vector,nhat,theta):
-#     '''rotate a vector about nhat by angle theta'''
-#     cos_thby2=np.cos(theta/2)
-#     sin_thby2=np.sin(theta/2)
-#     q=np.quaternion(cos_thby2,nhat[0]*sin_thby2,nhat[1]*sin_thby2,nhat[2]*sin_thby2)
-#     q_inv=np.quaternion(cos_thby2,-nhat[0]*sin_thby2,-nhat[1]*sin_thby2,-nhat[2]*sin_thby2)
-#     nn=vector.shape[0]
-#     rot_vec=np.zeros([nn,3])
-#     for i in range(nn):
-#         q_vec=np.quaternion(0,vector[i][0],vector[i][1],vector[i][2])
-#         rot_vec[i]=quater2vec(q*q_vec*q_inv)
-#     return rot_vec
-
-
-# Rotation matrix-based implementation
-def rotate(vector, nhat, theta):
-    '''Rotate a vector about nhat by angle theta using a rotation matrix'''
-    nhat = nhat / np.linalg.norm(nhat)
-    cos_theta = np.cos(theta)
-    sin_theta = np.sin(theta)
-    one_minus_cos = 1 - cos_theta
-    nx, ny, nz = nhat
+def lastfilename(dirname, prefix='snap_', zfill=5, suffix=".vtk"):
+    """
+    Returns the full path of the last file matching the pattern in a directory.
     
-    rotation_matrix = np.array([
-        [cos_theta + nx**2 * one_minus_cos, nx*ny*one_minus_cos - nz*sin_theta, nx*nz*one_minus_cos + ny*sin_theta],
-        [ny*nx*one_minus_cos + nz*sin_theta, cos_theta + ny**2 * one_minus_cos, ny*nz*one_minus_cos - nx*sin_theta],
-        [nz*nx*one_minus_cos - ny*sin_theta, nz*ny*one_minus_cos + nx*sin_theta, cos_theta + nz**2 * one_minus_cos]
-    ])
+    Parameters:
+        - dirname: Directory path.
+        - prefix: Prefix of the file name (default: '').
+        - zfill: Zero-padded width of the numerical identifier (default: 5).
+        - suffix: File extension (default: '.h5').
     
-    rot_vec = np.dot(vector, rotation_matrix.T)
-    return rot_vec
+    Returns:
+        - str: Full path of the last file.
+        - None: If no files are found.
+    """
+    # Normalize the directory path
+    dirname = os.path.abspath(dirname)
+    if not dirname.endswith(os.sep):
+        dirname += os.sep
 
-def quater2vec(qq,precision=1e-16):
-    if qq.w>1e-8:
-        print("# ERROR: Quaternion has non-zero scalar value.\n \
-               # Can not convert to vector.")
-        exit(1)
-    return np.array([qq.x,qq.y,qq.z])
+    # Find all files matching the pattern
+    file_pattern = f"{dirname}{prefix}*{suffix}"
+    files = glob.glob(file_pattern)
 
-def sort_nbrs(R, Np, cmlst, node_nbr):
-    zhat = np.array([0.,0.,1.])
-    for i in range(Np):
-        nbrs=node_nbr[cmlst[i]:cmlst[i+1]]  # neighbours of ith node
-        vector=R[i]
-        # I will rotate the coordinate system about this vector
-        vhat = np.cross(vector,zhat)       
-        vnorm = LA.norm(vhat)
-        # If the vector is already lying at z-axis then there is no need to rotate.
-        if vnorm>1e-16:
-            vhat = vhat/vnorm
-            theta = polar(vector)
-            # Rotate all the neighbours of a point.
-            rotated=rotate(R[nbrs],vhat,theta)
-            # Since all the voronoi cells are rotated, sort them in anticlockwise direction
-            sorted_indices = sort_2Dpoints_theta(rotated[:,0],rotated[:,1])[0]
-            node_nbr[cmlst[i]:cmlst[i+1]]=nbrs[sorted_indices]
-    return node_nbr
-    #
+    # If no files found, return None
+    if not files:
+        return None
+    try:
+        # Extract numeric parts of the file names and sort by them
+        files_sorted = sorted(
+            files,
+            key=lambda f: int(os.path.basename(f).replace(prefix, '').replace(suffix, ''))
+        )
+        # Return the last file in the sorted list
+        return files_sorted[-1]
+    except ValueError:
+        # If parsing fails, return None
+        return None
 
-def write_hdf5(R, cmlst, node_nbr, posfile):
-    hf = h5py.File(posfile,'w')
-    hf.create_dataset('pos',data=R.reshape(-1))
-    hf.create_dataset('cumu_list',data=cmlst.astype(np.int32))
-    hf.create_dataset('node_nbr',data=node_nbr.astype(np.int32))
+def extract_parameters(filename):
+    """
+    Extract charge, concentration, and fraction from the filename.
+    Example format: ch0o03_cs0o01_fr0o50.png
 
-def new_way_nbrs(Np, cmlist, node_nbr, nghst=12):
-    new_nbr = np.zeros(nghst*Np, dtype=int)
-    new_nbr[:] = -1
-    for ip in range(0, Np):
-        nbrs = node_nbr[cmlist[ip]:cmlist[ip+1]]
-        num_nbr = -(cmlist[ip]-cmlist[ip+1])
-        nnbrs = nbrs
-        st_idx = int(ip*nghst); end_idx = int(ip*nghst + num_nbr)
-        new_nbr[st_idx:end_idx] = nnbrs[:]
-    return new_nbr
+    Parameters:
+        filename (str): Filename to parse.
+
+    Returns:
+        tuple: (charge, concentration, fraction) as floats.
+    """
+    match = re.search(r'ch([\d.]+)_cs([\d.]+)_fr([\d.]+)\.png', filename.replace("o","."))
+    if match:
+        charge = float(match.group(1).replace('o', '.'))
+        conc = float(match.group(2).replace('o', '.'))
+        fraction = float(match.group(3).replace('o', '.'))
+        return charge, conc, fraction
+    return None, None, None
+
+def plot_images_on_grid(folder_path, fixed_axis, fixed_value):
+    """
+    Basic version: Plot images in a grid with two varying axes, one fixed axis.
+
+    Parameters:
+        folder_path (str): Path to the image folder.
+        fixed_axis (str): One of 'charge', 'conc', or 'frac'.
+        fixed_value (float): Fixed value for the chosen axis.
+        extract_parameters (function): Function to extract (charge, conc, frac) from filename.
+    """
+    assert fixed_axis in ['charge', 'conc', 'frac'], "Invalid fixed axis"
+
+    axis_map = {
+        'charge': ('conc', 'frac', 'ch', fixed_value),
+        'conc': ('charge', 'frac', 'cs', fixed_value),
+        'frac': ('charge', 'conc', 'fr', fixed_value),
+    }
+
+    var1, var2, fixed_prefix, val = axis_map[fixed_axis]
+    val_str = f"{fixed_prefix}{val:.2f}".replace(".", "o")
+    files = [f for f in os.listdir(folder_path) if val_str in f]
+
+    points = []
+    for file in files:
+        ch, cs, fr = extract_parameters(file)
+        if ch is not None and cs is not None and fr is not None:
+            values = {'charge': ch, 'conc': cs, 'frac': fr}
+            points.append((values[var1], values[var2]))
+
+    vals1 = sorted(set(p[0] for p in points))
+    vals2 = sorted(set(p[1] for p in points))
+
+    zoom_factor = min(1.0 / len(vals1), 1.0 / len(vals2)) * 0.65
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    ax.set_xticks(range(1, len(vals1) + 1))
+    ax.set_yticks(range(1, len(vals2) + 1))
+    ax.set_xlim([0.5, len(vals1) + 0.5])
+    ax.set_ylim([0.5, len(vals2) + 0.5])
+
+    for v1 in vals1:
+        for v2 in vals2:
+            params = {
+                'charge': fixed_value if fixed_axis == 'charge' else v1 if var1 == 'charge' else v2,
+                'conc': fixed_value if fixed_axis == 'conc' else v1 if var1 == 'conc' else v2,
+                'frac': fixed_value if fixed_axis == 'frac' else v1 if var1 == 'frac' else v2,
+            }
+            filename = "ch{:.2f}_cs{:.2f}_fr{:.2f}.png".format(
+                params['charge'], params['conc'], params['frac']
+            ).replace(".", "o")
+            filepath = os.path.join(folder_path, filename)
+            if os.path.exists(filepath):
+                img = plt.imread(filepath)
+                image_box = OffsetImage(img, zoom=zoom_factor)
+                ab = AnnotationBbox(image_box, (
+                    vals1.index(v1) + 1, vals2.index(v2) + 1), frameon=False)
+                ax.add_artist(ab)
+
+    plt.tight_layout()
+    return fig, ax  # You customize it further

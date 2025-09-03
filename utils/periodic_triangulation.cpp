@@ -199,7 +199,7 @@ void hdf5_io_write_mesh(int *cmlist,
    hid_t   file_id, dset1, dataset_id, space_id;  /* identifiers */
    herr_t  status;
    int size_mesh; 
-   hsize_t          dims; 
+   hsize_t dims; 
 
    size_mesh = ng*N;
 

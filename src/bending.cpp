@@ -18,7 +18,7 @@ BE::BE(const MESH_p& mesh, std::string fname){
     BendRead(&bend1, &bend2, &spC1, &spC2, &iGauss, tmp_fname);
     
     spcurv=spC1;
-
+    
     if (mesh.ncomp==1){
         bend2=bend1;
         spC2=spC1;
@@ -141,8 +141,10 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     double bend_ener=0;
     Vec3d xij[num_nbr], ntri[num_nbr];
     int jdx, kdx;
-    int nbrloopind; // this will decide whether we are cicrulating over all the neighbors or not. For boundary points (except pbc) we do not circulate over all the neighbors.
+    int nbrloopind;
+    // this will decide whether we are circulating over all the neighbors or not. For boundary points (except pbc) we do not circulate over all the neighbors.
     if (idx>edge || pbc) {nbrloopind = num_nbr;}
+    
     else {nbrloopind = num_nbr-1;}
 
     if (idx>edge || !pbc) for (int j = 0; j < nbrloopind; ++j){ xij[j]=pos[idx]-pos[node_nbr[j]]; }

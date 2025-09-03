@@ -23,7 +23,6 @@ ESP::ESP(const MESH_p& mesh, std::string fname){
 
     if (charge1||charge2) ical=1;
     if (charge1 != charge2) iex=1;
-    // print(mesh.compA,mesh.N);
     initcharges((int *) mesh.compA, mesh.N);
     debyelen = 0.304/sqrt(conc+tiny);
     kappa = 1/debyelen;
@@ -39,22 +38,23 @@ ESP::ESP(const MESH_p& mesh, std::string fname){
     out_.close();
 }
 
-double ESP::debye_huckel(const Vec3d p1, const Vec3d p2, double q1,
-    double q2){
+double ESP::debye_huckel(const Vec3d p1, const Vec3d p2, double q1, double q2){
     double dx = p1.x - p2.x;
     double dy = p1.y - p2.y;
     double dz = p1.z - p2.z;
     double r = sqrt(dx * dx + dy * dy + dz * dz);
     if (r == 0) return 0.0;  // Avoid self-interaction
+    if (q1 == 0.0 || q2 == 0.0) return 0.0;
     return (q1 * q2 / r) * exp(-kappa * r);
 }
 
 double ESP::debye_huckel_ipart(Vec3d *Pos, int idx, int N){
     double total_potential = 0.0;
     double charge1 = charges[idx];
-    Vec3d Pos1 = Pos[idx];
+    if (charge1 == 0.0) return 0.0;
     // omp_set_num_threads(1);
     // #pragma omp parallel for reduction(+:total_potential) schedule(dynamic)
+    Vec3d Pos1 = Pos[idx];
     for (int j = 0; j < N; ++j) {
         total_potential += debye_huckel(Pos1, Pos[j], charge1, charges[j]);
     }

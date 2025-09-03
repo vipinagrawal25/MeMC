@@ -26,19 +26,6 @@ McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj,
 beobj(beobj), steobj(steobj), lipidobj(lipidobj), chargeobj(chargeobj), 
 repulsiveobj(repulsiveobj), lineobj(lineobj){};
 
-void McP::startcycle(int cycle){
-   if (0<cycle<5){
-      this -> kBT=initial_kBT;
-      this -> dfac=initial_dfac;
-   }
-   else{
-      this -> kBT=initial_kBT*pow(10.0, -(cycle-4));
-      this -> dfac=initial_dfac/pow(2.0, (cycle-4));
-   }
-   // this -> kBT=initial_kBT*pow(10.0, -cycle);
-   // this -> dfac=initial_dfac/pow(2.0, cycle);
-}
-
 void McP::updateparam(int anneal, string fname){
    if (anneal>0){
       dfac=dfac/2;
@@ -68,12 +55,10 @@ int McP::initMC(MESH_p mesh, string fname){
    MC_listread(temp_algo, &dfac, &kBT, &is_restart,
               &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
               &fluidize_every, &fac_len_vertices, &iexch, &nexch_iter, tmp_fname);
-   
+
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
    dfac=mesh.av_bond_len/dfac;
-   initial_dfac = dfac;
-   initial_kBT = kBT;
    // cout << mesh.av_bond_len << endl;
    // exit(1);
    // if(mesh.sphere) 
@@ -87,7 +72,6 @@ int McP::initMC(MESH_p mesh, string fname){
       << " N " << N << endl
       << " dfac " << dfac << endl
       << " kbT " << kBT << endl
-      << " initial kbT " << initial_kBT << endl
       << " is_restart " << is_restart << endl
       << " is_fluid " << is_fluid << endl
       << " tot_mc_iter " << tot_mc_iter << endl
@@ -99,12 +83,12 @@ int McP::initMC(MESH_p mesh, string fname){
 
    if (chargeobj.calculate() && lineobj.calculate()){
       out_ << " Energy_mc_3d = energy_mc_bestchli "<< endl;
-      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
                   int val, int val2, int val3 ) -> double {
       return this->energy_mc_bestchli(vec, vec_ptr, mesh, val, val2, val3);};
    }else if (chargeobj.calculate() && repulsiveobj.isSelfRepulsive()){
       out_ << " Energy_mc_3d = energy_mc_bestchrep "<< endl;
-      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
                   int val, int val2, int val3 ) -> double {
       return this->energy_mc_bestchrep(vec, vec_ptr, mesh, val, val2, val3);};
    }else if(chargeobj.calculate()){
@@ -118,7 +102,7 @@ int McP::initMC(MESH_p mesh, string fname){
                            int val2, int val3) -> double {
       return this->energy_mc_best(vec , vec_ptr, mesh, val, val2, val3);};
    }
-
+   
    algo=temp_algo;
 
    if (algo=="mpolis"){
@@ -349,7 +333,7 @@ bool McP::Glauber(double DE, double activity){
   return yes;
 }
 //
-inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
+inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int    num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
    double lijsq[num_nbr];
    energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
@@ -360,7 +344,8 @@ inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mes
    if (steobj.doarea()){
       energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.bdry_type, mesh.boxlen,mesh.lastbdry);
    }
-   return energy[0]+energy[1];
+   cout << idx << "\t" << energy[0] << "\t" << energy[1] << endl;
+   return energy[0] + energy[1];
 }
 //
 inline double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
@@ -433,6 +418,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    int nframe;
    // the code does not generate random number for the boundary
    // if bdry_type == 0,1
+   // FIX THIS BUG FOR FIXED BOUNDARY CONDITION
    nframe = get_nstart(mesh.N, mesh.bdry_type);
    acceptedmoves = 0;
 
@@ -458,8 +444,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       //
       pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
       //
-      Efintot = energy_mc_3d(Efin, pos, mesh, idx, mesh.nghst*idx, 
-         mesh.numnbr[idx]);
+      Efintot = energy_mc_3d(Efin, pos, mesh, idx, mesh.nghst*idx,  mesh.numnbr[idx]);
       //
       de = Efintot - Einitot;
       if (mesh.sphere){
@@ -648,6 +633,7 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    for (int i = 0; i < nexch_iter*one_mc_iter; ++i){
       logic = true;
       idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
+
       cm_idx1 = mesh.nghst * idx1;
       num_nbr1=mesh.numnbr[idx1];
 
@@ -665,17 +651,21 @@ int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
                                  idx1, idx2, 
                                  cm_idx1, cm_idx2,
                                  num_nbr1, num_nbr2);
-
+         
+      
          mesh.compA[idx2] = lip_idx1;
          mesh.compA[idx1] = lip_idx2;
-
-         beobj.exchange(idx1,idx2,mesh); // Have you swiped the contents already?
+         beobj.exchange(idx1, idx2, mesh); // Have you swiped the contents already?
          chargeobj.exchange(idx1,idx2);
+
          Efintot = energy_mc_exch(Efin, pos, mesh,
                                  idx1, idx2,
                                  cm_idx1, cm_idx2,
                                  num_nbr1, num_nbr2);
          de = Efintot-Einitot;
+         // if (idx2 > mesh.lastbdry && idx1 < mesh.lastbdry){
+         //    cout << "electroe" << " " <<  Efin[2] - Eini[2] << endl;
+         // }
          yes = Boltzman(de, 0.0);
 
          if (yes){

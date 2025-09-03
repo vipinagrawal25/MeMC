@@ -1,10 +1,11 @@
-include hosts/quest_antara#
-# CC=/software/mpi/openmpi-4.1.4-gcc-11.2.0/bin/mpic++ -O3 -w  -L/software/hdf5/1.12.0/lib/ -I/software/hdf5/1.12.0/include/
-# CC=h5c++
-opt=-O3
+include hosts/quest
+# CC=/software/mpi/openmpi-4.1.4-gcc-11.2.0/bin/mpic++ -w  -L/software/hdf5/1.12.0/lib/ -I/software/hdf5/1.12.0/include/
+# opt=-O3
 # opt=-pg
 ifeq ($(debug), y)
 	opt = -g3  -Wall -Wpedantic
+	else
+		opt = -O3
 endif
 
 link = $(opt) -lm -std=c++17 -lhdf5 -Isrc#

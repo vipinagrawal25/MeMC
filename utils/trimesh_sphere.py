@@ -6,6 +6,8 @@ import sys
 
 # Generate an icosphere with a specific subdivision level
 mesh = trimesh.creation.icosphere(subdivisions=4, radius=20.0)
+print(mesh.vertices.shape)
+# exit(1)
 # print(mesh.faces)
 # print(mesh.vertices)
 Np = mesh.vertices.shape[0]

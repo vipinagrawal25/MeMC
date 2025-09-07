@@ -5,6 +5,7 @@
 #include "vector.hpp"
 
 void hdf5_io_read_double(double *Pos, string input_file, string);
+void hdf5_io_read_int(int*, string, string);
 void hdf5_io_read_mesh(int *cmlist, int *node_nbr, string input_file);
 void hdf5_io_write_mesh(int *cmlist,
         int *node_nbr, int N, int ng, string output_file);
@@ -13,6 +14,7 @@ void io_read_config(double *Pos, int N, char *);
 void io_dump_config_ascii(double *Pos, int N, char *);
 int hdf5_io_get_Np(string input_file, string dset_name);
 void hdf5_io_delete(string filename);
+bool hdf5_io_has_dataset(string input_file, string dset_name);
 //----//
 template <typename T>
 void hdf5_io_write(T *Pos, int N, string input_file, string dset_name){

@@ -291,39 +291,6 @@ int print_sanity(Vec3d *pos, int *nbr_del1, int *nbr_del2, int *nbr_add1,
 // }
 
 
-void fillPoints(vector<int>& points, double fraction, int N){
-    int numOnes = static_cast<int>(fraction * N);
-    int numZeros = N - numOnes;
-
-    // Fill the vector with the required number of 1s and 0s
-    points.clear(); // Clear the vector first if you're reusing it
-    for (int i = 0; i < numOnes; ++i) points.push_back(1);
-    for (int i = numOnes; i < N; ++i) points.push_back(0);
-
-    // Shuffle the vector using shuffle
-    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-    shuffle(points.begin(), points.end(), default_random_engine(seed));
-}
-
-void fillPoints(int* points, double fraction, int N){
-    int numOnes = static_cast<int>(fraction * N);
-    int numZeros = N - numOnes;
-
-    // Fill the array with the required number of 1s and 0s
-    for (int i = 0; i < numOnes; ++i) points[i] = 1;
-    for (int i = numOnes; i < N; ++i) points[i] = 0;
-
-    // Shuffle the array
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::shuffle(points, points + N, std::default_random_engine(seed));
-}
-
-void fillPoints(int* points, int N, int value){
-    // Fill the array with the required number of 1s and 0s
-    for (int i = 0; i < N; ++i) points[i] = value;
-}
-
-
 // void identify_attractive_part(int *is_attractive, Vec3d *pos,
 //     double theta_attr, int N){
 //   /// @brief identify all the points which substends theta_attr with the center

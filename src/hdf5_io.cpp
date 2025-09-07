@@ -18,32 +18,50 @@ int hdf5_io_get_Np(string input_file, string dset_name){
       exit(1);
    }
 
-   file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, 
-      H5P_DEFAULT);
-   dataset_id = H5Dopen(file_id, dset_name.c_str(),
-      H5P_DEFAULT);
+   file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+   dataset_id = H5Dopen(file_id, dset_name.c_str(), H5P_DEFAULT);
 
    hid_t dspace = H5Dget_space(dataset_id);
    const int ndims = H5Sget_simple_extent_ndims(dspace);
-   hsize_t dims[ndims];
+   hsize_t dims[2];  // Support up to 2D arrays
    H5Sget_simple_extent_dims(dspace, dims, NULL);
 
-   return dims[0];
+   int total_points;
+   if (ndims == 1) {
+       total_points = dims[0];
+   } else if (ndims == 2) {
+       total_points = dims[0] * dims[1];  // For [N,3] this will be 3N
+   } else {
+       fprintf(stderr, "Unsupported number of dimensions: %d\n", ndims);
+       H5Sclose(dspace);
+       H5Dclose(dataset_id);
+       H5Fclose(file_id);
+       exit(1);
+   }
+
+   H5Sclose(dspace);
+   H5Dclose(dataset_id);
+   H5Fclose(file_id);
+
+   return total_points;
 }
 
-void hdf5_io_read_double(double *Pos, string input_file, string dset_name){
-
+void hdf5_io_read_double(double *Data, string input_file, string dset_name){
     ///  @brief Read from the hdf5 file
-    ///  @param Pos array containing co-ordinates of all the particles
+    ///  @param Data array containing co-ordinates of all the particles
     ///  @param input_file File name from which co-ordinate will be read
+    ///  @note Handles both 1D arrays and 2D arrays with second dimension of 3
 
-    hid_t   file_id,dataset_id;  /* identifiers */
-    herr_t  status;
+    hid_t file_id, dataset_id, dataspace;  /* identifiers */
+    herr_t status;
+    int ndims;
+    hsize_t dims[2];  // Array to hold dimensions
 
     if(access(input_file.c_str(),F_OK)!=0){
         std::cerr << "Error: The configuration file does not exist\n";
         std::exit(EXIT_FAILURE);
     }
+    
     /* Open an existing file. */
     file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     if (file_id < 0) {
@@ -57,14 +75,35 @@ void hdf5_io_read_double(double *Pos, string input_file, string dset_name){
         H5Fclose(file_id);
         std::exit(EXIT_FAILURE);
     }
-    status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
-            H5P_DEFAULT, Pos);
+
+    // Get the dataspace and check dimensions
+    dataspace = H5Dget_space(dataset_id);
+    ndims = H5Sget_simple_extent_ndims(dataspace);
+    status = H5Sget_simple_extent_dims(dataspace, dims, NULL);
+    
+    if (ndims == 2) {
+        // For 2D dataset, verify second dimension is 3
+        if (dims[1] != 3) {
+            std::cerr << "Error: For 2D dataset, second dimension must be 3 for (x,y,z), got " 
+                      << dims[1] << "\n";
+            H5Sclose(dataspace);
+            H5Dclose(dataset_id);
+            H5Fclose(file_id);
+            std::exit(EXIT_FAILURE);
+        }
+    }
+
+    // Read the data
+    status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, Data);
     if (status < 0) {
         std::cerr << "Error: Failed to read dataset " << dset_name << "\n";
+        H5Sclose(dataspace);
         H5Dclose(dataset_id);
         H5Fclose(file_id);
         std::exit(EXIT_FAILURE);
     }
+
+    H5Sclose(dataspace);
     status = H5Dclose(dataset_id);
     if (status < 0) {
         std::cerr << "Error: Failed to close dataset " << dset_name << "\n";
@@ -76,8 +115,9 @@ void hdf5_io_read_double(double *Pos, string input_file, string dset_name){
 }
 
 
-void hdf5_io_write_mesh(int *cmlist, int *node_nbr, int N, int ng,
-        string output_file){
+
+
+void hdf5_io_write_mesh(int *cmlist, int *node_nbr, int N, int ng, string output_file){
 
     ///  @brief Read the mesh from the hdf5 file
     ///  @param cmlist array containing the number of neighbours for each particle  
@@ -147,7 +187,6 @@ void hdf5_io_read_mesh(int *cmlist, int *node_nbr,  string input_file){
         exit(1);
     }
 
-
   /* Open an existing file. */
   file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT); 
 
@@ -173,8 +212,6 @@ void io_read_config(double *Pos,
     ///  @brief Read position from the file; 
     /// @note The dump should be in binary
     /// 
-
-
     FILE *fid;
 
     fid = fopen(file, "rb");
@@ -182,24 +219,22 @@ void io_read_config(double *Pos,
     fclose(fid);
 }
 
-void hdf5_io_read_int(int *stick, string input_file, string dset_name){
-
+void hdf5_io_read_int(int *data, string input_file, string dset_name){
 
     hid_t   file_id, dataset_id, space_id;  /* identifiers */
     herr_t  status;
-    hsize_t          dims; 
+    hsize_t dims; 
     /* Open an existing file. */
     file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT); 
-
     dataset_id = H5Dopen(file_id, dset_name.c_str(), H5P_DEFAULT);
-    status = H5Dread(dataset_id, H5T_NATIVE_INT, 
-            H5S_ALL, H5S_ALL, H5P_DEFAULT, stick);
+    status = H5Dread(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    // Get the dataspace and check dimensions
     status = H5Dclose(dataset_id);
     status = H5Fclose(file_id);
     if(status != 0){
         fprintf(stderr, "file close failed\n");
     }
-
+    cout << "Read " << dset_name << " from " << input_file << endl;
 }
 
 // void hdf5_io_dump_int(int *stick, int N, string input_file, string dset_name){
@@ -287,4 +322,27 @@ void hdf5_io_delete(string filename){
     if (std::remove(filename.c_str()) == 0) {
         std::cout << "File deleted successfully: " << filename << std::endl;
     }
+}
+
+bool hdf5_io_has_dataset(string input_file, string dset_name) {
+    ///  @brief Check if a dataset exists in the HDF5 file
+    ///  @param input_file File name to check
+    ///  @param dset_name Name of the dataset to check for
+    ///  @return true if dataset exists, false otherwise
+
+    if(access(input_file.c_str(), F_OK) != 0) {
+        return false;  // File doesn't exist
+    }
+
+    hid_t file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (file_id < 0) {
+        return false;  // Couldn't open file
+    }
+
+    // Check if dataset exists
+    htri_t exists = H5Lexists(file_id, dset_name.c_str(), H5P_DEFAULT);
+    
+    H5Fclose(file_id);
+    
+    return exists > 0;
 }

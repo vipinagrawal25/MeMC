@@ -1,4 +1,5 @@
-include hosts/quest
+include hosts/quet_vipin
+CC=mpic++ -O3 -w  -L/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/lib/ -I/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/include/
 # CC=/software/mpi/openmpi-4.1.4-gcc-11.2.0/bin/mpic++ -w  -L/software/hdf5/1.12.0/lib/ -I/software/hdf5/1.12.0/include/
 # opt=-O3
 # opt=-pg
@@ -12,12 +13,16 @@ link = $(opt) -lm -std=c++17 -lhdf5 -Isrc#
 sources =  src/vector.cpp src/metropolis.cpp src/random_gen.cpp src/bending.cpp
 sources += src/stretching.cpp src/hdf5_io.cpp src/misc.cpp
 sources += src/electrostatics.cpp src/selfavoidance.cpp
+# Ensure mesh is compiled and linked
+sources += src/mesh.cpp
 # sources += src/misc.cpp
 #
 object = obj/vector.o obj/metropolis.o obj/random_gen.o obj/bending.o
 object += obj/stretching.o obj/hdf5_io.o obj/misc.o
 object += obj/multicomp.o
 object += obj/electrostatics.o obj/selfavoidance.o obj/linetension.o
+# Mesh object needed for MESH_p constructor/free definitions
+object += obj/mesh.o
 #
 # Find directories that match the pattern (00000, 00001, 00002, etc.)
 DIRS := $(shell find . -maxdepth 1 -type d -name '[0-9][0-9][0-9][0-9][0-9]')

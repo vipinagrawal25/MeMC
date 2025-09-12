@@ -59,11 +59,6 @@ int McP::initMC(MESH_p mesh, string fname){
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
    dfac=mesh.av_bond_len/dfac;
-   // cout << mesh.av_bond_len << endl;
-   // exit(1);
-   // if(mesh.sphere) 
-   //    dfac = sqrt(16*pi/(2*N-4))*radius/dfac;
-   // else dfac = sqrt(8/(2*N-4))/dfac;
    acceptedmoves = 0;
    if (mesh.ncomp==1) iexch=false;
    ofstream out_;
@@ -344,7 +339,7 @@ inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mes
    if (steobj.doarea()){
       energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.bdry_type, mesh.boxlen,mesh.lastbdry);
    }
-   cout << idx << "\t" << energy[0] << "\t" << energy[1] << endl;
+   // cout << idx << "\t" << energy[0] << "\t" << energy[1] << endl;
    return energy[0] + energy[1];
 }
 //

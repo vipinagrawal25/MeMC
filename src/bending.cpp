@@ -142,13 +142,13 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     Vec3d xij[num_nbr], ntri[num_nbr];
     int jdx, kdx;
     int nbrloopind;
-    // this will decide whether we are circulating over all the neighbors or not. For boundary points (except pbc) we do not circulate over all the neighbors.
+    // this will decide whether we are circulating over all the neighbors or not. For boundary points (except pbc) 
+    // we do not circulate over all the neighbors.
     if (idx>edge || pbc) {nbrloopind = num_nbr;}
-    
     else {nbrloopind = num_nbr-1;}
 
-    if (idx>edge || !pbc) for (int j = 0; j < nbrloopind; ++j){ xij[j]=pos[idx]-pos[node_nbr[j]]; }
-    if (idx < edge && pbc) for (int j = 0; j < nbrloopind; ++j){ xij[j]=diff_pbc(pos[idx],pos[node_nbr[j]], lenth); }
+    if (idx > edge || !pbc) for (int j = 0; j < nbrloopind; ++j){ xij[j]=pos[idx]-pos[node_nbr[j]]; }
+    if (idx <= edge && pbc) for (int j = 0; j < nbrloopind; ++j){ xij[j]=diff_pbc(pos[idx],pos[node_nbr[j]], lenth);}
 
     for (int j = 0; j < nbrloopind; ++j){lijsq[j]=normsq(xij[j]);}
     

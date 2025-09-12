@@ -20,26 +20,26 @@ struct MESH_p{
     /// @param numnbr; number of neighbours
     /// @param node_nbr_list; list of neighbours of a node
 
-    int N, bdry_type;
+    int N = 0, bdry_type = 0;
     const int nghst=12;
-    bool sphere;
-    int *numnbr;
-    int *node_nbr_list;
-    double boxlen;
-    int lastbdry; // storing corner index specially for periodic case.
-    double av_bond_len;
-    Vec3d *pos;
-    int *cells;
-    int ncomp;
-    double compfrac;
-    int *compA;
+    bool sphere = false;
+    int *numnbr = nullptr;
+    int *node_nbr_list = nullptr;
+    double boxlen = 0.0;
+    int lastbdry = -1; // storing corner index specially for periodic case.
+    double av_bond_len = 0.0;
+    Vec3d *pos = nullptr;
+    int *cells = nullptr;
+    int ncomp = 1;
+    double compfrac = 0.0;
+    int *compA = nullptr;
     string distribution;
-    double radius, ini_vol, zattr;
+    double radius = 0.0, ini_vol = 0.0, zattr = 0.0;
     double sum_lij = 0.0;
     int npairs = 0;
     Vec3d dr;
-    int num_nbr, cm_idx, i, j, k;
-    bool pbc;
+    int num_nbr = 0, cm_idx = 0, i = 0, j = 0, k = 0;
+    bool pbc = false;
     /// Declare all the functions here.
     bool isPlaner();
     // set<pair<int, int>> make_bond_list(int *node_nbr_list);

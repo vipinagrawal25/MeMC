@@ -127,7 +127,8 @@ int main(int argc, char *argv[]){
         out_file.open(outfolder+"/terminal.out", std::ios_base::app);
         terminal = &out_file;
     }
-
+    
+    (*terminal) << "# Simulation started on " << ctime(&timer) << endl;
     start_simulation(mesh, mcobj, stretchobj, outfolder, mesh.radius, residx);
     if(!mcobj.isrestart()) mcobj.wHeader(mesh,fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
@@ -162,10 +163,8 @@ int main(int argc, char *argv[]){
             if(!(iter % recaliter)){
                 Etot = mcobj.evalEnergy(mesh);
                 (*terminal) << "iter = " << iter << 
-                "; Accepted Moves = " << (double)num_moves*100/mcobj.onemciter() 
-                << " %;"
-                "; Exchanged Moves = " << (double)num_exchange * 100 / mcobj.onemciter()
-                << " %;"
+                "; Accepted Moves = " << (double)num_moves*100/mcobj.onemciter() << " %;"
+                "; Exchanged Moves = " << (double)num_exchange * 100 / mcobj.onemciter() << " %;"
                 << " totalener = " << Etot << "; volume = " << mcobj.getvolume() << endl;
             }
             mcobj.write_energy(fileptr, iter, mesh);
@@ -174,7 +173,6 @@ int main(int argc, char *argv[]){
     }
     (*terminal) << "Total time taken = " << (clock()-timer)/CLOCKS_PER_SEC << "s" << endl;
     if (world_size > 1) out_file.close();
-    
     fileptr.close();
     mesh.free();
     MPI_Barrier(MPI_COMM_WORLD);

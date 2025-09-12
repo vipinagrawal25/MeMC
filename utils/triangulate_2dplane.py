@@ -1,14 +1,7 @@
-#+begin_src python :session py2
-
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py, sys
 from scipy.spatial import Delaunay
-
-#+end_src
-
-
-#+begin_src python :session py2
 
 def read_data(filename):
     pos = h5py.File(filename)["pos"][()]
@@ -155,6 +148,3 @@ write_hdf5(pts_3d,  ncml, nn_nbr, sys.argv[2])
 #    ax.plot(pts_3d[nidx,0], pts_3d[nidx,1], 's', color='tab:red')
 #    fig.savefig('snap/0'+str(i)+'.png')
 #    plt.close()
-
-
-

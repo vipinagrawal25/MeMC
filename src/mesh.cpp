@@ -126,10 +126,6 @@ MESH_p::MESH_p(string outfolder){
     pos = new Vec3d[N];
     numnbr = new int[N];
     node_nbr_list = new int[N * nghst];
-
-    int *numnbr2 = new int[N];
-    int *node_nbr_list2 = new int[N * nghst];
-
     compA = new int[N];
 
     hdf5_io_read_double((double *)pos, outfolder + "/input.h5", "pos");
@@ -206,10 +202,9 @@ MESH_p::MESH_p(string outfolder){
     for (i = 0; i < N; i++){
         num_nbr = numnbr[i];
         cm_idx = nghst * i;
-        for (k = cm_idx; k < cm_idx + num_nbr; k++)
-        {
+        for (k = cm_idx; k < cm_idx + num_nbr; k++){
             j = node_nbr_list[k];
-            dr = diff_pbc(pos[j], pos[i], boxlen);
+            dr = diff_pbc(pos[i], pos[j], boxlen);
             sum_lij += sqrt(dr.x * dr.x + dr.y * dr.y + dr.z * dr.z);
             npairs++;
         }
@@ -219,13 +214,12 @@ MESH_p::MESH_p(string outfolder){
 
 void MESH_p::free(){
     // @brief This is something similar to destructor of the class.
-    // I do not remember now but there was some issue in defining the normal
-    // destructor of the structure
-    delete[] pos;
-    delete[] cells;  // Clean up cells memory
-    delete[] node_nbr_list;
-    delete[] numnbr;
-    delete[] compA;
+    // Guard against double free or uninitialized pointers.
+    if (pos) { delete[] pos; pos = nullptr; }
+    if (cells) { delete[] cells; cells = nullptr; }
+    if (node_nbr_list) { delete[] node_nbr_list; node_nbr_list = nullptr; }
+    if (numnbr) { delete[] numnbr; numnbr = nullptr; }
+    if (compA) { delete[] compA; compA = nullptr; }
 }
 
 void fillPoints(vector<int> &points, double fraction, int N){
@@ -233,7 +227,7 @@ void fillPoints(vector<int> &points, double fraction, int N){
     int numZeros = N - numOnes;
 
     // Fill the vector with the required number of 1s and 0s
-    points.clear(); // Clear the vector first if you're reusing it
+    points.clear();     // Clear the vector first if you're reusing it
     for (int i = 0; i < numOnes; ++i)
         points.push_back(1);
     for (int i = numOnes; i < N; ++i)

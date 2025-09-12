@@ -1,10 +1,6 @@
 import numpy as np
 import os
 import sys
-import vtk
-import vtk.util.numpy_support as VN
-import pyvista as pv
-from matplotlib.colors import LinearSegmentedColormap
 #
 def vtk_points(infile, points, triangles):
     """
@@ -104,18 +100,37 @@ def vtkScatter(infile, pts):
         f.write("%0.5f %0.5f %0.5f 0.1\n" %(pt[0], pt[1], pt[2]))
     f.close()
 
-def plot_vtk(vtk_file):
+def plot_vtk(vtk_file, off_screen=False):
+    """Visualize a VTK file with PyVista. Requires vtk/pyvista and a GL backend.
+
+    Set off_screen=True for headless servers (may still require EGL/OSMesa build of VTK).
+    """
+    try:
+        import pyvista as pv
+        from matplotlib.colors import LinearSegmentedColormap
+    except ImportError as e:
+        print(
+            "plot_vtk requires pyvista and matplotlib. Install them (e.g., pip install pyvista matplotlib) "+
+            "or skip plotting.",
+            file=sys.stderr,
+        )
+        return
+
     custom_cmap = LinearSegmentedColormap.from_list("blue_white", [(1, 1, 1), (0, 0, 1)], N=256)
     mesh = pv.read(vtk_file)
+    # Detect an available scalar to display
     scalars = None
     if mesh.point_data:
         scalars = list(mesh.point_data.keys())[0]
     elif mesh.cell_data:
         scalars = list(mesh.cell_data.keys())[0]
     # Set up the plotter
-    plotter = pv.Plotter(off_screen=False)  # Use off_screen for saving images without showing
-    plotter.add_mesh(mesh, cmap=custom_cmap, show_edges=False)
+    plotter = pv.Plotter(off_screen=off_screen)
+    plotter.add_mesh(mesh, cmap=custom_cmap, show_edges=False, scalars=scalars)
     # Remove scalar bar if it exists
-    if plotter.scalar_bars:
-        plotter.remove_scalar_bar()
+    if getattr(plotter, "scalar_bars", None):
+        try:
+            plotter.remove_scalar_bar()
+        except Exception:
+            pass
     plotter.show()

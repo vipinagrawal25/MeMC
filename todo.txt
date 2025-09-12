@@ -17,3 +17,4 @@
 14) Try to convert all the vectors to array class.
 15) In the multicomp.cpp, we compute phi[i+numnbr] every time we compute gradphisq_ipart. When we compute for neighbours, it can be done fast
 16) Make energy_mc_3d a function pointer.
+17) Do not pass arguments to function. When you initialize the object, assign mesh as an object.

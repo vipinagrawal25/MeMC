@@ -1,5 +1,4 @@
 &meshpara
-    bdry_cdt = 2
     comp2_frac = 1
     distribution = 'Random' !'Janus, Random are the options'
 /

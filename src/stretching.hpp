@@ -10,12 +10,12 @@ public :
     STE(const MESH_p&, std::string);
     double stretch_energy_total(Vec3d *pos, MESH_p mesh);
     void init_eval_lij_t0(MESH_p &mesh,  bool is_fluid);
-    double stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx, int, int bdry_type, double lenth, int edge, bool pbc);
+    double stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx, int, double lenth, int edge, bool pbc);
     double stretch_energy_ipart(double *, int, int, int);
     double area_total(MESH_p);
     double volume_total(Vec3d *, MESH_p );
-    double volume_ipart(Vec3d *, int *, int , int, int bdry_type, double lenth,
-            int edge );
+    double volume_ipart(Vec3d *, int *, int , int, double lenth,
+            int edge, bool pbc );
     double vol_energy_change(double volume, double dvol);
     bool doarea(){return do_area;}
     bool dovol(){return do_volume;}
@@ -25,7 +25,7 @@ public :
     double getkappa(){return Kappa;}
     void init_coefstretch(MESH_p);
     double area_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-        int bdry_type, double lenth, int edge);
+        double lenth, int edge, bool pbc);
     double area_energy_total(MESH_p mesh);
     double getyy1(){return YY1;}
     double getyy2(){return YY2;}
@@ -42,9 +42,9 @@ private:
     vector <double> HH;
     double ini_vol;
     double area_ipart(Vec3d *pos, int *node_nbr, int num_nbr, 
-                    int idx, int bdry_type, double lenth, int edge);
+                    int idx, double lenth, int edge, bool pbc);
     void area_ipart(double* area, Vec3d *pos, int *node_nbr, int num_nbr, 
-                    int idx, int bdry_type, double lenth, int edge);
+                    int idx, double lenth, int edge, bool pbc);
     void init_area_t0(MESH_p mesh);
     string initial_l0;
 };

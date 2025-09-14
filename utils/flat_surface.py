@@ -8,17 +8,10 @@ import h5py
 def generate_equidistant_points_2d(x_range, y_range, num_points_x, num_points_y):
     x_min, x_max = x_range
     y_min, y_max = y_range
-
-    # Create 1D arrays of x and y coordinates
     x_coords = np.linspace(x_min, x_max, num_points_x)
     y_coords = np.linspace(y_min, y_max, num_points_y)
-
-    # Create a 2D grid of points
     xx, yy = np.meshgrid(x_coords, y_coords)
-
-    # Stack x and y coordinates into a single array
     points = np.column_stack((xx.ravel(), yy.ravel()))
-
     return points
 
 def generate_vertex_neighbors(faces, num_vertices):
@@ -32,17 +25,11 @@ def generate_vertex_neighbors(faces, num_vertices):
         vertex_neighbors[v1].add(v2)
         vertex_neighbors[v2].add(v0)
         vertex_neighbors[v2].add(v1)
-    
-    # Create the first array: number of neighbors for each vertex
     num_neighbors = np.array([len(neighbors) for neighbors in vertex_neighbors], dtype=np.int32)
-    
-    # Create the second array: all neighbors concatenated in 1D
     all_neighbors = []
     for neighbors_set in vertex_neighbors:
-        all_neighbors.extend(sorted(list(neighbors_set)))
-    
+        all_neighbors.extend(sorted(list(neighbors_set)))    
     all_neighbors = np.array(all_neighbors, dtype=np.int32)
-    
     return num_neighbors, all_neighbors
 
 def sort_simplices(cells):
@@ -115,12 +102,26 @@ def new_way_nbrs(cmlist, node_nbr, nghst=12):
         new_nbr[st_idx:end_idx] = nnbrs[:]
     return new_nbr
 
+def save_cell_dataset(dataset, filename):
+    if not filename.endswith('.h5'):
+        filename = filename + '.h5'
+
+    # Open in append mode to preserve existing datasets
+    with h5py.File(filename, 'a') as hf:
+        # Check if 'cells' dataset already exists and delete it if so
+        if 'cells' in hf:
+            del hf['cells']
+        # Create the new cells dataset
+        hf.create_dataset("cells", data=dataset)
+
+    print(f"Cell dataset saved to {filename}")
+
 # Example usage
 if __name__ == "__main__":
     x_range = (-10, 10)  # x-axis range
     y_range = (-10, 10)  # y-axis range
-    num_points_x = 16  # Number of points along the x-axis
-    num_points_y = 16  # Number of points along the y-axis
+    num_points_x = 48  # Number of points along the x-axis
+    num_points_y = 48  # Number of points along the y-axis
     ng=12  # max number of neighbors
 
     pts = generate_equidistant_points_2d(x_range, y_range, num_points_x, num_points_y)
@@ -138,7 +139,7 @@ if __name__ == "__main__":
     cmlist[1:] = np.cumsum(ncmlist)
     new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=ng)
     write_hdf5(vertices,  ncmlist, new_nbr, sys.argv[1])
-
+    save_cell_dataset(faces, sys.argv[1])
 
     # ncmlist = np.diff(cmlist)
 

@@ -61,6 +61,8 @@ int McP::initMC(MESH_p mesh, string fname){
    dfac=mesh.av_bond_len/dfac;
    acceptedmoves = 0;
    if (mesh.ncomp==1) iexch=false;
+   if (!chargeobj.isexch() && !beobj.isexch() && !lineobj.calculate()) iexch=false;
+
    ofstream out_;
    out_.open( fname+"/mcpara.out" );
    out_<< "# =========== monte carlo parameters ==========" << endl
@@ -328,18 +330,17 @@ bool McP::Glauber(double DE, double activity){
   return yes;
 }
 //
-inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int    num_nbr){
+inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
    double lijsq[num_nbr];
-   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
+   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
    if (steobj.getyy1()!=0&&steobj.getyy2()!=0){
       energy[1] = steobj.stretch_energy_ipart(lijsq, num_nbr, idx, mesh.nghst);
    }
    if (steobj.doarea()){
-      energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.bdry_type, mesh.boxlen,mesh.lastbdry);
+      energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.boxlen, mesh.lastbdry, mesh.pbc);
    }
-   // cout << idx << "\t" << energy[0] << "\t" << energy[1] << endl;
    return energy[0] + energy[1];
 }
 //
@@ -368,9 +369,9 @@ inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mes
    double lijsq1[num_nbr1];
    double lijsq2[num_nbr1];
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm1,
-                  num_nbr1, idx1, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq1)
+                  num_nbr1, idx1, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq1)
                +beobj.bending_energy_ipart(pos, nbrcm2,
-                  num_nbr2, idx2, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq2);
+                  num_nbr2, idx2, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq2);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx1)
                +beobj.bending_energy_ipart_neighbour(pos, mesh, idx2);
    energy[2] = chargeobj.debye_huckel_ipart(pos, idx1, mesh.N)
@@ -414,19 +415,18 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    // the code does not generate random number for the boundary
    // if bdry_type == 0,1
    // FIX THIS BUG FOR FIXED BOUNDARY CONDITION
-   nframe = get_nstart(mesh.N, mesh.bdry_type);
+   nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
    acceptedmoves = 0;
 
    for (i = 0; i < one_mc_iter; i++) {
       int idx = RandomGenerator::intUniform(nframe, mesh.N-1);
       cm_idx = idx*mesh.nghst;
       num_nbr = mesh.numnbr[idx];
-      
-      Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst*idx, mesh.numnbr[idx]);
 
+      Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst*idx, mesh.numnbr[idx]);
       if (mesh.sphere){
          vol_i = steobj.volume_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
-               num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry);         
+               num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc);         
       }
       //
       x_o = pos[idx].x; y_o = pos[idx].y; z_o = pos[idx].z;
@@ -445,7 +445,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       if (mesh.sphere){
          vol_f = steobj.volume_ipart(pos,
                (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx,
-               mesh.bdry_type, mesh.boxlen, mesh.lastbdry);
+               mesh.boxlen, mesh.lastbdry, mesh.pbc);
          dvol = vol_f - vol_i;
          if(steobj.dovol()){
             de_vol = steobj.vol_energy_change(VolMonitored, dvol);
@@ -497,7 +497,7 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
   double av_bond_len=mesh.av_bond_len;
   bool yes, logic;
 
-//   nframe = get_nstart(mesh.N, mesh.bdry_type);
+//   nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
    // I may be wrong but I believe that boundary can be fluid too. 
    // even for pbc, the boundary can be fluid.
    nframe = 0;
@@ -598,9 +598,9 @@ inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos,
    double lijsq1[num_nbr1];
    double lijsq2[num_nbr2];
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm1,
-                  num_nbr1, idx1, mesh.bdry_type, mesh.boxlen, mesh.lastbdry,mesh.pbc, lijsq1)
+                  num_nbr1, idx1, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq1)
                +beobj.bending_energy_ipart(pos, nbrcm2,
-                  num_nbr2, idx2, mesh.bdry_type, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq2);
+                  num_nbr2, idx2, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq2);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx1)
                +beobj.bending_energy_ipart_neighbour(pos, mesh, idx2);
    return energy[0];
@@ -618,7 +618,7 @@ int McP::global_idx(int nframe, int N){
 int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
    int exchngdmoves = 0;
    int idx1, idx2, cm_idx1, cm_idx2;
-   int nframe = get_nstart(mesh.N, mesh.bdry_type);
+   int nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
    vector<double> Eini(5,0), Efin(5,0);
    bool yes, logic;
    int lip_idx1, lip_idx2, idxn, logic_break;

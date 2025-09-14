@@ -1,38 +1,36 @@
 &meshpara
-    nghst = 12
     bdry_cdt = 2
-    ncomp = 1
-    compfrac = 0
+    comp2_frac = 1
     distribution = 'Random' !'Janus, Random are the options'
 /
 
 &mcpara
     mcalgo = 'mpolis'
-    dfac = 8
+    dfac = 64
     kbt = 0.1
     is_restart = .false.
-    tot_mc_iter = 20000
+    tot_mc_iter = 20001
     dump_skip = 10000
     is_fluid = .false.
-    min_allowed_nbr = 0
-    fac_len_vertices = 0
-    fluidize_every = 0
-    iexch=.false.
-    nexch_iter=0
+    min_allowed_nbr = 4
+    fac_len_vertices = 1.3
+    fluidize_every = 1
+    iexch=.true.
+    nexch_iter=1
 /
 
 &bendpara
-    bend1 = 0.25
-    bend2 = 0.25
+    bend1 = 25
+    bend2 = 250
     spc1 = 0.0
     spc2 = 0.0
-    igauss = .false.
+    igauss = .true.
 /
 
 &stretchpara
     yy1 = 20
     yy2 = 20
-    initial_l0="avg"    !avg, spherical are the options right now
+    initial_l0="spherical"    !avg, spherical are the options right now
     do_volume = .false.
     is_pressurized = .false.
     do_area = .false.

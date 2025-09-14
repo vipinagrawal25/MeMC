@@ -145,12 +145,13 @@ int main(int argc, char *argv[]){
                 hdf5_io_delete(outfile);
                 hdf5_io_write((double*) mesh.pos, 3*mesh.N, outfile, "pos");
                 hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list, mesh.N,
-                                    mesh.nghst, outfile);
+                                mesh.nghst, outfile);
                 if (mesh.ncomp>1) hdf5_io_write(mesh.compA, mesh.N, outfile, "lip");
                 fstream restartfile(outfolder+"/restartindex.txt", ios::out);
                 restartfile << iter << " " << fnumber << endl;
                 restartfile.close();
                 fnumber++;
+                (*terminal) << "Snapshot written to " << outfile << endl;
             }
             if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
             num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);

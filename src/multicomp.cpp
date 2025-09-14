@@ -28,7 +28,7 @@ MulCom::MulCom(const MESH_p& mesh, std::string fname){
 }
 //
 Vec2d MulCom::gradphisq(double *phi, Vec3d *pos, int *node_nbr, int num_nbr, 
-    int idx, int bdry_type, double lenth, int edge){
+    int idx, double lenth, int edge, bool pbc){
     /// @brief Per-vertex gradient estimation in DOI: 10.2312/stag.20181301
     int j, jdx, kdx, k;
     Vec3d  rk, ri, rj, rkp;
@@ -37,7 +37,7 @@ Vec2d MulCom::gradphisq(double *phi, Vec3d *pos, int *node_nbr, int num_nbr,
     ri = pos[idx];
     Vec3d gradphi;
     Vec2d grad_ar;
-    if (bdry_type==1||idx > edge){
+    if (!pbc||idx > edge){
         for (j = 0; j < num_nbr; j++){
             jdx = node_nbr[j];
             k = (j+1)%num_nbr;
@@ -108,7 +108,7 @@ double MulCom::gradphisq_ipart(Vec3d *pos, MESH_p mesh, int idx){
     phi_ipart_neighbour(phi, mesh, idx);
     int cm_idx = mesh.nghst*idx;
     return gradphisq(phi, pos, (int *)(mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry).x;
+                num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc).x;
 }
 //
 double MulCom::gradphisq_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
@@ -143,7 +143,7 @@ Vec2d MulCom::reg_soln_ipart(Vec3d *pos, MESH_p mesh, int idx){
     // phi has a size of 1+num_nbr. You can't access phi[idx]
     int cm_idx = idx*mesh.nghst;
     grad_arr = gradphisq(phi, pos, (int *)(mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.bdry_type, mesh.boxlen, mesh.lastbdry);
+                num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc);
     out_array.x = mixenergy + epssqby2*grad_arr.x;
     out_array.y = grad_arr.y;
     // if (isnan(out_array.x)){
@@ -170,7 +170,7 @@ double MulCom::reg_soln_tot(Vec3d *pos, MESH_p mesh){
     double rsfe_tot;
     Vec2d rs_ar;
     rsfe_tot = 0e0;
-    st_idx = get_nstart(mesh.N, mesh.bdry_type);
+    st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
     for(idx = st_idx; idx < mesh.N; idx++){
         cm_idx = idx*mesh.nghst;
         num_nbr = mesh.numnbr[idx];

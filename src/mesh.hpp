@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <utility>  // for pair, make_pair
 
-extern "C" void MeshRead(int *, double *, char*, char *);
+extern "C" void MeshRead(double *, char*, char *);
 
 using namespace std;
 struct MESH_p{
@@ -20,7 +20,7 @@ struct MESH_p{
     /// @param numnbr; number of neighbours
     /// @param node_nbr_list; list of neighbours of a node
 
-    int N = 0, bdry_type = 0;
+    int N = 0;
     const int nghst=12;
     bool sphere = false;
     int *numnbr = nullptr;

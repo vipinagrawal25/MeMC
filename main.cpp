@@ -118,7 +118,9 @@ int main(int argc, char *argv[]){
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 
     clock_t timer;
+    timer = clock(); // Initialize timer
     Etot = mcobj.evalEnergy(mesh);
+    iter = residx; // Initialize iter before first use
     mcobj.write_energy(fileptr, iter, mesh);
     for(iter=residx; iter < mcobj.totaliter(); iter++){
         if(iter%mcobj.dumpskip() == 0){

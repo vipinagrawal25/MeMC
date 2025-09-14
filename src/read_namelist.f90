@@ -103,9 +103,8 @@ subroutine BendRead(bend1, bend2, spC1, spC2, iGauss, parafile) bind(c, name="Be
         close(unit=200)
 end subroutine
 
-subroutine MeshRead(bdry_cdt, comp2_frac, compdist, &
+subroutine MeshRead(comp2_frac, compdist, &
 parafile) bind(c, name="MeshRead")
-    integer(kind=c_int) :: bdry_cdt
     real(kind = c_double) ::  comp2_frac
     character(kind=c_char, len=1), dimension(char_len), intent(out) :: compdist
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
@@ -113,7 +112,7 @@ parafile) bind(c, name="MeshRead")
     integer :: ierr
     character(len=char_len) :: distribution
 
-    namelist /meshpara/ bdry_cdt, comp2_frac, distribution
+    namelist /meshpara/ comp2_frac, distribution
         call convert_cstr_fstr(parafile, f_fname)
         print *, "Opening file: ", trim(f_fname)
         open(unit=200,file=f_fname,status='old',iostat=ierr)
@@ -127,31 +126,6 @@ parafile) bind(c, name="MeshRead")
         call convert_fstr_cstr(distribution, compdist)
 
 end subroutine
-
-! subroutine MeshRead(bdry_cdt, compfrac, compdist, &
-! parafile) bind(c, name="MeshRead")
-!     integer(kind=c_int) :: bdry_cdt
-!     real(kind = c_double) ::  compfrac
-!     character(kind=c_char, len=1), dimension(char_len), intent(out) :: compdist
-!     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
-!     character(len=char_len) :: f_fname
-!     integer :: ierr
-!     character(len=char_len) :: distribution
-
-!     namelist /meshpara/ bdry_cdt, compfrac, distribution
-!         call convert_cstr_fstr(parafile, f_fname)
-!         print *, "Opening file: ", trim(f_fname)
-!         open(unit=200,file=f_fname,status='old',iostat=ierr)
-!         if (ierr /= 0) then
-!             print *, "Error opening file:", trim(f_fname)
-!             stop "File not found or cannot be opened"
-!         end if
-!         read(unit=200,nml=meshpara)
-!         close(unit=200)
-
-!         call convert_fstr_cstr(distribution, compdist)
-
-! end subroutine
 
 subroutine LipidRead(iregsoln, kai, epssqby2, parafile) bind(c, name="LipidRead")
     real(kind=c_double) :: iregsoln, kai, epssqby2

@@ -14,6 +14,7 @@
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <map>
 #include <utility>
 #include "vector.hpp"
 #include <iostream>
@@ -24,53 +25,44 @@
 set<pair<int, int>> make_bond_list(int *node_nbr, int N, int nghst, int *numnbr);
 using namespace std;
 
-void get_neighbours(int *node_nbr, int *numnbr, const vector<vector<int>> &simplices, int N, int nghst){
-    // Initialize all entries in node_nbr to -1
-    fill(node_nbr, node_nbr + N * nghst, -1);
-
-    // Initialize numnbr array to 0
-    fill(numnbr, numnbr + N, 0);
-
-    // For each simplex (triangle), add neighbors for each vertex
-    for (const auto &simplex : simplices){
-        // For each vertex in the triangle, add the other two vertices as neighbors
-        for (int i = 0; i < 3; ++i){
-            int v = simplex[i];            // Current vertex
-            int v1 = simplex[(i + 1) % 3]; // Next vertex
-            int v2 = simplex[(i + 2) % 3]; // Previous vertex
-
-            // Check if v1 is already in the neighbor list of v
-            bool v1_found = false;
-            bool v2_found = false;
-            for (int j = 0; j < numnbr[v]; ++j){
-                if (node_nbr[v * nghst + j] == v1)
-                    v1_found = true;
-                if (node_nbr[v * nghst + j] == v2)
-                    v2_found = true;
-            }
-
-            // Add v1 if not already present and within limit
-            if (!v1_found && numnbr[v] < nghst){
-                node_nbr[v * nghst + numnbr[v]] = v1;
-                numnbr[v]++;
-            }
-
-            // Add v2 if not already present and within limit
-            if (!v2_found && numnbr[v] < nghst){
-                node_nbr[v * nghst + numnbr[v]] = v2;
-                numnbr[v]++;
-            }
-        }
-    }
-}
+// void get_neighbours(int *node_nbr, int *numnbr, const vector<vector<int>> &simplices, int N, int nghst){
+//     fill(node_nbr, node_nbr + N * nghst, -1);
+    
+//     fill(numnbr, numnbr + N, 0);
+//     for (const auto &simplex : simplices){
+//         for (int i = 0; i < 3; ++i){
+//             int v = simplex[i];            // Current vertex
+//             int v1 = simplex[(i + 1) % 3]; // Next vertex
+//             int v2 = simplex[(i + 2) % 3]; // Previous vertex
+//             // Check if v1 is already in the neighbor list of v
+//             bool v1_found = false;
+//             bool v2_found = false;
+//             for (int j = 0; j < numnbr[v]; ++j){
+//                 if (node_nbr[v * nghst + j] == v1)
+//                     v1_found = true;
+//                 if (node_nbr[v * nghst + j] == v2)
+//                     v2_found = true;
+//             }
+//             // Add v1 if not already present and within limit
+//             if (!v1_found && numnbr[v] < nghst){
+//                 node_nbr[v * nghst + numnbr[v]] = v1;
+//                 numnbr[v]++;
+//             }
+//             // Add v2 if not already present and within limit
+//             if (!v2_found && numnbr[v] < nghst){
+//                 node_nbr[v * nghst + numnbr[v]] = v2;
+//                 numnbr[v]++;
+//             }
+//         }
+//     }   
+// }
 
 vector<vector<int>> sort_simplices(int *cells, int num_cells){
     // Equivalent to Python's sort_simplices function
     vector<vector<int>> sorted_cells;
     sorted_cells.reserve(num_cells * 6); // Pre-allocate space for efficiency
     // For each cell, create all 6 possible orientations
-    for (int i = 0; i < num_cells; i++)
-    {
+    for (int i = 0; i < num_cells; i++){
         vector<int> scles = {cells[i * 3], cells[i * 3 + 1], cells[i * 3 + 2]};
         sort(scles.begin(), scles.end()); // Sort the original triangle vertices
         // Add all 6 possible orientations
@@ -89,7 +81,46 @@ vector<vector<int>> sort_simplices(int *cells, int num_cells){
                     (a[0] == b[0] && a[1] < b[1]) ||
                     (a[0] == b[0] && a[1] == b[1] && a[2] < b[2]);
          });
-    return sorted_cells;
+    
+    // Apply repeat_unique_pairs functionality
+    // Create pairs from first two columns and count occurrences
+    map<pair<int, int>, int> pair_counts;
+    
+    for (const auto &row : sorted_cells) {
+        if (row.size() >= 2) {
+            pair<int, int> p = make_pair(row[0], row[1]);
+            pair_counts[p]++;
+        }
+    }
+    
+    // Find unique pairs (count == 1)
+    set<pair<int, int>> unique_pairs_set;
+    for (const auto &entry : pair_counts) {
+        if (entry.second == 1) {
+            unique_pairs_set.insert(entry.first);
+        }
+    }
+    
+    // Create new result vector with both original and repeated pairs in sorted order
+    vector<vector<int>> result;
+    result.reserve(sorted_cells.size() + unique_pairs_set.size());
+    
+    for (const auto &row : sorted_cells) {
+        // Add the original row
+        result.push_back(row);
+        
+        // Check if this row's pair (first two elements) is a unique pair
+        if (row.size() >= 2) {
+            pair<int, int> current_pair = make_pair(row[0], row[1]);
+            if (unique_pairs_set.count(current_pair) > 0) {
+                // Insert the repeated pair with -1 right after this row
+                vector<int> repeated_row = {row[0], row[1], -1};
+                result.push_back(repeated_row);
+            }
+        }
+    }
+    
+    return result;
 }
 
 vector<vector<int>> remove_duplicates(vector<vector<int>> &sorted_cells){
@@ -256,85 +287,135 @@ void order_boundary_neighbors(int *node_nbr, int *numnbr, Vec3d *pos, int Nb, in
             rotate(nbrs.begin(), nbrs.end() - 1, nbrs.end());
             logic = is_all_points_on_one_side(pos[ib], pos[nbrs[0]], vec_of_nbr_points(pos, nbrs, 1, num_nbr)) && is_all_points_on_one_side(pos[ib], pos[nbrs[num_nbr - 1]], vec_of_nbr_points(pos, nbrs, 0, num_nbr - 1));
         }
+        for (int k = 0; k < num_nbr; ++k)
+            node_nbr[start + k] = nbrs[k];
         if (!logic){
             cerr << "Error: Could not order neighbors of boundary vertex " << ib << " at (" << pos[ib].x << ", " << pos[ib].y << ", " << pos[ib].z << ") with " << num_nbr << " neighbors." << endl;
             exit(EXIT_FAILURE);
         }
+
     }
 }
-
-int put_boundary_first(Vec3d *pos, int *node_nbr_list, int *numnbr, int N, int nghst, double length){
-    /// @brief This function makes sure that the boundary points are at the beginning of the list. Steps: 1) make bond list 2) identify boundary points 3) rearrange the points such that boundary points are at the beginning. 4) rearrange the neighbours accordingly.
-    /// @param pos Array of vertex positions
-    /// @param numnbr Array containing the number of neighbours for each vertex
-    /// @param node_nbr_list Array containing the list of neighbours for each vertex
-    /// @param N Total number of vertices
-    /// @param nghst Maximum number of neighbours per vertex
-    /// @return The last index of boundary vertices
-
-    auto allbonds = make_bond_list(node_nbr_list, N, nghst, numnbr);
-
-    vector<int> boundary_points;
-    vector<int> interior_points;
-    
+//
+bool is_boundary_vertex(const vector<int> &nbrs, const set<pair<int, int>> &edge_set){
+    size_t n = nbrs.size();
+    if (n < 3)
+    {
+        return true;
+    }
+    for (size_t i = 0; i < n; ++i)
+    {
+        int n1 = nbrs[i];
+        int n2 = nbrs[(i + 1) % n];
+        // Create an edge with sorted order
+        pair<int, int> edge = make_pair(min(n1, n2), max(n1, n2));
+        if (edge_set.find(edge) == edge_set.end())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+//
+set<pair<int, int>> make_bond_list(int *node_nbr, int *numnbr, int N, int nghst){
+    set<pair<int, int>> edge_set;
+    // Determine the number of vertices from the length of neighbor_indices and nghst.
+    for (int i = 0; i < N; ++i){
+        int current_index = i * nghst;
+        // Loop over the valid neighbors for vertex i
+        for (int j = 0; j < numnbr[i]; ++j)
+        {
+            int neighbor = node_nbr[current_index + j];
+            // Create the edge (i, neighbor) in sorted order
+            pair<int, int> edge = make_pair(min(i, neighbor), max(i, neighbor));
+            edge_set.insert(edge);
+        }
+    }
+    return edge_set;
+}
+//
+int get_bdry(const set<pair<int, int>> &edge_set, int *node_nbr_list, int *numnbr, int N, int nghst){
     for (int i = 0; i < N; ++i){
         int *nbrs = node_nbr_list + i * nghst;
         vector<int> nbr_list(nbrs, nbrs + numnbr[i]);
-        if (is_boundary_vertex(pos, nbr_list, allbonds, length)){
-            boundary_points.push_back(i);
-            // printf("Boundary vertex %d at (%.3f, %.3f, %.3f) with %d neighbors\n", i, pos[i].x, pos[i].y, pos[i].z, numnbr[i]);
-        }
-        else{
-            interior_points.push_back(i);
-        }
+        if (is_boundary_vertex(nbr_list, edge_set) == false)
+            return i - 1;
     }
-    // print(boundary_points);
-    // Now rearrange pos, numnbr, node_nbr_list such that boundary points are at the beginning.
-    // Sort boundary points in CCW order around their centroid to provide a consistent ordering.
-    if (!boundary_points.empty()){
-        sort_indices_ccw_by_centroid(boundary_points, pos);
-    }
-
-    vector<int> new_order;
-    new_order.insert(new_order.end(), boundary_points.begin(), boundary_points.end());
-    new_order.insert(new_order.end(), interior_points.begin(), interior_points.end());
-    
-    // Create mapping from old indices to new indices
-    vector<int> old_to_new(N);
-    for (int i = 0; i < N; ++i){
-        old_to_new[new_order[i]] = i;
-    }
-    //
-    Vec3d *new_pos = new Vec3d[N];
-    int *new_numnbr = new int[N];
-    int *new_node_nbr_list = new int[N * nghst];
-    //
-    for (int i = 0; i < N; ++i){
-        int old_index = new_order[i];
-        new_pos[i] = pos[old_index];
-        new_numnbr[i] = numnbr[old_index];
-        // Rearrange the neighbour list and update indices
-        for (int j = 0; j < nghst; ++j){
-            int old_nbr = node_nbr_list[old_index * nghst + j];
-            if (old_nbr >= 0 && old_nbr < N) {
-                new_node_nbr_list[i * nghst + j] = old_to_new[old_nbr];
-            } else {
-                new_node_nbr_list[i * nghst + j] = old_nbr; // Keep invalid indices as is
-            }
-        }
-    }
-    // // Copy back to original arrays
-    copy(new_pos, new_pos + N, pos);
-    copy(new_numnbr, new_numnbr + N, numnbr);
-    copy(new_node_nbr_list, new_node_nbr_list + N * nghst, node_nbr_list);
-    //
-    delete[] new_pos;
-    delete[] new_numnbr;
-    delete[] new_node_nbr_list;
-    // 
-    return boundary_points.empty() ? -1 : static_cast<int>(boundary_points.size()) - 1;
+    return -1;
 }
+// Get the box dimensions in x and y directions
 
+// int put_boundary_first(Vec3d *pos, int *node_nbr_list, int *numnbr, int N, int nghst, double length){
+//     /// @brief This function makes sure that the boundary points are at the beginning of the list. Steps: 1) make bond list 2) identify boundary points 3) rearrange the points such that boundary points are at the beginning. 4) rearrange the neighbours accordingly.
+//     /// @param pos Array of vertex positions
+//     /// @param numnbr Array containing the number of neighbours for each vertex
+//     /// @param node_nbr_list Array containing the list of neighbours for each vertex
+//     /// @param N Total number of vertices
+//     /// @param nghst Maximum number of neighbours per vertex
+//     /// @return The last index of boundary vertices
+
+//     auto allbonds = make_bond_list(node_nbr_list, N, nghst, numnbr);
+
+//     vector<int> boundary_points;
+//     vector<int> interior_points;
+    
+//     for (int i = 0; i < N; ++i){
+//         int *nbrs = node_nbr_list + i * nghst;
+//         vector<int> nbr_list(nbrs, nbrs + numnbr[i]);
+//         if (is_boundary_vertex(pos, nbr_list, allbonds, length)){
+//             boundary_points.push_back(i);
+//             // printf("Boundary vertex %d at (%.3f, %.3f, %.3f) with %d neighbors\n", i, pos[i].x, pos[i].y, pos[i].z, numnbr[i]);
+//         }
+//         else{
+//             interior_points.push_back(i);
+//         }
+//     }
+//     // print(boundary_points);
+//     // Now rearrange pos, numnbr, node_nbr_list such that boundary points are at the beginning.
+//     // // Sort boundary points in CCW order around their centroid to provide a consistent ordering.
+//     // if (!boundary_points.empty()){
+//     //     sort_indices_ccw_by_centroid(boundary_points, pos);
+//     // }
+
+//     vector<int> new_order;
+//     new_order.insert(new_order.end(), boundary_points.begin(), boundary_points.end());
+//     new_order.insert(new_order.end(), interior_points.begin(), interior_points.end());
+    
+//     // Create mapping from old indices to new indices
+//     vector<int> old_to_new(N);
+//     for (int i = 0; i < N; ++i){
+//         old_to_new[new_order[i]] = i;
+//     }
+//     //
+//     Vec3d *new_pos = new Vec3d[N];
+//     int *new_numnbr = new int[N];
+//     int *new_node_nbr_list = new int[N * nghst];
+//     //
+//     for (int i = 0; i < N; ++i){
+//         int old_index = new_order[i];
+//         new_pos[i] = pos[old_index];
+//         new_numnbr[i] = numnbr[old_index];
+//         // Rearrange the neighbour list and update indices
+//         for (int j = 0; j < nghst; ++j){
+//             int old_nbr = node_nbr_list[old_index * nghst + j];
+//             if (old_nbr >= 0 && old_nbr < N) {
+//                 new_node_nbr_list[i * nghst + j] = old_to_new[old_nbr];
+//             } else {
+//                 new_node_nbr_list[i * nghst + j] = old_nbr; // Keep invalid indices as is
+//             }
+//         }
+//     }
+//     // // Copy back to original arrays
+//     copy(new_pos, new_pos + N, pos);
+//     copy(new_numnbr, new_numnbr + N, numnbr);
+//     copy(new_node_nbr_list, new_node_nbr_list + N * nghst, node_nbr_list);
+//     //
+//     delete[] new_pos;
+//     delete[] new_numnbr;
+//     delete[] new_node_nbr_list;
+//     // 
+//     return boundary_points.empty() ? -1 : static_cast<int>(boundary_points.size()) - 1;
+// }
 /**
  * @brief Sort neighbors in flat (2D) configuration with periodic boundary conditions
  * @param pts Array of 2D points (assumed to have x, y coordinates)
@@ -344,7 +425,7 @@ int put_boundary_first(Vec3d *pos, int *node_nbr_list, int *numnbr, int N, int n
  * @param nghst Maximum neighbors per point
  * @param length Periodic box length for boundary condition handling
  */
-void sort_nbrs(int* node_nbr, Vec3d* pts, int Np, int* numnbr, int nghst, double length){
+void sort_nbrs(int* node_nbr, Vec3d* pts, int Np, int* numnbr, int nghst, double length) {
     for (int ip = 0; ip < Np; ++ip){
         int num_nbr = numnbr[ip];
         int start_idx = ip * nghst;
@@ -381,6 +462,57 @@ void sort_nbrs(int* node_nbr, Vec3d* pts, int Np, int* numnbr, int nghst, double
         // Update node_nbr with sorted neighbors
         for (int j = 0; j < num_nbr; ++j) {
             node_nbr[start_idx + j] = angle_nbr_pairs[j].second;
+        }
+    }
+}
+
+// generate_vertex_neighbors(node_nbr_list2, numnbr2, cells, (int)cell_N / 3, N, nghst);
+/**
+ * @brief Generate vertex neighbors from triangular faces
+ * @param faces Array of faces, each face contains 3 vertex indices
+ * @param num_faces Number of faces
+ * @param num_vertices Total number of vertices
+ * @param num_neighbors Output array containing number of neighbors for each vertex
+ * @param all_neighbors Output array containing all neighbors in flat format
+ * @return Total number of neighbor relationships
+ */
+void generate_vertex_neighbors(int *all_neighbors, int *num_neighbors, int *faces, int num_faces, int num_vertices, int nghst){
+    // int* faces, int num_faces, int num_vertices, int* num_neighbors, int* all_neighbors) {
+    // Initialize vertex neighbor sets using vector<set<int>>
+    vector<set<int>> vertex_neighbors(num_vertices);
+    
+    // For each face (triangle), add neighbor relationships
+    for (int f = 0; f < num_faces; f++) {
+        int v0 = faces[f * 3];
+        int v1 = faces[f * 3 + 1]; 
+        int v2 = faces[f * 3 + 2];
+        
+        // Each vertex in a triangle is a neighbor of the other two
+        vertex_neighbors[v0].insert(v1);
+        vertex_neighbors[v0].insert(v2);
+        vertex_neighbors[v1].insert(v0);
+        vertex_neighbors[v1].insert(v2);
+        vertex_neighbors[v2].insert(v0);
+        vertex_neighbors[v2].insert(v1);
+    }
+    
+    // // Fill num_neighbors array and count total neighbors
+    int total_neighbors = 0;
+    for (int i = 0; i < num_vertices; i++) {
+        num_neighbors[i] = static_cast<int>(vertex_neighbors[i].size());
+        // total_neighbors += num_neighbors[i];
+    }
+    
+    // Fill all_neighbors array with sorted neighbors for each vertex, pad with -1 if needed
+    for (int i = 0; i < num_vertices; i++) {
+        int j = 0;
+        for (int neighbor : vertex_neighbors[i]) {
+            all_neighbors[i * nghst + j] = neighbor;
+            ++j;
+        }
+        // Pad the rest with -1
+        for (; j < nghst; ++j) {
+            all_neighbors[i * nghst + j] = -1;
         }
     }
 }
@@ -477,5 +609,155 @@ void sort_nbrs(int* node_nbr, Vec3d* pts, int Np, int* numnbr, int nghst, double
  *             node_nbr[cmlst[i]:cmlst[i+1]]=nbrs[sorted_indices]
  *     return node_nbr
  */
+
+/**
+ * @brief Convert Python neighbours function to C++
+ * This function processes simplices to find neighboring nodes and arranges them in anticlockwise order
+ * Follows the exact Python logic: simpl is treated as having columns [r1, r2, r3] where r1 and r2 are the main edge vertices
+ * @param Np Number of points
+ * @param simpl Simplex array (3 columns: vertex1, vertex2, vertex3/-1)
+ * @param vertices Array of vertex coordinates
+ * @param nghst Maximum neighbors per vertex (default 12)
+ * @return Pair of (cumlst, new_nbr) arrays
+ */
+pair<vector<int>, vector<int>> neighbours(int Np, vector<vector<int>> &simpl, Vec3d* vertices, int nghst = 12){
+    // Extract r1 and r2 from simpl (columns 0 and 1)
+    vector<int> r1, r2;
+    r1.reserve(simpl.size());
+    r2.reserve(simpl.size());
+    
+    for (const auto &row : simpl) {
+        if (row.size() >= 2) {
+            r1.push_back(row[0]);
+            r2.push_back(row[1]);
+        }
+    }
+    
+    int num_simpl = static_cast<int>(r1.size());
+    
+    // Calculate lst array - count neighbors for each point (Python: lst[i]=len(r1[r1==i])/2)
+    vector<int> lst(Np, 0);
+    for (int i = 0; i < Np; i++) {
+        int count = 0;
+        for (int j = 0; j < num_simpl; j++) {
+            if (r1[j] == i) count++;
+        }
+        lst[i] = count / 2;  // Following Python logic exactly
+    }
+    
+    // Calculate cumulative list (Python: cumlst[1:] = np.cumsum(lst))
+    vector<int> cumlst(Np + 1, 0);
+    for (int i = 1; i <= Np; i++) {
+        cumlst[i] = cumlst[i-1] + lst[i-1];
+    }
+    
+    // Create node_neighbour array (Python: node_neighbour[i]=r2[2*i])
+    vector<int> node_neighbour(cumlst[Np]);
+    int write_idx = 0;
+    
+    // Following the Python logic: for each vertex, collect its neighbors from r2 where r1 matches
+    for (int i = 0; i < Np; i++) {
+        for (int j = 0; j < num_simpl; j += 2) {  // Python uses 2*i indexing
+            if (j < num_simpl && r1[j] == i) {
+                if (write_idx < static_cast<int>(node_neighbour.size())) {
+                    node_neighbour[write_idx] = r2[j];
+                    write_idx++;
+                }
+            }
+        }
+    }
+    
+    // Sort neighbors in anticlockwise direction (new_way_nbrs equivalent)
+    vector<int> new_nbr(Np * nghst, -1);
+    
+    for (int ip = 0; ip < Np; ip++) {
+        // Get neighbors for current point
+        vector<int> nbrs;
+        for (int j = cumlst[ip]; j < cumlst[ip+1]; j++) {
+            if (j < static_cast<int>(node_neighbour.size())) {
+                nbrs.push_back(node_neighbour[j]);
+            }
+        }
+        
+        int num_nbr = static_cast<int>(nbrs.size());
+        if (num_nbr == 0) continue;
+        
+        // Calculate angles for each neighbor
+        vector<pair<double, int>> angle_nbr_pairs;
+        for (int i = 0; i < num_nbr; i++) {
+            int nbr_idx = nbrs[i];
+            if (nbr_idx >= 0 && nbr_idx < Np) {
+                double dx = vertices[nbr_idx].x - vertices[ip].x;
+                double dy = vertices[nbr_idx].y - vertices[ip].y;
+                double angle = atan2(dy, dx);
+                
+                // Convert negative angles to positive (0 to 2π range) for consistent sorting
+                if (angle < 0) {
+                    angle += 2.0 * M_PI;
+                }
+                
+                angle_nbr_pairs.emplace_back(angle, nbr_idx);
+            }
+        }
+
+        // Sort by angle (anticlockwise)
+        sort(angle_nbr_pairs.begin(), angle_nbr_pairs.end());
+        
+        // Store sorted neighbors
+        int st_idx = ip * nghst;
+        for (int j = 0; j < static_cast<int>(angle_nbr_pairs.size()) && (st_idx + j) < Np * nghst; j++) {
+            new_nbr[st_idx + j] = angle_nbr_pairs[j].second;
+        }
+    }
+    
+    return make_pair(lst, new_nbr);
+}
+// /**
+//  * @brief Overloaded version that works with C-style 3-column integer array
+//  * @param Np Number of points
+//  * @param simpl Simplex array as int* (3 columns: vertex1, vertex2, vertex3/-1)
+//  * @param num_simpl Number of rows in simpl
+//  * @param vertices Array of vertex coordinates
+//  * @param nghst Maximum neighbors per vertex
+//  * @return Pair of (cumlst, new_nbr) arrays
+//  */
+// pair<vector<int>, vector<int>> neighbours(int Np, int* simpl, int num_simpl, Vec3d* vertices, int nghst = 12){
+//     // Convert C-style array to vector<vector<int>>
+//     vector<vector<int>> simpl_vec;
+//     simpl_vec.reserve(num_simpl);
+    
+//     for (int i = 0; i < num_simpl; i++) {
+//         vector<int> row(3);
+//         row[0] = simpl[i * 3 + 0];
+//         row[1] = simpl[i * 3 + 1]; 
+//         row[2] = simpl[i * 3 + 2];
+//         simpl_vec.push_back(row);
+//     }   
+//     // Call the main function
+//     return neighbours(Np, simpl_vec, vertices, nghst);
+// }
+/**
+ * @brief C-style interface that works with existing arrays
+ * @param Np Number of points
+ * @param simpl Simplex array (3 columns: vertex1, vertex2, vertex3/-1)
+ * @param num_simpl Number of rows in simpl
+ * @param vertices Array of vertex coordinates
+ * @param cumlst Output cumulative list array (must be pre-allocated, size Np+1)
+ * @param node_neighbour Output neighbor array (must be pre-allocated)
+ * @param nghst Maximum neighbors per vertex
+ */
+void neighbours(int *numnbr, int *node_neighbour, vector<vector<int>> &simpl, Vec3d *vertices, int Np, int nghst = 12)
+{
+    auto result = neighbours(Np, simpl, vertices, nghst);
+    // Copy cumlst
+    for (size_t i = 0; i < result.first.size(); i++) {
+        numnbr[i] = result.first[i];
+    }
+    
+    // Copy new_nbr
+    for (size_t i = 0; i < result.second.size(); i++) {
+        node_neighbour[i] = result.second[i];
+    }
+}
 
 #endif

@@ -36,13 +36,13 @@ subroutine convert_fstr_cstr(f_str, c_str)
 end subroutine
 
 subroutine MC_listread(algo, dfac, kbt, is_restart, &
-    tot_mc_iter, dump_skip, is_fluid, min_allowed_nbr, &
+    nanneal_cycle, tot_mc_iter, dump_skip, is_fluid, min_allowed_nbr, &
     fluidize_every, fac_len_vertices, iexch, nexch_iter, parafile) bind(c, name='MC_listread')
 
     use, intrinsic :: iso_c_binding
     implicit none
     
-    integer(kind=c_int) :: tot_mc_iter
+    integer(kind=c_int) :: nanneal_cycle, tot_mc_iter
     integer(kind=c_int) :: dump_skip, min_allowed_nbr
     integer(kind=c_int) :: fluidize_every, nexch_iter
     logical(kind=c_bool) :: is_restart, is_fluid, iexch
@@ -52,7 +52,7 @@ subroutine MC_listread(algo, dfac, kbt, is_restart, &
     character(len=char_len) :: f_fname
     character(len=char_len) :: Mcalgo
 
-    namelist /mcpara/ Mcalgo, dfac, kbt, is_restart, tot_mc_iter, dump_skip, &
+    namelist /mcpara/ Mcalgo, dfac, kbt, is_restart, nanneal_cycle, tot_mc_iter, dump_skip, &
     is_fluid, min_allowed_nbr, fluidize_every, fac_len_vertices, iexch, nexch_iter
 
     call convert_cstr_fstr(parafile, f_fname)

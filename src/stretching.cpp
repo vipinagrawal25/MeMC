@@ -45,13 +45,15 @@ STE::STE(const MESH_p& mesh, std::string fname){
       << " Rest l0" << initial_l0 << endl;
     out_.close();
 }
-// /*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
 void STE::init_area_t0(MESH_p mesh){
     /// @brief Compute area for each triangle
     // int Nt = 2*mbrane_para.N-4;
     int num_nbr,cm_idx, jdx, jdxp1;
     Vec3d xij, xijp1;
-    int st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
+    // int st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); 
+    // if (st_idx < 0) st_idx = 0; //safety check
+    int st_idx = 0; // Change this for fixed boundary condition
     for(int idx = st_idx; idx < mesh.N; idx++){
         num_nbr = mesh.numnbr[idx];
         cm_idx = mesh.nghst*idx;
@@ -108,12 +110,12 @@ double STE::stretch_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx
    int i,j;
    //
    idx_ener = 0e0;
-   if (idx>edge || !pbc){
-      for (i =0; i < num_nbr; i++){
+   	if (idx>edge || !pbc) {
+      for (i =0; i < num_nbr; i++) {
         j = node_nbr[i];
         rij = pos[idx] - pos[j];
-      }
-   }else{
+	  }
+   	}else{
         for (i =0; i < num_nbr; i++){
             j = node_nbr[i];
             rij = diff_pbc(pos[idx], pos[j], lenth);
@@ -134,7 +136,8 @@ double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
     int idx, st_idx;
     int num_nbr, cm_idx;
     double se;
-    st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
+    // st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
+    st_idx = 0; // Change this for fixed boundary condition
     se = 0e0;
     for(idx = st_idx; idx < mesh.N; idx++){
         /* idx = 2; */
@@ -288,21 +291,21 @@ double STE::area_ipart(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
 }
 /*----------------------------------------------------------------------*/
 double STE::area_total(MESH_p mesh){
-     int idx, st_idx;
-     int num_nbr, cm_idx;
-     double area;
-
-     st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
-     area = 0e0;
-     for(idx = st_idx; idx < mesh.N; idx++){
-         /* idx = 2; */
-         cm_idx = idx*mesh.nghst;
-         num_nbr = mesh.numnbr[idx];
-         area += area_ipart(mesh.pos,
-                 (int *) (mesh.node_nbr_list + cm_idx),
-                 num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc);
-     }
-     return area/3;
+	int idx, st_idx;
+	int num_nbr, cm_idx;
+	double area;
+    //  st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
+	st_idx = 0; // Change this for fixed boundary condition
+	area = 0e0;
+	for(idx = st_idx; idx < mesh.N; idx++){
+		/* idx = 2; */
+		cm_idx = idx*mesh.nghst;
+		num_nbr = mesh.numnbr[idx];
+		area += area_ipart(mesh.pos,
+				(int *) (mesh.node_nbr_list + cm_idx),
+				num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc);
+	}
+	return area/3;
 }
 /*---------------------------------------------------------------------*/
 void STE::area_ipart(double* area, Vec3d *pos, int *node_nbr, int num_nbr, 
@@ -345,7 +348,8 @@ double STE::area_energy_total(MESH_p mesh){
     int idx, st_idx;
     int num_nbr, cm_idx;
     double ae;
-    st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
+    // st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
+    st_idx = 0; // Change this for fixed boundary condition
     ae = 0e0;
     for(idx = st_idx; idx < mesh.N; idx++){
         num_nbr = mesh.numnbr[idx];

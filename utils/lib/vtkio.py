@@ -3,16 +3,6 @@ import os
 import sys
 #
 def vtk_points(infile, points, triangles):
-    """
-    Snippet to write data of a mesh in a specific
-    format to be able to load in visit 
-    Download visit binaries from
-    https://wci.llnl.gov/simulation/computer-codes/visit/executables
-    To visualize
-    load <output>.vtk in visit
-    in Add select subsets>domains
-    click draw in gui
-    """
     Np = np.shape(points)[0]
     num_triangles = np.shape(triangles)[0]
     ## write the headers of the file

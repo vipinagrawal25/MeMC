@@ -12,7 +12,32 @@ def generate_equidistant_points_2d(x_range, y_range, num_points_x, num_points_y)
     y_coords = np.linspace(y_min, y_max, num_points_y)
     xx, yy = np.meshgrid(x_coords, y_coords)
     points = np.column_stack((xx.ravel(), yy.ravel()))
-    return points
+
+    # Identify boundary points
+    boundary_mask = (
+        (np.isclose(points[:, 0], x_min)) |
+        (np.isclose(points[:, 0], x_max)) |
+        (np.isclose(points[:, 1], y_min)) |
+        (np.isclose(points[:, 1], y_max))
+    )
+
+    boundary_points = points[boundary_mask]
+    interior_points = points[~boundary_mask]
+
+    
+    # Optional: order boundary points counterclockwise
+    angles = np.arctan2(
+        boundary_points[:, 1] - (y_min + y_max) / 2,
+        boundary_points[:, 0] - (x_min + x_max) / 2
+    ) - np.pi/4
+
+    angles = np.where(angles < -np.pi, angles + 2*np.pi, angles)
+
+    boundary_points = boundary_points[np.argsort(angles)]
+
+    # Concatenate boundary first, then interior
+    ordered_points = np.vstack((boundary_points, interior_points))
+    return ordered_points
 
 def generate_vertex_neighbors(faces, num_vertices):
     vertex_neighbors = [set() for _ in range(num_vertices)]
@@ -120,10 +145,10 @@ def save_cell_dataset(dataset, filename):
 if __name__ == "__main__":
     x_range = (-10, 10)  # x-axis range
     y_range = (-10, 10)  # y-axis range
-    num_points_x = 48  # Number of points along the x-axis
-    num_points_y = 48  # Number of points along the y-axis
+    num_points_x = 32  # Number of points along the x-axis
+    num_points_y = 32  # Number of points along the y-axis
     ng=12  # max number of neighbors
-
+    
     pts = generate_equidistant_points_2d(x_range, y_range, num_points_x, num_points_y)
     Np = len(pts)
     pts_3d = np.zeros(shape=(Np, 3), dtype=float)
@@ -132,12 +157,15 @@ if __name__ == "__main__":
     tri = Delaunay(pts, furthest_site = False)
     faces = tri.simplices
     vertices = pts_3d
-
+    lib.write_pos_cells(vertices, faces, sys.argv[1])
+    exit(1)
+    
     # Use the new function to generate vertex neighbors
     ncmlist, node_nbr = generate_vertex_neighbors(faces, Np)
     cmlist = np.zeros(Np+1, dtype=int)
     cmlist[1:] = np.cumsum(ncmlist)
     new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=ng)
+    
     write_hdf5(vertices,  ncmlist, new_nbr, sys.argv[1])
     save_cell_dataset(faces, sys.argv[1])
 

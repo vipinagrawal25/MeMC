@@ -38,6 +38,7 @@ public :
   void startcycle(int cycle);
   void updateparam(int anneal, string fname);
   bool exchange(){return iexch;}
+  int ncycles(){return nanneal_cycle;}
   void wHeader(const MESH_p &mesh, std::fstream &fid);
   std::string initial_l0;
 private:
@@ -50,7 +51,7 @@ private:
   std::string algo;
   double dfac;
   double initial_dfac;
-  int one_mc_iter, tot_mc_iter, dump_skip, nexch_iter;
+  int one_mc_iter, tot_mc_iter, dump_skip, nexch_iter, nanneal_cycle;
   double kBT;
   double initial_kBT;
   double delta; // increment of position

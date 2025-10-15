@@ -27,9 +27,7 @@ vector<vector<int>> remove_duplicates(vector<vector<int>> &sorted_cells);
 //     node_nbr_list = (int *)calloc(nghst*N, sizeof(int));
 // }
 
-pair<double, double> MESH_p::get_box_dim()
-{
-    // Vec3d *Pos = mesh.pos;
+pair<double, double> MESH_p::get_box_dim(){
     double xmin = 1e7, xmax = -1e7, ymin = 1e7, ymax = -1e7;
     for (int i = 0; i < N; ++i){
         if (pos[i].x < xmin)
@@ -59,9 +57,7 @@ bool MESH_p::isPlaner() {
 
 double MESH_p::calculateRadius(){
     double sum_distances = 0.0;
-
-    for (int i = 0; i < N; i++)
-    {
+    for (int i = 0; i < N; i++){
         auto point = pos[i];
         double distance = sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
         sum_distances += distance;
@@ -74,31 +70,28 @@ double MESH_p::calculateRadius(){
 
 bool MESH_p::determine_pbc(){
     // Check if any node has a neighbor that wraps around the boundary
-    for (int i = 0; i < N; ++i)
-    {
+    for (int i = 0; i < N; ++i){
         int current_index = i * nghst;
-        for (int j = 0; j < numnbr[i]; ++j)
-        {
+        for (int j = 0; j < numnbr[i]; ++j){
             int neighbor = node_nbr_list[current_index + j];
             if (abs(pos[i].x - pos[neighbor].x) > boxlen / 2 ||
                 abs(pos[i].y - pos[neighbor].y) > boxlen / 2 ||
-                abs(pos[i].z - pos[neighbor].z) > boxlen / 2)
-            {
+                abs(pos[i].z - pos[neighbor].z) > boxlen / 2){
                 return true;
             }
         }
     }
     return false;
 }
-
+//
 MESH_p::MESH_p(string outfolder){
     char tmp_fname[128], tmp_dist[128];
     string para_file = outfolder + "/para_file.in";
     sprintf(tmp_fname, "%s", para_file.c_str());
 
-    MeshRead(&bdry_type, &compfrac, tmp_dist, tmp_fname);
+    MeshRead(&compfrac, tmp_dist, tmp_fname);
     distribution = tmp_dist;
-    N = (int) hdf5_io_get_Np(outfolder + "/input.h5", "pos") / 3;
+    N = (int) hdf5_io_get_Np(outfolder + "/input.h5", "pos")/3;
     if (compfrac > 1 || compfrac < 0){
         cerr << "Error: The fraction of the component should be between 0 and 1" << endl;
         exit(EXIT_FAILURE);
@@ -110,31 +103,23 @@ MESH_p::MESH_p(string outfolder){
         cerr << "Error: The distribution type is not recognized. Please use either Random, Janus or Point." << endl;
         exit(EXIT_FAILURE);
     }
-
+    //
     if (compfrac > 0 && compfrac <= 1){
         ncomp = 2;
-    }
-    else{
+    }else{
         ncomp = 1;
     }
-
-    if (bdry_type != 0 && bdry_type != 1 && bdry_type != 2){
-        cerr << "Error: The boundary type is not recognized. Please use either 0, 1 or 2." << endl;
-        exit(EXIT_FAILURE);
-    }
-
+    //
     pos = new Vec3d[N];
     numnbr = new int[N];
     node_nbr_list = new int[N * nghst];
     compA = new int[N];
-
+    //
     hdf5_io_read_double((double *)pos, outfolder + "/input.h5", "pos");
     if (isPlaner()){
         sphere = false;
-        //
         if (hdf5_io_has_dataset(outfolder + "/input.h5", "cumu_list") &&
             hdf5_io_has_dataset(outfolder + "/input.h5", "node_nbr")){
-            // If both "cumu_list" and "node_nbr" exist, read mesh connectivity data.
             hdf5_io_read_mesh((int *)numnbr, (int *)node_nbr_list, outfolder + "/input.h5");
         }else if (hdf5_io_has_dataset(outfolder + "/input.h5", "cells")){
             auto cell_N = (int)hdf5_io_get_Np(outfolder + "/input.h5", "cells");
@@ -142,11 +127,8 @@ MESH_p::MESH_p(string outfolder){
             cells = new int[cell_N]; // Allocate memory for cells (6N points, each with x,y,z)
             hdf5_io_read_int((int *)cells, outfolder + "/input.h5", "cells");
             auto sort_tri = sort_simplices(cells, (int)cell_N / 3);
-            //
-            // The next step is important because you do not know if you are getting faces directly after delaunay triangulation or
-            // preprocessed such that triangles are stored for every vertex.
             vector<vector<int>> unique_tri = remove_duplicates(sort_tri);
-            get_neighbours(node_nbr_list,  numnbr, unique_tri, N, nghst);
+            neighbours(numnbr, node_nbr_list, unique_tri, pos, N, nghst);
         }else{
             cerr << "Error: The input HDF5 file must contain either 'cumu_list' and 'node_nbr' datasets or a 'cells' dataset." << endl;
             cerr << "First compute the Delaunay triangulation of the system and rerun the code." << endl;
@@ -154,34 +136,26 @@ MESH_p::MESH_p(string outfolder){
         }
         //
         boxlen = get_box_dim().first * (1 + 1 / sqrt(N));
-        sort_nbrs(node_nbr_list, pos, N, numnbr, nghst, boxlen);
-        lastbdry = put_boundary_first(pos, node_nbr_list, numnbr, N, nghst, boxlen);
-        cout<< "Last boundary index after rearranging: " << lastbdry << endl;
-        //
-        if (lastbdry == N - 1){
+        auto allbonds = make_bond_list(node_nbr_list, numnbr, N, nghst);
+        lastbdry = get_bdry(allbonds, node_nbr_list, numnbr, N, nghst);
+        if(lastbdry == N - 1){
             cout << "Warning: All the points are boundary points. The mesh is likely to be incorrect." << endl;
         }
-        if (lastbdry == -1){
-            cout << "Warning: No boundary points found. The mesh is likely to be incorrect." << endl;
-        }
-        // Determine if the mesh is periodic or not.
         pbc = determine_pbc();
-        if (pbc){
-            if (bdry_type == 0 || bdry_type == 1){
-                cerr << "Error: Boundary type of fixed frame (0) or channel (1) cannot be used with periodic mesh.\n"
-                        "Run this code with the right boundary condition"
-                     << endl;
-                exit(EXIT_FAILURE);
-            }
-        }else{
-            order_boundary_neighbors(node_nbr_list, numnbr, pos, lastbdry, nghst);
-        }
-    }
-    else{
+        order_boundary_neighbors(node_nbr_list, numnbr, pos, lastbdry + 1, nghst);
+        // for (i = 0; i < N; i++){
+        //     cout << "Node " << i << " has " << numnbr[i] << " neighbors : " ;
+        //     for (j = 0; j < numnbr[i]; j++){
+        //         cout << node_nbr_list[nghst*i+j] << " ";
+        //     }
+        //     cout << endl;
+        // }
+        // exit(1);
+    }else{
         sphere = true;
         lastbdry = -1;
         boxlen = 0;
-        bdry_type = 2; // Sphere always has a free boundary condition.
+        pbc = true; // Sphere always has periodic-like boundary conditions
         radius = calculateRadius();
         cout << "radius = " << radius << endl;
         ini_vol = 4e0 / 3e0 * M_PI * radius * radius * radius;
@@ -304,4 +278,3 @@ void fillPoints(int *points, int N, int value){
 //         numnbr[i] = cumlst[i + 1] - cumlst[i];
 //     }
 // }
-

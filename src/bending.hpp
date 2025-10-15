@@ -11,10 +11,6 @@ class BE{
 public :
   BE(const MESH_p& mesh, std::string fname);
   double bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx);
-  // double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
-  //     int, int, double, int);
-  // double bending_energy_ipart(Vec3d *pos, int *node_nbr, int num_nbr,
-  //     int, int, double, int, double*);
   double bending_energy_total(Vec3d *pos, MESH_p mesh);
   void printbend(const MESH_p& mesh){
     for (int i = 0; i < mesh.nghst * mesh.N; ++i){
@@ -25,7 +21,6 @@ public :
   double getbend1(){return bend1;}
   double getbend2(){return bend2;}
   std::function<double(Vec3d *, int *, int , int, double , int , bool, double *)> bending_energy_ipart;
-  // double SeungNelson(Vec3d *, int *, int , int, int , double , int , bool, double *);
   double Itzykson(Vec3d *, int *, int , int, double , int , bool, double *);
   bool isexch(){return multicomp;}
   std::function<void(int, int, const MESH_p&)> exchange;
@@ -49,9 +44,10 @@ private:
 					 int edge, double *lijsq);
   double SeungNelson_pbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
 						int edge, double lenth, double *lijsq);
-  double SeungNelson_core(Vec3d *xij, int nbrloopind, int num_nbr, int idx, double *lijsq);
-/*------------------------*/
-	  double voronoi_area(double cotJ, double cotK, double jsq, double ksq, double area)
+  double SeungNelson_core(Vec3d *xij, int nbrloopind, int nbrtriind, int num_nbr, int idx, double *lijsq);
+  double SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, int edge, bool pbc, double *lijsq);
+  /*------------------------*/
+      double voronoi_area(double cotJ, double cotK, double jsq, double ksq, double area)
   {
     /// @brief Estimate the area of the voronoi cell. If I J K are the nodes of
     /// triangle

@@ -17,15 +17,26 @@
 const double pi = 3.14159265358979323846264;
 
 using namespace std;
-extern "C" void  MC_listread(char *, double *, double *, bool *,int *, int *, 
-                  bool *, int *, int *, double *, bool *, int*, char *);
+extern "C" void  MC_listread(char *, double *, double *, bool *, int*, int *, 
+   int *, bool *, int *, int *, double *, bool *, int*, char *);
 int get_nstart(int, int);
 
-McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj, 
+McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj,
    SelfAvoid &repulsiveobj, LTN &lineobj):
 beobj(beobj), steobj(steobj), lipidobj(lipidobj), chargeobj(chargeobj), 
 repulsiveobj(repulsiveobj), lineobj(lineobj){};
-
+//
+void McP::startcycle(int cycle){
+   if (0 < cycle < 5){
+      this->kBT = initial_kBT;
+      this->dfac = initial_dfac;
+   }else{
+      this->kBT = initial_kBT * pow(10.0, -(cycle - 4));
+      this->dfac = initial_dfac / pow(2.0, (cycle - 4));
+   }
+   cout << "Cycle: " << cycle << " kBT: " << kBT << " dfac: " << dfac << endl;
+}
+//
 void McP::updateparam(int anneal, string fname){
    if (anneal>0){
       dfac=dfac/2;
@@ -37,7 +48,7 @@ void McP::updateparam(int anneal, string fname){
    out_<< "# =========== parameter after annealing = " << anneal <<  " ==========" << endl
       << " dfac " << dfac << endl
       << " kbT " << kBT << endl
-      << " is_restart " << is_restart << endl
+      << " is_evalEnergyrestart " << is_restart << endl
       << " tot_mc_iter " << tot_mc_iter << endl
       << " dump_skip " << dump_skip << endl;
    out_.close();
@@ -52,31 +63,33 @@ int McP::initMC(MESH_p mesh, string fname){
    string parafile, outfile;
    parafile = fname+"/para_file.in";
    sprintf(tmp_fname, "%s", parafile.c_str());
-   MC_listread(temp_algo, &dfac, &kBT, &is_restart,
+   MC_listread(temp_algo, &dfac, &kBT, &is_restart, &nanneal_cycle,
               &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
               &fluidize_every, &fac_len_vertices, &iexch, &nexch_iter, tmp_fname);
-
+              
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
    dfac=mesh.av_bond_len/dfac;
+   initial_dfac = dfac;
+   initial_kBT = kBT;
    acceptedmoves = 0;
    if (mesh.ncomp==1) iexch=false;
    if (!chargeobj.isexch() && !beobj.isexch() && !lineobj.calculate()) iexch=false;
-
    ofstream out_;
    out_.open( fname+"/mcpara.out" );
-   out_<< "# =========== monte carlo parameters ==========" << endl
-      << " N " << N << endl
-      << " dfac " << dfac << endl
-      << " kbT " << kBT << endl
-      << " is_restart " << is_restart << endl
-      << " is_fluid " << is_fluid << endl
-      << " tot_mc_iter " << tot_mc_iter << endl
-      << " dump_skip " << dump_skip << endl
-      << " min_allowed_nbr " << min_allowed_nbr << endl
-      << " fluidize_every " << fluidize_every << endl
-      << " iexch " << iexch << endl
-      << " Number_exch_iter " << nexch_iter*one_mc_iter << endl;
+   out_ << "# =========== monte carlo parameters ==========" << endl
+        << " N " << N << endl
+        << " dfac " << dfac << endl
+        << " kbT " << kBT << endl
+        << " is_restart " << is_restart << endl
+        << " is_fluid " << is_fluid << endl
+        << " nanneal cycle = " << nanneal_cycle << endl
+        << " tot_mc_iter " << tot_mc_iter << endl
+        << " dump_skip " << dump_skip << endl
+        << " min_allowed_nbr " << min_allowed_nbr << endl
+        << " fluidize_every " << fluidize_every << endl
+        << " iexch " << iexch << endl
+        << " Number_exch_iter " << nexch_iter * one_mc_iter << endl;
 
    if (chargeobj.calculate() && lineobj.calculate()){
       out_ << " Energy_mc_3d = energy_mc_bestchli "<< endl;
@@ -118,7 +131,7 @@ int McP::initMC(MESH_p mesh, string fname){
                   int val, int val2,
                   int val3, int val4,
                   int val5, int val6) -> double {
-      return this->energy_mc_bechli(vec , vec_ptr, mesh, val, val2, val3, 
+      return this->energy_mc_bechli(vec, vec_ptr, mesh, val, val2, val3, 
                                  val4, val5, val6);};
    }else if(chargeobj.isexch() && beobj.isexch()){
       out_ << " Energy_mc_exch = energy_mc_bech" << endl;
@@ -335,7 +348,7 @@ inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mes
    double lijsq[num_nbr];
    energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
-   if (steobj.getyy1()!=0&&steobj.getyy2()!=0){
+   if (steobj.getyy1()!=0 && steobj.getyy2()!=0){
       energy[1] = steobj.stretch_energy_ipart(lijsq, num_nbr, idx, mesh.nghst);
    }
    if (steobj.doarea()){
@@ -394,12 +407,12 @@ inline double McP::energy_mc_ch(vector<double> &energy, Vec3d *pos, MESH_p mesh,
    return energy[2];
 }
 //
-int get_nstart(int lastbdry, int bdry_type){
-   int nframe;
-   if (bdry_type == 0 || bdry_type == 1) nframe = lastbdry+1;
-   else nframe = 0;
-   return nframe;
-}
+// int get_nstart(int lastbdry, int bdry_type){
+//    int nframe;
+//    if (bdry_type == 0 || bdry_type == 1) nframe = lastbdry+1;
+//    else nframe = 0;
+//    return nframe;
+// }
 //
 int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    int i, num_nbr, cm_idx;
@@ -415,14 +428,14 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    // the code does not generate random number for the boundary
    // if bdry_type == 0,1
    // FIX THIS BUG FOR FIXED BOUNDARY CONDITION
-   nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
+   // nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); 
+   // nframe = get_nstart(mesh.lastbdry, steobj.bdry_type());
+   nframe = 0;
    acceptedmoves = 0;
-
    for (i = 0; i < one_mc_iter; i++) {
       int idx = RandomGenerator::intUniform(nframe, mesh.N-1);
       cm_idx = idx*mesh.nghst;
       num_nbr = mesh.numnbr[idx];
-
       Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst*idx, mesh.numnbr[idx]);
       if (mesh.sphere){
          vol_i = steobj.volume_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
@@ -497,7 +510,7 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
   double av_bond_len=mesh.av_bond_len;
   bool yes, logic;
 
-//   nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
+   // nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
    // I may be wrong but I believe that boundary can be fluid too. 
    // even for pbc, the boundary can be fluid.
    nframe = 0;
@@ -616,66 +629,63 @@ int McP::global_idx(int nframe, int N){
 }
 //
 int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
-   int exchngdmoves = 0;
-   int idx1, idx2, cm_idx1, cm_idx2;
-   int nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
-   vector<double> Eini(5,0), Efin(5,0);
-   bool yes, logic;
-   int lip_idx1, lip_idx2, idxn, logic_break;
-   double Einitot, Efintot, de;
-   int num_nbr1, num_nbr2;
-   //
-   for (int i = 0; i < nexch_iter*one_mc_iter; ++i){
-      logic = true;
-      idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
+   	int exchngdmoves = 0;
+   	int idx1, idx2, cm_idx1, cm_idx2;
+   	// int nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
+   	vector<double> Eini(5,0), Efin(5,0);
+	bool yes, logic;
+   	int lip_idx1, lip_idx2, idxn, logic_break;
+   	double Einitot, Efintot, de;
+   	int num_nbr1, num_nbr2;
+   	int nframe=0;
+   	//
+   	for (int i = 0; i < nexch_iter*one_mc_iter; ++i){
+	logic = true;
+	idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
 
-      cm_idx1 = mesh.nghst * idx1;
-      num_nbr1=mesh.numnbr[idx1];
+	cm_idx1 = mesh.nghst * idx1;
+	num_nbr1=mesh.numnbr[idx1];
 
-      idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, nframe, mesh.N);
-      cm_idx2 = mesh.nghst * idx2;
-      num_nbr2=mesh.numnbr[idx2];
+	idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, nframe, mesh.N);
+	cm_idx2 = mesh.nghst * idx2;
+	num_nbr2=mesh.numnbr[idx2];
 
-      logic = (mesh.compA[idx1] == mesh.compA[idx2]);
-      
-      if (!logic){
-         lip_idx1 = mesh.compA[idx1];
-         lip_idx2 = mesh.compA[idx2];
-         // auto tempE = chargeobj.debye_huckel_total(pos, mesh.N);
-         Einitot = energy_mc_exch(Eini, pos, mesh,
-                                 idx1, idx2, 
-                                 cm_idx1, cm_idx2,
-                                 num_nbr1, num_nbr2);
-         
-      
-         mesh.compA[idx2] = lip_idx1;
-         mesh.compA[idx1] = lip_idx2;
-         beobj.exchange(idx1, idx2, mesh); // Have you swiped the contents already?
-         chargeobj.exchange(idx1,idx2);
+	logic = (mesh.compA[idx1] == mesh.compA[idx2]);
+	
+	if (!logic){
+		lip_idx1 = mesh.compA[idx1];
+		lip_idx2 = mesh.compA[idx2];
+		// auto tempE = chargeobj.debye_huckel_total(pos, mesh.N);
+		Einitot = energy_mc_exch(Eini, pos, mesh,
+								idx1, idx2, 
+								cm_idx1, cm_idx2,
+								num_nbr1, num_nbr2);
+		
+		mesh.compA[idx2] = lip_idx1;
+		mesh.compA[idx1] = lip_idx2;
+		beobj.exchange(idx1, idx2, mesh); // Have you swiped the contents already?
+		chargeobj.exchange(idx1,idx2);
 
-         Efintot = energy_mc_exch(Efin, pos, mesh,
-                                 idx1, idx2,
-                                 cm_idx1, cm_idx2,
-                                 num_nbr1, num_nbr2);
-         de = Efintot-Einitot;
-         // if (idx2 > mesh.lastbdry && idx1 < mesh.lastbdry){
-         //    cout << "electroe" << " " <<  Efin[2] - Eini[2] << endl;
-         // }
-         yes = Boltzman(de, 0.0);
+		Efintot = energy_mc_exch(Efin, pos, mesh,
+								idx1, idx2,
+								cm_idx1, cm_idx2,
+								num_nbr1, num_nbr2);
+		de = Efintot-Einitot;
+		yes = Boltzman(de, 0.0);
 
-         if (yes){
-            ++exchngdmoves;
-            EneMonitored += de;
-            bende += Efin[0]-Eini[0];
-            stretche += Efin[1]-Eini[1];
-            electroe += Efin[2]-Eini[2];
-            linee += Efin[4]-Eini[4];
-         }else{
-            mesh.compA[idx1] = lip_idx1;
-            mesh.compA[idx2] = lip_idx2;
-            beobj.exchange(idx1, idx2, mesh); // Have you swiped the contents already?
-            chargeobj.exchange(idx1,idx2);
-         }
+		if (yes){
+		++exchngdmoves;
+		EneMonitored += de;
+		bende += Efin[0]-Eini[0];
+		stretche += Efin[1]-Eini[1];
+		electroe += Efin[2]-Eini[2];
+		linee += Efin[4]-Eini[4];
+		}else{
+		mesh.compA[idx1] = lip_idx1;
+		mesh.compA[idx2] = lip_idx2;
+		beobj.exchange(idx1, idx2, mesh); // Have you swiped the contents already?
+		chargeobj.exchange(idx1,idx2);
+		}
       }
    }
    return exchngdmoves;

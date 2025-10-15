@@ -30,7 +30,7 @@ struct MESH_p{
     double av_bond_len = 0.0;
     Vec3d *pos = nullptr;
     int *cells = nullptr;
-    int ncomp = 1;
+    int ncomp;
     double compfrac = 0.0;
     int *compA = nullptr;
     string distribution;

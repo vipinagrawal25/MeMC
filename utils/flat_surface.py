@@ -24,7 +24,6 @@ def generate_equidistant_points_2d(x_range, y_range, num_points_x, num_points_y)
     boundary_points = points[boundary_mask]
     interior_points = points[~boundary_mask]
 
-    
     # Optional: order boundary points counterclockwise
     angles = np.arctan2(
         boundary_points[:, 1] - (y_min + y_max) / 2,

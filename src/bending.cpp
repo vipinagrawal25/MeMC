@@ -42,9 +42,12 @@ BE::BE(const MESH_p& mesh, std::string fname){
     if (method=="SN"){
         out_ << " bending_energy_ipart = Seung and Nelson" << endl;
         init_bendij(mesh);
-            bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, int edge, bool pbc, double *lijsq) -> double
-        { 
-            return this->SeungNelson(pos, node_nbr, num_nbr, idx, lenth, edge, pbc, lijsq);
+            bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, BoundaryType btype,
+                // int edge, bool pbc,
+                 double *lijsq) -> double{
+            return this->SeungNelson(pos, node_nbr, num_nbr, idx, lenth, btype,
+                // edge, pbc, 
+                lijsq);
         };
         // bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, int edge, bool pbc, double *lijsq) -> double{
         //     if (pbc) {
@@ -61,8 +64,12 @@ BE::BE(const MESH_p& mesh, std::string fname){
     }else{
         out_ << " bending_energy_ipart = Itzykson" << endl;
         init_coefbend(mesh.compA, mesh.N);
-        bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, int edge, bool pbc, double *lijsq) -> double {
-            return this->Itzykson(pos, node_nbr, num_nbr, idx, lenth, edge, pbc, lijsq);
+        bending_energy_ipart = [this](Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, BoundaryType btype,
+            // int edge, bool pbc, 
+            double *lijsq) -> double {
+            return this->Itzykson(pos, node_nbr, num_nbr, idx, lenth, btype,
+                // edge, pbc,
+                lijsq);
         };
 
         out_ << "Node based bending" << endl;
@@ -136,106 +143,108 @@ inline double acot(double x) {
     }
     return result;
 }
-/*-------------------------------------------------*/
-double BE::SeungNelson_core(Vec3d *xij, int nbrloopind, int nbrtriind, int num_nbr, int idx, double *lijsq){
-    /// @brief Core computation for Seung-Nelson bending energy
-    /// @param xij Pre-computed displacement vectors between particle idx and its neighbors
-    /// @param nbrloopind Number of neighbors to loop over for energy computation
-    /// @param num_nbr Total number of neighbors (for array indexing)
-    /// @param idx Index of the particle
-    /// @param lijsq Array to store squared distances
-    /// @return Bending energy contribution    
-    double bend_ener = 0;
-    Vec3d ntri[nbrtriind];
+// /*-------------------------------------------------*/
+// double BE::SeungNelson_core(Vec3d *xij, int nbrloopind, int nbrtriind, int num_nbr, int idx, double *lijsq){
+//     /// @brief Core computation for Seung-Nelson bending energy
+//     /// @param xij Pre-computed displacement vectors between particle idx and its neighbors
+//     /// @param nbrloopind Number of neighbors to loop over for energy computation
+//     /// @param num_nbr Total number of neighbors (for array indexing)
+//     /// @param idx Index of the particle
+//     /// @param lijsq Array to store squared distances
+//     /// @return Bending energy contribution    
+//     double bend_ener = 0;
+//     Vec3d ntri[nbrtriind];
     
-    // Compute squared distances
-    for (int j = 0; j < num_nbr; ++j){
-        lijsq[j] = normsq(xij[j]);
-    }
+//     // Compute squared distances
+//     for (int j = 0; j < num_nbr; ++j){
+//         lijsq[j] = normsq(xij[j]);
+//     }
 
-    // Compute normal vectors for each triangle
-    for (int j = 0; j < nbrloopind; ++j){ 
-        ntri[j] = cross_product(xij[j], xij[(j+1)%num_nbr]);
-        if (norm(ntri[j]) > 1e-10) {
-            ntri[j] = ntri[j]/norm(ntri[j]);
-        }
-    }
+//     // Compute normal vectors for each triangle
+//     for (int j = 0; j < nbrloopind; ++j){ 
+//         ntri[j] = cross_product(xij[j], xij[(j+1)%num_nbr]);
+//         if (norm(ntri[j]) > 1e-10) {
+//             ntri[j] = ntri[j]/norm(ntri[j]);
+//         }
+//     }
     
-    // Compute bending energy
-    for (int j = 0; j < nbrtriind; ++j){
-        bend_ener += bendij[idx*ghost+j]*(1-inner_product(ntri[j], ntri[(j+1)%num_nbr]));
-    }
+//     // Compute bending energy
+//     for (int j = 0; j < nbrtriind; ++j){
+//         bend_ener += bendij[idx*ghost+j]*(1-inner_product(ntri[j], ntri[(j+1)%num_nbr]));
+//     }
 
-    // for (int j = 0; j < nbrtriind; ++j){
-    //     cout << idx << " " << j << " " << num_nbr << " " << nbrtriind << " " << nbrloopind << " ";
-    // }
-    // cout << endl;
+//     // for (int j = 0; j < nbrtriind; ++j){
+//     //     cout << idx << " " << j << " " << num_nbr << " " << nbrtriind << " " << nbrloopind << " ";
+//     // }
+//     // cout << endl;
 
-    // if (isnan(bend_ener)){
-    //     cerr << "Warning: bend_ener is NaN for idx " << idx << endl;
-    //     exit(EXIT_FAILURE);
-    // }
-    return 0.5*bend_ener;
-}
+//     // if (isnan(bend_ener)){
+//     //     cerr << "Warning: bend_ener is NaN for idx " << idx << endl;
+//     //     exit(EXIT_FAILURE);
+//     // }
+//     return 0.5*bend_ener;
+// }
 
-/*-------------------------------------------------*/
-double BE::SeungNelson_nonpbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-            int edge, double *lijsq){
-    /// @brief Seung-Nelson bending energy for non-periodic boundary conditions
-    /// @param pos Array containing coordinates of all particles
-    /// @param node_nbr Indices of nearest neighbors of the ith particle
-    /// @param num_nbr Number of nearest neighbors
-    /// @param idx Index of the ith particle
-    /// @param edge Edge parameter for boundary determination
-    /// @param lijsq Preallocated array to store squared distances
-    /// @return Bending energy contribution for non-PBC case
-    Vec3d xij[num_nbr];
-    int nbrloopind, nbrtriind;
-    // Determine neighbor loop index for boundary points
-    // cout << "edge: " << edge << " idx: " << idx << endl;
-    if (idx >= edge) {
-        nbrloopind = num_nbr;
-        nbrtriind = num_nbr;
-    }else{
-        nbrloopind = num_nbr - 1;
-        nbrtriind = num_nbr -2;
-    }
+// /*-------------------------------------------------*/
+// double BE::SeungNelson_nonpbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
+//             int edge, double *lijsq){
+//     /// @brief Seung-Nelson bending energy for non-periodic boundary conditions
+//     /// @param pos Array containing coordinates of all particles
+//     /// @param node_nbr Indices of nearest neighbors of the ith particle
+//     /// @param num_nbr Number of nearest neighbors
+//     /// @param idx Index of the ith particle
+//     /// @param edge Edge parameter for boundary determination
+//     /// @param lijsq Preallocated array to store squared distances
+//     /// @return Bending energy contribution for non-PBC case
+//     Vec3d xij[num_nbr];
+//     int nbrloopind, nbrtriind;
+//     // Determine neighbor loop index for boundary points
+//     // cout << "edge: " << edge << " idx: " << idx << endl;
+//     if (idx >= edge) {
+//         nbrloopind = num_nbr;
+//         nbrtriind = num_nbr;
+//     }else{
+//         nbrloopind = num_nbr - 1;
+//         nbrtriind = num_nbr -2;
+//     }
 
-    // Compute displacement vectors for ALL neighbors (needed for triangle computation)
-    for (int j = 0; j < num_nbr; ++j){
-        xij[j] = pos[idx] - pos[node_nbr[j]];
-    }
+//     // Compute displacement vectors for ALL neighbors (needed for triangle computation)
+//     for (int j = 0; j < num_nbr; ++j){
+//         xij[j] = pos[idx] - pos[node_nbr[j]];
+//     }
     
-    return SeungNelson_core(xij, nbrloopind, nbrtriind, num_nbr, idx, lijsq);
-}
-/*-------------------------------------------------*/
-double BE::SeungNelson_pbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-            int edge, double lenth, double *lijsq){
-    /// @brief Seung-Nelson bending energy for periodic boundary conditions
-    /// @param pos Array containing coordinates of all particles
-    /// @param node_nbr Indices of nearest neighbors of the ith particle
-    /// @param num_nbr Number of nearest neighbors
-    /// @param idx Index of the ith particle
-    /// @param edge Edge parameter for boundary determination
-    /// @param lenth Box length for PBC calculations
-    /// @param lijsq Preallocated array to store squared distances
-    /// @return Bending energy contribution for PBC case
-    Vec3d xij[num_nbr];
-    int nbrloopind = num_nbr;  // For PBC, we loop over all neighbors
-    int nbrtriind = num_nbr;   // All triangles are considered
-    // Compute displacement vectors for ALL neighbors using PBC-aware difference
-    for (int j = 0; j < num_nbr; ++j){
-        if (idx <= edge) {
-            xij[j] = diff_pbc(pos[idx], pos[node_nbr[j]], lenth);
-        } else {
-            xij[j] = pos[idx] - pos[node_nbr[j]];
-        }
-    }
-    return SeungNelson_core(xij, nbrloopind, nbrtriind, num_nbr, idx, lijsq);
-}
+//     return SeungNelson_core(xij, nbrloopind, nbrtriind, num_nbr, idx, lijsq);
+// }
+// /*-------------------------------------------------*/
+// double BE::SeungNelson_pbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
+//             int edge, double lenth, double *lijsq){
+//     /// @brief Seung-Nelson bending energy for periodic boundary conditions
+//     /// @param pos Array containing coordinates of all particles
+//     /// @param node_nbr Indices of nearest neighbors of the ith particle
+//     /// @param num_nbr Number of nearest neighbors
+//     /// @param idx Index of the ith particle
+//     /// @param edge Edge parameter for boundary determination
+//     /// @param lenth Box length for PBC calculations
+//     /// @param lijsq Preallocated array to store squared distances
+//     /// @return Bending energy contribution for PBC case
+//     Vec3d xij[num_nbr];
+//     int nbrloopind = num_nbr;  // For PBC, we loop over all neighbors
+//     int nbrtriind = num_nbr;   // All triangles are considered
+//     // Compute displacement vectors for ALL neighbors using PBC-aware difference
+//     for (int j = 0; j < num_nbr; ++j){
+//         if (idx <= edge) {
+//             xij[j] = diff_pbc(pos[idx], pos[node_nbr[j]], lenth);
+//         } else {
+//             xij[j] = pos[idx] - pos[node_nbr[j]];
+//         }
+//     }
+//     return SeungNelson_core(xij, nbrloopind, nbrtriind, num_nbr, idx, lijsq);
+// }
 /*-------------------------------------------------*/
 double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-        double lenth, int edge, bool pbc, double *lijsq){
+        double lenth, BoundaryType btype,
+        // int edge, bool pbc, 
+        double *lijsq){
     /// @brief Computes the bending energy contribution in Seung and Nelson way
     /// when the position of the ith particle changes.
     /// @param pos Array containing coordinates of all particles.
@@ -243,7 +252,7 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     /// @param node_nbr Indices of nearest neighbors of the ith particle.
     /// @param num_nbr Number of nearest neighbors.
     /// @param bdry_type Type of boundary condition (unused).
-    /// @param lijsq Preallocated array to store squared distances between neighbors.
+    /// @param lijsq Preallocat2ed array to store squared distances between neighbors.
     /// @return Bending energy contribution for the ith particle.
     /// @todo Merge calculations with SeungNelson_nbr for optimization using better
     /// data structures.
@@ -255,16 +264,45 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     int nbrloopind, nbrtriind;
     // Determines whether to iterate over all neighbors or exclude some for boundary points.
     // For boundary points (except under periodic boundary conditions), not all neighbors are included.
-    if (idx>edge || pbc) {
-        nbrloopind = num_nbr;
-        nbrtriind = num_nbr;
-    } else {
-        nbrloopind = num_nbr-1;
-        nbrtriind = num_nbr-2;
+    switch (btype) {
+        case PBC:
+            nbrloopind = num_nbr;
+            nbrtriind = num_nbr;
+            for (int j = 0; j < num_nbr; ++j) {
+                // theoretically I could expand it into two cases, where it is PBCx or PBCy?
+                // In that case, I can save a few computations.
+                // but I may not save significant time as vertices with PBC are a few.
+                xij[j] = diff_pbc(pos[idx], pos[node_nbr[j]], lenth);
+            }
+            break;
+        case FBC:
+            nbrloopind = num_nbr-1;
+            nbrtriind = num_nbr-2;
+            for (int j = 0; j < num_nbr; ++j) {
+                xij[j] = pos[idx] - pos[node_nbr[j]];
+            }
+            break;
+        default:
+            nbrloopind = num_nbr;
+            nbrtriind = num_nbr;
+            for (int j = 0; j < num_nbr; ++j) {
+                xij[j] = pos[idx] - pos[node_nbr[j]];
+            }
+            break;
     }
+    // if(btype==PBC){
+        
+    // }
+    // if (idx>edge || pbc){
+    //     nbrloopind = num_nbr;
+    //     nbrtriind = num_nbr;
+    // } else {
+    //     nbrloopind = num_nbr-1;
+    //     nbrtriind = num_nbr-2;
+    // }
 
-    if (idx > edge || !pbc) for (int j = 0; j < num_nbr; ++j){ xij[j]=pos[idx]-pos[node_nbr[j]]; }
-    if (idx <= edge && pbc) for (int j = 0; j < num_nbr; ++j){ xij[j]=diff_pbc(pos[idx],pos[node_nbr[j]], lenth);}
+    // if (idx > edge || !pbc) for (int j = 0; j < num_nbr; ++j){ xij[j]=pos[idx]-pos[node_nbr[j]]; }
+    // if (idx <= edge && pbc) for (int j = 0; j < num_nbr; ++j){ xij[j]=diff_pbc(pos[idx],pos[node_nbr[j]], lenth);}
 
     for (int j = 0; j < num_nbr; ++j){lijsq[j]=normsq(xij[j]);}
 
@@ -276,6 +314,7 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     for (int j = 0; j < nbrtriind; ++j){
         bend_ener+=bendij[idx*ghost+j]*(1-inner_product(ntri[j], ntri[(j+1)%num_nbr]));
     }
+    // cout << "Bending energy for particle " << idx << " = " << 0.5*bend_ener << endl;
     return 0.5*bend_ener;
 }
 /*-------------------------------------------------*/
@@ -283,7 +322,9 @@ double BE::SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
 // the code also needs to be fixed for pbc, boundary points etc.
 // see SeungNelson function.
 double BE::Itzykson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-            double lenth, int edge, bool pbc, double *lijsq){
+            double lenth, BoundaryType btype,
+            // int edge, bool pbc,
+            double *lijsq){
     /// @brief Estimate the Bending energy contribution when ith particle 
     /// position changes
     /// @param Pos array containing co-ordinates of all the particles
@@ -306,27 +347,29 @@ double BE::Itzykson(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
     double ljksq[num_nbr];
     Vec3d xij[num_nbr];
     // store all the lengths
-    if (!pbc || idx>edge){
+    // if (!pbc || idx>edge)
+    if(btype == PBC){
         for (int j = 0; j < num_nbr; ++j){
             jdx = node_nbr[j];
-            kdx = node_nbr[(j+1)%num_nbr]; // this is same as kdx
-            xij[j]=pos[idx]-pos[jdx];
-            xjk = pos[jdx]-pos[kdx];
-            lijsq[j] = inner_product(xij[j],xij[j]);
-            ljksq[j] = inner_product(xjk,xjk);
-            area_ijk[j] = 0.5*norm(cross_product(xij[j],xjk));
+            kdx = node_nbr[(j + 1) % num_nbr]; // this is same as kdx
+            xij[j] = diff_pbc(pos[idx], pos[jdx], lenth);
+            xjk = diff_pbc(pos[jdx], pos[kdx], lenth);
+            lijsq[j] = inner_product(xij[j], xij[j]);
+            ljksq[j] = inner_product(xjk, xjk);
+            area_ijk[j] = 0.5 * norm(cross_product(xij[j], xjk));
         }
     }else{
         for (int j = 0; j < num_nbr; ++j){
             jdx = node_nbr[j];
-            kdx = node_nbr[(j+1)%num_nbr]; // this is same as kdx
-            xij[j] = diff_pbc(pos[idx],pos[jdx],lenth);
-            xjk =  diff_pbc(pos[jdx],pos[kdx], lenth);
-            lijsq[j] = inner_product(xij[j],xij[j]);
-            ljksq[j] = inner_product(xjk,xjk);
-            area_ijk[j] = 0.5*norm(cross_product(xij[j],xjk));
+            kdx = node_nbr[(j + 1) % num_nbr]; // this is same as kdx
+            xij[j] = pos[idx] - pos[jdx];
+            xjk = pos[jdx] - pos[kdx];
+            lijsq[j] = inner_product(xij[j], xij[j]);
+            ljksq[j] = inner_product(xjk, xjk);
+            area_ijk[j] = 0.5 * norm(cross_product(xij[j], xjk));
         }
     }
+
     // Now compute all the angles
     for (int j = 0; j < num_nbr; ++j){
         liksq=lijsq[(j+1)%num_nbr];
@@ -389,7 +432,9 @@ double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
    	    double lijsq[num_nbr_j];
         be += bending_energy_ipart(pos,
             (int *) mesh.node_nbr_list + cm_idx_nbr,
-            num_nbr_j, nbr, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
+            num_nbr_j, nbr, mesh.boxlen, mesh.btype[nbr],
+            // mesh.lastbdry, mesh.pbc,
+            lijsq);
     }
     return be;
 }
@@ -414,7 +459,9 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
         cm_idx = idx*mesh.nghst;
         num_nbr = mesh.numnbr[idx];
         be+= bending_energy_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
+                num_nbr, idx, mesh.boxlen, mesh.btype[idx],
+                // mesh.lastbdry, mesh.pbc, 
+                lijsq);
     }
     return be;
 }

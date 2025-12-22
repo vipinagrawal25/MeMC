@@ -103,16 +103,16 @@ subroutine BendRead(bend1, bend2, spC1, spC2, iGauss, parafile) bind(c, name="Be
         close(unit=200)
 end subroutine
 
-subroutine MeshRead(comp2_frac, compdist, &
+subroutine MeshRead(comp2_frac, compdist, dist2center, &
 parafile) bind(c, name="MeshRead")
-    real(kind = c_double) ::  comp2_frac
+    real(kind = c_double) ::  comp2_frac, dist2center
     character(kind=c_char, len=1), dimension(char_len), intent(out) :: compdist
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
     integer :: ierr
     character(len=char_len) :: distribution
 
-    namelist /meshpara/ comp2_frac, distribution
+    namelist /meshpara/ comp2_frac, distribution, dist2center
         call convert_cstr_fstr(parafile, f_fname)
         print *, "Opening file: ", trim(f_fname)
         open(unit=200,file=f_fname,status='old',iostat=ierr)

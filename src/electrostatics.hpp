@@ -23,7 +23,10 @@ private:
   // double debye_huckel(const Vec3d p1, const Vec3d p2, double q1, double q2);
   std::function<double(const Vec3d, const Vec3d, double, double)> debye_huckel;
   double dh_pbc(const Vec3d p1, const Vec3d p2, double q1, double q2);
-  double dh_nopbc(const Vec3d p1, const Vec3d p2, double q1, double q2);
+  // double dh_nopbc(const Vec3d p1, const Vec3d p2, double q1, double q2);
+  double dh_channelX(const Vec3d p1, const Vec3d p2, double q1, double q2);
+  double dh_channelY(const Vec3d p1, const Vec3d p2, double q1, double q2);
+  double dh_NONE(const Vec3d p1, const Vec3d p2, double q1, double q2);
   double charge1, charge2;
   std::vector<double> charges;
   double conc;  // Concentration of the electrolyte
@@ -32,6 +35,9 @@ private:
   double kappa ;
   const double lb = 0.71; // Bjerrum length
   double boxlen = 0.0;
-  bool pbc = false;
+  bool PBCx = false;
+  bool PBCy = false;
+  // Detect and set periodic boundary conditions in x/y from mesh
+  void determinePBC(const MESH_p& mesh);
 };
 #endif

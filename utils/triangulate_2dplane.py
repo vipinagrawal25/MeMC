@@ -1,4 +1,4 @@
-import numpy as np
+h5pyimport numpy as np
 import matplotlib.pyplot as plt
 import h5py, sys
 from scipy.spatial import Delaunay
@@ -8,8 +8,6 @@ def read_data(filename):
     pos = np.asarray(pos)
     Np = int(len(pos)/2)
     pts = pos.reshape(Np,2)
-    # pts = np.loadtxt(filename)
-    # Np = len(pts);
     return Np, pts
 
 def sort_simplices(cells):
@@ -40,7 +38,6 @@ def neighbours(Np, simpl):
     for i in range(0, cumlst[-1], 1):
         node_neighbour[i]=r2[2*i]
     ncmlist = np.diff(cumlist)
-    
     return cumlst,node_neighbour
 
 def write_hdf5(R, cmlst, node_nbr,  posfile):
@@ -50,9 +47,6 @@ def write_hdf5(R, cmlst, node_nbr,  posfile):
         posfile=posfile+".h5"
     hf = h5py.File(posfile,'w')
     hf.create_dataset('pos',data=R.reshape(-1))
-    # hf.close()
-
-    # hf = h5py.File(file,'w')
     hf.create_dataset('cumu_list',data=cmlst.astype(np.int32))
     hf.create_dataset('node_nbr',data=node_nbr.astype(np.int32))
     hf.close()
@@ -86,19 +80,16 @@ def new_way_nbrs(cmlist, node_nbr, nghst=12):
         nnbrs = nbrs[sort]
         st_idx = int(ip*nghst); end_idx = int(ip*nghst + num_nbr)
         new_nbr[st_idx:end_idx] = nnbrs[:]
-
     return new_nbr
 
 lenth = 2*np.pi
 file = sys.argv[1]
 print(file)
 Np, pts = read_data(file)
-# pts = pts/(2*np.pi)
 pts_3d = np.zeros(shape=(Np, 3), dtype=float)
 pts_3d[:,0] = pts[:,0]
 pts_3d[:,1] = pts[:,1]
 tri = Delaunay(pts, furthest_site = False)
-# simplices = read_simplices('simplices_new_256.dat')
 ng = 12
 sort_tri = sort_simplices(tri.simplices)
 cmlist, node_nbr = neighbours(Np, sort_tri)

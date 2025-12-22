@@ -21,9 +21,9 @@ public :
   McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj, 
     SelfAvoid &repulsiveobj, LTN &lineobj);
   int monte_carlo_3d(Vec3d *pos, MESH_p mesh);
-  int monte_carlo_fluid(Vec3d *, MESH_p);
+  int monte_carlo_fluid(Vec3d *pos, MESH_p mesh);
   int monte_carlo_lipid(Vec3d *pos, MESH_p mesh);
-  int initMC(MESH_p, std::string);
+  int initMC(MESH_p mesh, std::string fname);
   bool isfluid();
   bool isrestart();
   int fluidizeevery();
@@ -31,7 +31,7 @@ public :
   int totaliter();
   int onemciter();
   double evalEnergy(MESH_p mesh);
-  void write_energy(fstream &, int, const MESH_p&);
+  void write_energy(fstream &fileptr, int itr, const MESH_p &mesh);
   double getarea();
   double getvolume(); 
   void setEneVol();
@@ -67,39 +67,24 @@ private:
   double volt0;
   int acceptedmoves;
   bool sphere;
-  function<double(vector<double> &, Vec3d*, MESH_p, 
-          int, int,
-          int, int,
-          int, int)> energy_mc_exch;
-  function<double(vector<double> &, Vec3d*, MESH_p, int, int, int)> energy_mc_3d;
-  double energy_mc_be(vector<double>& , Vec3d *, MESH_p ,
-                      int , int, 
-                      int, int,
-                      int, int);
-  double energy_mc_best(vector<double>& , Vec3d *, MESH_p , int , int, int);
-  double energy_mc_bestch(vector<double>&, Vec3d *, MESH_p , int , int, int);
-  double energy_mc_bestchli(vector<double>&, Vec3d *, MESH_p , int , int, int);
-  double energy_mc_bestchrep(vector<double>&, Vec3d *, MESH_p , int , int, int);
-  double energy_mc_bech(vector<double>&, Vec3d *, MESH_p, 
-                        int, int,
-                        int, int,
-                        int, int);
-  double energy_mc_bechli(vector<double>&, Vec3d *, MESH_p, 
-                        int, int,
-                        int, int,
-                        int, int);
-  double energy_mc_ch(vector<double>&, Vec3d *, MESH_p, 
-                    int, int, 
-                    int, int,
-                    int, int);
-  function<bool(double, double)> Algo;
+  std::function<double(std::vector<double>&, Vec3d*, MESH_p, int, int, int, int, int, int,
+  BoundaryType, BoundaryType)> energy_mc_exch;
+  std::function<double(std::vector<double>&, Vec3d*, MESH_p, int, int, int, BoundaryType)> energy_mc_3d;
+  double energy_mc_be(std::vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2, BoundaryType btype1, BoundaryType btype2);
+  double energy_mc_best(std::vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr, BoundaryType btype);
+  double energy_mc_bestch(std::vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr, BoundaryType btype);
+  double energy_mc_bestchli(std::vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr, BoundaryType btype);
+  double energy_mc_bestchrep(std::vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr, BoundaryType btype);
+  double energy_mc_bech(std::vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2, BoundaryType btype1, BoundaryType btype2);
+  double energy_mc_bechli(std::vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2, BoundaryType btype1, BoundaryType btype2);
+  double energy_mc_ch(std::vector<double>& energy, Vec3d *pos, MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2);
+  std::function<bool(double, double)> Algo;
   bool Boltzman(double DE, double activity);
   bool Glauber(double DE, double activity);
-  void changeparam(double dfac, double kBT, bool is_restart, int tot_mc_iter, 
-      int dumpskip);
+  void changeparam(double dfac, double kBT, bool is_restart, int tot_mc_iter, int dumpskip);
   double ini_tot_mc_iter;
-  string exchtype="Global";
-  function<int(int, int*, int, int, int)> get_idx2;
+  std::string exchtype = "Global";
+  std::function<int(int, int*, int, int, int)> get_idx2;
   int local_idx(int num_nbr, int *node_nbr_list, int cm_idx);
   int global_idx(int nframe, int N);
 };

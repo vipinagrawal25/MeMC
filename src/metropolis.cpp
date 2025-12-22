@@ -66,7 +66,7 @@ int McP::initMC(MESH_p mesh, string fname){
    MC_listread(temp_algo, &dfac, &kBT, &is_restart, &nanneal_cycle,
               &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
               &fluidize_every, &fac_len_vertices, &iexch, &nexch_iter, tmp_fname);
-              
+
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
    dfac=mesh.av_bond_len/dfac;
@@ -93,60 +93,61 @@ int McP::initMC(MESH_p mesh, string fname){
 
    if (chargeobj.calculate() && lineobj.calculate()){
       out_ << " Energy_mc_3d = energy_mc_bestchli "<< endl;
-      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
-                  int val, int val2, int val3 ) -> double {
-      return this->energy_mc_bestchli(vec, vec_ptr, mesh, val, val2, val3);};
+      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
+                     int val, int val2, int val3, BoundaryType btype ) -> double {
+      return this->energy_mc_bestchli(vec, vec_ptr, mesh, val, val2, val3, btype);};
    }else if (chargeobj.calculate() && repulsiveobj.isSelfRepulsive()){
       out_ << " Energy_mc_3d = energy_mc_bestchrep "<< endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
-                  int val, int val2, int val3 ) -> double {
-      return this->energy_mc_bestchrep(vec, vec_ptr, mesh, val, val2, val3);};
+                  int val, int val2, int val3, BoundaryType btype ) -> double {
+      return this->energy_mc_bestchrep(vec, vec_ptr, mesh, val, val2, val3, btype);};
    }else if(chargeobj.calculate()){
       out_ << " Energy_mc_3d = energy_mc_bestch" << endl;
       energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val,
-                           int val2, int val3) -> double {
-      return this->energy_mc_bestch(vec , vec_ptr, mesh, val, val2, val3);};
+                           int val2, int val3, BoundaryType btype) -> double {
+      return this->energy_mc_bestch(vec , vec_ptr, mesh, val, val2, val3, btype);};
    }else{
       out_ << " Energy_mc_3d = energy_mc_best" << endl;
-      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, int val,
-                           int val2, int val3) -> double {
-      return this->energy_mc_best(vec , vec_ptr, mesh, val, val2, val3);};
+      energy_mc_3d = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh, 
+                    int val, int val2, int val3, BoundaryType btype) -> double {
+      return this->energy_mc_best(vec, vec_ptr, mesh, val, val2, val3, btype);};
    }
    
-   algo=temp_algo;
-
+   algo = temp_algo;
    if (algo=="mpolis"){
       out_ << " Algo = Metropolis"<< endl;
       Algo = [this](double DE, double activity) -> double {
-      return this->Boltzman(DE,activity);};
+      return this->Boltzman(DE, activity);};
    }else if(algo=="Glauber"){
       out_ << " Algo = Glauber"<< endl;
       Algo = [this](double DE, double activity) -> double {
-      return this->Glauber(DE,activity);};
+      return this->Glauber(DE, activity);};
    }
 
    if (chargeobj.isexch() && beobj.isexch() && lineobj.calculate()){
       out_ << " Energy_mc_exch = energy_mc_bechli" << endl;
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2,
-                  int val3, int val4,
-                  int val5, int val6) -> double {
+                  int val3, int val4, int val5, int val6,
+                  BoundaryType btype1, BoundaryType btype2) -> double {
       return this->energy_mc_bechli(vec, vec_ptr, mesh, val, val2, val3, 
-                                 val4, val5, val6);};
+                                 val4, val5, val6, btype1, btype2);};
    }else if(chargeobj.isexch() && beobj.isexch()){
       out_ << " Energy_mc_exch = energy_mc_bech" << endl;
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2, 
-                  int val3, int val4,
-                  int val5, int val6) -> double {
+                  int val3, int val4, 
+                  int val5, int val6,
+                  BoundaryType btype1, BoundaryType btype2) -> double {
       return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3, 
-                                 val4, val5, val6);};
+                                 val4, val5, val6, btype1, btype2);};
 	}else if(chargeobj.isexch()){
       out_ << " Energy_mc_exch = energy_mc_ch" << endl;
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2,
                   int val3, int val4,
-                  int val5, int val6) -> double {
+                  int val5, int val6,
+                  BoundaryType btype1, BoundaryType btype2) -> double {
       return this->energy_mc_ch(vec , vec_ptr, mesh, val, val2, val3, 
                                  val4, val5, val6);};
    }else if(beobj.isexch()){
@@ -154,9 +155,10 @@ int McP::initMC(MESH_p mesh, string fname){
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2,
                   int val3, int val4,
-                  int val5, int val6) -> double {
+                  int val5, int val6,
+                  BoundaryType btype1, BoundaryType btype2) -> double {
       return this->energy_mc_be(vec , vec_ptr, mesh, val, val2, val3, 
-                  val4, val5, val6);};
+                  val4, val5, val6, btype1, btype2);};
 	}
    
    if (exchtype=="Global" || exchtype == "global"){
@@ -186,30 +188,30 @@ double McP::evalEnergy(MESH_p mesh){
    bende = beobj.bending_energy_total(Pos, mesh);
    stretche = steobj.stretch_energy_total(Pos, mesh);
    
-   if (steobj.doarea()){
+   	if (steobj.doarea()){
       stretche =steobj.area_energy_total(mesh);
       totEner += stretche;
-   }
-   totEner = bende+stretche;
-   if (chargeobj.calculate()){
+   	}
+   	totEner = bende+stretche;
+   	if (chargeobj.calculate()){
       electroe = chargeobj.debye_huckel_total(Pos, mesh.N);
       totEner += electroe;
-   }
-   // It's okay to have if statement here.
-   if (lipidobj.calculate()) {
+   	}
+   	// It's okay to have if statement here.
+   	if (lipidobj.calculate()) {
       regsole = lipidobj.reg_soln_tot(Pos, mesh);
       totEner+=regsole;
-   }
-   if (mesh.sphere) totvol = steobj.volume_total(Pos, mesh);
-   if (steobj.dovol()) {
+   	}
+   	if (mesh.sphere) totvol = steobj.volume_total(Pos, mesh);
+   	if (steobj.dovol()) {
       vole = steobj.getkappa()*(VolMonitored/volt0-1)*(VolMonitored/volt0-1);
       totEner += vole;
-   }
-   if (steobj.dopressure()){
+   	}
+   	if (steobj.dopressure()){
       pre = -steobj.getpressure() * totvol;
       totEner += pre;
-   }
-   if (repulsiveobj.isSelfRepulsive()){
+   	}
+   	if (repulsiveobj.isSelfRepulsive()){
       selfe = repulsiveobj.totalRepulsiveEnergy(mesh);
       totEner += selfe;
    }
@@ -343,48 +345,56 @@ bool McP::Glauber(double DE, double activity){
   return yes;
 }
 //
-inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
+inline double McP::energy_mc_best(vector<double> &energy, Vec3d *pos, MESH_p mesh,
+				int idx, int cm_idx, int num_nbr, BoundaryType btype){
    int *nbrcm=mesh.node_nbr_list + cm_idx;
-   double lijsq[num_nbr];
-   energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq);
-   energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
-   if (steobj.getyy1()!=0 && steobj.getyy2()!=0){
-      energy[1] = steobj.stretch_energy_ipart(lijsq, num_nbr, idx, mesh.nghst);
-   }
-   if (steobj.doarea()){
-      energy[1] =  steobj.area_energy_ipart(pos,nbrcm,num_nbr,idx,mesh.boxlen, mesh.lastbdry, mesh.pbc);
-   }
-   return energy[0] + energy[1];
+	double lijsq[num_nbr];
+	energy[0]  = beobj.bending_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.boxlen, btype,lijsq);
+	energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx);
+	if (steobj.getyy1()!=0 && steobj.getyy2()!=0){
+		energy[1] = steobj.stretch_energy_ipart(lijsq, num_nbr, idx, mesh.nghst);
+	}
+	if (steobj.doarea()){
+		energy[1] =  steobj.area_energy_ipart(pos, nbrcm, num_nbr, idx, mesh.boxlen, btype);
+	}
+	return energy[0] + energy[1];
 }
 //
-inline double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
-   double Etot=energy_mc_best(energy, pos, mesh, idx, cm_idx, num_nbr);
+inline double McP::energy_mc_bestch(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr, BoundaryType btype){
+   double Etot=energy_mc_best(energy, pos, mesh, idx, cm_idx, num_nbr, btype);
    energy[2] = chargeobj.debye_huckel_ipart(pos, idx, mesh.N);
    return Etot + energy[2];
 }
 //
-inline double McP::energy_mc_bestchli(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx, int cm_idx, int num_nbr){
-   double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr);
+inline double McP::energy_mc_bestchli(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
+         int idx, int cm_idx, int num_nbr, BoundaryType btype){
+   double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr, btype);
    energy[4] = lineobj.energy_ipart(idx);
    return Etot + energy[4];
 }
 //
 inline double McP::energy_mc_bestchrep(vector<double> &energy, Vec3d *pos, MESH_p mesh,
-            int idx, int cm_idx, int num_nbr){
-   double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr);
+            int idx, int cm_idx, int num_nbr, BoundaryType btype){
+   double Etot=energy_mc_bestch(energy, pos, mesh, idx, cm_idx, num_nbr, btype);
    energy[3] = repulsiveobj.computeSelfRep(mesh, idx);
    return Etot + energy[3];
 }
 //
-inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2){
+inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mesh,
+    	int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2,
+		BoundaryType btype1, BoundaryType btype2){
    int *nbrcm1=mesh.node_nbr_list + cm_idx1;
    int *nbrcm2=mesh.node_nbr_list + cm_idx2;
    double lijsq1[num_nbr1];
-   double lijsq2[num_nbr1];
+   double lijsq2[num_nbr2];
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm1,
-                  num_nbr1, idx1, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq1)
+                  num_nbr1, idx1, mesh.boxlen, btype1,
+				//   mesh.lastbdry, mesh.pbc, 
+				  lijsq1)
                +beobj.bending_energy_ipart(pos, nbrcm2,
-                  num_nbr2, idx2, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq2);
+                  	num_nbr2, idx2, mesh.boxlen, btype2,
+					// mesh.lastbdry, mesh.pbc, 
+					lijsq2);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx1)
                +beobj.bending_energy_ipart_neighbour(pos, mesh, idx2);
    energy[2] = chargeobj.debye_huckel_ipart(pos, idx1, mesh.N)
@@ -392,10 +402,12 @@ inline double McP::energy_mc_bech(vector<double> &energy, Vec3d *pos, MESH_p mes
    return energy[0]+energy[2];
 }
 // 
-inline double McP::energy_mc_bechli(vector<double> &energy, Vec3d *pos, MESH_p mesh, 
-         int idx1, int idx2, int cm_idx1, int cm_idx2, int num_nbr1, int num_nbr2){
+inline double McP::energy_mc_bechli(vector<double> &energy, Vec3d *pos, MESH_p mesh,
+         	int idx1, int idx2, int cm_idx1, int cm_idx2, 
+            int num_nbr1, int num_nbr2, BoundaryType btype1, BoundaryType btype2){
    double Etot = energy_mc_bech(energy, pos, mesh, idx1, idx2, cm_idx1,
-               cm_idx2, num_nbr1, num_nbr2);
+               	cm_idx2, num_nbr1, num_nbr2, 
+				      btype1, btype2);
    energy[4] = lineobj.energy_ipart(idx1) + lineobj.energy_ipart(idx2);
    return Etot+energy[4];
 }
@@ -436,12 +448,14 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       int idx = RandomGenerator::intUniform(nframe, mesh.N-1);
       cm_idx = idx*mesh.nghst;
       num_nbr = mesh.numnbr[idx];
-      Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst*idx, mesh.numnbr[idx]);
+      BoundaryType bt_idx = mesh.btype[idx];
+      // cout << idx << " " << static_cast<int>(bt_idx) << endl;      
+      Einitot = energy_mc_3d(Eini, pos, mesh, idx, mesh.nghst * idx, num_nbr, bt_idx);
       if (mesh.sphere){
          vol_i = steobj.volume_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx),
-               num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc);         
+               num_nbr, idx, mesh.boxlen, bt_idx
+			);
       }
-      //
       x_o = pos[idx].x; y_o = pos[idx].y; z_o = pos[idx].z;
       //
       dxinc = (dfac) * (RandomGenerator::generateUniform(-1.0,1.0));
@@ -449,16 +463,16 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
       dzinc = (dfac) * (RandomGenerator::generateUniform(-1.0,1.0));
       //
       x_n = x_o + dxinc; y_n = y_o + dyinc; z_n = z_o + dzinc;
-      //
       pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
-      //
-      Efintot = energy_mc_3d(Efin, pos, mesh, idx, mesh.nghst*idx,  mesh.numnbr[idx]);
-      //
+      Efintot = energy_mc_3d(Efin, pos, mesh, idx, mesh.nghst * idx, num_nbr, bt_idx);
+		//
       de = Efintot - Einitot;
       if (mesh.sphere){
          vol_f = steobj.volume_ipart(pos,
                (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx,
-               mesh.boxlen, mesh.lastbdry, mesh.pbc);
+               mesh.boxlen, bt_idx
+			//    mesh.lastbdry, mesh.pbc
+			);
          dvol = vol_f - vol_i;
          if(steobj.dovol()){
             de_vol = steobj.vol_energy_change(VolMonitored, dvol);
@@ -604,16 +618,21 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh){
 }
 //
 inline double McP::energy_mc_be(vector<double> &energy, Vec3d *pos, 
-         MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, 
-         int num_nbr1, int num_nbr2){
+        	MESH_p mesh, int idx1, int idx2, int cm_idx1, int cm_idx2, 
+         	int num_nbr1, int num_nbr2,
+			BoundaryType btype1, BoundaryType btype2){
    int *nbrcm1=mesh.node_nbr_list + cm_idx1;
    int *nbrcm2=mesh.node_nbr_list + cm_idx2;
    double lijsq1[num_nbr1];
    double lijsq2[num_nbr2];
    energy[0] = beobj.bending_energy_ipart(pos, nbrcm1,
-                  num_nbr1, idx1, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq1)
+                  num_nbr1, idx1, mesh.boxlen, btype1,
+				//   mesh.lastbdry, mesh.pbc, 
+				  lijsq1)
                +beobj.bending_energy_ipart(pos, nbrcm2,
-                  num_nbr2, idx2, mesh.boxlen, mesh.lastbdry, mesh.pbc, lijsq2);
+                  num_nbr2, idx2, mesh.boxlen, btype2,
+				//   mesh.lastbdry, mesh.pbc, 
+				  lijsq2);
    energy[0] += beobj.bending_energy_ipart_neighbour(pos, mesh, idx1)
                +beobj.bending_energy_ipart_neighbour(pos, mesh, idx2);
    return energy[0];
@@ -629,63 +648,59 @@ int McP::global_idx(int nframe, int N){
 }
 //
 int McP::monte_carlo_lipid(Vec3d *pos, MESH_p mesh){
-   	int exchngdmoves = 0;
-   	int idx1, idx2, cm_idx1, cm_idx2;
-   	// int nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (nframe < 0) nframe = 0;
-   	vector<double> Eini(5,0), Efin(5,0);
-	bool yes, logic;
-   	int lip_idx1, lip_idx2, idxn, logic_break;
-   	double Einitot, Efintot, de;
-   	int num_nbr1, num_nbr2;
-   	int nframe=0;
-   	//
-   	for (int i = 0; i < nexch_iter*one_mc_iter; ++i){
-	logic = true;
-	idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
-
-	cm_idx1 = mesh.nghst * idx1;
-	num_nbr1=mesh.numnbr[idx1];
-
-	idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, nframe, mesh.N);
-	cm_idx2 = mesh.nghst * idx2;
-	num_nbr2=mesh.numnbr[idx2];
-
-	logic = (mesh.compA[idx1] == mesh.compA[idx2]);
-	
-	if (!logic){
-		lip_idx1 = mesh.compA[idx1];
-		lip_idx2 = mesh.compA[idx2];
-		// auto tempE = chargeobj.debye_huckel_total(pos, mesh.N);
-		Einitot = energy_mc_exch(Eini, pos, mesh,
-								idx1, idx2, 
-								cm_idx1, cm_idx2,
-								num_nbr1, num_nbr2);
-		
-		mesh.compA[idx2] = lip_idx1;
-		mesh.compA[idx1] = lip_idx2;
-		beobj.exchange(idx1, idx2, mesh); // Have you swiped the contents already?
-		chargeobj.exchange(idx1,idx2);
-
-		Efintot = energy_mc_exch(Efin, pos, mesh,
-								idx1, idx2,
-								cm_idx1, cm_idx2,
-								num_nbr1, num_nbr2);
-		de = Efintot-Einitot;
-		yes = Boltzman(de, 0.0);
-
-		if (yes){
-		++exchngdmoves;
-		EneMonitored += de;
-		bende += Efin[0]-Eini[0];
-		stretche += Efin[1]-Eini[1];
-		electroe += Efin[2]-Eini[2];
-		linee += Efin[4]-Eini[4];
-		}else{
-		mesh.compA[idx1] = lip_idx1;
-		mesh.compA[idx2] = lip_idx2;
-		beobj.exchange(idx1, idx2, mesh); // Have you swiped the contents already?
-		chargeobj.exchange(idx1,idx2);
-		}
+   int exchngdmoves = 0;
+   int idx1, idx2, cm_idx1, cm_idx2;
+   vector<double> Eini(5,0), Efin(5,0);
+   bool yes, logic;
+   int lip_idx1, lip_idx2, idxn, logic_break;
+   double Einitot, Efintot, de;
+   int num_nbr1, num_nbr2;
+   int nframe=0;
+   BoundaryType btype1;
+   BoundaryType btype2;
+   for (int i = 0; i < nexch_iter * one_mc_iter; ++i) {
+      logic = true;
+      idx1 = RandomGenerator::intUniform(nframe, mesh.N-1);
+      cm_idx1 = mesh.nghst * idx1;
+      num_nbr1 = mesh.numnbr[idx1];
+      idx2 = get_idx2(num_nbr1, mesh.node_nbr_list, cm_idx1, nframe, mesh.N);
+      cm_idx2 = mesh.nghst * idx2;
+      num_nbr2 = mesh.numnbr[idx2];
+      btype1 = mesh.btype[idx1];
+      btype2 = mesh.btype[idx2];
+      logic = (mesh.compA[idx1] == mesh.compA[idx2]);
+      if (!logic){
+         lip_idx1 = mesh.compA[idx1];
+         lip_idx2 = mesh.compA[idx2];
+         Einitot = energy_mc_exch(Eini, pos, mesh,
+                                 idx1, idx2, 
+                                 cm_idx1, cm_idx2,
+                                 num_nbr1, num_nbr2,
+                                 btype1, btype2);
+         mesh.compA[idx2] = lip_idx1;
+         mesh.compA[idx1] = lip_idx2;
+         beobj.exchange(idx1, idx2, mesh);
+         chargeobj.exchange(idx1,idx2);
+         Efintot = energy_mc_exch(Efin, pos, mesh,
+                                 idx1, idx2,
+                                 cm_idx1, cm_idx2,
+                                 num_nbr1, num_nbr2,
+                                 btype1, btype2);
+         de = Efintot-Einitot;
+         yes = Boltzman(de, 0.0);
+         if (yes){
+            ++exchngdmoves;
+            EneMonitored += de;
+            bende += Efin[0]-Eini[0];
+            stretche += Efin[1]-Eini[1];
+            electroe += Efin[2]-Eini[2];
+            linee += Efin[4]-Eini[4];
+         }else{
+            mesh.compA[idx1] = lip_idx1;
+            mesh.compA[idx2] = lip_idx2;
+            beobj.exchange(idx1, idx2, mesh);
+            chargeobj.exchange(idx1,idx2);
+         }
       }
    }
    return exchngdmoves;

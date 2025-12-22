@@ -12,25 +12,22 @@
 #include <algorithm>
 #include <utility>  // for pair, make_pair
 
-extern "C" void MeshRead(double *, char*, char *);
+extern "C" void MeshRead(double *, char*, double *, char *);
+enum BoundaryType { PBC, FBC, NONE };
 
 using namespace std;
 struct MESH_p{
     /// @brief Mesh Structure
     /// @param numnbr; number of neighbours
     /// @param node_nbr_list; list of neighbours of a node
-
     int N = 0;
     const int nghst=12;
     bool sphere = false;
     int *numnbr = nullptr;
     int *node_nbr_list = nullptr;
-    double boxlen = 0.0;
-    int lastbdry = -1; // storing corner index specially for periodic case.
     double av_bond_len = 0.0;
     Vec3d *pos = nullptr;
     int *cells = nullptr;
-    int ncomp;
     double compfrac = 0.0;
     int *compA = nullptr;
     string distribution;
@@ -39,18 +36,17 @@ struct MESH_p{
     int npairs = 0;
     Vec3d dr;
     int num_nbr = 0, cm_idx = 0, i = 0, j = 0, k = 0;
-    bool pbc = false;
-    /// Declare all the functions here.
+    bool periodic_x = false;
+    bool periodic_y = false;
+    int ncomp;
     bool isPlaner();
-    // set<pair<int, int>> make_bond_list(int *node_nbr_list);
-    // int get_bdry(const set<pair<int, int>> &allbonds);
-    pair<double, double> get_box_dim();
-    bool determine_pbc();
-    double calculateRadius();    
-    // Constructor
+    pair<double, double> get_box_dim() const;
+    double calculateRadius();
     MESH_p(string outfolder);
-    // Cleanup method
+    BoundaryType* btype=nullptr;
     void free();
+    pair<bool, bool> determinePBC();
+    double boxlen ;
 };
 
 #endif

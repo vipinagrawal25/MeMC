@@ -29,12 +29,7 @@ string ZeroPadNumber(T num){
     ss << setw( 5 ) << setfill( '0' ) << (int)num;
     return ss.str();
 }
-
-void scale_pos(Vec3d *pos, double R, int N){
-  for(int i = 0; i<N; i++) pos[i] = pos[i]*R;
-}
-
-
+/*----------------------------------------------------------*/
 void start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, 
     string outfolder, double radius, int &residx){
         

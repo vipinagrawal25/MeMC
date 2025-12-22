@@ -2,7 +2,6 @@
 #include <CGAL/Periodic_2_Delaunay_triangulation_2.h>
 #include <CGAL/Periodic_2_Delaunay_triangulation_traits_2.h>
 #include <CGAL/Point_3.h>
-
 #include <fstream>
 #include <cassert>
 #include <list>
@@ -30,7 +29,7 @@ typedef PDT::Finite_faces_iterator                          Face_iterator;
 using namespace std;
 // Function to sort simplices
 vector<vector<int>> sort_simplices(const vector<vector<int>>& cells) {
-
+   
    vector<vector<int>> nsimplices;
    for (const auto& scles : cells) {
       vector<int> nscles = scles;
@@ -142,7 +141,6 @@ void hdf5_io_read_pos(double *Pos, string input_file){
    if(status != 0){
       fprintf(stderr, "file close failed\n");
    }
-   
 }
 
 void cyclic_nbrs(int* new_nbr, const vector<int>& cmlist, 
@@ -291,7 +289,7 @@ int main(int argc, char const *argv[]){
    auto* nn_nbr=memc::array(ng*Np,-1);
    auto* ncml=memc::array(Np,0);
 
-   Iso_rectangle domain(0, 0,box_len,box_len); // The cube for the periodic domain
+   Iso_rectangle domain(0, 0, box_len,box_len); // The cube for the periodic domain
    map<Vertex_handle, int> vertex_indices;
    vector<vector<int>>cells;
 

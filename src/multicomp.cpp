@@ -28,7 +28,9 @@ MulCom::MulCom(const MESH_p& mesh, std::string fname){
 }
 //
 Vec2d MulCom::gradphisq(double *phi, Vec3d *pos, int *node_nbr, int num_nbr, 
-    int idx, double lenth, int edge, bool pbc){
+    int idx, double lenth, BoundaryType btype
+    // int edge, bool pbc
+){
     /// @brief Per-vertex gradient estimation in DOI: 10.2312/stag.20181301
     int j, jdx, kdx, k;
     Vec3d  rk, ri, rj, rkp;
@@ -37,35 +39,44 @@ Vec2d MulCom::gradphisq(double *phi, Vec3d *pos, int *node_nbr, int num_nbr,
     ri = pos[idx];
     Vec3d gradphi;
     Vec2d grad_ar;
-    if (!pbc||idx > edge){
+    switch (btype){
+    case PBC:
         for (j = 0; j < num_nbr; j++){
             jdx = node_nbr[j];
-            k = (j+1)%num_nbr;
+            k = (j + 1) % num_nbr;
             kdx = node_nbr[k];
-            rj = pos[jdx]; rk = pos[kdx];
-            rji  = rj - ri;
-            rik  = ri - rk;
+            rj = pos[jdx];
+            rk = pos[kdx];
+            rji = change_vec_pbc(rj - ri, lenth);
+            rik = change_vec_pbc(ri - rk, lenth);
             ip1 = cross_product(rik, rji);
-            area1 = area1 + 0.5*norm(ip1);
-            ip1 = ip1*1/norm(ip1);
-            gradphi=gradphi+(cross_product(rik, ip1)/2)*(phi[j+1]-phi[0])
-                    + (cross_product(rji, ip1)/2)*(phi[k+1]-phi[0]);
+            area1 = area1 + 0.5 * norm(ip1);
+            ip1 = ip1 * 1 / norm(ip1);
+            gradphi = gradphi + (cross_product(rik, ip1) / 2) * (phi[j + 1] - phi[0]) 
+                            + (cross_product(rji, ip1) / 2) * (phi[k + 1] - phi[0]);
         }
-    }else{
+        break;
+    case FBC:
+        break;
+    default:
         for (j = 0; j < num_nbr; j++){
             jdx = node_nbr[j];
-            k = (j+1)%num_nbr;
+            k = (j + 1) % num_nbr;
             kdx = node_nbr[k];
-            rj = pos[jdx]; rk = pos[kdx];
-            rji = change_vec_pbc(rj-ri,lenth);
-            rik = change_vec_pbc(ri-rk,lenth);
+            rj = pos[jdx];
+            rk = pos[kdx];
+            rji = rj - ri;
+            rik = ri - rk;
             ip1 = cross_product(rik, rji);
-            area1 = area1 + 0.5*norm(ip1);
-            ip1 = ip1*1/norm(ip1);
-            gradphi=gradphi+(cross_product(rik, ip1)/2)*(phi[j+1]-phi[0])
-                    + (cross_product(rji, ip1)/2)*(phi[k+1]-phi[0]);
+            area1 = area1 + 0.5 * norm(ip1);
+            ip1 = ip1 * 1 / norm(ip1);
+            gradphi = gradphi + (cross_product(rik, ip1) / 2) * (phi[j + 1] - phi[0]) + (cross_product(rji, ip1) / 2) * (phi[k + 1] - phi[0]);
         }
+        break;
     }
+    // if (!pbc||idx > edge){
+    // }else{
+    // }
     gradphi = gradphi/area1;
     grad_ar.x = normsq(gradphi);
     grad_ar.y = area1;
@@ -108,7 +119,9 @@ double MulCom::gradphisq_ipart(Vec3d *pos, MESH_p mesh, int idx){
     phi_ipart_neighbour(phi, mesh, idx);
     int cm_idx = mesh.nghst*idx;
     return gradphisq(phi, pos, (int *)(mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc).x;
+                num_nbr, idx, mesh.boxlen, mesh.btype[idx]
+                // mesh.lastbdry, mesh.pbc
+            ).x;
 }
 //
 double MulCom::gradphisq_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
@@ -143,7 +156,9 @@ Vec2d MulCom::reg_soln_ipart(Vec3d *pos, MESH_p mesh, int idx){
     // phi has a size of 1+num_nbr. You can't access phi[idx]
     int cm_idx = idx*mesh.nghst;
     grad_arr = gradphisq(phi, pos, (int *)(mesh.node_nbr_list + cm_idx),
-                num_nbr, idx, mesh.boxlen, mesh.lastbdry, mesh.pbc);
+                num_nbr, idx, mesh.boxlen, mesh.btype[idx]
+                // mesh.lastbdry, mesh.pbc
+            );
     out_array.x = mixenergy + epssqby2*grad_arr.x;
     out_array.y = grad_arr.y;
     // if (isnan(out_array.x)){
@@ -170,7 +185,8 @@ double MulCom::reg_soln_tot(Vec3d *pos, MESH_p mesh){
     double rsfe_tot;
     Vec2d rs_ar;
     rsfe_tot = 0e0;
-    st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
+    // st_idx = mesh.pbc ? 0 : (mesh.lastbdry + 1); if (st_idx < 0) st_idx = 0;
+    st_idx = 0;
     for(idx = st_idx; idx < mesh.N; idx++){
         cm_idx = idx*mesh.nghst;
         num_nbr = mesh.numnbr[idx];

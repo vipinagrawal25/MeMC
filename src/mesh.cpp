@@ -11,13 +11,13 @@
 #include "misc.hpp"
 
 using namespace std;
-bool is_boundary_vertex(const vector<int> &nbrs, const set<pair<int, int>> &edge_set);
+// bool is_boundary_vertex(const vector<int> &nbrs, const set<pair<int, int>> &edge_set);
 void fillPoints(vector<int> &points, double fraction, int N);
 void fillPoints(int *points, double fraction, int N);
 void fillPoints(int *points, int N, int value);
-vector<vector<int>> sort_simplices(int *cells, int num_cells);
-void get_neighbours(const vector<vector<int>> &simplices, int *numnbr,
-                    int *node_nbr, int N, int nghst);
+// vector<vector<int>> sort_simplices(int *cells, int num_cells);
+// void get_neighbours(const vector<vector<int>> &simplices, int *numnbr,
+                    // int *node_nbr, int N, int nghst);
 vector<vector<int>> remove_duplicates(vector<vector<int>> &sorted_cells);
 // void MESH::initMESH(){
 //     MeshRead(&bdry_type, &nghst, &radius, tmp_fname);
@@ -27,34 +27,45 @@ vector<vector<int>> remove_duplicates(vector<vector<int>> &sorted_cells);
 //     node_nbr_list = (int *)calloc(nghst*N, sizeof(int));
 // }
 
-pair<double, double> MESH_p::get_box_dim(){
-    double xmin = 1e7, xmax = -1e7, ymin = 1e7, ymax = -1e7;
-    for (int i = 0; i < N; ++i){
-        if (pos[i].x < xmin)
-            xmin = pos[i].x;
-        if (pos[i].x > xmax)
-            xmax = pos[i].x;
-        if (pos[i].y < ymin)
-            ymin = pos[i].y;
-        if (pos[i].y > ymax)
-            ymax = pos[i].y;
-    }
-    double xlen = xmax - xmin;
-    double ylen = ymax - ymin;
-    return {xlen, ylen};
-}
 
+// pair<double, double> MESH_p::get_box_dim() const{
+//     double xmin =  numeric_limits<double>::max();
+//     double xmax = -numeric_limits<double>::max();
+//     double ymin =  numeric_limits<double>::max();
+//     double ymax = -numeric_limits<double>::max();
+
+//     for (int i = 0; i < N; ++i) {
+//         xmin = min(xmin, pos[i].x);
+//         xmax = max(xmax, pos[i].x);
+//         ymin = min(ymin, pos[i].y);
+//         ymax = max(ymax, pos[i].y);
+//     }
+
+//     double xlen = xmax - xmin;
+//     double ylen = ymax - ymin;
+
+//     // --- Correct for periodic meshes ---
+//     if (periodic_x) {
+//         // If periodic in x, estimate true box length
+//         xlen = xlen / (1.0 - 1.0 / sqrt(N));
+//     }
+//     if (periodic_y) {
+//         // If periodic in y, estimate true box length
+//         ylen = ylen / (1.0 - 1.0 / sqrt(N));
+//     }
+//     return {xlen, ylen};
+// }
+
+//
 bool MESH_p::isPlaner() {
-    for (int i = 0; i < N; i++)
-    {
-        if (pos[i].z != 0)
-        {
+    for (int i = 0; i < N; i++){
+        if (pos[i].z != 0){
             return false;
         }
     }
     return true;
 }
-
+//
 double MESH_p::calculateRadius(){
     double sum_distances = 0.0;
     for (int i = 0; i < N; i++){
@@ -62,41 +73,61 @@ double MESH_p::calculateRadius(){
         double distance = sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
         sum_distances += distance;
     }
-
     // Calculate average distance (approximate radius)
     double radius = sum_distances / N;
     return radius;
 }
-
-bool MESH_p::determine_pbc(){
-    // Check if any node has a neighbor that wraps around the boundary
-    for (int i = 0; i < N; ++i){
-        int current_index = i * nghst;
-        for (int j = 0; j < numnbr[i]; ++j){
-            int neighbor = node_nbr_list[current_index + j];
-            if (abs(pos[i].x - pos[neighbor].x) > boxlen / 2 ||
-                abs(pos[i].y - pos[neighbor].y) > boxlen / 2 ||
-                abs(pos[i].z - pos[neighbor].z) > boxlen / 2){
-                return true;
+//
+// Determine periodicity in x and y based on mesh connectivity and coordinates.
+// Strategy: compute x/y extents from mesh positions, then check neighbor pairs
+// from node_nbr_list; if any neighbor separation in x (or y) exceeds half the
+// corresponding box extent, we assume periodicity in that direction.
+pair<bool, bool> MESH_p::determinePBC(){
+    // Access neighbor lists; node_nbr_list is stored as blocks of size nghst
+    // int nghst = mesh->nghst;
+    bool PBCx = false;
+    bool PBCy = false;
+    for (int i = 0; i < N && (!PBCx || !PBCy); ++i){
+        int base = i * nghst;
+        int nn = numnbr[i];
+        for (int k = 0; k < nn; ++k){
+            int j = node_nbr_list[base + k];
+            if (j < 0 || j >= N)
+                continue; // sanity check
+            double dx = fabs(pos[i].x - pos[j].x);
+            double dy = fabs(pos[i].y - pos[j].y);
+            // if(dx>0.5*xlen && dy > 0.5*ylen){
+            //     cout << "Detected periodicity in both x and y directions based on edge between vertices " << i << " and " << j << endl;
+            // }
+            if (dx > 0.5 * boxlen){
+                PBCx = true;
+                // cout << "Detected periodicity in x direction based on edge between vertices " << i << " and " << j << endl;
             }
+            if (dy > 0.5 * boxlen){
+                PBCy = true;
+                // cout << "Detected periodicity in y direction based on edge between vertices " << i << " and " << j << endl;
+            }
+            if (PBCx && PBCy)
+                break;
         }
     }
-    return false;
+    return make_pair(PBCx, PBCy);
 }
 //
 MESH_p::MESH_p(string outfolder){
     char tmp_fname[128], tmp_dist[128];
     string para_file = outfolder + "/para_file.in";
     sprintf(tmp_fname, "%s", para_file.c_str());
-
-    MeshRead(&compfrac, tmp_dist, tmp_fname);
+    
+    MeshRead(&compfrac, tmp_dist, &radius, tmp_fname);
+    boxlen = 2 * radius;
     distribution = tmp_dist;
     N = (int) hdf5_io_get_Np(outfolder + "/input.h5", "pos")/3;
     if (compfrac > 1 || compfrac < 0){
         cerr << "Error: The fraction of the component should be between 0 and 1" << endl;
         exit(EXIT_FAILURE);
     }
-
+    //
     if (distribution != "Random" && distribution != "random" &&
         distribution != "Janus" && distribution != "janus" &&
         distribution != "Point" && distribution != "point"){
@@ -114,6 +145,7 @@ MESH_p::MESH_p(string outfolder){
     numnbr = new int[N];
     node_nbr_list = new int[N * nghst];
     compA = new int[N];
+    btype = new BoundaryType[N];
     //
     hdf5_io_read_double((double *)pos, outfolder + "/input.h5", "pos");
     if (isPlaner()){
@@ -123,43 +155,44 @@ MESH_p::MESH_p(string outfolder){
             hdf5_io_read_mesh((int *)numnbr, (int *)node_nbr_list, outfolder + "/input.h5");
         }else if (hdf5_io_has_dataset(outfolder + "/input.h5", "cells")){
             auto cell_N = (int)hdf5_io_get_Np(outfolder + "/input.h5", "cells");
-            cout << "Number of cells (triangles) in the mesh: " << (int)cell_N / 3 << endl;
             cells = new int[cell_N]; // Allocate memory for cells (6N points, each with x,y,z)
             hdf5_io_read_int((int *)cells, outfolder + "/input.h5", "cells");
             auto sort_tri = sort_simplices(cells, (int)cell_N / 3);
             vector<vector<int>> unique_tri = remove_duplicates(sort_tri);
-            neighbours(numnbr, node_nbr_list, unique_tri, pos, N, nghst);
+            neighbours(numnbr, node_nbr_list, unique_tri, pos, N, boxlen, nghst);
         }else{
             cerr << "Error: The input HDF5 file must contain either 'cumu_list' and 'node_nbr' datasets or a 'cells' dataset." << endl;
             cerr << "First compute the Delaunay triangulation of the system and rerun the code." << endl;
             exit(EXIT_FAILURE);
         }
-        //
-        boxlen = get_box_dim().first * (1 + 1 / sqrt(N));
+        auto ispbc = determinePBC();
+        this->periodic_x = ispbc.first;
+        this->periodic_y = ispbc.second;
+        cout << "Periodic in X: " << (this->periodic_x ? "Yes" : "No") << ", Periodic in Y: " << (this->periodic_y ? "Yes" : "No") << endl;
         auto allbonds = make_bond_list(node_nbr_list, numnbr, N, nghst);
-        lastbdry = get_bdry(allbonds, node_nbr_list, numnbr, N, nghst);
-        if(lastbdry == N - 1){
-            cout << "Warning: All the points are boundary points. The mesh is likely to be incorrect." << endl;
+        order_boundary_neighbors(node_nbr_list, numnbr, pos, allbonds, N, nghst);
+        determine_bdry_cdt(btype, node_nbr_list, numnbr, pos, allbonds, boxlen, N, nghst);
+        for (i = 0; i < N; i++){
+            cout << "Node " << i << " has " << numnbr[i] << " neighbors : " ;
+            for (j = 0; j < numnbr[i]; j++){
+                cout << node_nbr_list[nghst*i+j] << " ";
+            }
+            cout << endl;
         }
-        pbc = determine_pbc();
-        order_boundary_neighbors(node_nbr_list, numnbr, pos, lastbdry + 1, nghst);
-        // for (i = 0; i < N; i++){
-        //     cout << "Node " << i << " has " << numnbr[i] << " neighbors : " ;
-        //     for (j = 0; j < numnbr[i]; j++){
-        //         cout << node_nbr_list[nghst*i+j] << " ";
-        //     }
-        //     cout << endl;
-        // }
         // exit(1);
     }else{
         sphere = true;
-        lastbdry = -1;
+        // lastbdry = -1;
         boxlen = 0;
-        pbc = true; // Sphere always has periodic-like boundary conditions
+        // pbc = true; // Sphere always has periodic-like boundary conditions
         radius = calculateRadius();
         cout << "radius = " << radius << endl;
         ini_vol = 4e0 / 3e0 * M_PI * radius * radius * radius;
         hdf5_io_read_mesh((int *)numnbr, (int *)node_nbr_list, outfolder + "/input.h5");
+        for (size_t vi = 0; vi < N; vi++){
+            btype[vi] = NONE;
+        }
+        // determine_bdry_cdt(btype, node_nbr_list, numnbr, pos, allbonds, boxlen, N, nghst);
     }
 
     if (distribution == "Random" || distribution == "random"){
@@ -194,19 +227,18 @@ void MESH_p::free(){
     if (node_nbr_list) { delete[] node_nbr_list; node_nbr_list = nullptr; }
     if (numnbr) { delete[] numnbr; numnbr = nullptr; }
     if (compA) { delete[] compA; compA = nullptr; }
+    if (btype) { delete[] btype; btype = nullptr; }
 }
 
 void fillPoints(vector<int> &points, double fraction, int N){
     int numOnes = static_cast<int>(fraction * N);
     int numZeros = N - numOnes;
-
     // Fill the vector with the required number of 1s and 0s
     points.clear();     // Clear the vector first if you're reusing it
     for (int i = 0; i < numOnes; ++i)
         points.push_back(1);
     for (int i = numOnes; i < N; ++i)
         points.push_back(0);
-
     // Shuffle the vector using shuffle
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     shuffle(points.begin(), points.end(), default_random_engine(seed));

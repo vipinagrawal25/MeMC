@@ -23,6 +23,6 @@ private:
    double epssqby2;
    double phi_ipart(int *lipA, int *node_nbr, int num_nbr, int idx);
    void phi_ipart_neighbour(double *phi, MESH_p mesh, int idx);
-   Vec2d gradphisq(double *phi, Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, int edge, bool pbc);
+   Vec2d gradphisq(double *phi, Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, BoundaryType btype);
 };
 #endif

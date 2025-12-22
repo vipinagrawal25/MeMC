@@ -20,8 +20,14 @@ public :
   int getbend(int i){return coef_bend[i];}
   double getbend1(){return bend1;}
   double getbend2(){return bend2;}
-  std::function<double(Vec3d *, int *, int , int, double , int , bool, double *)> bending_energy_ipart;
-  double Itzykson(Vec3d *, int *, int , int, double , int , bool, double *);
+  std::function<double(Vec3d *, int *, int, int, double,
+                       BoundaryType btype,
+                       // int , bool,
+                       double *)> bending_energy_ipart;
+  double Itzykson(Vec3d *, int *, int, int, double,
+				  BoundaryType btype,
+				  // int , bool,
+				  double *);
   bool isexch(){return multicomp;}
   std::function<void(int, int, const MESH_p&)> exchange;
   void set_nbrbending(int idx1, const MESH_p& mesh);
@@ -40,15 +46,18 @@ private:
   void init_bendij(MESH_p mesh);
   void exchange_node(int idx1, int idx2);
   void exchange_bond(int idx1, int idx2, const MESH_p& mesh);
-  double SeungNelson_nonpbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-					 int edge, double *lijsq);
-  double SeungNelson_pbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
-						int edge, double lenth, double *lijsq);
-  double SeungNelson_core(Vec3d *xij, int nbrloopind, int nbrtriind, int num_nbr, int idx, double *lijsq);
-  double SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, int edge, bool pbc, double *lijsq);
+  // double SeungNelson_nonpbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
+	// 				 int edge, double *lijsq);
+  // double SeungNelson_pbc(Vec3d *pos, int *node_nbr, int num_nbr, int idx,
+	// 					int edge, double lenth, double *lijsq);
+//   double SeungNelson_core(Vec3d *xij, int nbrloopind, int nbrtriind, int num_nbr, int idx,
+// 						double *lijsq);
+double SeungNelson(Vec3d *pos, int *node_nbr, int num_nbr, int idx, double lenth, 
+    BoundaryType btype,
+// int edge, bool pbc, 
+double *lijsq);
   /*------------------------*/
-      double voronoi_area(double cotJ, double cotK, double jsq, double ksq, double area)
-  {
+      double voronoi_area(double cotJ, double cotK, double jsq, double ksq, double area){
     /// @brief Estimate the area of the voronoi cell. If I J K are the nodes of
     /// triangle
     ///  @param cotJ angle at node j (see paper/paper.pdf)

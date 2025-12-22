@@ -29,30 +29,7 @@ string ZeroPadNumber(T num){
     ss << setw( 5 ) << setfill( '0' ) << (int)num;
     return ss.str();
 }
-
-void scale_pos(Vec3d *pos, double R, int N){
-  for(int i = 0; i<N; i++) pos[i] = pos[i]*R;
-}
-
-bool isPlaner(Vec3d *pos, int Np){
-    for(int i=0;i<Np;i++){if(pos[i].z!=0){return false;}}
-    return true;
-}
-
-pair<double, double> get_box_dim(MESH_p mesh){
-    Vec3d *Pos = mesh.pos;
-    double xmin=1e7,xmax=-1e7,ymin=1e7,ymax=-1e7;
-    for (int i = 0; i < mesh.N; ++i){
-        if (Pos[i].x<xmin)  xmin=Pos[i].x;
-        if (Pos[i].x>xmax)  xmax=Pos[i].x;
-        if (Pos[i].y<ymin)  ymin=Pos[i].y;
-        if (Pos[i].y>ymax)  ymax=Pos[i].y;
-    }
-    double xlen = xmax-xmin;
-    double ylen = ymax-ymin;
-    return {xlen, ylen};
-}
-
+/*----------------------------------------------------------*/
 void start_simulation(MESH_p &mesh, McP mcobj, STE &stretchobj, string outfolder, double radius, int &residx){
 
     double Pole_zcoord;
@@ -136,6 +113,7 @@ int main(int argc, char *argv[]){
     (*terminal) << "# The seed value is " << seed_v << endl;
     Etot = mcobj.evalEnergy(mesh);
     mcobj.write_energy(fileptr, iter, mesh);
+
     //
     for(int cycle = 0; cycle<mcobj.ncycles(); cycle++){
         mcobj.startcycle(cycle);

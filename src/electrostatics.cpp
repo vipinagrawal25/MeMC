@@ -12,7 +12,7 @@ void ESP::initcharges(int *compA, int N){
         else {charges.push_back(charge1);}
     }
 }
-
+//
 ESP::ESP(const MESH_p& mesh, std::string fname){
     char tmp_fname[128];
     string parafile, outfile;
@@ -32,34 +32,52 @@ ESP::ESP(const MESH_p& mesh, std::string fname){
     
     // Store mesh properties for PBC calculations
     boxlen = mesh.boxlen;
-    pbc = mesh.pbc;
-    
-    // Assign function pointer based on boundary conditions
-    if (pbc) {
+    // Compute periodic boundary condition flags from the mesh
+    // determinePBC(mesh);
+    cout << mesh.periodic_x << " " << mesh.periodic_y << endl;
+    this->PBCx = mesh.periodic_x;
+    this -> PBCy = mesh.periodic_y;
+    std::ofstream out_;
+    out_.open(fname + "/electrostatpara.out");
+    out_ << "# =========== electrostatic parameters ==========" << endl
+        << " N " << mesh.N << endl
+        << " charge1 = " << charge1 << endl
+        << " charge2 = " << charge2 << endl
+        << " electrolyte conc = " << conc << endl
+        << " Debye length = " << debyelen << " nm" << endl
+        << " PBCx = " << (PBCx ? "true" : "false") << endl
+        << " PBCy = " << (PBCy ? "true" : "false") << endl
+        << " box length = " << boxlen << endl;
+    // Assign function pointer: if either x or y is periodic we use the PBC-aware
+    // implementation (which uses minimum image convention with boxlen).
+    // choose function and record selection in the same if/else to avoid duplicated logic
+    std::string sel;
+    if (PBCx && PBCy){
         debye_huckel = [this](const Vec3d p1, const Vec3d p2, double q1, double q2) -> double {
             return this->dh_pbc(p1, p2, q1, q2);
         };
+        sel = "dh_pbc (PBCx & PBCy)";
+    } else if (PBCx && !PBCy) {
+        debye_huckel = [this](const Vec3d p1, const Vec3d p2, double q1, double q2) -> double{
+            return this->dh_channelX(p1, p2, q1, q2);
+        };
+        sel = "dh_channelX (PBCx only)";
+    } else if (!PBCx && PBCy) {
+        debye_huckel = [this](const Vec3d p1, const Vec3d p2, double q1, double q2) -> double {
+            return this->dh_channelY(p1, p2, q1, q2);
+        };
+        sel = "dh_channelY (PBCy only)";
     } else {
         debye_huckel = [this](const Vec3d p1, const Vec3d p2, double q1, double q2) -> double {
-            return this->dh_nopbc(p1, p2, q1, q2);
+            return this->dh_NONE(p1, p2, q1, q2);
         };
+        sel = "dh_NONE (No PBC)";
     }
-
-    std::ofstream out_;
-    out_.open(fname+"/electrostatpara.out");
-    out_<< "# =========== electrostatic parameters ==========" << endl
-      << " N " << mesh.N << endl
-      << " charge1 = " << charge1 << endl
-      << " charge2 = " << charge2 << endl
-      << " electrolyte conc = " << conc << endl
-      << " Debye length = " << debyelen << " nm"<< endl
-      << " PBC = " << (pbc ? "true" : "false") << endl
-      << " box length = " << boxlen << endl;
+    out_ << " Selected Debye-Huckel implementation: " << sel << endl;
     out_.close();
 }
-
 // Debye-Hückel potential with periodic boundary conditions
-double ESP::dh_pbc(const Vec3d p1, const Vec3d p2, double q1, double q2){
+double ESP::dh_pbc( Vec3d p1,  Vec3d p2, double q1, double q2){
     if (q1 == 0.0 || q2 == 0.0) return 0.0;
     // Use minimum image convention for periodic boundaries
     Vec3d dr = diff_pbc(p1, p2, boxlen);
@@ -67,9 +85,37 @@ double ESP::dh_pbc(const Vec3d p1, const Vec3d p2, double q1, double q2){
     if (r == 0) return 0.0;  // Avoid self-interaction
     return (q1 * q2 / r) * exp(-kappa * r);
 }
-
+// Debye-Hückel potential with periodic boundaries in x but not y
+double ESP::dh_channelX( Vec3d p1,  Vec3d p2, double q1, double q2){
+    if (q1 == 0.0 || q2 == 0.0)
+        return 0.0;
+    // Use minimum image convention for periodic boundaries
+    // Vec3d dr = diff_channelX(p1, p2, boxlen);
+    Vec3d dr = p1 - p2;
+    // Apply PBC in x direction
+    if (dr.x > 0.5 * boxlen) dr.x -= boxlen;
+    else if (dr.x < -0.5 * boxlen) dr.x += boxlen;
+    double r = sqrt(dr.x * dr.x + dr.y * dr.y + dr.z * dr.z);
+    if (r == 0)
+        return 0.0; // Avoid self-interaction
+    return (q1 * q2 / r) * exp(-kappa * r);
+}
+// Debye-Hückel potential with periodic boundaries in y but not x
+double ESP::dh_channelY( Vec3d p1,  Vec3d p2, double q1, double q2){
+    if (q1 == 0.0 || q2 == 0.0)
+        return 0.0;
+    // Use minimum image convention for periodic boundaries
+    // Vec3d dr = diff_channelY(p1, p2, boxlen);
+    Vec3d dr = p1 - p2;
+    // Apply PBC in y direction
+    if (dr.y > 0.5 * boxlen) dr.y -= boxlen;
+    else if (dr.y < -0.5 * boxlen) dr.y += boxlen;
+    double r = sqrt(dr.x * dr.x + dr.y * dr.y + dr.z * dr.z);
+    if (r == 0) return 0.0; // Avoid self-interaction
+    return (q1 * q2 / r) * exp(-kappa * r);
+}
 // Debye-Hückel potential without periodic boundary conditions
-double ESP::dh_nopbc(const Vec3d p1, const Vec3d p2, double q1, double q2){
+double ESP::dh_NONE(const Vec3d p1, const Vec3d p2, double q1, double q2){
     if (q1 == 0.0 || q2 == 0.0) return 0.0;
     double dx = p1.x - p2.x;
     double dy = p1.y - p2.y;
@@ -78,7 +124,7 @@ double ESP::dh_nopbc(const Vec3d p1, const Vec3d p2, double q1, double q2){
     if (r == 0) return 0.0;  // Avoid self-interaction
     return (q1 * q2 / r) * exp(-kappa * r);
 }
-
+//
 double ESP::debye_huckel_ipart(Vec3d *Pos, int idx, int N){
     double total_potential = 0.0;
     double charge1 = charges[idx];

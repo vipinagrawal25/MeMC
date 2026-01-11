@@ -7,6 +7,7 @@
 #include "mesh.hpp"
 #include "vector.hpp"
 #include "modules/sparse_celllist.hpp"
+// # include "celllist.hpp" -- if you do not want sparse representation
 
 class SelfAvoid: public CellList {
 public:

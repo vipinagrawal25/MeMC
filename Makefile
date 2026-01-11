@@ -66,9 +66,14 @@ cleanfols:
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "mc_log" -exec rm -f {} \; -print; done
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "restartindex.txt" -exec rm -f {} \; -print; done
 	@make cleanvtk
+	@make cleanpng
 	
 cleanvtk:
 	@echo "Deleting files matching $(VTK_PATTERN) in directories named like 00000, 00001, etc..."
+	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(VTK_PATTERN)" -exec rm -f {} \; -print; done
+
+cleanpng:
+	@echo "Deleting files matching $(PNG_PATTERN) in directories named like 00000, 00001, etc..."
 	@for dir in $(DIRS); do find "$$dir" -maxdepth 1 -name "$(VTK_PATTERN)" -exec rm -f {} \; -print; done
 
 curv: $(object) obj/curv.o
@@ -90,4 +95,5 @@ obj/gradient.o: tests/gradient.cpp $(includes)
 OUT_PATTERN = *.out
 SNAP_PATTERN = snap_*.h5
 VTK_PATTERN = snap_*.vtk
+PNG_PATTERN = snap_*.png
 OTHER_FILES = mc_log restartindex.txt

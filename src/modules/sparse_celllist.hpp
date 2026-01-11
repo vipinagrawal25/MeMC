@@ -15,7 +15,6 @@ public:
     void buildCellList(MESH_p mesh) {
         // Clear previous cell lists
         cellList_.clear();
-
         // Assign particles to cells
         for (int i = 0; i < mesh.N; ++i) {
             int cellIdx = getCellIndex(mesh.pos[i].x, mesh.pos[i].y, mesh.pos[i].z, minL);
@@ -58,7 +57,7 @@ protected:
         int z = cellIdx / (numCells_ * numCells_);
         int y = (cellIdx % (numCells_ * numCells_)) / numCells_;
         int x = cellIdx % numCells_;
-
+        
         // Loop through neighboring cells in 3x3x3 cube
         for (int dz = -1; dz <= 1; ++dz) {
             for (int dy = -1; dy <= 1; ++dy) {
@@ -81,6 +80,7 @@ protected:
         }
         return false;
     }
+    
 };
 
 #endif // CELLLIST_HPP

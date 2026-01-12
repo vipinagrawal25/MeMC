@@ -80,7 +80,16 @@ protected:
         }
         return false;
     }
-    
+
+    bool isNotInArray(int arr[], int size, int value){
+        for (int i = 0; i < size; ++i){
+            if (arr[i] == value){
+                return false;
+            }
+        }
+        return true;
+    }
+
 };
 
 #endif // CELLLIST_HPP

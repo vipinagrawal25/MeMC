@@ -13,7 +13,6 @@ SelfAvoid::SelfAvoid(MESH_p mesh, string fname){
   boxSize_ = 2*(mesh.radius-minL);
   numCells_ = static_cast<int>(boxSize_ / cutoff_);
   cellSize_ = boxSize_/numCells_;
-
   // cellList_.resize(numCells_ * numCells_ * numCells_);
 }
 //
@@ -39,19 +38,19 @@ double SelfAvoid::computeSelfRep(MESH_p mesh, int idx) {
   std::vector<int> neighbors = getNeighboringCells(cellIdx);
   Vec3d p1 = mesh.pos[idx];
   double EselfRep = 0.0;
-  double sigr2 = 0.0;
+  // double sigr2 = 0.0;
 
-  // std::cout << particles_[idx].x << " " << particles_[idx].y << " " << particles_[idx].z << std::endl;
-  for (int j : cellList_[cellIdx]){
-    if(isInArray((int *)(mesh.node_nbr_list + cm_idx), num_nbr, j)){
-        EselfRep += LJ(p1, mesh.pos[j]);
-        // Example Lennard-Jones force
-     } 
-  }
+  // std::cout << particles_[idx].x << " " << particles_[idx].y << " "
+  //  << particles_[idx].z << std::endl;
+//   for (int j : cellList_[cellIdx]){
+//     if(isInArray((int *)(mesh.node_nbr_list + cm_idx), num_nbr, j)){
+//         EselfRep += LJ(p1, mesh.pos[j]);
+//      } 
+//   }
   // loop over all the neighbors
   for (int neighborIdx : neighbors) {
     for (int j : cellList_[neighborIdx]){
-      if(isInArray((int *)(mesh.node_nbr_list + cm_idx), num_nbr, j)){
+      if(isNotInArray((int *)(mesh.node_nbr_list + cm_idx), num_nbr, j)){
         EselfRep += LJ(p1, mesh.pos[j]);
       }
     }
@@ -65,5 +64,5 @@ double SelfAvoid::totalRepulsiveEnergy(MESH_p mesh){
   for(i=0; i< mesh.N; i++){
     et += computeSelfRep(mesh, i);
   }
-  return et;
+  return 0.5*et;
 }

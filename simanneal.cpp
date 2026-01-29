@@ -115,7 +115,7 @@ int main(int argc, char *argv[]){
     mcobj.write_energy(fileptr, iter, mesh);
 
     //
-    for(int cycle = 0; cycle<mcobj.ncycles(); cycle++){
+    for(int cycle = 0; cycle<5; cycle++){
         mcobj.startcycle(cycle);
         for(int anneal=0; anneal < 6; anneal++){
             mcobj.updateparam(anneal, outfolder);

@@ -176,20 +176,19 @@ double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
 }
 /*------------------------*/
 double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
-    /// @brief Estimate the total Bending energy
-    ///  @param Pos array containing co-ordinates of all the particles
-    ///  @param mesh mesh related parameters -- connections and neighbours
-    /// information;
-    ///  @param para  Membrane related parameters;
-    /// @return Total Bending energy
+    if(!bend_cache.empty()){
+        int st_idx = get_nstart(mesh.N, mesh.bdry_type);
+        double be = 0e0;
+        for(int idx = st_idx; idx < mesh.N; idx++)
+            be += bend_cache[idx];
+        return be;
+    }
+    // fallback if cache not initialised
     int idx, st_idx;
     int num_nbr, cm_idx;
-    double be;
-    be = 0e0;
-    //
+    double be = 0e0;
     st_idx = get_nstart(mesh.N, mesh.bdry_type);
     for(idx = st_idx; idx < mesh.N; idx++){
-        /* idx = 2; */
         cm_idx = idx*mesh.nghst;
         num_nbr = mesh.numnbr[idx];
         be += bending_energy_ipart(pos,

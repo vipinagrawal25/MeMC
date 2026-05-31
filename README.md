@@ -1,6 +1,10 @@
-# MeMC
+# MeMC — semisolid branch
 
 MeMC is an open-source Monte Carlo package for simulating elastic membranes. It is designed to study the mechanics of biological nano-vesicles (e.g. exosomes) where thermal fluctuations renormalize elastic constants. The package supports both spherical shells and flat membranes, fluid and tethered topology, and AFM indentation experiments.
+
+This branch (`semisolid`) extends the base code with:
+- **Semisolid membranes** — a subset of nodes is pinned to a fixed triangulation (no bond flips), while the rest remains fluid. The solid node set is loaded from `solid_index.h5`.
+- **Shear deformation** — an affine shear strain is applied to the initial configuration before the MC run begins. The frame is held fixed at the sheared positions throughout the simulation.
 
 For the physical background see `paper/paper.pdf`.
 
@@ -10,11 +14,12 @@ For the physical background see `paper/paper.pdf`.
 
 ```
 MeMC/
-├── start/       — generates equilibrated initial positions (LJ randomisation)
-├── memc/        — main Monte Carlo simulation
-├── utils/       — pre/post-processing Python scripts
-├── docs/        — API documentation (Doxygen)
-└── paper/       — manuscript and figures
+├── start/        — generates equilibrated initial positions (LJ randomisation)
+├── memc/         — main Monte Carlo simulation (semisolid + shear)
+│   └── old/      — reference: previous flat-struct implementation
+├── utils/        — pre/post-processing Python scripts
+├── docs/         — API documentation (Doxygen)
+└── paper/        — manuscript and figures
 ```
 
 ---
@@ -244,9 +249,37 @@ Key parameters:
 | `Stretchpara` | `YY` | 2D Young's modulus |
 | `mcpara` | `dfac` | Step-size divisor (larger = smaller steps) |
 | `mcpara` | `is_fluid` | Enable bond-flip moves for fluid membrane |
+| `mcpara` | `is_semisolid` | Enable semisolid mode (requires `solid_index.h5`) |
+| `mcpara` | `num_solid_points` | Number of solid (non-flipping) nodes |
 | `mcpara` | `fluidize_every` | Bond-flip sweep every N MC iterations |
 | `Volpara` | `do_volume` | Enable volume constraint |
 | `afmpara` | `do_afm` | Enable AFM tip potential |
+| `shearpara` | `do_shear` | Apply affine shear to initial config |
+| `shearpara` | `slope` | Shear strain γ (Δx per unit y) |
+| `shearpara` | `constant` | Frame spring constant (unused in set-and-run mode) |
+
+#### Semisolid namelist
+
+```fortran
+&mcpara
+...
+is_fluid        = T
+is_semisolid    = T
+num_solid_points = 200
+fluidize_every  = 10
+/
+```
+
+#### Shear namelist
+
+```fortran
+&shearpara
+do_shear   = T
+slope      = 0.1
+constant   = 0.0
+shear_every = 0
+/
+```
 
 ---
 
@@ -317,10 +350,21 @@ python utils/viz_memc.py <snap.h5> <output.vtk>
 | Script | Purpose |
 |---|---|
 | `utils/makeinput.py` | Build `input.h5` from a start snapshot (auto-detects flat/sphere) |
+| `utils/makesolidpts.py` | Generate `solid_index.h5` for semisolid simulations |
 | `utils/viz_memc.py` | Convert snapshot to VTK |
 | `utils/check_status.py` | Diagnose bad runs |
 | `utils/check_plot.py` | Plot energy traces |
 | `utils/paramio.py` | Read/write parameter files |
+
+#### Generating solid points
+
+```bash
+python utils/makesolidpts.py 00000/input.h5 200 --bdry_type 1 --seed 42
+# writes: 00000/solid_index.h5
+```
+
+Nodes in the frame and their direct neighbours are excluded from selection.
+The remaining `num_solid_points` nodes are chosen at random.
 
 ---
 

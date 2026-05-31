@@ -1,8 +1,7 @@
 # HOST=norlx65
 # include hosts/$(HOST)
 # CC = mpic++
-CC=mpic++ -O3 -w  -L/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/lib/ \
-	-I/home/vipin-agrawal/opt/hdf5/HDF_Group/HDF5/1.12.3/include/
+CC=mpic++ -O3 -w
 #
 opt=-O3
 # opt=-pg

@@ -29,9 +29,9 @@ string ZeroPadNumber(T num){
     return ss.str();
 }
 
-void scale_pos(Vec3d *pos, double R, int N){
+void scale_pos(Vec3d *pos, double R, int N, int bdry_type){
+  if(bdry_type == 1) return;   // flat membrane: positions already in physical units
   for(int i = 0; i<N; i++) pos[i] = pos[i]*R;
-  // for (Vec3d elem : pos) elem = R*elem;
 }
 
 double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, STICK &stickobj, string outfolder,
@@ -44,12 +44,12 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, STI
 
     if(!mcobj.isrestart()){
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
-        scale_pos(Pos, radius, mesh.N);
+        scale_pos(Pos, radius, mesh.N, mesh.bdry_type);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         ave_bond_len = stretchobj.init_eval_lij_t0(Pos, mesh, mcobj.isfluid());
         stickobj.identify_attractive_part(Pos);
-        residx = 0; 
+        residx = 0;
         // init_spcurv(spcurv_para, Pos, mbrane_para.N);
         // if(stick_para.do_stick)
             // identify_attractive_part(Pos, stick_para.is_attractive, stick_para.theta, mbrane_para.N);
@@ -58,7 +58,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, STI
     }else{
         hdf5_io_read_double( (double *)Pos,  outfolder+"/input.h5", "pos");
         stickobj.identify_attractive_part(Pos);
-        scale_pos(Pos, radius, mesh.N);
+        scale_pos(Pos, radius, mesh.N, mesh.bdry_type);
         hdf5_io_read_mesh((int *) mesh.numnbr,
                 (int *) mesh.node_nbr_list, outfolder+"/input.h5");
         ave_bond_len = stretchobj.init_eval_lij_t0(Pos, mesh, mcobj.isfluid());
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]){
         }
         num_moves = mcobj.monte_carlo_3d(Pos, mesh);
         if(mcobj.isfluid() && iter%mcobj.fluidizeevery()==0){
-          num_bond_change = mcobj.monte_carlo_fluid(Pos, mesh, av_bond_len, outfolder, iter);
+          num_bond_change = mcobj.monte_carlo_fluid(Pos, mesh, av_bond_len);
             outfile_terminal << "fluid stats " << num_bond_change <<
             " bonds flipped" << endl;
         }

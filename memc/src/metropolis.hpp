@@ -18,7 +18,7 @@ public :
                                               actobj(actobj), celllistobj(celllistobj) {};
   int monte_carlo_3d(Vec3d *pos, MESH_p mesh);
   double energy_mc_3d(Vec3d *pos, MESH_p mesh,  int );
-  int monte_carlo_fluid(Vec3d *, MESH_p, double, string, int);
+  int monte_carlo_fluid(Vec3d *, MESH_p, double);
   bool Boltzman(double DE, double activity);
   bool Glauber(double DE, double activity);
   int initMC(int, std::string);

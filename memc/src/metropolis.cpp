@@ -304,21 +304,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
 }
 // //
 
-void PrintEnergy(vector<double> &Ebend_before, vector <double> &Ebend_after,
-                 vector<double> &Estretch_before, vector <double> &Estretch_after, string outfolder, int iter){
-
-  fstream dumpfile(outfolder+"/Flip_ener_"+ZeroPadNumber(iter)+".dat", ios::out);
-  for(int i = 0; i< Ebend_before.size(); i++){
-    dumpfile << Ebend_before[i] << " " << Ebend_after[i] << " "
-             << Estretch_before[i] << " " << Estretch_after[i] << " "
-             << endl;
- }
-  dumpfile.close();
-  
-}
-
-
-int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len, string folder, int iter) {
+int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len) {
 
   int i, j, move;
   int nnbr_del1;
@@ -335,9 +321,6 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len, string f
   int N_nbr_add2, N_nbr_add1;
   double det1, det2;
   Vec3d bef_ij, aft_ij;
-  vector <double> Ebend_before, Ebend_after;
-  vector <double> Estretch_before, Estretch_after;
-  double KAPPA;
   bool yes, logic;
 
   nframe = get_nstart(mesh.N, mesh.bdry_type);
@@ -387,30 +370,8 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len, string f
       flip_condt3 =  N_nbr_add1 < 9 && N_nbr_add2 < 9;
 
       accept_flip = flip_condt1 && flip_condt2 && flip_condt3;
-      double E1, E2, E3, E4, E5, E6, E7, E8;
       if (accept_flip) {
         move = move + 1;
-        
-        E1 = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_add1), N_nbr_add1, idx_add1);
-        E2 = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_add1), N_nbr_add1, idx_add1, mesh.nghst);
-
-        E3 = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_add2), N_nbr_add2, idx_add2);
-        E4 = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_add2), N_nbr_add2, idx_add2, mesh.nghst);
-
-        E5 = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_del1), N_nbr_del1, idx_del1);
-        E6 = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_del1), N_nbr_del1, idx_del1, mesh.nghst);
-
-        E7 = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_del2), N_nbr_del2, idx_del2);
-        E8 = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_del2), N_nbr_del2, idx_del2, mesh.nghst);
-
-        Ebend_before.push_back(E1+E3+E5+E7);
-        Estretch_before.push_back(E2+E4+E6+E8);
-
-        /* print_sanity(pos, mesh.node_nbr_list+cm_idx_del1,
-         * mesh.node_nbr_list+cm_idx_del2, */
-        /*         mesh.node_nbr_list+cm_idx_add1,
-         * mesh.node_nbr_list+cm_idx_add2, */
-        /*         idx_del1, idx_del2, idx_add1, idx_add2, (char*)"bef", i); */
 
         memcpy(nbr_del_1, &mesh.node_nbr_list[cm_idx_del1],
                sizeof(int) * mesh.nghst);
@@ -444,37 +405,7 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len, string f
                sizeof(int) * mesh.nghst);
         mesh.numnbr[idx_add1] = N_nbr_add1;
         mesh.numnbr[idx_add2] = N_nbr_add2;
- 
-
-        E1 = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_add1), N_nbr_add1, idx_add1);
-        E2 = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_add1), N_nbr_add1, idx_add1, mesh.nghst);
-
-        E3 = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_add2), N_nbr_add2, idx_add2);
-        E4 = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_add2), N_nbr_add2, idx_add2, mesh.nghst);
-
-        E5 = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_del1), N_nbr_del1, idx_del1);
-        E6 = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_del1), N_nbr_del1, idx_del1, mesh.nghst);
-
-        E7 = beobj.bending_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_del2), N_nbr_del2, idx_del2);
-        E8 = steobj.stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx_del2), N_nbr_del2, idx_del2, mesh.nghst);
-
-        Ebend_after.push_back(E1+E3+E5+E7);
-        Estretch_after.push_back(E2+E4+E6+E8);
-
-
-        // print out the output before and after//
-
-            /* exit(0); */
       }
   }
-  if(iter%100 == 0){
-  PrintEnergy(Ebend_before, Ebend_after, Estretch_before, Estretch_after, folder, iter);
-  }
-  Ebend_before.clear();
-  Estretch_before.clear();
-  Ebend_after.clear();
-  Estretch_after.clear();
-  /* } */
-
   return move;
 }

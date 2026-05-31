@@ -2,23 +2,41 @@ import numpy as np
 import h5py, os, sys, quaternion
 import vtkio as vtk
 from numpy import linalg as LA
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, Delaunay
 
 def read_data(filename):
     pos= h5py.File(filename)["pos"][()]
     pos= np.asarray(pos)
     Np = int(len(pos)/2)
     pts_sph = pos.reshape(Np,2)
-    pts_cart = np.asarray([[np.sin(theta)*np.cos(phi), 
+    pts_cart = np.asarray([[np.sin(theta)*np.cos(phi),
                 np.sin(theta)*np.sin(phi),
                 np.cos(theta)] for theta, phi in pts_sph]
                 )
     return Np, pts_sph, pts_cart
 
+def read_data_flat(filename):
+    pos = h5py.File(filename)["pos"][()]
+    pos = np.asarray(pos)
+    Np = int(len(pos)/2)
+    pts = pos.reshape(Np, 2)   # (x, y) 2D Cartesian
+    return Np, pts
+
 def triangulate(rr):
     hull = ConvexHull(rr)
     triangles = hull.simplices
     return triangles
+
+def generate_vertex_neighbors(faces, num_vertices):
+    vertex_neighbors = [set() for _ in range(num_vertices)]
+    for face in faces:
+        v0, v1, v2 = face
+        vertex_neighbors[v0].update([v1, v2])
+        vertex_neighbors[v1].update([v0, v2])
+        vertex_neighbors[v2].update([v0, v1])
+    num_neighbors = np.array([len(n) for n in vertex_neighbors], dtype=np.int32)
+    all_neighbors = np.array([v for n in vertex_neighbors for v in sorted(n)], dtype=np.int32)
+    return num_neighbors, all_neighbors
 
 def sort_simplices(cells):
     lsimples = len(cells)
@@ -99,7 +117,7 @@ def sort_nbrs(R, Np, cmlst, node_nbr):
         nbrs=node_nbr[cmlst[i]:cmlst[i+1]]  # neighbours of ith node
         vector=R[i]
         # I will rotate the coordinate system about this vector
-        vhat = np.cross(vector,zhat)       
+        vhat = np.cross(vector,zhat)
         vnorm = LA.norm(vhat)
         # If the vector is already lying at z-axis then there is no need to rotate.
         if vnorm>1e-16:
@@ -111,7 +129,18 @@ def sort_nbrs(R, Np, cmlst, node_nbr):
             sorted_indices = sort_2Dpoints_theta(rotated[:,0],rotated[:,1])[0]
             node_nbr[cmlst[i]:cmlst[i+1]]=nbrs[sorted_indices]
     return node_nbr
-    #
+
+def new_way_nbrs_2d(pts, cmlist, node_nbr, Np, nghst=12):
+    """Sort neighbours anticlockwise by arctan2 and pack into fixed-stride array."""
+    new_nbr = np.full(nghst * Np, -1, dtype=int)
+    for ip in range(Np):
+        nbrs = node_nbr[cmlist[ip]:cmlist[ip+1]]
+        num_nbr = len(nbrs)
+        angles = np.arctan2(pts[nbrs, 1] - pts[ip, 1], pts[nbrs, 0] - pts[ip, 0])
+        angles[angles < 0] += 2 * np.pi
+        nnbrs = nbrs[np.argsort(angles)]
+        new_nbr[ip*nghst : ip*nghst + num_nbr] = nnbrs
+    return new_nbr
 
 def write_hdf5(R, cmlst, node_nbr, posfile):
     hf = h5py.File(posfile,'w')
@@ -142,13 +171,28 @@ def new_way_nbrs(cmlist, node_nbr, nghst=12):
 
 inf = sys.argv[1]
 outf = sys.argv[2]
-Np, pts_sph, pts_cart = read_data(inf)
-triangles = triangulate(pts_cart)
-sort_tri = sort_simplices(triangles)
-cmlist, node_nbr = neighbours(Np, sort_tri)
-node_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr)
-new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=12)
-ncmlist = np.diff(cmlist)
-write_hdf5(pts_cart, ncmlist, new_nbr, outf+"/input.h5")
 
-vtk.vtk_points(outf+"/input.vtk", pts_cart, triangles)
+# Auto-detect flat 2D vs spherical: flat coords exceed theta range [0, pi]
+_probe = h5py.File(inf)["pos"][()]
+_is_flat = (_probe.reshape(-1, 2)[:, 0].max() > np.pi)
+
+if _is_flat:
+    Np, pts = read_data_flat(inf)
+    tri = Delaunay(pts, furthest_site=False)
+    ncmlist, node_nbr_flat = generate_vertex_neighbors(tri.simplices, Np)
+    cmlist = np.zeros(Np + 1, dtype=int)
+    cmlist[1:] = np.cumsum(ncmlist)
+    new_nbr = new_way_nbrs_2d(pts, cmlist, node_nbr_flat, Np, nghst=12)
+    pts_out = np.hstack([pts, np.zeros((Np, 1))])   # pad z=0 for 3D memc format
+    write_hdf5(pts_out, ncmlist, new_nbr, outf+"/input.h5")
+    vtk.vtk_points(outf+"/input.vtk", pts_out, tri.simplices)
+else:
+    Np, pts_sph, pts_cart = read_data(inf)
+    triangles = triangulate(pts_cart)
+    sort_tri = sort_simplices(triangles)
+    cmlist, node_nbr = neighbours(Np, sort_tri)
+    node_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr)
+    new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=12)
+    ncmlist = np.diff(cmlist)
+    write_hdf5(pts_cart, ncmlist, new_nbr, outf+"/input.h5")
+    vtk.vtk_points(outf+"/input.vtk", pts_cart, triangles)

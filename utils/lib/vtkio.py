@@ -32,7 +32,7 @@ def vtk_points_scalar(infile, points, scalar, name_scalar='points_data'):
     """
     Np = np.shape(points)[0]
     Nscalar = np.shape(scalar)[0]
-    #
+
     if(Np != Nscalar):
         print ("Error:: the dimension of points and scalar should be same") 
     else:
@@ -65,4 +65,36 @@ def cells_cells_scalar(infile,
             for p in scalar:
                 f.write("%16.8f\n" %(p))
 #
+
+
+def vtk_solid(infile, pts, solid_id, nnbr_solid_id, tri_solid):
+    "triangulates only the solid points and dumps it in a file."
+    Np = len(solid_id)
+    for sl_id in nnbr_solid_id:
+        Np = Np + len(sl_id)
+    num_triangles = len(tri_solid)
+    ## write the headers of the file
+    with open(infile, "w") as f:
+        f.write('# vtk DataFile Version 2.0 \n')
+        f.write('grid, time 110\n')
+        f.write('ASCII \n')
+        f.write('DATASET POLYDATA \n')
+        f.write('POINTS  '+str(Np)+'  float\n')
+        for itr,i_ in enumerate(solid_id):
+            f.write("%16.8f %16.8f %16.8f\n" %(pts[i_,0], pts[i_,1], pts[i_,2]))
+            for j_ in nnbr_solid_id[itr]:
+                f.write("%16.8f %16.8f %16.8f\n" %(pts[j_,0], pts[j_,1], pts[j_,2]))
+        f.write('TRIANGLE_STRIPS  '+str(num_triangles)+'  '
+                +str(4*num_triangles) + '\n')
+        for tri in tri_solid:
+            f.write("%d %d %d %d\n " %(3, tri[0], tri[1], tri[2]))
+
+
+def vtkScatter(infile, pts):
+    f = open(infile, 'w')
+    f.write("#x y z v\n" )
+    for pt in pts:
+        f.write("%0.5f %0.5f %0.5f 0.1\n" %(pt[0], pt[1], pt[2]))
+        f.write("%0.5f %0.5f %0.5f 0.1\n" %(pt[0], pt[1], pt[2]))
+    f.close()
 

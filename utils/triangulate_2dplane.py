@@ -7,19 +7,16 @@ from scipy.spatial import Delaunay
 
 #+end_src
 
-#+RESULTS:
-
-
 
 #+begin_src python :session py2
 
 def read_data(filename):
-    # pos = h5py.File(filename)["pos"][()]
-    # pos = np.asarray(pos)
-    # Np = int(len(pos)/2)
-    # pts = pos.reshape(Np,2)
-    pts = np.loadtxt(filename)
-    Np = len(pts);
+    pos = h5py.File(filename)["pos"][()]
+    pos = np.asarray(pos)
+    Np = int(len(pos)/2)
+    pts = pos.reshape(Np,2)
+    # pts = np.loadtxt(filename)
+    # Np = len(pts);
     return Np, pts
 
 def sort_simplices(cells):
@@ -54,63 +51,28 @@ def neighbours(Np, simpl):
 
 
 
-def write_hdf5(R, cmlst, node_nbr,  posfile, file):
-    if file.split(".")[-1]=="h5":
+def write_hdf5(R, cmlst, node_nbr,  posfile):
+    if posfile.split(".")[-1]=="h5":
         pass
     else:
-        file=file+".h5"
+        posfile=posfile+".h5"
     hf = h5py.File(posfile,'w')
     hf.create_dataset('pos',data=R.reshape(-1))
-    hf.close()
+    # hf.close()
 
-    hf = h5py.File(file,'w')
+    # hf = h5py.File(file,'w')
     hf.create_dataset('cumu_list',data=cmlst.astype(np.int32))
     hf.create_dataset('node_nbr',data=node_nbr.astype(np.int32))
     hf.close()
 
-
-def read_hdf5(posfile, file):
-    if file.split(".")[-1]=="h5":
-        pass
-    else:
-        file=file+".h5"
-    hf = h5py.File(posfile,'r')
-    R = hf["pos"][()]
-    hf.close()
-
-    hf = h5py.File(file,'r')
-    cmlst = hf["cumu_list"][()]
-    node_nbr = hf["node_nbr"][()]
-    hf.close()
-    return R, cmlst, node_nbr
-
-
-# def write_file(pts_cart, cmlist, node_nbr):
-#     file = open("../Examples/pts.bin", "wb")
-#     file.write(pts_cart)
-#     file.close()
-
-#     file = open("../Examples/mesh.bin", "wb")
-#     file.write(cmlist)
-#     file.write(node_nbr)
-#     file.close()
-
-#+end_src
-
-#+RESULTS:
-
-#+begin_src python :session py2 :results output
-
-# file = '../Examples/cart_256.dat'
-file = '../Examples/cart_frame_256.dat'
-
-# file = 'test.dat'
 def read_simplices(file):
     simplices = []
     data = np.loadtxt(file, dtype=int)
     for it in range(0,len(data)):
         simplices.append([data[it,0], data[it,1], data[it,2]])
     return simplices
+
+
 
 def new_way_nbrs(cmlist, node_nbr, nghst=12):
     new_nbr = np.zeros(nghst*Np, dtype=int)
@@ -121,13 +83,11 @@ def new_way_nbrs(cmlist, node_nbr, nghst=12):
         angles = []
         for i in nbrs:
             dx = pts[i,0]-pts[ip,0]
-            if(dx >= 0.5): dx = dx - 1.0
-            if(dx < -0.5): dx = dx + 1.0
+            if(dx >= 0.5*lenth): dx = dx - lenth
+            if(dx < -0.5*lenth): dx = dx + lenth
             dy = pts[i,1]-pts[ip,1]
-            if(dy >= 0.5):
-                print('cond met')
-                dy = dy - 1.0
-            if(dy < -0.5): dy = dy + 1.0
+            if(dy >= 0.5*lenth): dy = dy - lenth
+            if(dy < -0.5*lenth): dy = dy + lenth
             angles.append(np.arctan2(dy, dx))
         angles = np.asarray(angles)
         idx = np.where(angles < 0)
@@ -139,35 +99,25 @@ def new_way_nbrs(cmlist, node_nbr, nghst=12):
 
     return new_nbr
 
-
-nghst = 12
+lenth = 2*np.pi
+file = sys.argv[1]
+print(file)
 Np, pts = read_data(file)
+# pts = pts/(2*np.pi)
 pts_3d = np.zeros(shape=(Np, 3), dtype=float)
 pts_3d[:,0] = pts[:,0]
 pts_3d[:,1] = pts[:,1]
 tri = Delaunay(pts, furthest_site = False)
-simplices = read_simplices('simplices_new_256.dat')
-# fig, ax = plt.subplots()
-# ax.triplot(pts_3d[:,0], pts_3d[:,1], tri.simplices)
-# ax.plot(pts_3d[:,0], pts_3d[:,1], 'o')
-# plt.show()
+# simplices = read_simplices('simplices_new_256.dat')
 ng = 12
 sort_tri = sort_simplices(tri.simplices)
 cmlist, node_nbr = neighbours(Np, sort_tri)
-new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=12)
+new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=ng)
 ncmlist = np.diff(cmlist)
+fig, ax = plt.subplots()
+ax.triplot(pts[:,0], pts[:,1], tri.simplices)
+plt.show()
 
-#+end_src
-
-#+RESULTS:
-
-
-#+begin_src python :session py2 :results output
-
-# for i, s1 in enumerate(simplices):
-#     s1_s = np.sort(s1)
-#     if(s1_s[0] == 0):print(s1_s)
-ng = nghst
 nn_nbr = np.zeros(ng*Np, dtype=int)
 nn_nbr[:] = -1
 for i in range(0,Np):
@@ -187,59 +137,27 @@ for i in range(0,Np):
       k = cidx + j
       if(nn_nbr[k] != -1): ncml[i] = ncml[i] + 1;
 
-write_hdf5(pts_3d,  ncml, nn_nbr, 'conf/inp_pos.h5', 'conf/nbrs.h5')
+write_hdf5(pts_3d,  ncml, nn_nbr, sys.argv[2])
 
 #+end_src
 
 #+RESULTS:
 
 
-#+begin_src python :session py2 :results output
+##+begin_src python :session py2 :results output
 
-for i in range(0,Np):
-    fig, ax = plt.subplots()
-    idx = i
-    ax.triplot(pts_3d[:,0], pts_3d[:,1], tri.simplices)
-    ax.plot(pts_3d[idx,0], pts_3d[idx,1], 'o', markerfacecolor='none')
-    cuidx = nghst*idx
-    nnbr_idx = ncml[idx]
-    e = cuidx + nnbr_idx
-    nidx = nn_nbr[cuidx:e]
-    ax.plot(pts_3d[nidx,0], pts_3d[nidx,1], 's', color='tab:red')
-    fig.savefig('snap/0'+str(i)+'.png')
-    plt.close()
-
-
-
-#+end_src
-
-#+RESULTS:
+#for i in range(0,Np):
+#    fig, ax = plt.subplots()
+#    idx = i
+#    ax.triplot(pts_3d[:,0], pts_3d[:,1], tri.simplices)
+#    ax.plot(pts_3d[idx,0], pts_3d[idx,1], 'o', markerfacecolor='none')
+#    cuidx = nghst*idx
+#    nnbr_idx = ncml[idx]
+#    e = cuidx + nnbr_idx
+#    nidx = nn_nbr[cuidx:e]
+#    ax.plot(pts_3d[nidx,0], pts_3d[nidx,1], 's', color='tab:red')
+#    fig.savefig('snap/0'+str(i)+'.png')
+#    plt.close()
 
 
 
-#+begin_src python :session py2 :results output
-
-def new_way_nbrs(cmlist, node_nbr, nghst=12):
-    new_nbr = np.zeros(nghst*Np, dtype=int)
-    new_nbr[:] = -1
-    print(new_nbr)
-    for ip in range(0, Np):
-        nbrs = node_nbr[cmlist[ip]:cmlist[ip+1]]
-        num_nbr = -(cmlist[ip]-cmlist[ip+1])
-        nnbrs = nbrs
-        st_idx = int(ip*nghst); end_idx = int(ip*nghst + num_nbr)
-        new_nbr[st_idx:end_idx] = nnbrs[:]
-    return new_nbr
-
-Np = 512
-
-
-pts_3d, cmlist, node_nbr = read_hdf5('../Examples/conf/dmemc_pos.h5', '../Examples/conf/dmemc_conf.h5')
-new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=12)
-ncmlist = np.diff(cmlist)
-write_hdf5(pts_3d,  ncmlist, new_nbr, 'conf/inp_pos.h5', 'conf/nbrs.h5')
-
-
-#+end_src
-
-#+RESULTS:

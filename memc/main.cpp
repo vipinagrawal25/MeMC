@@ -150,8 +150,9 @@ int main(int argc, char *argv[]){
     // stickobj.initSTICK(mesh.N, outfolder);
     actobj.initACT(mesh.N, outfolder);
     // celllistobj.initCelllist(outfolder);
-    av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, stickobj, outfolder, radius, 
+    av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, stickobj, outfolder, radius,
                 residx);
+    bendobj.initBendCache(Pos, mesh);
     clock_t timer;
     Etot = mcobj.evalEnergy(Pos, mesh, fileptr, residx);
     mcobj.setEneVol(radius);

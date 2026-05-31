@@ -245,12 +245,23 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
   nframe = get_nstart(mesh.N, mesh.bdry_type);
   acceptedmoves = 0;
 
+  double bend_new[13]; // max nghst + 1
+
   for (i = 0; i < one_mc_iter; i++) {
     int idx = RandomGenerator::intUniform(nframe, mesh.N-1);
     cm_idx = idx*mesh.nghst;
     num_nbr = mesh.numnbr[idx];
-    Eini = energy_mc_3d(pos, mesh, idx);
-    vol_i = steobj.volume_ipart(pos, (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
+    int *nbr_list = mesh.node_nbr_list + cm_idx;
+
+    // --- Eini: use cached per-node bending values (no evaluation) ---
+    double Eini_bend = beobj.bend_cache[idx];
+    for(int k = 0; k < num_nbr; k++) Eini_bend += beobj.bend_cache[nbr_list[k]];
+    double Eini_rest = steobj.stretch_energy_ipart(pos, nbr_list, num_nbr, idx, mesh.nghst)
+                     + stickobj.stick_energy_ipart(pos[idx], idx);
+    if(celllistobj.isSelfRepulsive()) Eini_rest += celllistobj.computeSelfRep(pos, mesh, idx);
+    Eini = Eini_bend + Eini_rest;
+
+    vol_i = steobj.volume_ipart(pos, nbr_list, num_nbr, idx);
     //
     x_o = pos[idx].x; y_o = pos[idx].y; z_o = pos[idx].z;
     //
@@ -261,8 +272,22 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
     x_n = x_o + dxinc; y_n = y_o + dyinc; z_n = z_o + dzinc;
     //
     pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
-    //
-    Efin = energy_mc_3d(pos, mesh, idx);
+
+    // --- Efin: compute fresh bending for idx and all its neighbours ---
+    bend_new[0] = beobj.bending_energy_ipart(pos, nbr_list, num_nbr, idx);
+    double Efin_bend = bend_new[0];
+    for(int k = 0; k < num_nbr; k++){
+        int nbr = nbr_list[k];
+        int nbr_cm = nbr * mesh.nghst;
+        bend_new[k+1] = beobj.bending_energy_ipart(pos,
+                (int *)(mesh.node_nbr_list + nbr_cm), mesh.numnbr[nbr], nbr);
+        Efin_bend += bend_new[k+1];
+    }
+    double Efin_rest = steobj.stretch_energy_ipart(pos, nbr_list, num_nbr, idx, mesh.nghst)
+                     + stickobj.stick_energy_ipart(pos[idx], idx);
+    if(celllistobj.isSelfRepulsive()) Efin_rest += celllistobj.computeSelfRep(pos, mesh, idx);
+    Efin = Efin_bend + Efin_rest;
+
     de = (Efin - Eini);
 
     vol_f = steobj.volume_ipart(pos,
@@ -294,6 +319,10 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
       acceptedmoves +=  1;
       EneMonitored += de;
       VolMonitored += 2*dvol;
+      // update bend cache for idx and all its neighbours
+      beobj.bend_cache[idx] = bend_new[0];
+      for(int k = 0; k < num_nbr; k++)
+        beobj.bend_cache[nbr_list[k]] = bend_new[k+1];
     } else {
       pos[idx].x = x_o;
       pos[idx].y = y_o;

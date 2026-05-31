@@ -95,7 +95,7 @@ double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
     int idx, st_idx;
     int num_nbr, cm_idx;
     double se;
-    // st_idx = get_nstart(para.N, para.bdry_type);
+    st_idx = get_nstart(mesh.N, mesh.bdry_type);
     se = 0e0;
     for(idx = st_idx; idx < mesh.N; idx++){
         /* idx = 2; */

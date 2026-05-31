@@ -61,10 +61,10 @@ void diag_wHeader(MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
     fflush(fid);
 }
 
-double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0, 
+double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double *lij_t0,
         MBRANE_p mbrane_para, AREA_p area_para, STICK_p stick_para,
-        VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para, 
-         FILE *fid ){
+        VOL_p vol_para, AFM_p afm_para, ACTIVE_p act_para,
+        SHEAR_p shear_para, FILE *fid ){
     double vol_sph, ar_sph, ini_ar;
     double Ener_t;
     Vec3d afm_force,spring_force[2];
@@ -108,6 +108,10 @@ double diag_energies(double *Et, Vec3d *Pos, Vec3d *Pos_t0, MESH_p mesh, double 
         }
     }
     if (afm_para.do_afm){fprintf(fid, " %g %g %g", afm_force.x, afm_force.y, afm_force.z);}
+    if (shear_para.do_scale_shear){
+        Et[5] = scale_shear_total(Pos, mbrane_para, shear_para);
+        fprintf(fid, " %g", Et[5]);
+    }
     {fprintf(fid, " %g  %g\n", vol_sph, ar_sph );}
     Ener_t = Et[0] + Et[1] + Et[2] + Et[3] + Et[4]+ Et[5]+ Et[6];
     fflush(fid);
@@ -205,6 +209,7 @@ int main(int argc, char *argv[]){
    mesh.sPole = poleidx[1];
     //
     //
+    if(shear_para.do_shear) shear_positions(Pos, mbrane_para.N, shear_para);
 
     mask_frame(mask_ids, mesh, mbrane_para);
     if(fld_para.is_fluid)mbrane_para.av_bond_len = lij_t0[0];
@@ -221,7 +226,7 @@ int main(int argc, char *argv[]){
 
     fprintf(fid , "%d %g", 0, 0.0 );
     Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0,  mbrane_para, area_para,  stick_para,
-         vol_para,  afm_para,  act_para,   fid );
+         vol_para,  afm_para,  act_para,  shear_para, fid );
     *mbrane_para.tot_energy = Ener_t;
     filename = outfolder + "/para.out";
     write_parameters(mbrane_para, mc_para, area_para, fld_para, vol_para,
@@ -270,7 +275,7 @@ int main(int argc, char *argv[]){
 
         fprintf(fid , "%d %g", iter, ((float)num_moves/(float)mc_para.one_mc_iter) );
         Ener_t = diag_energies(Et, Pos, Pos_t0, mesh, lij_t0, mbrane_para, area_para, stick_para,
-                vol_para,  afm_para,  act_para,  fid );
+                vol_para,  afm_para,  act_para,  shear_para, fid );
 
         outfile_terminal << "iter = " << iter << "; Accepted Moves = " 
             << (double) num_moves*100/mc_para.one_mc_iter << " %;"<<  

@@ -120,9 +120,9 @@ double rand_inc_theta(double th0, double dfac) {
   return dth;
 }
 
-double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0, 
-                    int idx, double *area_i, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p, 
-                    VOL_p vol_p, AFM_p afm) {
+double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
+                    int idx, double *area_i, MBRANE_p mbrane, AREA_p area_p, STICK_p st_p,
+                    VOL_p vol_p, AFM_p afm, SHEAR_p shear) {
   /// @brief Estimate the contribution from all the energies when a particle is
   /// moved randomly
   ///  @param Pos array containing co-ordinates of all the particles
@@ -136,7 +136,7 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
   /// @param AFM afm related parameter
   /// @return Change in Energy when idx particle is moved
 
-  double E_b, E_s, E_stick, E_afm, E_spr;
+  double E_b, E_s, E_stick, E_afm, E_spr, E_shr;
   double area_idx;
   Vec2d be_ar;
   int cm_idx, num_nbr;
@@ -148,6 +148,7 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
   E_s = 0.0;
   E_stick = 0.0;
   E_afm = 0.0;
+  E_shr = 0.0;
 
   cm_idx = mesh.nghst * idx;
   num_nbr = mesh.numnbr[idx];
@@ -177,9 +178,10 @@ double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
           E_stick = stick_bottom_surface(pos[idx], pos_t0[idx], st_p); 
 
       if(afm.do_afm) E_afm = lj_afm(pos[idx], afm);
+      if(shear.do_scale_shear) E_shr = scale_shear(pos[idx], shear);
       /* fprintf(stderr, "%d \n", idx); */
 
-  return E_b + E_s + E_stick + E_afm;
+  return E_b + E_s + E_stick + E_afm + E_shr;
 }
 
 int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0, 
@@ -225,7 +227,7 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
       cm_idx = mesh.nghst * idx;
       num_nbr = mesh.numnbr[idx];
       Eini = energy_mc_3d(pos, pos_t0, mesh, lij_t0,  idx, &area_i, mbrane, area_p, st_p, vol_p,
-              afm);
+              afm, shear);
       if(vol_p.do_volume) vol_i = volume_ipart(pos,
               (int *) (mesh.node_nbr_list + cm_idx), num_nbr, idx);
 
@@ -254,7 +256,7 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
       pos[idx].z = z_n;
 
       Efin = energy_mc_3d(pos, pos_t0, mesh, lij_t0,  idx, &area_f, mbrane, area_p, st_p, vol_p,
-              afm);
+              afm, shear);
 
       de = (Efin - Eini);
       if(!area_p.is_tether){
@@ -299,6 +301,49 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
       }
   }
   return move;
+}
+
+int monte_carlo_shear(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh, double *lij_t0,
+        MBRANE_p mbrane, ACTIVE_p activity,
+        MC_p mcpara, AREA_p area_p, SHEAR_p shear) {
+    int i, move, cm_idx, num_nbr;
+    double x_o, de, Eini, Efin, dxinc;
+    bool yes;
+
+    int nframe = get_nstart(mbrane.N, mbrane.bdry_type);
+    move = 0;
+
+    for (i = 0; i < 2*nframe; i++) {
+        int idx = RandomGenerator::intUniform(0, nframe - 1);
+        cm_idx = mesh.nghst * idx;
+        num_nbr = mesh.numnbr[idx];
+
+        Eini = frame_spring_energy(pos[idx], pos_t0[idx], shear);
+        Eini += stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+                      (lij_t0 + cm_idx), num_nbr, idx, area_p);
+
+        x_o = pos[idx].x;
+        dxinc = (mcpara.delta / mcpara.dfac) * RandomGenerator::generateUniform(-1, 1);
+        pos[idx].x = x_o + dxinc;
+
+        Efin = frame_spring_energy(pos[idx], pos_t0[idx], shear);
+        Efin += stretch_energy_ipart(pos, (int *)(mesh.node_nbr_list + cm_idx),
+                      (lij_t0 + cm_idx), num_nbr, idx, area_p);
+
+        de = Efin - Eini;
+        if (mcpara.algo == "mpolis") {
+            yes = Metropolis(de, activity.activity[idx], mcpara);
+        } else {
+            yes = Glauber(de, activity.activity[idx], mcpara);
+        }
+        if (yes) {
+            move++;
+            mbrane.tot_energy[0] += de;
+        } else {
+            pos[idx].x = x_o;
+        }
+    }
+    return move;
 }
 
 int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,

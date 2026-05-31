@@ -15,9 +15,9 @@ int monte_carlo_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,
                 MC_p mcpara, AREA_p,  STICK_p ,  VOL_p , AFM_p afm, 
                 ACTIVE_p activity,  SHEAR_p shear);
 
- /* double energy_mc_3d(Vec3d *pos, MESH_p mesh, */ 
-         /* double *lij_t0, int idx, MBRANE_p , STICK_p , */
-         /* VOL_p , AFM_p , SPRING_p ); */
+double energy_mc_3d(Vec3d *pos, Vec3d *pos_t0, MESH_p mesh,
+         double *lij_t0, int idx, double *area_i, MBRANE_p, AREA_p,
+         STICK_p, VOL_p, AFM_p, SHEAR_p);
 
 int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, 
         MC_p mcpara, char *metric);
@@ -95,8 +95,9 @@ void init_stick_bottom_new(Vec3d *pos, MESH_p mesh, STICK_p stick,
         FLUID_p fld_para, MBRANE_p mbrane, string outfolder);
 void init_read_config();
 void init_afm_tip(AFM_p );
-void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *, FLUID_p *fld_para, 
-        VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para, 
+void shear_positions(Vec3d *Pos, int N, SHEAR_p shear);
+void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *, FLUID_p *fld_para,
+        VOL_p *vol_para, STICK_p *stick_para, AFM_p *afm_para,  ACTIVE_p *act_para,
         SHEAR_p *shear_para, string para_file);
  
 void init_activity(ACTIVE_p, int );

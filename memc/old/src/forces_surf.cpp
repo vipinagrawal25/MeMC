@@ -672,11 +672,27 @@ double frame_spring_energy(Vec3d pos, Vec3d pos_t0, SHEAR_p shear){
     double kk=shear.constant;
     double shift_y = shear.slope;
 
-    double xmin = pos_t0.x + shift_y*(pos_t0.y - 3.14159); 
+    double xmin = pos_t0.x + shift_y*(pos_t0.y - 3.14159);
     ener_spr = kk*pow((pos.x - xmin),2)/2;
 
     return ener_spr;
 }
+
+double scale_shear(Vec3d pos, SHEAR_p shear){
+    double phix = shear.scale*(pos.x - pi);
+    double phiy = (pos.y - pi);
+    return shear.slope*(pos.x - pi)*sin(phix)*sin(phiy);
+}
+
+double scale_shear_total(Vec3d *pos, MBRANE_p para, SHEAR_p shear){
+    double ener_sh = 0e0;
+    int st_idx = get_nstart(para.N, para.bdry_type);
+    for(int idx = st_idx; idx < para.N; idx++){
+        ener_sh += scale_shear(pos[idx], shear);
+    }
+    return ener_sh;
+}
+
 void mask_frame(bool *mask_ids, MESH_p mesh, MBRANE_p para){
     int idx, st_idx;
     int nbr;

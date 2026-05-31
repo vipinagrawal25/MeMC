@@ -19,7 +19,8 @@ extern "C"  void  Activity_listread(char *, double *, double *, char *);
 extern "C"  void  Afm_listread(bool *, double *, double *, double *, double *,
              char *);
 extern "C"  void  Fluid_listread(bool *, bool *, int * , int *, int*, double *, char *);
-extern "C"  void   Volume_listread(bool *, bool *, double *, double*, char *); 
+extern "C"  void   Volume_listread(bool *, bool *, double *, double*, char *);
+extern "C"  void  Shear_listread(bool *, bool *, int *, double *, double *, double *, char *);
 
 /* void init_rng2(uint32_t seed_val) { */
 
@@ -239,6 +240,9 @@ void init_read_parameters(MBRANE_p *mbrane_para, MC_p *mc_para, AREA_p *area_par
     Area_listread(&area_para->is_tether, &area_para->YY,
             &area_para->Ka, tmp_fname);
 
+    sprintf(tmp_fname, "%s", para_file.c_str() );
+    Shear_listread(&shear_para->do_shear, &shear_para->do_scale_shear, &shear_para->shear_every,
+            &shear_para->slope, &shear_para->scale, &shear_para->constant, tmp_fname);
 
   // mbrane->av_bond_len = sqrt(8*pi/(2*mbrane->N-4));
    // define the monte carlo parameters
@@ -315,6 +319,13 @@ void write_parameters(MBRANE_p mbrane, MC_p mc_para, AREA_p area_para, FLUID_p f
     out_.close();
 }
 
+
+void shear_positions(Vec3d *Pos, int N, SHEAR_p shear){
+    double shift_y = shear.slope;
+    for(int i = 0; i < N; i++){
+        Pos[i].x = Pos[i].x + shift_y*(Pos[i].y - pi);
+    }
+}
 
 void init_activity(ACTIVE_p activity, int N){
     int i;

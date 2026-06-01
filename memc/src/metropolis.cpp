@@ -122,6 +122,19 @@ if (fileptr.is_open()) {
 double McP::getvolume(){return totvol;}
 bool McP::isrestart(){return is_restart;}
 bool McP::isfluid(){return is_fluid;}
+bool McP::issemisolid(){return is_semisolid;}
+int* McP::getsolidIdx(){return solid_idx;}
+void McP::mark_solid_neighbours(MESH_p mesh){
+    for(int i = 0; i < mesh.N; i++){
+        if(!solid_idx[i]) continue;
+        int cm_idx = mesh.nghst * i;
+        int num_nbr = mesh.numnbr[i];
+        for(int j = 0; j < num_nbr; j++){
+            int nbr = mesh.node_nbr_list[cm_idx + j];
+            if(nbr >= 0) solid_idx[nbr] = 1;
+        }
+    }
+}
 int McP::fluidizeevery(){return fluidize_every;}
 int McP::dumpskip(){return dump_skip;}
 int McP::totaliter(){return tot_mc_iter;}

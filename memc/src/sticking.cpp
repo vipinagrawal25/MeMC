@@ -40,8 +40,14 @@ double lj_attr(double sqdr, double eps1, double eps2){
 
 void STICK::identify_attractive_part(Vec3d *pos){
   int i;
-  for (i=0; i<isattractive.size(); i++){
+  for (i=0; i<(int)isattractive.size(); i++){
     isattractive[i] = pos[i].z < 0;
+  }
+}
+
+void STICK::mark_solid_attractive(int *solid_idx, int N){
+  for(int i = 0; i < N; i++){
+    if(solid_idx[i]) isattractive[i] = true;
   }
 }
 

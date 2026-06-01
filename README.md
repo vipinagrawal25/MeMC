@@ -58,70 +58,68 @@ cd memc && make
 
 ---
 
-## Workflow
+## Quick-start workflow
 
-### 1. Generate an initial configuration
+**1. Compile `start`**
+```bash
+cd start && make
+# produces: start/exe_start
+```
 
-`start/exe_start` places N points on a sphere or flat plane using a Lennard-Jones
-Monte Carlo and outputs HDF5 snapshots.
+**2. Generate initial positions**
 
+Run the LJ Monte Carlo to place N points on a flat plane or sphere:
 ```bash
 cd start
-./exe_start <N> <metric> <outfolder> <mc_steps>
+./exe_start <N> cart <outfolder> <mc_steps>
+# example: ./exe_start 1024 cart run_flat 50000
+# writes:  run_flat/snap_00000.h5 ... snap_000NN.h5
 ```
+Use the last (most equilibrated) snapshot in the next step.
 
-| Argument | Description |
-|---|---|
-| `N` | Number of mesh nodes |
-| `metric` | `sph` for sphere, `cart` for flat plane |
-| `outfolder` | Directory for output snapshots |
-| `mc_steps` | Number of MC steps for randomisation |
+**3. Build the mesh connectivity**
 
-Example — 1024 nodes on a flat plane:
-
+Triangulate the point cloud and write `input.h5` (positions + neighbour list):
 ```bash
-./exe_start 1024 cart run_flat 50000
+python utils/triangulate_2dplane.py start/run_flat/snap_00499.h5 start/run_flat/input.h5
 ```
 
-Snapshots are written as `run_flat/snap_00000.h5`, `snap_00001.h5`, ...
+**4. (Semisolid only) Generate solid node indices**
+
+Pick `num_solid_points` random bulk nodes and write `solid_index.h5`:
+```bash
+python utils/makesolidpts.py start/run_flat/input.h5 <num_solid_points> --bdry_type 1 --seed 42
+# writes: start/run_flat/solid_index.h5
+```
+
+**5. Compile `memc`**
+```bash
+cd memc && make
+# produces: memc/bin/exe_memc
+```
+
+**6. Set up a run folder**
+
+`exe_memc` reads from a zero-padded folder (e.g. `memc/00000/`):
+```bash
+mkdir -p memc/00000
+cp start/run_flat/input.h5     memc/00000/
+cp start/run_flat/solid_index.h5  memc/00000/   # semisolid only
+cp <your_para_file.in>         memc/00000/para_file.in
+```
+
+**7. Run the simulation**
+```bash
+mpirun -n <nproc> memc/bin/exe_memc <start_index>
+# example (single process, folder 00000/):
+mpirun -n 1 memc/bin/exe_memc 0
+```
+
+With `nproc` MPI ranks and `start_index=K`, the ranks run in folders `K/`, `K+1/`, ..., `K+nproc-1/` simultaneously.
 
 ---
 
-### 2. Build the mesh connectivity
-
-`utils/makeinput.py` reads positions from a start snapshot, triangulates the
-surface and writes `input.h5` (positions + neighbour list) into the same folder.
-It auto-detects spherical vs flat coordinates.
-
-```bash
-python utils/makeinput.py <snapshot.h5> <outfolder>
-```
-
-Example:
-
-```bash
-python utils/makeinput.py start/run_flat/snap_00099.h5 start/run_flat
-# writes: start/run_flat/input.h5
-#         start/run_flat/input.vtk
-```
-
-Use the last (most equilibrated) snapshot as input.
-
----
-
-### 3. Set up a simulation folder
-
-`exe_memc` expects a zero-padded folder (e.g. `00000/`) containing:
-- `input.h5` — mesh from step 2
-- `para_file.in` — simulation parameters (Fortran namelist format)
-
-```bash
-mkdir -p sim/00000
-cp start/run_flat/input.h5 sim/00000/
-cp <para_file.in>           sim/00000/
-```
-
-#### Parameter file format
+## Parameter file
 
 Parameters are read as Fortran namelists. A minimal `para_file.in`:
 

@@ -32,6 +32,9 @@ public :
   double getarea();
   double getvolume();
   void setEneVol(double );
+  bool issemisolid();
+  int* getsolidIdx();
+  void mark_solid_neighbours(MESH_p mesh);
 private:
     BE &beobj;
     STE &steobj;

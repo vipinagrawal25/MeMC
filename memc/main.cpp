@@ -156,6 +156,10 @@ int main(int argc, char *argv[]){
     av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, stickobj, outfolder, radius,
                 residx);
     if(shearobj.do_shear() && !mcobj.isrestart()) shearobj.shear_positions(Pos, mesh.N);
+    if(mcobj.issemisolid()){
+        stickobj.mark_solid_attractive(mcobj.getsolidIdx(), mesh.N);  // before neighbour expansion
+        mcobj.mark_solid_neighbours(mesh);                             // expand solid_idx for bond-flip check
+    }
     bendobj.initBendCache(Pos, mesh);
     clock_t timer;
     Etot = mcobj.evalEnergy(Pos, mesh, fileptr, residx);

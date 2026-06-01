@@ -13,6 +13,7 @@ public :
   double stick_energy_total(Vec3d *pos, int);
   double stick_energy_ipart(Vec3d pos, int);
   void identify_attractive_part(Vec3d *);
+  void mark_solid_attractive(int *solid_idx, int N);
 private:
     double eps1, eps2;  // strength of stick potential
     double sigma, pos_bot_wall;

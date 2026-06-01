@@ -17,6 +17,7 @@
 #include "random_gen.hpp"
 #include "hdf5_io.hpp"
 #include "mdcelllist.hpp"
+#include "shear.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -126,9 +127,10 @@ int main(int argc, char *argv[]){
     BE  bendobj;
     ACT actobj;
     STE stretchobj;
+    SHEAR shearobj;
     STICK stickobj(mesh.N, outfolder);
     MDCellList celllistobj(outfolder);
-    McP mcobj(bendobj, stretchobj, stickobj, actobj, celllistobj);
+    McP mcobj(bendobj, stretchobj, stickobj, actobj, celllistobj, shearobj);
     Vec3d *Pos; 
 
     fstream fileptr(outfolder+"/mc_log", ios::app);
@@ -147,11 +149,13 @@ int main(int argc, char *argv[]){
     mcobj.initMC(mesh.N, outfolder);
     bendobj.initBE(mesh.N, outfolder);
     stretchobj.initSTE(mesh.N, outfolder);
+    shearobj.initSHEAR(mesh.N, outfolder);
     // stickobj.initSTICK(mesh.N, outfolder);
     actobj.initACT(mesh.N, outfolder);
     // celllistobj.initCelllist(outfolder);
     av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, stickobj, outfolder, radius,
                 residx);
+    if(shearobj.do_shear() && !mcobj.isrestart()) shearobj.shear_positions(Pos, mesh.N);
     bendobj.initBendCache(Pos, mesh);
     clock_t timer;
     Etot = mcobj.evalEnergy(Pos, mesh, fileptr, residx);

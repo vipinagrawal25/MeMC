@@ -122,20 +122,20 @@ subroutine StretchRead(YY, do_volume, is_pressurized, is_pressure_ideal, coef_vo
     close(unit=200)
 end subroutine
 
-subroutine MC_listread(algo, dfac, kbt, is_restart,&
- tot_mc_iter, dump_skip, is_fluid, min_allowed_nbr, &
-                fluidize_every, fac_len_vertices, parafile) bind(c, name='MC_listread')
- integer(kind=c_int) :: tot_mc_iter, dump_skip, min_allowed_nbr, fluidize_every
- logical (kind=c_bool) :: is_restart, is_fluid
+subroutine MC_listread(algo, dfac, kbt, is_restart, &
+ tot_mc_iter, dump_skip, is_fluid, is_semisolid, min_allowed_nbr, &
+                fluidize_every, fac_len_vertices, num_solid_points, parafile) bind(c, name='MC_listread')
+    integer(kind=c_int) :: tot_mc_iter, dump_skip, min_allowed_nbr, fluidize_every, num_solid_points
+    logical(kind=c_bool) :: is_restart, is_fluid, is_semisolid
     real(kind=c_double) :: dfac, kbt, fac_len_vertices
-    character(kind=c_char, len=1), dimension(char_len) :: algo;
+    character(kind=c_char, len=1), dimension(char_len) :: algo
     character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
     character(len=char_len) :: f_fname
     character(len=char_len) :: Mcalgo
 
     namelist /mcpara/ Mcalgo, dfac, kbt, is_restart, tot_mc_iter, dump_skip, &
-         is_fluid, min_allowed_nbr, fluidize_every, &
-         fac_len_vertices
+         is_fluid, is_semisolid, min_allowed_nbr, fluidize_every, &
+         fac_len_vertices, num_solid_points
 
     call convert_cstr_fstr(parafile, f_fname)
     open(unit=100,file=f_fname,status='old')
@@ -244,4 +244,19 @@ subroutine Spring_listread(do_spring, icompute, nPole_eq_z, sPole_eq_z, &
     read(unit=100,nml=springpara)
     close(unit=100)
     end subroutine
+
+subroutine Shear_listread(do_shear, shear_every, slope, constant, &
+        parafile) bind(c, name='Shear_listread')
+    real(c_double) :: slope, constant
+    logical(kind=c_bool) :: do_shear
+    integer(kind=c_int) :: shear_every
+    character(kind=c_char, len=1), dimension(char_len), intent(in) :: parafile
+    character(len=char_len) :: f_fname
+    namelist /shearpara/ do_shear, shear_every, slope, constant
+    call convert_cstr_fstr(parafile, f_fname)
+    open(unit=100,file=f_fname,status='old')
+    read(unit=100,nml=shearpara)
+    close(unit=100)
+end subroutine
+
 end module

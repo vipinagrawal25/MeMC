@@ -1,5 +1,6 @@
 #include "metropolis.hpp"
 #include "random_gen.hpp"
+#include "hdf5_io.hpp"
 #include <cmath>
 #include <cstring>
 #include <iomanip>
@@ -11,7 +12,7 @@ const double pi = 3.14159265358979323846264;
 // #include <unistd.h>
 
 extern "C" void  MC_listread(char *, double *, double *, bool *,
-                             int *, int *, bool *, int *, int *, double *, char *);
+                             int *, int *, bool *, bool *, int *, int *, double *, int *, char *);
 
 // Remove this once fixed;
 template<typename T>
@@ -31,12 +32,28 @@ int McP::initMC(int N, std::string fname){
   parafile = fname+"/para_file.in";
   sprintf(tmp_fname, "%s", parafile.c_str());
   MC_listread(temp_algo, &dfac, &kBT, &is_restart,
-              &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
-              &fluidize_every, &fac_len_vertices, tmp_fname);
+              &tot_mc_iter, &dump_skip, &is_fluid, &is_semisolid, &min_allowed_nbr,
+              &fluidize_every, &fac_len_vertices, &num_solid_points, tmp_fname);
   algo=temp_algo;
   one_mc_iter = 2*N;
   dfac = sqrt(8*pi/(2*N-4))/dfac;
   acceptedmoves = 0;
+
+  solid_idx = (int *)calloc(N, sizeof(int));
+  if(is_semisolid){
+      if(num_solid_points > N){
+          fprintf(stderr, "ERROR: num_solid_points (%d) exceeds total particles N (%d)\n",
+                  num_solid_points, N);
+          MPI_Abort(MPI_COMM_WORLD, 1);
+      }
+      int *index_solid = (int *)calloc(N, sizeof(int));
+      string solidfile = fname + "/solid_index.h5";
+      hdf5_io_read_int(index_solid, solidfile, "solid_idx");
+      for(int i = 0; i < num_solid_points; i++)
+          solid_idx[index_solid[i]] = 1;
+      free(index_solid);
+  }
+
   ofstream out_;
   out_.open( fname+"/mcpara.out");
   out_<< "# =========== monte carlo parameters ==========" << endl
@@ -46,6 +63,8 @@ int McP::initMC(int N, std::string fname){
       << " kbT " << kBT << endl
       << " is_restart " << is_restart << endl
       << " is_fluid " << is_fluid << endl
+      << " is_semisolid " << is_semisolid << endl
+      << " num_solid_points " << num_solid_points << endl
       << " tot_mc_iter " << tot_mc_iter << endl
       << " dump_skip " << dump_skip << endl
       << " min_allowed_nbr " << min_allowed_nbr << endl
@@ -374,6 +393,9 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len) {
         idx_add1 = mesh.node_nbr_list[idx_del1 * mesh.nghst + up];
         idx_add2 = mesh.node_nbr_list[idx_del1 * mesh.nghst + down];
         logic = idx_del2 > nframe && idx_add1 > nframe && idx_add2 > nframe;
+        if(is_semisolid && logic)
+            logic = solid_idx[idx_del1] + solid_idx[idx_del2] +
+                    solid_idx[idx_add1] + solid_idx[idx_add2] == 0;
       } else {
         logic = false;
       }

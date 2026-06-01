@@ -7,6 +7,7 @@
 void hdf5_io_write_double(double *Pos, int N, string input_file, string);
 void hdf5_io_read_double(double *Pos, string input_file, string);
 void hdf5_io_read_mesh(int *cmlist, int *node_nbr, string input_file);
+void hdf5_io_read_int(int *data, string input_file, string dset_name);
 void hdf5_io_write_mesh(int *cmlist,
         int *node_nbr, int N, int ng, string output_file);
 void io_dump_config(double *Pos, int N, char *);

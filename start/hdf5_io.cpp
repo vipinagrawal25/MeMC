@@ -9,8 +9,8 @@
  */
 
  
-void hdf5_io_write_double(double *Pos, int N, 
-        string input_file, string dset_name){
+void hdf5_io_write_pos(double *Pos, int N, string input_file){
+    string dset_name = "pos";
 
 	 ///  @brief hdf5 io for  the position 
 	 ///  @param Pos array containing co-ordinates of all the particles
@@ -39,13 +39,7 @@ void hdf5_io_write_double(double *Pos, int N,
   }
 }
 
-<<<<<<<< HEAD:memc/old/src/hdf5_io.cpp
-void hdf5_io_read_double(double *Pos, string input_file, 
-        string dset_name){
-
-========
 void hdf5_io_read_pos(double *Pos, string input_file){
->>>>>>>> develop:start/hdf5_io.cpp
     ///  @brief Read from the hdf5 file
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param input_file File name from which co-ordinate will be read
@@ -59,9 +53,9 @@ void hdf5_io_read_pos(double *Pos, string input_file){
     }
   /* Open an existing file. */
   file_id = H5Fopen(input_file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-  dataset_id = H5Dopen(file_id, dset_name.c_str(), H5P_DEFAULT);
-  status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, 
-          H5S_ALL, H5S_ALL, H5P_DEFAULT,Pos);
+  dataset_id = H5Dopen(file_id, "pos", H5P_DEFAULT);
+  status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE,
+          H5S_ALL, H5S_ALL, H5P_DEFAULT, Pos);
   status = H5Dclose(dataset_id);
   status = H5Fclose(file_id);
   if(status != 0){

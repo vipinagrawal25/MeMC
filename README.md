@@ -79,9 +79,11 @@ Use the last (most equilibrated) snapshot in the next step.
 
 **3. Build the mesh connectivity**
 
-Triangulate the point cloud and write `input.h5` (positions + neighbour list):
+Triangulate the point cloud and write `input.h5` (positions + neighbour list).
+Auto-detects flat vs spherical coordinates:
 ```bash
-python utils/triangulate_2dplane.py start/run_flat/snap_00499.h5 start/run_flat/input.h5
+python utils/makeinput.py start/run_flat/snap_00499.h5 start/run_flat
+# writes: start/run_flat/input.h5
 ```
 
 **4. (Semisolid only) Generate solid node indices**

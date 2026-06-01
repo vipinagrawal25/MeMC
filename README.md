@@ -215,6 +215,10 @@ Key parameters:
 | `mcpara` | `is_semisolid` | Enable semisolid mode (requires `solid_index.h5`) |
 | `mcpara` | `num_solid_points` | Number of solid (non-flipping) nodes |
 | `mcpara` | `fluidize_every` | Bond-flip sweep every N MC iterations |
+| `Stretchpara` | `do_volume` | Enable volume constraint |
+| `Stretchpara` | `is_pressurized` | Use pressure ensemble instead of fixed volume |
+| `Stretchpara` | `coef_vol_expansion` | Volume spring constant (used when `do_volume=T`, `is_pressurized=F`) |
+| `Stretchpara` | `pext` / `pint` | External / internal pressure (used when `is_pressurized=T`) |
 | `shearpara` | `do_shear` | Apply affine shear to initial config |
 | `shearpara` | `slope` | Shear strain γ (Δx per unit y) |
 | `shearpara` | `constant` | Frame spring constant (unused in set-and-run mode) |

@@ -134,6 +134,7 @@ cutoff = 1.5
 minL = 0.0
 sig = 1.0
 eps = 0.0
+!! In case the membrane folds.
 /
 
 &Meshpara
@@ -153,7 +154,7 @@ spcurv = 0.0
 
 &StickPara
 pos_bot_wall = -1.0
-sigma = 1.0
+sigma = 0.0
 eps1 = 0.0
 eps2 = 0.0
 /
@@ -178,6 +179,7 @@ do_shear = F
 slope = 0.0
 constant = 0.0
 shear_every = 0
+!! Constant and shear_every are for equilibrating the frame
 /
 
 &Actpara

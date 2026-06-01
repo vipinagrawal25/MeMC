@@ -127,6 +127,7 @@ With `nproc` MPI ranks and `start_index=K`, the ranks run in folders `K/`, `K+1/
 Parameters are read as Fortran namelists. A minimal `para_file.in`:
 
 ```fortran
+! Self-repulsion via cell-linked list (for folded membranes)
 &Celllist
 isselfrepulsive = F
 boxsize = 10.0
@@ -134,9 +135,9 @@ cutoff = 1.5
 minL = 0.0
 sig = 1.0
 eps = 0.0
-!! In case the membrane folds.
 /
 
+! Mesh and geometry
 &Meshpara
 N = 1024
 nghst = 12
@@ -144,51 +145,56 @@ bdry_cdt = 1        ! 0=channel  1=frame (flat)  other=periodic
 radius = 1.0        ! set to 1.0 for flat membranes
 /
 
+! Bending rigidity
 &Bendpara
 coef_bend = 4.0
 minC = 0.0
 maxC = 0.0
 theta = 0.0
-spcurv = 0.0
+spcurv = 0.0        ! spontaneous curvature
 /
 
+! Wall sticking potential (LJ)
 &StickPara
 pos_bot_wall = -1.0
-sigma = 0.0
-eps1 = 0.0
-eps2 = 0.0
+sigma = 1.0
+eps1 = 0.0          ! repulsive coefficient
+eps2 = 0.0          ! attractive coefficient
 /
 
+! Monte Carlo parameters
 &mcpara
-Mcalgo = 'mpolis'
+Mcalgo = 'mpolis'   ! mpolis or glauber
 dfac = 16.0
 kbt = 1.0
 is_restart = F
 tot_mc_iter = 1000
 dump_skip = 1000
-is_fluid = F
-is_semisolid = F
+is_fluid = F        ! enable bond-flip moves
+is_semisolid = F    ! enable semisolid mode (requires solid_index.h5)
 num_solid_points = 0
 min_allowed_nbr = 4
 fac_len_vertices = 1.3
 fluidize_every = 10
 /
 
+! Shear deformation
 &shearpara
 do_shear = F
-slope = 0.0
+slope = 0.0         ! shear strain gamma
 constant = 0.0
 shear_every = 0
-!! Constant and shear_every are for equilibrating the frame
 /
 
+! Activity
 &Actpara
-act_which = 'none'
+act_which = 'none'  ! none, random, constant
 doactivity = F
 maxA = 0.0
 minA = 0.0
 /
 
+! Stretching, volume, and pressure
 &Stretchpara
 YY = 1e4
 do_volume = F

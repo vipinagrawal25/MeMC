@@ -93,6 +93,7 @@ Pick `num_solid_points` random bulk nodes and write `solid_index.h5`:
 python utils/makesolidpts.py start/run_flat/input.h5 <num_solid_points> --bdry_type 1 --seed 42
 # writes: start/run_flat/solid_index.h5
 ```
+Note `num_solid_points` is hardcoded as 2048 in the main cpp code. Thus choose 2048 or change in the code. 
 
 **5. Compile `memc`**
 ```bash
@@ -138,16 +139,8 @@ eps = 0.0
 &Meshpara
 N = 1024
 nghst = 12
-bdry_cdt = 1        ! 0=channel  1=frame  other=periodic
+bdry_cdt = 1        ! 0=channel  1=frame (flat)  other=periodic
 radius = 1.0        ! set to 1.0 for flat membranes
-/
-
-&Membrane
-N = 1024
-coef_bend = 4.0
-YY = 1e4
-radius = 1.0
-bdry_type = 1
 /
 
 &Bendpara
@@ -156,13 +149,6 @@ minC = 0.0
 maxC = 0.0
 theta = 0.0
 spcurv = 0.0
-/
-
-&spcurvpara
-spcurv_which = 'none'
-minC = 0.0
-maxC = 0.0
-theta = 0.0
 /
 
 &StickPara
@@ -177,27 +163,21 @@ Mcalgo = 'mpolis'
 dfac = 16.0
 kbt = 1.0
 is_restart = F
-tot_mc_iter = 5000
-dump_skip = 100
+tot_mc_iter = 1000
+dump_skip = 1000
 is_fluid = F
+is_semisolid = F
+num_solid_points = 0
 min_allowed_nbr = 4
 fac_len_vertices = 1.3
 fluidize_every = 10
 /
 
-&springpara
-do_spring = F
-icompute = 0
-nPole_eq_z = 0.0
-sPole_eq_z = 0.0
-/
-
-&afmpara
-do_afm = F
-tip_rad = 1.0
-tip_pos_z = 0.0
-sigma = 1.0
-epsilon = 0.0
+&shearpara
+do_shear = F
+slope = 0.0
+constant = 0.0
+shear_every = 0
 /
 
 &Actpara
@@ -205,25 +185,6 @@ act_which = 'none'
 doactivity = F
 maxA = 0.0
 minA = 0.0
-/
-
-&fluidpara
-is_fluid = F
-min_allowed_nbr = 4
-fluidize_every = 10
-fac_len_vertices = 1.3
-/
-
-&Volpara
-do_volume = F
-is_pressurized = F
-coef_vol_exp = 0.0
-pressure = 0.0
-/
-
-&Areapara
-do_area = F
-coef_area_exp = 0.0
 /
 
 &Stretchpara
@@ -252,8 +213,6 @@ Key parameters:
 | `mcpara` | `is_semisolid` | Enable semisolid mode (requires `solid_index.h5`) |
 | `mcpara` | `num_solid_points` | Number of solid (non-flipping) nodes |
 | `mcpara` | `fluidize_every` | Bond-flip sweep every N MC iterations |
-| `Volpara` | `do_volume` | Enable volume constraint |
-| `afmpara` | `do_afm` | Enable AFM tip potential |
 | `shearpara` | `do_shear` | Apply affine shear to initial config |
 | `shearpara` | `slope` | Shear strain γ (Δx per unit y) |
 | `shearpara` | `constant` | Frame spring constant (unused in set-and-run mode) |

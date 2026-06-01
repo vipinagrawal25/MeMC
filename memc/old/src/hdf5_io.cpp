@@ -39,13 +39,8 @@ void hdf5_io_write_double(double *Pos, int N,
   }
 }
 
-<<<<<<<< HEAD:memc/old/src/hdf5_io.cpp
-void hdf5_io_read_double(double *Pos, string input_file, 
+void hdf5_io_read_double(double *Pos, string input_file,
         string dset_name){
-
-========
-void hdf5_io_read_pos(double *Pos, string input_file){
->>>>>>>> develop:start/hdf5_io.cpp
     ///  @brief Read from the hdf5 file
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param input_file File name from which co-ordinate will be read

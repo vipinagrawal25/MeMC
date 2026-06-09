@@ -45,12 +45,14 @@ int main(int argc, char **argv){
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder");
     init_rng(23177);
     /* define all the paras */ 
-     para.len = 2*pi;
+     para.len_x = 2*pi;
+     para.len_y = 2*pi;
      para.epsilon = 1;
      para.bdry_condt = 1;
      // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
-         para.sigma = para.len/sqrt((double)para.N);
+         //sigma needs to be calculated w.r.t area, if len_x and len_y are not equal
+         para.sigma = sqrt((double)(para.len_x*para.len_y)/(double)para.N); 
      }else if(strcmp(metric,"sph")==0){
          para.sigma = sqrt(8*pi/(2*para.N-4));
      }
@@ -60,11 +62,12 @@ int main(int argc, char **argv){
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
      mcpara.dump_skip = 100;
+     fprintf(stderr, "sigma = %lf, r_cut = %lf\n", para.sigma, para.r_cut);     
 
      Pos = (Vec2d *)calloc(para.N, sizeof(Vec2d));
      neib = (Nbh_list *) calloc(para.N, sizeof(Nbh_list));
 
-     init_system_random_pos(Pos, para.len, para.N, metric, para.bdry_condt );
+     init_system_random_pos(Pos, para.len_x, para.len_y, para.N, metric, para.bdry_condt );
 
      fprintf(stderr, "For N = %d, sigma = %lf, and epsilon=%lf \n", para.N,
              para.sigma, para.epsilon);

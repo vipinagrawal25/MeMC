@@ -105,11 +105,11 @@ int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
 
     if (is_cart) {
       dxinc = (para.sigma / mcpara.dfac) * rand_real(rng);
-      x_n = fmod((x_o + dxinc + 30 * para.len), para.len);
+      x_n = fmod((x_o + dxinc + 30 * para.len_x), para.len_x);
       Pos[idx].x = x_n;
 
       dyinc = (para.sigma / mcpara.dfac) * rand_real(rng);
-      y_n = fmod((y_o + dyinc + 30 * para.len), para.len);
+      y_n = fmod((y_o + dyinc + 30 * para.len_y), para.len_y);
       Pos[idx].y = y_n;
     }
     if (is_sph) {

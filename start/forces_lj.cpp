@@ -1,7 +1,7 @@
 #include "global.h"
 #include "subroutine.h"
 double cal_length(double x1 , double x2, 
-        double y1, double y2, double len, char
+        double y1, double y2, double len_x, double len_y, char
         *metric, int bdry_condt){
 
     ///  @brief Calculate the length between points x1,y1 and x2,y2 
@@ -11,7 +11,7 @@ double cal_length(double x1 , double x2,
     ///  @param x2  Coordinate x2 if metric is cart; Theta_2 if metric is sphere;
     ///  @param y1  Coordinate y1 if metric is cart; Phi_1 if metric is sphere;
     ///  @param y2  Coordinate y2 if metric is cart; Phi_2 if metric is sphere;
-    ///  @param len length of the domain;
+    ///  @param len length of the domain; now len_x and len_y
     ///  @return   (x2-x1)^2 + (y2-y1)^2 if metric is cart;
     ///   (sin(x2)cos(y2) - sin(x1)*cos(y1))^2 +  
     ///   (sin(x2)sin(y2) - sin(x1)*sin(y1))^2 +  
@@ -34,18 +34,18 @@ double cal_length(double x1 , double x2,
 
         switch (bdry_condt){
             case 0:
-                if(dx >  len*0.5) dx = dx - len; 
-                if(dx < -len*0.5) dx = dx + len;
+                if(dx >  len_x*0.5) dx = dx - len_x; 
+                if(dx < -len_x*0.5) dx = dx + len_x;
                 break;
             case 1:
                 // frame
                 break;
             default:
-                if(dx >  len*0.5) dx = dx - len; 
-                if(dx < -len*0.5) dx = dx + len;
+                if(dx >  len_x*0.5) dx = dx - len_x; 
+                if(dx < -len_x*0.5) dx = dx + len_x;
 
-                if(dy >  len*0.5) dy = dy - len;
-                if(dy < -len*0.5) dy = dy + len;
+                if(dy >  len_y*0.5) dy = dy - len_y;
+                if(dy < -len_y*0.5) dy = dy + len_y;
         }   
         ds = dx*dx + dy*dy;
     }
@@ -93,7 +93,7 @@ void make_nlist(Vec2d *Pos, Nbh_list *neib,
 
     for(int i = 0; i < para.N; i++){
         for(int j = i+1; j < para.N; j++){
-            if(len_check(Pos[i], Pos[j],  para.len, new_rc, metric, para.bdry_condt)){
+            if(len_check(Pos[i], Pos[j],  para.len_x, para.len_y, new_rc, metric, para.bdry_condt)){
                 neib[i].list[neib[i].cnt] = j;
                 neib[j].list[neib[j].cnt] = i;
                 neib[i].cnt += 1;
@@ -102,11 +102,14 @@ void make_nlist(Vec2d *Pos, Nbh_list *neib,
         }
 
     }
+    int avg_nbr = 0;
+    for(int i=0; i<para.N; i++) avg_nbr += neib[i].cnt;
+    fprintf(stderr, "Average neighbors per particle: %f\n", (double)avg_nbr/para.N);
 }
 
 
 bool len_check(Vec2d s1, Vec2d s2,
-        double len, double cutoff, char *metric ,int bdry_condt){
+        double len_x, double len_y, double cutoff, char *metric ,int bdry_condt){
 
 	 ///  @brief checks the distance between  s1 and s2 
      ///  @param s1 coordinate of first particle
@@ -114,7 +117,7 @@ bool len_check(Vec2d s1, Vec2d s2,
      /// @param new_rc square of the cutoff length
 	 ///  @param metric Topology of the surface "cart" for flat plane "sph" for
      /// sphere
-     /// @param len length of the domain
+     /// @param len length of the domain, len_x and len_y now
   	 /// @return  
      /// True if (s2 - s1)^2 is smaller than ds, False otherwise
 
@@ -122,7 +125,7 @@ bool len_check(Vec2d s1, Vec2d s2,
     bool var = false;
 
     ds = cal_length(s1.x , s2.x, 
-            s1.y, s2.y, len, metric, bdry_condt);
+            s1.y, s2.y, len_x, len_y, metric, bdry_condt);
     var = (ds < cutoff);
     return var;
 }
@@ -153,7 +156,7 @@ double pairlj_ipart_energy(Vec2d *Pos, int *n_list,
         k = n_list[j];
         if( k != i_p ){
             ds2 = cal_length(Pos[i_p].x , Pos[k].x, 
-                    Pos[i_p].y , Pos[k].y, para.len, metric, para.bdry_condt);
+                    Pos[i_p].y , Pos[k].y, para.len_x, para.len_y, metric, para.bdry_condt);
             r2_cut = para.r_cut*para.r_cut;
             if(ds2 < r2_cut){	
                 /* printf("%lf %lf\n", r2_cut, ds2); */

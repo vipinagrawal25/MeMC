@@ -11,13 +11,13 @@ int monte_carlo_surf2d(Vec2d *Pos,
         Nbh_list *neib, LJ_p para, 
         MC_p mcpara, char *metric);
 void init_rng(uint32_t seed_val);
-void init_system_random_pos(Vec2d *Pos,  double len, 
+void init_system_random_pos(Vec2d *Pos,  double len_x, double len_y, 
         int N, char *metric, int bdry_condt );
  
 //forces_lj.c
 void make_nlist(Vec2d *Pos, Nbh_list *neib,
         LJ_p para, char *metric);
-bool len_check(Vec2d s1, Vec2d s2, double len, 
+bool len_check(Vec2d s1, Vec2d s2, double len_x, double len_y, 
         double new_rc, char* metric, int);
 
 double pairlj_ipart_energy(Vec2d *Pos, int *n_list,

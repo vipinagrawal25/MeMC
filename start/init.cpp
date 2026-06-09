@@ -2,25 +2,30 @@
 #include "subroutine.h"
 std::mt19937 rng2;
 
-void init_system_random_pos(Vec2d *Pos,  double len, 
+void init_system_random_pos(Vec2d *Pos,  double len_x, double len_y, 
         int N, char *metric, int bdry_condt ){
     /// @brief Initializes the points on surface of sphere or flat plane
     ///  @param Pos array containing co-ordinates of all the particles
     ///  @param metric Topology of the surface "cart" for flat plane "sph" for
     /// sphere
-    ///  @param len length of the domain;
+    ///  @param len length of the domain;  
     ///  @param N number of points;
     bool is_sph, is_cart;
-    double dl;
+    double dl_x, dl_y;
 
     // this should be calculated or passed parameters
-    int n_ghost;
+    int n_ghost, n_ghost_x, n_ghost_y;
     // remove it once debugged 
 
-    n_ghost = (int) sqrt(N);
-    dl = (len/n_ghost);
+    n_ghost = (int)sqrt(N);
+    //distribute particles according to side length
+    n_ghost_x = (int)n_ghost*len_x/(len_x+len_y);
+    n_ghost_y = (int)n_ghost*len_y/(len_x+len_y);
+    dl_x = (len_x/n_ghost_x);
+    dl_y = (len_y/n_ghost_y);
 
-    std::uniform_real_distribution<> rand_real(dl, len-dl);
+    std::uniform_real_distribution<> rand_x(dl_x, len_x-dl_x);
+    std::uniform_real_distribution<> rand_y(dl_y, len_y-dl_y);
 
     is_sph = false;
     is_cart = false;
@@ -43,53 +48,53 @@ void init_system_random_pos(Vec2d *Pos,  double len,
             case 0:
             // This is a channel ; read bdry_condt as 0 
             // n_ghost has to be even for logic to work;
-            n_ghost = 2*n_ghost;
+            n_ghost = 2*n_ghost_x;
             for(int i=0; i<n_ghost/2; i++){
-                    Pos[i].x = i*dl;
+                    Pos[i].x = i*dl_x;
                     Pos[i].y = 0.0; 
             }
             for(int i=n_ghost/2; i<n_ghost; i++){
-                Pos[i].x = (i - n_ghost/2 + 0.5)*dl;
+                Pos[i].x = (i - n_ghost/2 + 0.5)*dl_x;
                 /* Pos[i].x = (i - n_ghost/2)*(2*(len + 0.5)/n_ghost);  bp*/
-                Pos[i].y = len; 
+                Pos[i].y = len_y; 
             }
             for(int i=n_ghost; i<N; i++){
-                Pos[i].x = rand_real(rng2);
-                Pos[i].y = rand_real(rng2);
+                Pos[i].x = rand_x(rng2);
+                Pos[i].y = rand_y(rng2);
             }
             break;
       case 1:
             // This is a frame ;
             // n_ghost has to be even for logic to work;
-            n_ghost = 4*n_ghost;
-            for(int i=0; i<n_ghost/4; i++){
-                Pos[i].x = (i+0.5)*dl;
+            n_ghost = 2*n_ghost_x + 2*n_ghost_y;
+            for(int i=0; i<n_ghost_x; i++){
+                Pos[i].x = (i+0.5)*dl_x;
                 Pos[i].y = 0.0; 
             }
-            for(int i=n_ghost/4; i<n_ghost/2; i++){
-                Pos[i].x = (i - n_ghost/4 + 0.5)*dl;
-                Pos[i].y = len; 
+            for(int i=n_ghost_x; i<2*n_ghost_x; i++){
+                Pos[i].x = (i - n_ghost_x + 0.5)*dl_x;
+                Pos[i].y = len_y; 
             }
-            for(int i=n_ghost/2; i<3*n_ghost/4; i++){
+            for(int i=2*n_ghost_x; i<2*n_ghost_x+n_ghost_y; i++){
                 Pos[i].x = 0.0;
-                Pos[i].y = (i - n_ghost/2 + 0.5)*dl; 
+                Pos[i].y = (i - 2*n_ghost_x + 0.5)*dl_y; 
             }
 
-            for(int i=3*n_ghost/4; i<n_ghost; i++){
-                Pos[i].x = len;
-                Pos[i].y = (i +0.5 - 3*n_ghost/4)*dl; 
+            for(int i=2*n_ghost_x+n_ghost_y; i<n_ghost; i++){
+                Pos[i].x = len_x;
+                Pos[i].y = (i +0.5 -2*n_ghost_x-n_ghost_y)*dl_y; 
             }
             for(int i=n_ghost; i<N; i++){
-                Pos[i].x = rand_real(rng2);
-                Pos[i].y = rand_real(rng2);
+                Pos[i].x = rand_x(rng2);
+                Pos[i].y = rand_y(rng2);
             }
 
             break;
        
             default:
                 for(int i=0; i<N; i++){
-                    Pos[i].x = rand_real(rng2);
-                    Pos[i].y = rand_real(rng2);
+                    Pos[i].x = rand_x(rng2);
+                    Pos[i].y = rand_y(rng2);
                 }
         }
     }

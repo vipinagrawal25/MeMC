@@ -48,7 +48,8 @@ typedef struct{
     int N;
     double sigma;
     double epsilon;
-    double len;
+    double len_x;
+    double len_y;
     double r_cut;
     int bdry_condt;
 }LJ_p;

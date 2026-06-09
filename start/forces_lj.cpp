@@ -102,9 +102,9 @@ void make_nlist(Vec2d *Pos, Nbh_list *neib,
         }
 
     }
-    int avg_nbr = 0;
-    for(int i=0; i<para.N; i++) avg_nbr += neib[i].cnt;
-    fprintf(stderr, "Average neighbors per particle: %f\n", (double)avg_nbr/para.N);
+    //int avg_nbr = 0;
+    //for(int i=0; i<para.N; i++) avg_nbr += neib[i].cnt;
+    //fprintf(stderr, "Average neighbors per particle: %f\n", (double)avg_nbr/para.N);
 }
 
 

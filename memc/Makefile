@@ -9,7 +9,7 @@ ifeq ($(debug), y)
 	opt = -g3  -Wall -Wpedantic
 endif
 
-link = $(opt) -lm -std=c++14 -lhdf5 -Isrc # 
+link = $(opt) -lm -std=c++14 -lhdf5 -Isrc -I/usr/include/hdf5/serial -L/usr/lib/x86_64-linux-gnu/hdf5/serial# 
 sources =  src/vector.cpp src/metropolis.cpp src/random_gen.cpp src/bending.cpp
 sources += src/stretching.cpp  src/hdf5_io.cpp  src/activity.cpp src/mdcelllist.cpp src/misc.cpp src/sticking.cpp src/shear.cpp
 # sources += src/misc.cpp

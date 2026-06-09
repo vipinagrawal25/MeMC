@@ -6,7 +6,7 @@ ifeq ($(debug), y)
 	opt = -g3  -Wall -pedantic
 endif
 
-link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes # 
+link = $(opt) -lm -std=c++17 -lhdf5 -Iincludes -I/usr/include/hdf5/serial -L/usr/lib/x86_64-linux-gnu/hdf5/serial# 
 sources = forces_lj.cpp Metropolis.cpp
 sources += init.cpp  hdf5_io.cpp
 #

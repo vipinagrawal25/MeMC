@@ -142,11 +142,14 @@ def new_way_nbrs_2d(pts, cmlist, node_nbr, Np, nghst=12):
         new_nbr[ip*nghst : ip*nghst + num_nbr] = nnbrs
     return new_nbr
 
-def write_hdf5(R, cmlst, node_nbr, posfile):
+def write_hdf5(R, cmlst, node_nbr, posfile, triangles=None):
     hf = h5py.File(posfile,'w')
     hf.create_dataset('pos',data=R.reshape(-1))
     hf.create_dataset('cumu_list',data=cmlst.astype(np.int32))
     hf.create_dataset('node_nbr',data=node_nbr.astype(np.int32))
+    if triangles is not None:
+        hf.create_dataset('triangles',data=triangles.astype(np.int32))
+    hf.close()
 
 def write_file(pts_cart, cmlist, node_nbr):
     file = open("../Examples/pts.bin", "wb")
@@ -184,7 +187,7 @@ if _is_flat:
     cmlist[1:] = np.cumsum(ncmlist)
     new_nbr = new_way_nbrs_2d(pts, cmlist, node_nbr_flat, Np, nghst=12)
     pts_out = np.hstack([pts, np.zeros((Np, 1))])   # pad z=0 for 3D memc format
-    write_hdf5(pts_out, ncmlist, new_nbr, outf+"/input.h5")
+    write_hdf5(pts_out, ncmlist, new_nbr, outf+"/input.h5", tri.simplices)
     vtk.vtk_points(outf+"/input.vtk", pts_out, tri.simplices)
 else:
     Np, pts_sph, pts_cart = read_data(inf)
@@ -194,5 +197,5 @@ else:
     node_nbr = sort_nbrs(pts_cart, Np, cmlist, node_nbr)
     new_nbr = new_way_nbrs(cmlist, node_nbr, nghst=12)
     ncmlist = np.diff(cmlist)
-    write_hdf5(pts_cart, ncmlist, new_nbr, outf+"/input.h5")
+    write_hdf5(pts_cart, ncmlist, new_nbr, outf+"/input.h5", triangles)
     vtk.vtk_points(outf+"/input.vtk", pts_cart, triangles)

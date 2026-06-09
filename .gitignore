@@ -1,5 +1,12 @@
 *.o
 *.h5
 *.mod
+*.dat
+*.log
+*.out
+tests/
 obj/
 bin/
+[0-9][0-9][0-9][0-9][0-9]/
+exe_memc
+exe_start

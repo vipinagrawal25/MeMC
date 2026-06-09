@@ -71,4 +71,6 @@ plot_grouped(x1, y1, cnt, fig, ax, 'tab:red', 'd', ms = 5)
 # plt.grid(True)
 # ofile = fname.replace('dat', 'png')
 # fig.savefig(ofile)
-plt.show()
+
+plt.savefig("check_plot.png")
+#plt.show()

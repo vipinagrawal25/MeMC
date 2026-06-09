@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstring>
 #include <iomanip>
+#include <mpi.h>
 
 const double pi = 3.14159265358979323846264;
 // #include <cstdio>

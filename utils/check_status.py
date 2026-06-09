@@ -35,4 +35,6 @@ if(which_file == 'memc'):
 # ax.set(xlim = [-1.1,1.1], ylim=[-0.1,6.36], 
 #         xlabel='cos(theta)', ylabel='phi')
 
-plt.show()
+#(SG:) modifying for my own purpose, for use in WSL
+plt.savefig("check_status_output.png")
+#plt.show()

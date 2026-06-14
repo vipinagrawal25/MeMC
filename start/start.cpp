@@ -1,3 +1,4 @@
+
 #include "global.h"
 #include "subroutine.h"
 #include <random>
@@ -45,14 +46,14 @@ int main(int argc, char **argv){
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder");
     init_rng(23177);
     /* define all the paras */ 
-     para.len_x = 2*pi;
-     para.len_y = 2*pi;
+     para.len_x = 16*pi;
+     para.len_y = pi;
      para.epsilon = 1;
      para.bdry_condt = 1;
      // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          //sigma needs to be calculated w.r.t area, if len_x and len_y are not equal
-         para.sigma = sqrt((double)(para.len_x*para.len_y)/(double)para.N); 
+         para.sigma = sqrt((para.len_x * para.len_y) / (double)para.N); 
      }else if(strcmp(metric,"sph")==0){
          para.sigma = sqrt(8*pi/(2*para.N-4));
      }
@@ -62,7 +63,9 @@ int main(int argc, char **argv){
      mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
      mcpara.dump_skip = 100;
-     fprintf(stderr, "sigma = %lf, r_cut = %lf\n", para.sigma, para.r_cut);     
+     //fprintf(stderr, "sigma = %lf, r_cut = %lf\n", para.sigma, para.r_cut);     
+     //fprintf(stderr, "len_x=%.4f len_y=%.4f\n", para.len_x, para.len_y);
+     //fprintf(stderr, "sigma=%.4f r_cut=%.4f\n", para.sigma, para.r_cut);
 
      Pos = (Vec2d *)calloc(para.N, sizeof(Vec2d));
      neib = (Nbh_list *) calloc(para.N, sizeof(Nbh_list));
@@ -78,7 +81,7 @@ int main(int argc, char **argv){
 
     sprintf(log_file, "%s%s",outfolder.c_str(),"/mc_log");
     fid = fopen(log_file, "a");
-
+    
     fprintf(stderr, "start main loop ");
     for(i=0; i<mcpara.tot_mc_iter; i++){
         if(i%mcpara.dump_skip == 0){

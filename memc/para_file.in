@@ -10,7 +10,7 @@ eps = 0.0
 
 ! Mesh and geometry
 &Meshpara
-N = 1024
+N = 2048
 nghst = 12
 bdry_cdt = 1        ! 0=channel  1=frame (flat)  other=periodic
 radius = 1.0        ! set to 1.0 for flat membranes
@@ -39,7 +39,7 @@ Mcalgo = 'mpolis'   ! mpolis = Metropolis, glauber = Glauber
 dfac = 16.0         ! step-size divisor (larger = smaller steps)
 kbt = 1.0
 is_restart = F
-tot_mc_iter = 1000
+tot_mc_iter = 50000
 dump_skip = 1000
 is_fluid = F        ! enable bond-flip moves
 is_semisolid = F    ! enable semisolid mode (requires solid_index.h5)

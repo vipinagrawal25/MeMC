@@ -23,8 +23,12 @@ void init_system_random_pos(Vec2d *Pos,  double len_x, double len_y,
     n_ghost_y = (int)2*n_ghost*len_y/(len_x+len_y);
     //n_ghost_x=n_ghost;
     //n_ghost_y=n_ghost;
+
+    
     dl_x = (len_x/(n_ghost_x));
     dl_y = (len_y/(n_ghost_y)); //original: len_y/n_ghost. accordingly changed the scale
+    
+    //fprintf(stderr, "n_ghost=%d n_ghost_x=%d n_ghost_y=%d\n", n_ghost, n_ghost_x, n_ghost_y);
 
     std::uniform_real_distribution<> rand_x(dl_x, len_x-dl_x);
     std::uniform_real_distribution<> rand_y(dl_y, len_y-dl_y);

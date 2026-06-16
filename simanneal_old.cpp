@@ -107,7 +107,6 @@ int main(int argc, char *argv[]){
     
     (*terminal) << "# Simulation started on " << ctime(&timer) << endl;
     start_simulation(mesh, mcobj, stretchobj, outfolder, mesh.radius, residx);
-    if (repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
     if(!mcobj.isrestart()) mcobj.wHeader(mesh,fileptr);
     if(mcobj.isrestart()) fileptr << "# Restart index " << residx << endl;
 
@@ -139,9 +138,8 @@ int main(int argc, char *argv[]){
             int block_end   = block_start + mcobj.initialiter();
 
             for(iter = block_start; iter < block_end; iter++){
-                if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
-                if(iter % mcobj.dumpskip() == 0){
-                    outfile = outfolder + "/snap_" + ZeroPadNumber(fnumber) + ".h5";
+            if(iter % mcobj.dumpskip() == 0){
+                outfile = outfolder + "/snap_" + ZeroPadNumber(fnumber) + ".h5";
                 hdf5_io_delete(outfile);
                 hdf5_io_write((double*) mesh.pos, 3*mesh.N, outfile, "pos");
                 hdf5_io_write_mesh(mesh.numnbr, mesh.node_nbr_list,
@@ -155,6 +153,7 @@ int main(int argc, char *argv[]){
                 fnumber++;
                 (*terminal) << "Snapshot written to " << outfile << endl;
                 }
+                if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
                 num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
                 if (mcobj.exchange()) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
                 if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){

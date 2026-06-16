@@ -95,7 +95,6 @@ int main(int argc, char *argv[]){
     mcobj.initMC(mesh, outfolder);
 
     start_simulation(mesh, mcobj, stretchobj, outfolder, mesh.radius, residx);
-    if (repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
     //  ow often do you want to compute the total energy?
     if (mcobj.isfluid()) recaliter=mcobj.fluidizeevery();
     else recaliter=1;
@@ -119,7 +118,6 @@ int main(int argc, char *argv[]){
     iter = residx; // Initialize iter before first use
     mcobj.write_energy(fileptr, iter, mesh);
     for(iter=residx; iter < mcobj.totaliter(); iter++){
-        if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
         if(iter%mcobj.dumpskip() == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mcobj.dumpskip())+".h5";
             hdf5_io_delete(outfile);
@@ -132,6 +130,7 @@ int main(int argc, char *argv[]){
             restartfile.close();
         }
         //
+        if(repulsiveobj.isSelfRepulsive()) repulsiveobj.buildCellList(mesh);
         num_moves = mcobj.monte_carlo_3d(mesh.pos, mesh);
         if (mcobj.exchange()) num_exchange = mcobj.monte_carlo_lipid(mesh.pos, mesh);
         if (mcobj.isfluid() && !(iter % mcobj.fluidizeevery())){

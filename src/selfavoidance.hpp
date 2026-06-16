@@ -15,9 +15,12 @@ public:
   double computeSelfRep(MESH_p , int );
   double totalRepulsiveEnergy(MESH_p);
   bool isSelfRepulsive() {return doselfrepulsion;}
+  void setKBT(double kBT) {this->kBT = kBT;}
 private:
   double LJ(Vec3d p1, Vec3d p2);
-  double sig, epsl;
+  double sig_scale, epsl_scale;
+  double av_bond_len_scale;
+  double kBT;
   bool doselfrepulsion;
 };
 #endif // MDCELLLIST_HPP

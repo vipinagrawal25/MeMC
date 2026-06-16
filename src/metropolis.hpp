@@ -41,6 +41,8 @@ public :
   int ncycles(){return nanneal_cycle;}
   void wHeader(const MESH_p &mesh, std::fstream &fid);
   std::string initial_l0;
+  double getkBT() const { return kBT; }
+  int initialiter() const { return ini_tot_mc_iter; }
 private:
   BE &beobj;
   STE &steobj;

@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <mpi.h>
 
 const double pi = 3.14159265358979323846264;
 
@@ -26,22 +27,41 @@ McP::McP (BE &beobj, STE &steobj, MulCom &lipidobj, ESP &chargeobj,
 beobj(beobj), steobj(steobj), lipidobj(lipidobj), chargeobj(chargeobj), 
 repulsiveobj(repulsiveobj), lineobj(lineobj){};
 //
+// void McP::startcycle(int cycle){
+//    if (0 <= cycle && cycle < 3){
+//       this->kBT = initial_kBT;
+//       this->dfac = initial_dfac;
+//    }else{
+//       this->kBT = initial_kBT * pow(10.0, -(cycle - 4));
+//       this->dfac = initial_dfac / pow(2.0, (cycle - 4));
+//    }
+//    cout << "Cycle: " << cycle << " kBT: " << kBT << " dfac: " << dfac << endl;
+// }
+
 void McP::startcycle(int cycle){
-   if (0 < cycle < 5){
-      this->kBT = initial_kBT;
-      this->dfac = initial_dfac;
-   }else{
-      this->kBT = initial_kBT * pow(10.0, -(cycle - 4));
-      this->dfac = initial_dfac / pow(2.0, (cycle - 4));
-   }
-   cout << "Cycle: " << cycle << " kBT: " << kBT << " dfac: " << dfac << endl;
+
+    // First two cycles start at initial temperature
+    if (cycle < 2) {
+        kBT = initial_kBT;   // 0.1
+    }
+    else {
+        // cycle 2 → 1e-2
+        // cycle 3 → 1e-3
+        kBT = initial_kBT * pow(10.0, -(cycle - 1));
+    }
+
+    dfac = initial_dfac;
+
+    cout << "Cycle: " << cycle 
+         << " starting kBT: " << kBT 
+         << endl;
 }
+
 //
 void McP::updateparam(int anneal, string fname){
    if (anneal>0){
       dfac=dfac/2;
       kBT=kBT*0.1;
-      tot_mc_iter=tot_mc_iter+ini_tot_mc_iter;
 
    ofstream out_;
    out_.open( fname+"/mcpara.out", ios::app );
@@ -59,7 +79,8 @@ int McP::initMC(MESH_p mesh, string fname){
    int N = mesh.N;
    double radius = mesh.radius;
    // string topology=mesh.topology;
-   char tmp_fname[128], temp_algo[128];
+   char tmp_fname[128];
+   char temp_algo[128] = {0};
    string parafile, outfile;
    parafile = fname+"/para_file.in";
    sprintf(tmp_fname, "%s", parafile.c_str());
@@ -67,11 +88,42 @@ int McP::initMC(MESH_p mesh, string fname){
               &tot_mc_iter, &dump_skip, &is_fluid, &min_allowed_nbr,
               &fluidize_every, &fac_len_vertices, &iexch, &nexch_iter, tmp_fname);
 
+   std::string algo_str(temp_algo, 128);
+   size_t nullpos = algo_str.find('\0');
+   if (nullpos != std::string::npos) {
+      algo_str.resize(nullpos);
+   }
+   auto trim_whitespace = [](std::string &s){
+      const auto ws = " \t\r\n";
+      size_t first = s.find_first_not_of(ws);
+      if (first == std::string::npos) {
+         s.clear();
+         return;
+      }
+      size_t last = s.find_last_not_of(ws);
+      s = s.substr(first, last - first + 1);
+   };
+   trim_whitespace(algo_str);
+
+   int rank;
+   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   // std::cout << "RANK " << rank << " Algo = [" << algo_str << "] len=" << algo_str.size() << std::endl;
+
+   if (algo_str.empty()) {
+      throw std::runtime_error("Empty algo string on MPI rank " + std::to_string(rank));
+   }
+
+   // strict validation
+   if (algo_str != "mpolis" && algo_str != "Glauber") {
+      throw std::runtime_error("Invalid algo string on rank " + std::to_string(rank) + ": [" + algo_str + "]");
+   }
+
    ini_tot_mc_iter = tot_mc_iter;
    one_mc_iter = 2*N;
    dfac=mesh.av_bond_len/dfac;
    initial_dfac = dfac;
    initial_kBT = kBT;
+   repulsiveobj.setKBT(kBT);
    acceptedmoves = 0;
    if (mesh.ncomp==1) iexch=false;
    if (!chargeobj.isexch() && !beobj.isexch() && !lineobj.calculate()) iexch=false;
@@ -113,24 +165,33 @@ int McP::initMC(MESH_p mesh, string fname){
       return this->energy_mc_best(vec, vec_ptr, mesh, val, val2, val3, btype);};
    }
    
-   algo = temp_algo;
-   if (algo=="mpolis"){
+   algo = algo_str;
+   if (algo == "mpolis"){
       out_ << " Algo = Metropolis"<< endl;
       Algo = [this](double DE, double activity) -> double {
       return this->Boltzman(DE, activity);};
-   }else if(algo=="Glauber"){
+   }else if(algo == "Glauber"){
       out_ << " Algo = Glauber"<< endl;
       Algo = [this](double DE, double activity) -> double {
       return this->Glauber(DE, activity);};
+   }else {
+      throw std::runtime_error(
+         "Unknown algorithm AFTER parsing: [" + algo + "]"
+      );
+   }
+   // std::cout << "INIT OK: Algo assigned = " << algo << std::endl;
+
+   if (!Algo) {
+      throw std::runtime_error("FATAL: Algo not assigned after parsing");
    }
 
-   if (chargeobj.isexch() && beobj.isexch() && lineobj.calculate()){
+   if (lineobj.calculate()){
       out_ << " Energy_mc_exch = energy_mc_bechli" << endl;
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2,
                   int val3, int val4, int val5, int val6,
                   BoundaryType btype1, BoundaryType btype2) -> double {
-      return this->energy_mc_bechli(vec, vec_ptr, mesh, val, val2, val3, 
+      return this->energy_mc_bechli(vec, vec_ptr, mesh, val, val2, val3,
                                  val4, val5, val6, btype1, btype2);};
    }else if(chargeobj.isexch() && beobj.isexch()){
       out_ << " Energy_mc_exch = energy_mc_bech" << endl;
@@ -141,7 +202,7 @@ int McP::initMC(MESH_p mesh, string fname){
                   BoundaryType btype1, BoundaryType btype2) -> double {
       return this->energy_mc_bech(vec , vec_ptr, mesh, val, val2, val3, 
                                  val4, val5, val6, btype1, btype2);};
-	}else if(chargeobj.isexch()){
+   }else if(chargeobj.isexch()){
       out_ << " Energy_mc_exch = energy_mc_ch" << endl;
       energy_mc_exch = [this](vector<double>& vec, Vec3d* vec_ptr, MESH_p mesh,
                   int val, int val2,
@@ -159,7 +220,11 @@ int McP::initMC(MESH_p mesh, string fname){
                   BoundaryType btype1, BoundaryType btype2) -> double {
       return this->energy_mc_be(vec , vec_ptr, mesh, val, val2, val3, 
                   val4, val5, val6, btype1, btype2);};
-	}
+   }
+
+   if (iexch && !energy_mc_exch) {
+      throw std::runtime_error("FATAL: energy_mc_exch not initialized in initMC() for exchange-enabled run");
+   }
    
    if (exchtype=="Global" || exchtype == "global"){
       out_ << "Component exchange type = Global" << endl;
@@ -173,6 +238,15 @@ int McP::initMC(MESH_p mesh, string fname){
 
    out_.close();
    volt0=mesh.ini_vol;
+   if (!Algo) {
+      throw std::runtime_error("FATAL: Algo not initialized in initMC()");
+   }
+   if (iexch && !energy_mc_exch) {
+      throw std::runtime_error("FATAL: energy_mc_exch not initialized in initMC()");
+   }
+   if (iexch && !get_idx2) {
+      throw std::runtime_error("FATAL: get_idx2 not initialized in initMC()");
+   }
    return 1;
 }
 /*-----------------------*/
@@ -227,7 +301,7 @@ double McP::evalEnergy(MESH_p mesh){
 }
 /*----------------------------------------------------------*/
 void McP::wHeader(const MESH_p &mesh, std::fstream &fid){
-    std::string log_headers = "#iter acceptedmoves bend_e stretch_e ";
+    std::string log_headers = "#iter acceptedmoves kBT bend_e stretch_e ";
     if (chargeobj.calculate()) log_headers+="electroe ";
     if(steobj.dopressure()) {log_headers+=" Pressure_e ";}
     if(steobj.dovol()) {log_headers+=" Volume_e ";}
@@ -242,6 +316,7 @@ void McP::wHeader(const MESH_p &mesh, std::fstream &fid){
 void McP::write_energy(fstream &fileptr, int itr, const MESH_p &mesh){
    if (fileptr.is_open()){
       fileptr << itr << " " << (double)acceptedmoves/(double)one_mc_iter<< "  ";
+      fileptr << kBT << " ";
       fileptr << bende << " " << stretche << "  ";
       if (chargeobj.calculate()) fileptr << electroe << " ";
       if (lipidobj.calculate()) fileptr << regsole << " ";
@@ -442,8 +517,15 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
    // FIX THIS BUG FOR FIXED BOUNDARY CONDITION
    // nframe = mesh.pbc ? 0 : (mesh.lastbdry + 1); 
    // nframe = get_nstart(mesh.lastbdry, steobj.bdry_type());
+   int rank;
+   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   // std::cout << "RANK " << rank << " Algo pointer = " << (void*)(&Algo) << std::endl;
    nframe = 0;
    acceptedmoves = 0;
+   if (!Algo) {
+      std::cerr << "FATAL: Algo is null at start of monte_carlo_3d" << std::endl;
+      abort();
+   }
    for (i = 0; i < one_mc_iter; i++) {
       int idx = RandomGenerator::intUniform(nframe, mesh.N-1);
       cm_idx = idx*mesh.nghst;
@@ -484,6 +566,15 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh){
          }
       }
       //
+      if (!Algo) {
+         std::cerr << "ERROR: Algo not initialized before MC step on rank "
+                  << std::endl;
+         abort();
+      }
+      if (!Algo) {
+         std::cerr << "RANK " << rank << " Algo is EMPTY at MC step" << std::endl;
+         abort();
+      }
       yes = Algo(de, 0.0);
       if(yes){
          acceptedmoves +=  1;

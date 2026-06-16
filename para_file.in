@@ -9,7 +9,7 @@
     kbt = 0.1
     is_restart = .false.
     tot_mc_iter = 5001
-    dump_skip = 1000
+    dump_skip = 5000
     is_fluid = .false.
     min_allowed_nbr = 4
     fac_len_vertices = 1.3

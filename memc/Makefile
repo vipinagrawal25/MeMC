@@ -13,9 +13,11 @@ link = $(opt) -lm -std=c++14 -lhdf5 -Isrc -I/usr/include/hdf5/serial -L/usr/lib/
 sources =  src/vector.cpp src/metropolis.cpp src/random_gen.cpp src/bending.cpp
 sources += src/stretching.cpp  src/hdf5_io.cpp  src/activity.cpp src/mdcelllist.cpp src/misc.cpp src/sticking.cpp src/shear.cpp
 # sources += src/misc.cpp
+sources += src/boundary.cpp
 #
 object = obj/vector.o obj/metropolis.o obj/random_gen.o obj/bending.o
 object += obj/stretching.o  obj/hdf5_io.o obj/activity.o obj/mdcelllist.o obj/misc.o obj/sticking.o obj/shear.o
+object += obj/boundary.o
 bindir = ./bin
 #
 #

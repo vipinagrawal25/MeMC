@@ -25,6 +25,17 @@ theta = 0.0         ! angular threshold for attractive region
 spcurv = 0.0        ! spontaneous curvature
 /
 
+!Boundary parameters
+&Bdrypara
+coef_gc = -2.0
+do_bdry = F         ! T for stress-free boundary
+fix_bottom = F
+fix_top = F
+fix_left = F
+fix_right = F
+/
+
+
 ! Wall sticking potential (LJ)
 &StickPara
 pos_bot_wall = -1.0

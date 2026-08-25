@@ -13,6 +13,7 @@
 
 #include "metropolis.hpp"
 #include "bending.hpp"
+#include "boundary.hpp"
 #include "stretching.hpp"
 #include "random_gen.hpp"
 #include "hdf5_io.hpp"
@@ -86,7 +87,7 @@ double start_simulation(Vec3d *Pos, MESH_p mesh, McP mcobj, STE &stretchobj, STI
 }
 /*----------------------------------------------------------*/
 void diag_wHeader(BE bendobj, STE steobj, std::fstream &fid ){
-  std::string log_headers = "#iter acceptedmoves bend_e stretch_e stick_e ";
+std::string log_headers = "#iter acceptedmoves bend_e stretch_e stick_e bdry_e "; 
     // if(stick_para.do_stick){log_headers+="stick_e ";}
     // if(afm_para.do_afm){log_headers+="afm_e ";}
     // if (spring_para.do_spring){log_headers+="spring_e ";}
@@ -126,11 +127,12 @@ int main(int argc, char *argv[]){
     double av_bond_len, Etot;
     BE  bendobj;
     ACT actobj;
+    BDE bdeobj;
     STE stretchobj;
     SHEAR shearobj;
     STICK stickobj(mesh.N, outfolder);
     MDCellList celllistobj(outfolder);
-    McP mcobj(bendobj, stretchobj, stickobj, actobj, celllistobj, shearobj);
+    McP mcobj(bendobj, bdeobj, stretchobj, stickobj, actobj, celllistobj, shearobj);
     Vec3d *Pos; 
 
     fstream fileptr(outfolder+"/mc_log", ios::app);
@@ -148,6 +150,7 @@ int main(int argc, char *argv[]){
 
     mcobj.initMC(mesh.N, outfolder);
     bendobj.initBE(mesh.N, outfolder);
+    bdeobj.initBDE(mesh.N, outfolder);
     stretchobj.initSTE(mesh.N, outfolder);
     shearobj.initSHEAR(mesh.N, outfolder);
     // stickobj.initSTICK(mesh.N, outfolder);
@@ -155,6 +158,11 @@ int main(int argc, char *argv[]){
     // celllistobj.initCelllist(outfolder);
     av_bond_len = start_simulation(Pos, mesh, mcobj, stretchobj, stickobj, outfolder, radius,
                 residx);
+
+    //initiate boundary edge identification
+    bdeobj.bdry_edges(Pos,mesh);
+    bdeobj.initBdryCache(Pos,mesh);
+
     if(shearobj.do_shear() && !mcobj.isrestart()) shearobj.shear_positions(Pos, mesh.N);
     if(mcobj.issemisolid()){
         stickobj.mark_solid_attractive(mcobj.getsolidIdx(), mesh.N);  // before neighbour expansion
@@ -188,15 +196,24 @@ int main(int argc, char *argv[]){
             restartfile.close();
         }
         num_moves = mcobj.monte_carlo_3d(Pos, mesh);
+        int num_bdry_moves=0;
+        if (bdeobj.do_bdry){
+          num_bdry_moves=mcobj.monte_carlo_bdry(Pos,mesh);
+        }
         if(mcobj.isfluid() && iter%mcobj.fluidizeevery()==0){
           num_bond_change = mcobj.monte_carlo_fluid(Pos, mesh, av_bond_len);
             outfile_terminal << "fluid stats " << num_bond_change <<
             " bonds flipped" << endl;
         }
         Etot = mcobj.evalEnergy(Pos, mesh, fileptr, iter);
+        
+        //acceptance rate for boundary loop
+        double bdry_acc_rate = bdeobj.do_bdry ? (double)num_bdry_moves * 100.0 / bdeobj.num_bdry_nodes : 0.0; 
+
         outfile_terminal << "iter = " << iter << "; Accepted Moves = "
-                         << (double) num_moves*100/mcobj.onemciter() << " %;"<<  
-            " totalener = "<< Etot << "; volume = " << mcobj.getvolume() << endl;
+                         << (double) num_moves*100/mcobj.onemciter() << " %;"
+                         << " Bdry Acceptance = " << bdry_acc_rate << " %;"  
+                         << " totalener = "<< Etot << "; volume = " << mcobj.getvolume() << endl;
         if(celllistobj.isSelfRepulsive()) celllistobj.buildCellList(Pos, mesh.N);
     }
 

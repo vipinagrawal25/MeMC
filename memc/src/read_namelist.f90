@@ -90,6 +90,21 @@ subroutine BendRead(coef_bend, minC, maxC, theta, spcurv, parafile) bind(c, name
     close(unit=200)
 end subroutine
 
+subroutine BdryRead(coef_gc, do_bdry, fix_bottom,fix_top,fix_left,fix_right, parafile) bind(c, name="BdryRead")
+   real(kind=c_double) :: coef_gc
+   character(kind=c_char,len=1), dimension(char_len), intent(in) :: parafile
+   character(len=char_len) :: f_fname
+   logical(kind=c_bool) :: do_bdry 
+   logical(kind=c_bool) :: fix_bottom,fix_top,fix_left,fix_right 
+   
+   namelist /Bdrypara/ do_bdry, coef_gc, fix_bottom,fix_top,fix_left,fix_right 
+
+     call convert_cstr_fstr(parafile,f_fname)
+     open(unit=100, file=f_fname, status='old') 
+     read(unit=100,nml=Bdrypara)
+     close(unit=100)
+end subroutine
+
 subroutine MeshRead(N, bdry_cdt, nghst, radius, parafile) bind(c, name="MeshRead")
   integer (kind=c_int) :: N, bdry_cdt, nghst
   integer funit;

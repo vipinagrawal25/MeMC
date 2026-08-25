@@ -87,17 +87,23 @@ double McP::evalEnergy(Vec3d *Pos, MESH_p mesh, std::fstream &fileptr, int itr){
   double stickener;
   double areat;
   double eself;
+  //BDE 
+  double bdryener=0.0;
 if (fileptr.is_open()) {
   fileptr << itr << "  " << (double)acceptedmoves/(double)one_mc_iter<< "  "; 
   bende = beobj.bending_energy_total(Pos, mesh);
   stretche = steobj.stretch_energy_total(Pos, mesh);
   stickener = stickobj.stick_energy_total(Pos, mesh.N);
-  fileptr << bende << "  "<<stretche << "  "<< stickener << "  ";
+
+  if (bdeobj.do_bdry){
+    bdryener=bdeobj.bde_total(Pos,mesh);
+  }
+  fileptr << bende << "  "<<stretche << "  "<< stickener << "  " << bdryener << " ";
   totvol = steobj.volume_total(Pos, mesh);
   // totarea = steobj.area_total(Pos, mesh);
   }
 
- totEner = bende+stretche+stickener;
+ totEner = bende+stretche+stickener+bdryener;
 
  if (steobj.dopressure()) {
    pre = steobj.PressureEnergyTotal(volt0, totvol);
@@ -474,3 +480,108 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len) {
   }
   return move;
 }
+
+//adding boundary sampling loop 
+//for stress-free boundary
+int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
+  if (!bdeobj.do_bdry) return 0; //if boundary is not stress-free
+  int num_nbr,cm_idx;
+  double x_o,y_o,z_o,x_n,y_n,z_n;
+  double de,Eini,Efin;
+  double dxinc,dyinc,dzinc;
+  bool yes;
+  int bdry_acceptedmoves=0;
+
+  int nframe=bdeobj.num_bdry_nodes;
+  double bend_new[13];
+
+  double dfac_bdry=dfac; //is this supposed to be the same?
+
+  for (int i=0;i<2*nframe;i++){  //since bulk mc is 2*N per mciter 
+
+    int idx=RandomGenerator::intUniform(0,nframe-1);
+
+    if (bdeobj.is_clamped_vertex(idx)) continue;
+
+    cm_idx=idx*mesh.nghst;
+    num_nbr=mesh.numnbr[idx];
+    int *nbr_list=mesh.node_nbr_list+cm_idx;
+
+    //bending energy change for neighbours (non-boundary)
+    double Eini_bend=beobj.bend_cache[idx];
+    for (int k=0; k<num_nbr; k++){
+       Eini_bend+=beobj.bend_cache[nbr_list[k]];
+    }
+    double Eini_rest=steobj.stretch_energy_ipart(pos,nbr_list, num_nbr, idx,mesh.nghst)+stickobj.stick_energy_ipart(pos[idx],idx);
+    if (celllistobj.isSelfRepulsive()){
+      Eini_rest+=celllistobj.computeSelfRep(pos,mesh,idx);
+    }
+    
+    double Eini_gc=bdeobj.bde_ipart(pos,mesh,idx); //change due to geodesic curvature integral
+    Eini=Eini_bend+Eini_rest+Eini_gc;
+
+    //propose update
+    x_o=pos[idx].x;
+    y_o=pos[idx].y;
+    z_o=pos[idx].z;
+  
+    dxinc=dfac_bdry*RandomGenerator::generateUniform(-1.0,1.0);
+    dyinc=dfac_bdry*RandomGenerator::generateUniform(-1.0,1.0);
+    dzinc=dfac_bdry*RandomGenerator::generateUniform(-1.0,1.0);
+    
+    x_n = x_o + dxinc; y_n = y_o + dyinc; z_n = z_o + dzinc;
+    //
+    pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
+
+    bend_new[0]=beobj.bending_energy_ipart(pos,nbr_list,num_nbr,idx);
+    double Efin_bend=bend_new[0];
+
+    for (int k=0; k<num_nbr; k++){
+      int nbr=nbr_list[k];
+      int nbr_cm=nbr*mesh.nghst;
+      bend_new[k+1]=beobj.bending_energy_ipart(pos,(int*)(mesh.node_nbr_list+nbr_cm),mesh.numnbr[nbr],nbr);
+      Efin_bend+=bend_new[k+1];
+    }
+
+    double Efin_rest=steobj.stretch_energy_ipart(pos,nbr_list,num_nbr,idx,mesh.nghst)+stickobj.stick_energy_ipart(pos[idx],idx);
+    if (celllistobj.isSelfRepulsive()){
+      Efin_rest+=celllistobj.computeSelfRep(pos,mesh,idx);
+    }
+   
+    double Efin_gc=bdeobj.bde_ipart(pos,mesh,idx);
+    Efin=Efin_bend+Efin_rest+Efin_gc;
+
+    de=(Efin-Eini);
+
+
+    double act=0.0;
+    if (actobj.is_active()){
+       act=actobj.getActivityIdx(idx);
+    }
+
+    if (algo=="mpolis"){
+      yes=Boltzman(de,act);
+    }
+    else if (algo=="glauber"){
+      yes=Glauber(de,act);
+    }
+
+
+    if (yes){
+      bdry_acceptedmoves+=1;
+      EneMonitored+=de;
+      beobj.bend_cache[idx]=bend_new[0];
+      for (int k=0; k<num_nbr; k++){
+        beobj.bend_cache[nbr_list[k]]=bend_new[k+1];
+      }
+    } else {
+      pos[idx].x=x_o;
+      pos[idx].y=y_o;
+      pos[idx].z=z_o;
+    }
+  }
+  return bdry_acceptedmoves;
+}
+
+
+    

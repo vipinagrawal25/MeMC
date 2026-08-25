@@ -9,7 +9,7 @@
 class BDE{
   public:
     int initBDE(int N, std::string fname);
-    void bdry_edges(Vec3d *pos, MESH_p mesh)
+    void bdry_edges(Vec3d *pos, MESH_p mesh);
     void initBdryCache(Vec3d *pos, MESH_p mesh);
 
     Vec3d midpt_normal(Vec3d *pos, MESH_p mesh, int v1, int v2);

@@ -5,6 +5,7 @@
 #include "mesh.hpp"
 #include "vector.hpp"
 #include "bending.hpp"
+#include "boundary.hpp"
 #include "stretching.hpp"
 #include "sticking.hpp"
 #include "activity.hpp"
@@ -13,10 +14,11 @@
 
 class McP {
 public :
-  McP (BE &beobj, STE &steobj, STICK &stickobj,
-       ACT &actobj, MDCellList &celllistobj, SHEAR &shearobj): beobj(beobj), steobj(steobj), stickobj(stickobj),
+  McP (BE &beobj, BDE &bdeobj, STE &steobj, STICK &stickobj,
+       ACT &actobj, MDCellList &celllistobj, SHEAR &shearobj): beobj(beobj), bdeobj(bdeobj), steobj(steobj), stickobj(stickobj),
                                               actobj(actobj), celllistobj(celllistobj), shearobj(shearobj) {};
   int monte_carlo_3d(Vec3d *pos, MESH_p mesh);
+  int monte_carlo_bdry(Vec3d *pos, MESH_p mesh); //separate sampling for boundary 
   double energy_mc_3d(Vec3d *pos, MESH_p mesh,  int );
   int monte_carlo_fluid(Vec3d *, MESH_p, double);
   bool Boltzman(double DE, double activity);
@@ -37,6 +39,7 @@ public :
   void mark_solid_neighbours(MESH_p mesh);
 private:
     BE &beobj;
+    BDE &bdeobj; //boundary contribution to energy
     STE &steobj;
     STICK &stickobj;
     ACT &actobj;

@@ -501,16 +501,20 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
 
     int idx=RandomGenerator::intUniform(0,nframe-1);
 
-    if (bdeobj.is_clamped_vertex(idx)) continue;
+    if (bdeobj.is_clamped_vertex(idx)) continue; //skip if clamped
+
 
     cm_idx=idx*mesh.nghst;
     num_nbr=mesh.numnbr[idx];
     int *nbr_list=mesh.node_nbr_list+cm_idx;
 
-    //bending energy change for neighbours (non-boundary)
-    double Eini_bend=beobj.bend_cache[idx];
+    //bending energy change for neighbours (non-boundary neighbours only) bulk term (Laplacian)
+    double Eini_bend=0.0; 
     for (int k=0; k<num_nbr; k++){
-       Eini_bend+=beobj.bend_cache[nbr_list[k]];
+       int nbr=nbr_list[k];
+       if (nbr>=nframe){
+       Eini_bend+=beobj.bend_cache[nbr];
+       }
     }
     double Eini_rest=steobj.stretch_energy_ipart(pos,nbr_list, num_nbr, idx,mesh.nghst)+stickobj.stick_energy_ipart(pos[idx],idx);
     if (celllistobj.isSelfRepulsive()){
@@ -534,13 +538,16 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
     pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
 
     bend_new[0]=beobj.bending_energy_ipart(pos,nbr_list,num_nbr,idx);
-    double Efin_bend=bend_new[0];
-
+    
+    //bending contribution to neighbours
+    double Efin_bend=0.0;
     for (int k=0; k<num_nbr; k++){
       int nbr=nbr_list[k];
-      int nbr_cm=nbr*mesh.nghst;
-      bend_new[k+1]=beobj.bending_energy_ipart(pos,(int*)(mesh.node_nbr_list+nbr_cm),mesh.numnbr[nbr],nbr);
-      Efin_bend+=bend_new[k+1];
+      if (nbr>=nframe){
+        int nbr_cm=nbr*mesh.nghst;
+        bend_new[k+1]=beobj.bending_energy_ipart(pos,(int*)(mesh.node_nbr_list+nbr_cm),mesh.numnbr[nbr],nbr);
+        Efin_bend+=bend_new[k+1]; 
+      }
     }
 
     double Efin_rest=steobj.stretch_energy_ipart(pos,nbr_list,num_nbr,idx,mesh.nghst)+stickobj.stick_energy_ipart(pos[idx],idx);
@@ -553,6 +560,14 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
 
     de=(Efin-Eini);
 
+    /*
+    if (i == 0 && bdry_acceptedmoves == 0) { 
+    std::cout << "\n--- BDRY DEBUG ---" << std::endl;
+    std::cout << "Eini -> Bend: " << Eini_bend << " | Rest: " << Eini_rest << " | GC: " << Eini_gc << std::endl;
+    std::cout << "Efin -> Bend: " << Efin_bend << " | Rest: " << Efin_rest << " | GC: " << Efin_gc << std::endl;
+    std::cout << "dE: " << de << std::endl;
+}
+    */
 
     double act=0.0;
     if (actobj.is_active()){
@@ -570,9 +585,13 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
     if (yes){
       bdry_acceptedmoves+=1;
       EneMonitored+=de;
+      //update bending cache for bulk neighbours
       beobj.bend_cache[idx]=bend_new[0];
       for (int k=0; k<num_nbr; k++){
-        beobj.bend_cache[nbr_list[k]]=bend_new[k+1];
+        int nbr=nbr_list[k];
+        if (nbr>=nframe){
+        beobj.bend_cache[nbr]=bend_new[k+1];
+        }
       }
     } else {
       pos[idx].x=x_o;

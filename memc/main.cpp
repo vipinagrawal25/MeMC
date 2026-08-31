@@ -208,11 +208,12 @@ int main(int argc, char *argv[]){
         Etot = mcobj.evalEnergy(Pos, mesh, fileptr, iter);
         
         //acceptance rate for boundary loop
-        double bdry_acc_rate = bdeobj.do_bdry ? (double)num_bdry_moves * 100.0 / bdeobj.num_bdry_nodes : 0.0; 
+        double bdry_acc_rate = bdeobj.do_bdry ? (double)num_bdry_moves*100.0/(2*bdeobj.num_bdry_nodes) : 0.0; 
+        //2*num_bdry_nodes is the number of total attempts
 
         outfile_terminal << "iter = " << iter << "; Accepted Moves = "
                          << (double) num_moves*100/mcobj.onemciter() << " %;"
-                         << " Bdry Acceptance = " << bdry_acc_rate << " %;"  
+                         << " Accepted Moves (Bdry) = " << bdry_acc_rate << " %;"  
                          << " totalener = "<< Etot << "; volume = " << mcobj.getvolume() << endl;
         if(celllistobj.isSelfRepulsive()) celllistobj.buildCellList(Pos, mesh.N);
     }

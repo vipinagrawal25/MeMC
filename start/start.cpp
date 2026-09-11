@@ -46,21 +46,23 @@ int main(int argc, char **argv){
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder");
     init_rng(23177);
     /* define all the paras */ 
-     para.len_x = 16*pi;
+     para.len_x = 8*pi;
      para.len_y = pi;
      para.epsilon = 1;
      para.bdry_condt = 1;
      // 0 for channel; 1 for frame; default is periodic;
      if(strcmp(metric,"cart")==0){
          //sigma needs to be calculated w.r.t area, if len_x and len_y are not equal
-         para.sigma = sqrt((para.len_x * para.len_y) / (double)para.N); 
+         para.sigma = sqrt((para.len_x * para.len_y) / (double)para.N);
+         //test sigma with y dimensions once, closer packing
+         //para.sigma=para.len_y/sqrt((double)para.N); 
      }else if(strcmp(metric,"sph")==0){
          para.sigma = sqrt(8*pi/(2*para.N-4));
      }
 
-     para.r_cut = 4*para.sigma;
+     para.r_cut = 2*para.sigma;
      mcpara.dfac  = 16  ;
-     mcpara.one_mc_iter = 2*para.N;
+     mcpara.one_mc_iter = 0.2*para.N;
      mcpara.kBT = 1;
      mcpara.dump_skip = 100;
      //fprintf(stderr, "sigma = %lf, r_cut = %lf\n", para.sigma, para.r_cut);     

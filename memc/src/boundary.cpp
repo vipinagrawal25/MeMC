@@ -131,8 +131,7 @@ Vec3d BDE::midpt_normal(Vec3d *pos, MESH_p mesh,int v1, int v2){
   int *nbrs1=mesh.node_nbr_list+cm1;
 
   int cm2=v2*mesh.nghst;
-  int nn2=mesh.numnbr[v2];
-  int *nbrs2=mesh.node_nbr_list+cm2;
+  int nn2=mesh.numnbr[v2];  int *nbrs2=mesh.node_nbr_list+cm2;
 
   int v3=-1; //other vertex of the triangle, will be found
   for (int i=0; i<nn1; i++){
@@ -157,17 +156,34 @@ Vec3d BDE::midpt_normal(Vec3d *pos, MESH_p mesh,int v1, int v2){
   //check for normal orientation
   //for flat ribbon normal direction should be outwards (up?)
   //this needs to be changed for twisting etc.
-  if (N.z < 0) {
+  /*if (N.z < 0) {
     N.x = -N.x;
     N.y = -N.y;
     N.z = -N.z;
   }
- 	 
+  */
+
+  	 
   double Nnorm=norm(N);
+  if (Nnorm<1e-14){Vec3d z={0.0,0.0,1.0}; return z;}
+
   Vec3d N_unit;
   N_unit.x=N.x/Nnorm;
   N_unit.y=N.y/Nnorm;
   N_unit.z=N.z/Nnorm;
+
+  //keep normals consistent in direction
+  Vec3d midpt;
+  midpt.x = 0.5*(pos[v1].x + pos[v2].x);
+  midpt.y = 0.5*(pos[v1].y + pos[v2].y);
+  midpt.z = 0.5*(pos[v1].z + pos[v2].z);
+  Vec3d outward=midpt-pos[v3]; //point towards boundary
+  if (inner_product(N_unit,outward)<0){
+    N_unit.x=-N_unit.x;
+    N_unit.y=-N_unit.y;
+    N_unit.z=-N_unit.z;
+  } 
+  
   return N_unit;
 }
 

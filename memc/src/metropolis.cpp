@@ -97,6 +97,19 @@ if (fileptr.is_open()) {
 
   if (bdeobj.do_bdry){
     bdryener=bdeobj.bde_total(Pos,mesh);
+/*
+// --- INSERT DIAGNOSTIC HERE ---
+    if (bende > 1e-6) { 
+        double saved_coef = bdeobj.coef_gc;
+        //bdeobj.coef_gc = 1.0;
+        double raw_integral = bdeobj.bde_total(Pos, mesh);
+        bdeobj.coef_gc = saved_coef;
+        printf("Iter: %d | Bdry/Bulk Ratio: %.6f\n", itr, std::abs(raw_integral) / bende);
+    }
+    // ------------------------------
+*/
+
+
   }
   fileptr << bende << "  "<<stretche << "  "<< stickener << "  " << bdryener << " ";
   totvol = steobj.volume_total(Pos, mesh);
@@ -516,6 +529,9 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
        Eini_bend+=beobj.bend_cache[nbr];
        }
     }
+
+  
+    
     double Eini_rest=steobj.stretch_energy_ipart(pos,nbr_list, num_nbr, idx,mesh.nghst)+stickobj.stick_energy_ipart(pos[idx],idx);
     if (celllistobj.isSelfRepulsive()){
       Eini_rest+=celllistobj.computeSelfRep(pos,mesh,idx);
@@ -550,6 +566,7 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
       }
     }
 
+    
     double Efin_rest=steobj.stretch_energy_ipart(pos,nbr_list,num_nbr,idx,mesh.nghst)+stickobj.stick_energy_ipart(pos[idx],idx);
     if (celllistobj.isSelfRepulsive()){
       Efin_rest+=celllistobj.computeSelfRep(pos,mesh,idx);
@@ -567,7 +584,7 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
     std::cout << "Efin -> Bend: " << Efin_bend << " | Rest: " << Efin_rest << " | GC: " << Efin_gc << std::endl;
     std::cout << "dE: " << de << std::endl;
 }
-    */
+   */
 
     double act=0.0;
     if (actobj.is_active()){

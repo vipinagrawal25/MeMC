@@ -47,7 +47,7 @@ int main(int argc, char **argv){
     init_rng(23177);
     /* define all the paras */ 
      para.len_x = 8*pi;
-     para.len_y = pi;
+     para.len_y = 0.5*pi;
      para.epsilon = 1;
      para.bdry_condt = 1;
      // 0 for channel; 1 for frame; default is periodic;
@@ -60,9 +60,9 @@ int main(int argc, char **argv){
          para.sigma = sqrt(8*pi/(2*para.N-4));
      }
 
-     para.r_cut = 2*para.sigma;
-     mcpara.dfac  = 16  ;
-     mcpara.one_mc_iter = 0.2*para.N;
+     para.r_cut = 2.5*para.sigma;
+     mcpara.dfac  = 16 ;
+     mcpara.one_mc_iter = 2*para.N;
      mcpara.kBT = 1;
      mcpara.dump_skip = 100;
      //fprintf(stderr, "sigma = %lf, r_cut = %lf\n", para.sigma, para.r_cut);     
@@ -93,14 +93,18 @@ int main(int argc, char **argv){
         }
         fprintf(fid, " %d %d %g\n", i, num_moves, Ener);
         fflush(fid);
+        
         num_moves = monte_carlo_surf2d(Pos, neib, 
                 para, mcpara, metric);
+        make_nlist(Pos,neib,para,metric);
         Ener = pairlj_total_energy(Pos, neib, para, 
                 metric);
         fprintf(stderr, " iter = %d percentage of AcceptedMoves = %4.2f Energy = %g\n",
                 i, 100*(double)num_moves/mcpara.one_mc_iter, Ener);
-        make_nlist(Pos, neib,  para, metric);
+        //make_nlist(Pos, neib,  para, metric);
     }
+    
+
     fclose(fid);
     free(Pos);
     free(neib);

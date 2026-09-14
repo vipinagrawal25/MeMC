@@ -105,12 +105,34 @@ int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
 
     if (is_cart) {
       dxinc = (para.sigma / mcpara.dfac) * rand_real(rng);
-      x_n = fmod((x_o + dxinc + 30 * para.len_x), para.len_x);
-      Pos[idx].x = x_n;
+      //x_n = fmod((x_o + dxinc + 30 * para.len_x), para.len_x);
+      //Pos[idx].x = x_n;
 
       dyinc = (para.sigma / mcpara.dfac) * rand_real(rng);
-      y_n = fmod((y_o + dyinc + 30 * para.len_y), para.len_y);
-      Pos[idx].y = y_n;
+      //y_n = fmod((y_o + dyinc + 30 * para.len_y), para.len_y);
+      //Pos[idx].y = y_n;
+
+      if (para.bdry_condt==1){
+      //clamped
+          x_n=x_o+dxinc;
+          y_n=y_o+dyinc;
+          if (x_n<0||x_n>=para.len_x||y_n<0||y_n>=para.len_y){
+              continue;
+          }
+      } 
+      else if (para.bdry_condt == 0) {
+          // channel
+          x_n = fmod(x_o + dxinc + 30*para.len_x, para.len_x);
+          y_n = y_o + dyinc;
+          if (y_n < 0 || y_n >= para.len_y) continue;
+      }
+      else {
+        // fully periodic
+        x_n = fmod(x_o + dxinc + 30*para.len_x, para.len_x);
+        y_n = fmod(y_o + dyinc + 30*para.len_y, para.len_y);
+      }
+    Pos[idx].x = x_n;
+    Pos[idx].y = y_n;
     }
     if (is_sph) {
       dxinc = rand_inc_theta(Pos[idx].x, mcpara.dfac);

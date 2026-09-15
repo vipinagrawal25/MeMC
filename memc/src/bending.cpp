@@ -164,8 +164,11 @@ double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
     int nbr, cm_idx_nbr;
     double be;
     be = 0e0;
+    int nframe=get_nstart(mesh.N,mesh.bdry_type);
     for(j = idx*mesh.nghst; j < idx*mesh.nghst + mesh.numnbr[idx]; j++){
         nbr = mesh.node_nbr_list[j];
+        if (nbr<nframe) continue; //skip for boundary vertices
+
         num_nbr_j = mesh.numnbr[nbr];
         cm_idx_nbr = nbr*mesh.nghst;
         be += bending_energy_ipart(pos, 
@@ -198,8 +201,12 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
 }
 /*-------------------------------------------------------------------------------------*/
 void BE::initBendCache(Vec3d *pos, MESH_p mesh){
+    int nframe=get_nstart(mesh.N,mesh.bdry_type);
     bend_cache.resize(mesh.N);
     for(int i = 0; i < mesh.N; i++){
+        if (i<nframe){
+            bend_cache[i]=0.0; //set bulk bending to zero for boundary vertices
+        }
         int cm_idx = i * mesh.nghst;
         bend_cache[i] = bending_energy_ipart(pos,
                 (int *)(mesh.node_nbr_list + cm_idx),

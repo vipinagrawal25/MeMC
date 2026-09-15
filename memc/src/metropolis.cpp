@@ -553,7 +553,7 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
     //
     pos[idx].x = x_n; pos[idx].y = y_n; pos[idx].z = z_n;
 
-    bend_new[0]=beobj.bending_energy_ipart(pos,nbr_list,num_nbr,idx);
+    //bend_new[0]=beobj.bending_energy_ipart(pos,nbr_list,num_nbr,idx);
     
     //bending contribution to neighbours
     double Efin_bend=0.0;
@@ -603,7 +603,7 @@ int McP::monte_carlo_bdry(Vec3d *pos, MESH_p mesh){
       bdry_acceptedmoves+=1;
       EneMonitored+=de;
       //update bending cache for bulk neighbours
-      beobj.bend_cache[idx]=bend_new[0];
+      //beobj.bend_cache[idx]=bend_new[0];
       for (int k=0; k<num_nbr; k++){
         int nbr=nbr_list[k];
         if (nbr>=nframe){

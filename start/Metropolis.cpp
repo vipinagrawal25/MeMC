@@ -16,7 +16,7 @@ void init_rng(u_int32_t seed_val){
 int get_nstart(int N, int bdrytype){
     static int nf1;
     int nf2;
-    nf1 = (int) sqrt((double)N);
+    nf1 = (int) 2*sqrt((double)N);
     switch (bdrytype) {
         case 0:
             nf2 = 2 * nf1;

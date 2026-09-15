@@ -195,7 +195,7 @@ void min(int *aminind, double *aminval, Vec3d *pos, int ndim,char dirn){
 int get_nstart(int N, int bdrytype){
     static int nf1;
     int nf2;
-    nf1 = (int) sqrt((double)N);
+    nf1 = 2*(int)sqrt((double)N);
     switch (bdrytype) {
         case 0:
             nf2 = 2 * nf1;

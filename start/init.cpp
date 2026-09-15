@@ -17,10 +17,14 @@ void init_system_random_pos(Vec2d *Pos,  double len_x, double len_y,
     int n_ghost, n_ghost_x, n_ghost_y;
     // remove it once debugged 
 
-    n_ghost = (int)sqrt(N);
+    //n_ghost = (int)(len_x+len_y)*sqrt(N/(len_x*len_y));
+    n_ghost=2*(int)sqrt(N); //hardcode it to 2*sqrt(N) for now, will correct later
+
     //distribute particles according to side length
     n_ghost_x = (int)2*n_ghost*len_x/(len_x+len_y);
-    n_ghost_y = (int)2*n_ghost*len_y/(len_x+len_y);
+    //n_ghost_y = (int)2*n_ghost*len_y/(len_x+len_y);
+    n_ghost_y = (int)(2*n_ghost-n_ghost_x);
+
     //n_ghost_x=n_ghost;
     //n_ghost_y=n_ghost;
 

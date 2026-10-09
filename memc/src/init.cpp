@@ -67,7 +67,7 @@ void init_area_t0(Vec3d *pos, MESH_p mesh, MBRANE_p mbrane_para, AREA_p area_par
     int num_nbr,cm_idx, jdx, jdxp1;
     Vec3d xij, xijp1;
     double area_tot=0;
-    int st_idx = get_nstart(mbrane_para.N, mbrane_para.bdry_type);
+    int st_idx = get_nstart(mbrane_para.N, mbrane_para.bdry_type, mbrane_para.len_x, mbrane_para.len_y);
     for(int idx = st_idx; idx < mbrane_para.N; idx++){
         /* idx = 2; */
         num_nbr = mesh.numnbr[idx];

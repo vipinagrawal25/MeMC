@@ -10,10 +10,13 @@ eps = 0.0
 
 ! Mesh and geometry
 &Meshpara
+pi = 3.1415926535897932D0
 N = 2048
 nghst = 12
 bdry_cdt = 1        ! 0=channel  1=frame (flat)  other=periodic
 radius = 1.0        ! set to 1.0 for flat membranes
+len_x = 8*pi
+len_y = 0.5*pi
 /
 
 ! Bending rigidity
@@ -27,7 +30,7 @@ spcurv = 0.0        ! spontaneous curvature
 
 !Boundary parameters
 &Bdrypara
-coef_gc = -2.0
+coef_gc = -500.0
 do_bdry = F         ! T for stress-free boundary
 fix_bottom = F
 fix_top = F

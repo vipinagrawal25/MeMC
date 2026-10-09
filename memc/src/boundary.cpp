@@ -6,7 +6,7 @@
 
 extern "C" void BdryRead(double*,bool*,bool*,bool*,bool*,bool*,char*);
 
-int get_nstart(int,int);
+int get_nstart(int,int,double,double);
 
 int BDE::initBDE(int N, std::string fname){
   char tmp_fname[128];
@@ -62,7 +62,7 @@ Vec3d dd2_3pt(Vec3d sm1, Vec3d s, Vec3d sp1){
 //get boundary vertices in positional order
 void BDE::bdry_edges(Vec3d *pos, MESH_p mesh){
   if (!do_bdry) return;
-  int nframe=get_nstart(mesh.N,mesh.bdry_type);
+  int nframe=get_nstart(mesh.N,mesh.bdry_type,mesh.len_x,mesh.len_y);
   //nframe is the number of boundary nodes
   num_bdry_nodes=nframe;
   

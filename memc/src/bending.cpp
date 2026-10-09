@@ -3,7 +3,7 @@
 #define sign(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 
 extern "C" void BendRead(double *, double *, double *, double *, double *, char *);
-int get_nstart(int , int);
+int get_nstart(int , int, double, double);
 /*------------------------*/
 int BE::initBE(int N, std::string fname){
   char tmp_fname[128];
@@ -164,7 +164,7 @@ double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
     int nbr, cm_idx_nbr;
     double be;
     be = 0e0;
-    int nframe=get_nstart(mesh.N,mesh.bdry_type);
+    int nframe=get_nstart(mesh.N,mesh.bdry_type,mesh.len_x,mesh.len_y);
     for(j = idx*mesh.nghst; j < idx*mesh.nghst + mesh.numnbr[idx]; j++){
         nbr = mesh.node_nbr_list[j];
         if (nbr<nframe) continue; //skip for boundary vertices
@@ -180,7 +180,7 @@ double BE::bending_energy_ipart_neighbour(Vec3d *pos, MESH_p mesh, int idx){
 /*------------------------*/
 double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
     if(!bend_cache.empty()){
-        int st_idx = get_nstart(mesh.N, mesh.bdry_type);
+        int st_idx = get_nstart(mesh.N, mesh.bdry_type, mesh.len_x, mesh.len_y);
         double be = 0e0;
         for(int idx = st_idx; idx < mesh.N; idx++)
             be += bend_cache[idx];
@@ -190,7 +190,7 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
     int idx, st_idx;
     int num_nbr, cm_idx;
     double be = 0e0;
-    st_idx = get_nstart(mesh.N, mesh.bdry_type);
+    st_idx = get_nstart(mesh.N, mesh.bdry_type, mesh.len_x, mesh.len_y);
     for(idx = st_idx; idx < mesh.N; idx++){
         cm_idx = idx*mesh.nghst;
         num_nbr = mesh.numnbr[idx];
@@ -201,7 +201,7 @@ double BE::bending_energy_total(Vec3d *pos, MESH_p mesh){
 }
 /*-------------------------------------------------------------------------------------*/
 void BE::initBendCache(Vec3d *pos, MESH_p mesh){
-    int nframe=get_nstart(mesh.N,mesh.bdry_type);
+    int nframe=get_nstart(mesh.N,mesh.bdry_type,mesh.len_x,mesh.len_y);
     bend_cache.resize(mesh.N);
     for(int i = 0; i < mesh.N; i++){
         if (i<nframe){

@@ -4,7 +4,7 @@
 extern "C" void StretchRead(double *, bool *, bool *, bool *,
                             double *, double *, double *, double *, bool *, char *);
 
-int get_nstart(int, int);
+int get_nstart(int, int,double,double);
 
 int STE::initSTE(int N, std::string fname){
   char tmp_fname[128];
@@ -95,7 +95,7 @@ double STE::stretch_energy_total(Vec3d *pos, MESH_p mesh){
     int idx, st_idx;
     int num_nbr, cm_idx;
     double se;
-    st_idx = get_nstart(mesh.N, mesh.bdry_type);
+    st_idx = get_nstart(mesh.N, mesh.bdry_type,mesh.len_x,mesh.len_y);
     se = 0e0;
     for(idx = st_idx; idx < mesh.N; idx++){
         /* idx = 2; */
@@ -131,7 +131,7 @@ double STE::area_total(Vec3d *pos, MESH_p mesh){
      int num_nbr, cm_idx;
      double area;
 
-     st_idx = get_nstart(mesh.N, mesh.bdry_type);
+     st_idx = get_nstart(mesh.N, mesh.bdry_type,mesh.len_x,mesh.len_y);
      area = 0e0;
      for(idx = st_idx; idx < mesh.N; idx++){
          /* idx = 2; */
@@ -159,6 +159,7 @@ double STE::init_eval_lij_t0(Vec3d *Pos, MESH_p mesh,  bool is_fluid){
     double tlij;
     double r0, av_bond_len;
     npairs = 0;
+    double scale=1.00; //to be used for growing bonds to increase strain 
 
     for(i = 0; i < mesh.nghst*mesh.N; i++){
       lij_t0.push_back(0.0);

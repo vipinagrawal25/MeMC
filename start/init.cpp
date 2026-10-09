@@ -17,20 +17,18 @@ void init_system_random_pos(Vec2d *Pos,  double len_x, double len_y,
     int n_ghost, n_ghost_x, n_ghost_y;
     // remove it once debugged 
 
-    //n_ghost = (int)(len_x+len_y)*sqrt(N/(len_x*len_y));
-    n_ghost=2*(int)sqrt(N); //hardcode it to 2*sqrt(N) for now, will correct later
-
     //distribute particles according to side length
-    n_ghost_x = (int)2*n_ghost*len_x/(len_x+len_y);
+    n_ghost_x = (int)(len_x*sqrt((sqrt(3.0)/2.0)*(double)N/(len_x*len_y)));
+    
     //n_ghost_y = (int)2*n_ghost*len_y/(len_x+len_y);
-    n_ghost_y = (int)(2*n_ghost-n_ghost_x);
-
+    n_ghost_y = (int)(len_y*sqrt((sqrt(3.0)/2.0)*(double)N/(len_x*len_y)));
+   
     //n_ghost_x=n_ghost;
     //n_ghost_y=n_ghost;
 
     
     dl_x = (len_x/(n_ghost_x));
-    dl_y = (len_y/(n_ghost_y)); //original: len_y/n_ghost. accordingly changed the scale
+    dl_y = (len_y/(n_ghost_y)); //step length according to size length and number of points
     
     //fprintf(stderr, "n_ghost=%d n_ghost_x=%d n_ghost_y=%d\n", n_ghost, n_ghost_x, n_ghost_y);
 
@@ -58,6 +56,7 @@ void init_system_random_pos(Vec2d *Pos,  double len_x, double len_y,
             case 0:
             // This is a channel ; read bdry_condt as 0 
             // n_ghost has to be even for logic to work;
+
             n_ghost = 2*n_ghost_x;
             for(int i=0; i<n_ghost/2; i++){
                     Pos[i].x = i*dl_x;
@@ -73,7 +72,7 @@ void init_system_random_pos(Vec2d *Pos,  double len_x, double len_y,
                 Pos[i].y = rand_y(rng2);
             }
             break;
-      case 1:
+            case 1:
             // This is a frame ;
             // n_ghost has to be even for logic to work;
             n_ghost = 2*n_ghost_x + 2*n_ghost_y;
@@ -102,6 +101,7 @@ void init_system_random_pos(Vec2d *Pos,  double len_x, double len_y,
             break;
        
             default:
+                n_ghost=0;
                 for(int i=0; i<N; i++){
                     Pos[i].x = rand_x(rng2);
                     Pos[i].y = rand_y(rng2);

@@ -3,7 +3,7 @@
 
 extern "C" void StickRead(double *, double *, double *, double *, char *);
 
-int get_nstart(int, int);
+int get_nstart(int, int,double,double);
 
 STICK::STICK(int N, std::string fname){
   char tmp_fname[128];

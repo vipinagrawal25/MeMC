@@ -22,7 +22,7 @@
 #include <fstream>
 #include <iostream>
 
-extern "C" void MeshRead(int *, int *, int *, double *, char *);
+extern "C" void MeshRead(int *, int *, int *, double *, double *, double *, char *);
 
 template<typename T>
 string ZeroPadNumber(T num){
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]){
     outfolder = ZeroPadNumber(mpi_rank+start)+"/";
     para_file = outfolder+"/para_file.in";
     sprintf(tmp_fname, "%s", para_file.c_str() );
-    MeshRead(&mesh.N, &mesh.bdry_type, &mesh.nghst, &radius, tmp_fname);
+    MeshRead(&mesh.N, &mesh.bdry_type, &mesh.nghst, &radius, &mesh.len_x, &mesh.len_y, tmp_fname);
     // cout << outfolder << endl;
 
     pid_t pid = getpid();
@@ -184,7 +184,6 @@ int main(int argc, char *argv[]){
     //   cout<< celllistobj.computeForces(Pos, mesh, iter)<< endl;
     //   // outfile_terminal << Pos[iter].x << "       " << Pos[iter].y << " "<< Pos[iter].z << endl;
     // }
-
     for(iter=residx; iter < mcobj.totaliter(); iter++){
         if(iter%mcobj.dumpskip() == 0){
             outfile=outfolder+"/snap_"+ZeroPadNumber(iter/mcobj.dumpskip())+".h5";

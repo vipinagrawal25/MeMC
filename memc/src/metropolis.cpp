@@ -23,7 +23,7 @@ string ZeroPadNumber(T num){
     return ss.str();
 }
 
-int get_nstart(int, int);
+int get_nstart(int, int, double, double);
 
 
 int McP::initMC(int N, std::string fname){
@@ -294,7 +294,7 @@ int McP::monte_carlo_3d(Vec3d *pos, MESH_p mesh) {
   bool yes;
   int nframe;
   //
-  nframe = get_nstart(mesh.N, mesh.bdry_type);
+  nframe = get_nstart(mesh.N, mesh.bdry_type, mesh.len_x, mesh.len_y);
   acceptedmoves = 0;
 
   double bend_new[13]; // max nghst + 1
@@ -404,7 +404,7 @@ int McP::monte_carlo_fluid(Vec3d *pos, MESH_p mesh, double av_bond_len) {
   Vec3d bef_ij, aft_ij;
   bool yes, logic;
 
-  nframe = get_nstart(mesh.N, mesh.bdry_type);
+  nframe = get_nstart(mesh.N, mesh.bdry_type, mesh.len_x, mesh.len_y);
   move = 0;
 
   int idxn, up, down;

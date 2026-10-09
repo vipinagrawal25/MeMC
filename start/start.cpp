@@ -46,7 +46,7 @@ int main(int argc, char **argv){
     if(system(syscmds.c_str()) != 0) fprintf(stderr, "failure in creating folder");
     init_rng(23177);
     /* define all the paras */ 
-     para.len_x = 8*pi;
+     para.len_x = 16*pi;
      para.len_y = 0.5*pi;
      para.epsilon = 1;
      para.bdry_condt = 1;

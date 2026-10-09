@@ -13,21 +13,19 @@ void init_rng(u_int32_t seed_val){
     rng.seed(seed_val);
 }
 
-int get_nstart(int N, int bdrytype){
-    static int nf1;
-    int nf2;
-    nf1 = (int) 2*sqrt((double)N);
+int get_nstart(int N, int bdrytype, double len_x, double len_y){
+    int nf;
     switch (bdrytype) {
-        case 0:
-            nf2 = 2 * nf1;
+        case 0:  //channel: long edges connected
+            nf = (int)((len_y)*sqrt((sqrt(3.0)/2.0)*N/(len_x*len_y)));
             break;
-        case 1:
-            nf2 = 4 * nf1; 
+        case 1:  //frame: all four edges
+            nf = (int)(len_x*sqrt((sqrt(3.0)/2.0)*N/(len_x*len_y)))+(int)(len_y*sqrt((sqrt(3.0)/2.0)*N/(len_x*len_y))); 
             break;
-        default:
-            nf2 = 0;
+        default: //fully periodic
+            nf = 0;
     }
-    return nf2;;
+    return 2*nf;
 }
 
 
@@ -84,7 +82,7 @@ int monte_carlo_surf2d(Vec2d *Pos, Nbh_list *neib, LJ_p para, MC_p mcpara,
   bool is_sph, is_cart;
   int n_ghost;
 
-  n_ghost = get_nstart(para.N, para.bdry_condt);
+  n_ghost = get_nstart(para.N, para.bdry_condt, para.len_x, para.len_y);
   std::uniform_int_distribution<uint32_t> rand_int(n_ghost, para.N - 1);
   std::uniform_real_distribution<> rand_real(-1, 1);
   is_sph = false;

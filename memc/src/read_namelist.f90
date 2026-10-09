@@ -105,13 +105,14 @@ subroutine BdryRead(coef_gc, do_bdry, fix_bottom,fix_top,fix_left,fix_right, par
      close(unit=100)
 end subroutine
 
-subroutine MeshRead(N, bdry_cdt, nghst, radius, parafile) bind(c, name="MeshRead")
+subroutine MeshRead(N, bdry_cdt, nghst, radius, len_x, len_y, parafile) bind(c, name="MeshRead")
   integer (kind=c_int) :: N, bdry_cdt, nghst
   integer funit;
   real(kind = c_double) :: radius
+  real(kind=c_double) :: len_x, len_y
   character(kind=c_char, len=1), dimension(char_len), intent(in) ::  parafile
   character(len=char_len) :: f_fname
-  namelist /Meshpara/ N, bdry_cdt, radius, nghst 
+  namelist /Meshpara/ N, bdry_cdt, nghst, radius, len_x, len_y 
    
     funit = 473
     call convert_cstr_fstr(parafile, f_fname)
